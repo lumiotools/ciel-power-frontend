@@ -19,12 +19,16 @@ export default function Login() {
   const [email, setEmail] = useState("abc@gmail.com");
   const [password, setPassword] = useState("Abc12345678@");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null); // Reset the error state
+    setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/auth/login", {
+      const response = await fetch("https://ciel-power-backend.onrender.com/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,10 +45,14 @@ export default function Login() {
         router.push("/dashboard");
       } else {
         const errorData = await response.json();
+        setError(errorData.message || "Login failed. Please try again."); // Display server error
         console.error("Login failed:", errorData);
       }
     } catch (error) {
-      console.error("Error during login:", error);
+      setError("An error occurred during login. Please try again later.");
+      console.error("Error during login:", error.message);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -85,10 +93,11 @@ export default function Login() {
                 placeholder="Password"
               />
             </div>
+            {error && <p className="text-sm text-red-500">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col gap-1">
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
             </Button>
             <div className="mt-2">OR</div>
             <Button

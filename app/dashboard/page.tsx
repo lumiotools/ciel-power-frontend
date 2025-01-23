@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 // import { RecentSales } from "@/components/dashboard/recent-sales"
 
 export default function DashboardPage() {
-    
+
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -95,7 +95,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      
+
     </div>
   )
 }

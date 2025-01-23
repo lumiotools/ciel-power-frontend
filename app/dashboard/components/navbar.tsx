@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 //   DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input";
+import { useUser } from "../user/useUser";
 
 // const navItems = [
 //   // { name: "Dashboard", href: "/dashboard" },
@@ -25,6 +26,7 @@ import { Input } from "@/components/ui/input";
 export function Navbar() {
   // const pathname = usePathname()
 
+  const { user, loading, error } = useUser();
   return (
     <nav className="border-b bg-white">
       <div className="flex h-16 items-center px-4">
@@ -71,22 +73,38 @@ export function Navbar() {
               />
             </div>
           </form>
-          <Button variant="ghost" size="icon" className="hidden md:block relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:block relative"
+          >
             <Bell className="h-5 w-5" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-600" />
           </Button>
-          <Button>
-            <Link href="/signup">
-              {/* Wrap the text with Link, and avoid using 'to' */}
-              Sign Up
-            </Link>
-          </Button>
-          <Button variant="outline">
-            <Link href="/login">
-              {/* Wrap the text with Link, and avoid using 'to' */}
-              Login
-            </Link>
-          </Button>
+          {user ? (
+            <Button>
+              <Link href="/signup">
+                {/* Wrap the text with Link, and avoid using 'to' */}
+                Logout
+              </Link>
+            </Button>
+          ) : (
+            <>
+              <Button>
+                <Link href="/signup">
+                  {/* Wrap the text with Link, and avoid using 'to' */}
+                  Sign Up
+                </Link>
+              </Button>
+              <Button variant="outline">
+                <Link href="/login">
+                  {/* Wrap the text with Link, and avoid using 'to' */}
+                  Login
+                </Link>
+              </Button>
+            </>
+          )}
+
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
