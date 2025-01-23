@@ -16,8 +16,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const [email, setEmail] = useState("abc@gmail.com");
-  const [password, setPassword] = useState("Abc12345678@");
+  const [email, setEmail] = useState("johndoe7@gmail.com");
+  const [password, setPassword] = useState("StrongP@ssw0rd");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,12 +28,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://ciel-power-backend.onrender.com/auth/login", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Include cookies in the request
+        // credentials: "include", // Include cookies in the request
         body: JSON.stringify({ email, password }),
       });
 
@@ -50,7 +50,7 @@ export default function Login() {
       }
     } catch (error) {
       setError("An error occurred during login. Please try again later.");
-      console.error("Error during login:", error.message);
+      console.error("Error during login:", (error as Error).message);
     }finally{
       setLoading(false);
     }

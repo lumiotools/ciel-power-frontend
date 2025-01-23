@@ -27,7 +27,7 @@ export default function SignUp() {
 
     try {
       const response = await fetch(
-        "https://ciel-power-backend.onrender.com/auth/register",
+        `${process.env.NEXT_PUBLIC_BASEURL}/auth/register`,
         {
           method: "POST",
           headers: {
@@ -49,8 +49,8 @@ export default function SignUp() {
       console.log(data);
 
       router.push("/signup");
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError((error as Error).message);
       console.log(error);
     }
   };

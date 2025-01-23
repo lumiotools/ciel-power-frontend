@@ -26,7 +26,8 @@ import { useUser } from "../user/useUser";
 export function Navbar() {
   // const pathname = usePathname()
 
-  const { user, loading, error } = useUser();
+  const { user} = useUser();
+  
   return (
     <nav className="border-b bg-white">
       <div className="flex h-16 items-center px-4">
