@@ -1,18 +1,19 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LayoutDashboard } from "lucide-react"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Calendar } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-]
+  { name: "My Bookings", href: "/dashboard/bookings", icon: Calendar },
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col">
@@ -28,7 +29,7 @@ export function Sidebar() {
                   "w-full justify-start",
                   pathname === item.href
                     ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 )}
               >
                 <Link href={item.href}>
@@ -41,6 +42,5 @@ export function Sidebar() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
