@@ -79,7 +79,6 @@ interface StreetAddress {
   address1: string;
   address2?: string;
   city: string;
-  countryCode: string;
   state: string;
   postcode: string;
 }
@@ -110,7 +109,6 @@ const ServiceDetailsPage: React.FC = () => {
 
   const [userDetails, setUserDetails] = useState<UserDetails>({
     firstName: "",
-    middleName: "", // Optional, can be omitted if not needed
     lastName: "",
     emailAddress: "",
     phoneNumbers: [
@@ -123,7 +121,6 @@ const ServiceDetailsPage: React.FC = () => {
       address1: "",
       address2: "", // Optional, can be omitted if not needed
       city: "",
-      countryCode: "", // e.g., "US" for United States
       state: "",
       postcode: "",
     },
@@ -133,7 +130,6 @@ const ServiceDetailsPage: React.FC = () => {
       console.log("auth context", authContext);
       setUserDetails((prev) => ({
         firstName: authContext.firstName || "",
-        middleName: prev.middleName, // Not provided in AUTH_CONTEXT, retain initial default
         lastName: authContext.lastName || "",
         emailAddress: authContext.emailAddress || "",
         phoneNumbers: authContext.phoneNumbers?.length
@@ -143,7 +139,6 @@ const ServiceDetailsPage: React.FC = () => {
           address1: authContext.streetAddress?.line1 || "",
           address2: authContext.streetAddress?.line2 || "",
           city: authContext.streetAddress?.city || "",
-          countryCode: authContext.streetAddress?.countryCode || "",
           state: authContext.streetAddress?.province || "", // Map `province` to `state`
           postcode: authContext.streetAddress?.postalCode || "",
         },
@@ -225,8 +220,8 @@ const ServiceDetailsPage: React.FC = () => {
       const formattedDate = format(date, "yyyy-MM-dd");
       const preFieldId = service?.preField?.id;
 
-      const selectedCountyId = formData[service.preField.id];
-      const selectedCountyName = service.preField.values?.find(
+      const selectedCountyId = service ? formData[service.preField.id] : "";
+      const selectedCountyName = service?.preField.values?.find(
         (v) => v.id === selectedCountyId
       )?.name;
 
@@ -260,15 +255,13 @@ const ServiceDetailsPage: React.FC = () => {
       console.log("selected slot", selectedSlot);
 
       // Format date in UTC to avoid timezone issues
-      const formattedDate = format(selectedDate, "yyyy-MM-dd", {
-        timeZone: "UTC",
-      });
+      const formattedDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
 
       // Convert the time slot to proper format (assuming it's in ISO or HH:mm format)
-      let formattedStartTime = selectedSlot.startTime;
+      let formattedStartTime = selectedSlot?.startTime;
 
       // If time includes timezone info, clean it to get just HH:mm
-      if (formattedStartTime.includes("T")) {
+      if (formattedStartTime?.includes("T")) {
         formattedStartTime = formattedStartTime.split("T")[1].substring(0, 5);
       }
 
@@ -278,8 +271,8 @@ const ServiceDetailsPage: React.FC = () => {
       // Transform the additional information into the required fields array format
       // Get the selected county name from preField
       const preFieldId = service?.preField?.id;
-      const selectedCountyId = formData[service.preField.id];
-      const selectedCountyName = service.preField.values?.find(
+      const selectedCountyId = service ? formData[service.preField.id] : "";
+      const selectedCountyName = service?.preField.values?.find(
         (v) => v.id === selectedCountyId
       )?.name;
 
@@ -292,7 +285,7 @@ const ServiceDetailsPage: React.FC = () => {
           }
 
           // Find the field configuration from service
-          const fieldConfig = service.fields?.find((field) => field.id === id);
+          const fieldConfig = service?.fields?.find((field) => field.id === id);
 
           if (fieldConfig?.values) {
             // If field has predefined values, find the selected value's name
@@ -315,8 +308,8 @@ const ServiceDetailsPage: React.FC = () => {
 
       // Add preField at the beginning of the array
       fields.unshift({
-        id: preFieldId,
-        value: selectedCountyName,
+        id: preFieldId || "",
+        value: selectedCountyName || "",
       });
       // Prepare the request payload
       const requestData = {
@@ -578,7 +571,7 @@ const ServiceDetailsPage: React.FC = () => {
       <CardContent className="pt-6">
         <div className="space-y-6">
           {/* Name Fields */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -588,20 +581,6 @@ const ServiceDetailsPage: React.FC = () => {
                   setUserDetails((prev) => ({
                     ...prev,
                     firstName: e.target.value,
-                  }))
-                }
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="middleName">Middle Name</Label>
-              <Input
-                id="middleName"
-                value={userDetails.middleName}
-                onChange={(e) =>
-                  setUserDetails((prev) => ({
-                    ...prev,
-                    middleName: e.target.value,
                   }))
                 }
                 className="mt-1"
@@ -630,13 +609,8 @@ const ServiceDetailsPage: React.FC = () => {
               id="emailAddress"
               type="email"
               value={userDetails.emailAddress}
-              onChange={(e) =>
-                setUserDetails((prev) => ({
-                  ...prev,
-                  emailAddress: e.target.value,
-                }))
-              }
               className="mt-1"
+              disabled
             />
           </div>
 
@@ -706,7 +680,7 @@ const ServiceDetailsPage: React.FC = () => {
                     }}
                     className="mt-1"
                   >
-                    ×
+                    x
                   </Button>
                 )}
               </div>
@@ -767,7 +741,7 @@ const ServiceDetailsPage: React.FC = () => {
                   className="mt-1"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="city">City</Label>
                   <Input
@@ -802,10 +776,8 @@ const ServiceDetailsPage: React.FC = () => {
                     className="mt-1"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="postcode">Postcode</Label>
+                  <Label htmlFor="postcode">Postal Code</Label>
                   <Input
                     id="postcode"
                     value={userDetails.streetAddress.postcode}
@@ -815,23 +787,6 @@ const ServiceDetailsPage: React.FC = () => {
                         streetAddress: {
                           ...prev.streetAddress,
                           postcode: e.target.value,
-                        },
-                      }))
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="countryCode">Country Code</Label>
-                  <Input
-                    id="countryCode"
-                    value={userDetails.streetAddress.countryCode}
-                    onChange={(e) =>
-                      setUserDetails((prev) => ({
-                        ...prev,
-                        streetAddress: {
-                          ...prev.streetAddress,
-                          countryCode: e.target.value,
                         },
                       }))
                     }
@@ -1004,27 +959,6 @@ const ServiceDetailsPage: React.FC = () => {
                   ))}
                 </div>
               </div>
-              <div>
-                <p className="text-gray-600">Address:</p>
-                <div className="space-y-1">
-                  <p className="text-lg">
-                    {userDetails.streetAddress.address1}
-                  </p>
-                  {userDetails.streetAddress.address2 && (
-                    <p className="text-lg">
-                      {userDetails.streetAddress.address2}
-                    </p>
-                  )}
-                  <p className="text-lg">
-                    {userDetails.streetAddress.city},{" "}
-                    {userDetails.streetAddress.state}{" "}
-                    {userDetails.streetAddress.postcode}
-                  </p>
-                  <p className="text-lg">
-                    Country: {userDetails.streetAddress.countryCode}
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -1070,8 +1004,7 @@ const ServiceDetailsPage: React.FC = () => {
       !userDetails.streetAddress.address1 ||
       !userDetails.streetAddress.city ||
       !userDetails.streetAddress.state ||
-      !userDetails.streetAddress.postcode ||
-      !userDetails.streetAddress.countryCode
+      !userDetails.streetAddress.postcode
     ) {
       toast.error("Please fill in all required contact information");
       return false;
@@ -1171,8 +1104,8 @@ const ServiceDetailsPage: React.FC = () => {
             "Contact Information",
             "contact",
             completedSections.contact,
-            userDetails.email
-              ? `${userDetails.email} • ${userDetails.phone}`
+            userDetails.emailAddress
+              ? `${userDetails.emailAddress} • ${userDetails.phoneNumbers[0]?.number}`
               : undefined,
             true
           )}

@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstname, setFirstName] = useState("");
+  const [lastname, setLastName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -26,19 +28,18 @@ export default function SignUp() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-          }),
-        }
-      );
+      const response = await fetch(`/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          firstName: firstname,
+          lastName: lastname,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -67,6 +68,30 @@ export default function SignUp() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="flex gap-3">
+              <div className="grid gap-2">
+                <Label htmlFor="firstname">FirstName</Label>
+                <Input
+                  id="firstname"
+                  type="text"
+                  value={firstname}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="John"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">LastName</Label>
+                <Input
+                  id="lastname"
+                  type="text"
+                  value={lastname}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Deo"
+                  required
+                />
+              </div>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useContext } from "react";
 import { AUTH_CONTEXT } from "@/providers/auth";
+import { useRouter } from "next/navigation";
 
 // const navItems = [
 //   // { name: "Dashboard", href: "/dashboard" },
@@ -28,6 +29,20 @@ export function Navbar() {
   // const pathname = usePathname()
 
   const { isLoading, isLoggedIn } = useContext(AUTH_CONTEXT);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const response = await (
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+    ).json();
+
+    if (response["message"]) {
+      router.replace("/login");
+    }
+  };
 
   return (
     <nav className="border-b bg-white">
@@ -88,12 +103,7 @@ export function Navbar() {
               <LoaderCircle className="animate-spin h-5 w-5" />
             </Button>
           ) : isLoggedIn ? (
-            <Button>
-              <Link href="/signup">
-                {/* Wrap the text with Link, and avoid using 'to' */}
-                Logout
-              </Link>
-            </Button>
+            <Button onClick={handleLogout}>Logout</Button>
           ) : (
             <>
               <Button>
