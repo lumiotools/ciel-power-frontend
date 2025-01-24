@@ -190,6 +190,10 @@ const ServiceDetailsPage: React.FC = () => {
           data.data.preField.values[0].id;
       }
 
+      if (!data?.data.preField) {
+        setOpenSection("dateTime");
+      }
+
       // Set other fields
       data?.data.fields.forEach((field: ServiceField) => {
         if (field.type === "checkbox") {
@@ -225,17 +229,22 @@ const ServiceDetailsPage: React.FC = () => {
 
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
-      const preFieldId = service?.preField?.id;
+      let searchParams = `productId=${id}&date=${formattedDate}`;
+      if (service?.preField) {
+        const preFieldId = service?.preField?.id;
 
-      const selectedCountyId = service ? formData[service.preField.id] : "";
-      const selectedCountyName = service?.preField.values?.find(
-        (v) => v.id === selectedCountyId
-      )?.name;
+        const selectedCountyId = service ? formData[service.preField.id] : "";
+        const selectedCountyName = service?.preField.values?.find(
+          (v) => v.id === selectedCountyId
+        )?.name;
 
-      if (!selectedCountyId || !selectedCountyName) return;
+        if (!selectedCountyId || !selectedCountyName) return;
+
+        searchParams += `&preAnswerId=${preFieldId}&preAnswerValue=${selectedCountyName}`;
+      }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?productId=${id}&date=${formattedDate}&preAnswerId=${preFieldId}&preAnswerValue=${selectedCountyName}`
+        `/api/booking/slots?${searchParams}`
       );
       const data = await response.json();
       setSlots(data?.data || []);
@@ -285,15 +294,9 @@ const ServiceDetailsPage: React.FC = () => {
 
       const eventId = `FT_${formattedDate}_${formattedStartTime}`;
       console.log("Generated eventId:", eventId);
-
-      // Transform the additional information into the required fields array format
-      // Get the selected county name from preField
+      
       const preFieldId = service?.preField?.id;
-      const selectedCountyId = service ? formData[service.preField.id] : "";
-      const selectedCountyName = service?.preField.values?.find(
-        (v) => v.id === selectedCountyId
-      )?.name;
-
+      
       // Transform fields and add preField
       const fields = Object.entries(formData)
         .map(([id, value]) => {
@@ -324,11 +327,21 @@ const ServiceDetailsPage: React.FC = () => {
         })
         .filter((field) => field !== null); // Remove the null entry from preField skip
 
-      // Add preField at the beginning of the array
-      fields.unshift({
-        id: preFieldId || "",
-        value: selectedCountyName || "",
-      });
+      if (service?.preField) {
+        // Transform the additional information into the required fields array format
+        // Get the selected county name from preField
+        const preFieldId = service?.preField?.id;
+        const selectedCountyId = service ? formData[service.preField.id] : "";
+        const selectedCountyName = service?.preField.values?.find(
+          (v) => v.id === selectedCountyId
+        )?.name;
+
+        // Add preField at the beginning of the array
+        fields.unshift({
+          id: preFieldId || "",
+          value: selectedCountyName || "",
+        });
+      }
       // Prepare the request payload
       const requestData = {
         productId: id, // Assuming 'id' is your serviceId/productId
@@ -1106,19 +1119,23 @@ const ServiceDetailsPage: React.FC = () => {
         </Card>
 
         {/* County Selection Section */}
-        <div className="border rounded-lg bg-white">
-          {renderSectionHeader(
-            "County Selection",
-            "county",
-            completedSections.county,
-            service?.preField.values?.find(
-              (v) => v.id === formData[service?.preField.id || ""]
-            )?.name,
-            true
-          )}
-          {(openSection === "county" || editingSection === "county") &&
-            renderCountySelection()}
-        </div>
+        {service?.preField ? (
+          <div className="border rounded-lg bg-white">
+            {renderSectionHeader(
+              "County Selection",
+              "county",
+              completedSections.county,
+              service?.preField?.values?.find(
+                (v) => v.id === formData[service?.preField?.id || ""]
+              )?.name,
+              true
+            )}
+            {(openSection === "county" || editingSection === "county") &&
+              renderCountySelection()}
+          </div>
+        ) : (
+          <></>
+        )}
 
         {/* Date & Time Section */}
         <div className="border rounded-lg bg-white">
