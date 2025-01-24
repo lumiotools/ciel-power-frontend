@@ -593,9 +593,10 @@ const ServiceDetailsPage: React.FC = () => {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">{service?.description}</p>
-          </CardContent>
+          <CardContent
+            className="text-gray-600"
+            dangerouslySetInnerHTML={{ __html: service?.description ?? "" }}
+          ></CardContent>
         </Card>
 
         {/* Date & Time Section */}
