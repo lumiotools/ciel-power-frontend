@@ -9,7 +9,7 @@ export default function DashboardPage() {
 
   const getServices = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/booking/services`, {
+      const response = await fetch(`/api/booking/services`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

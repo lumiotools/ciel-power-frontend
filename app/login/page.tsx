@@ -16,8 +16,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const [email, setEmail] = useState("john.doe@gmail.com");
-  const [password, setPassword] = useState("StrongP@ssw0rd!");
+  const [email, setEmail] = useState("dawood@teamlumio.ai");
+  const [password, setPassword] = useState("password");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,13 +29,13 @@ export default function Login() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASEURL}/auth/login`,
+        `/api/auth/login`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          // credentials: "include", // Include cookies in the request
+          credentials: "include", // Include cookies in the request
           body: JSON.stringify({ email, password }),
         }
       );

@@ -27,7 +27,7 @@ export default function SignUp() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASEURL}/auth/register`,
+        `/api/auth/register`,
         {
           method: "POST",
           headers: {

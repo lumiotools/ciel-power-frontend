@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 // import { usePathname } from "next/navigation"
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, LoaderCircle, Menu, Search } from "lucide-react";
 
 // import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 //   DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input";
-import { useUser } from "../user/useUser";
+import { useContext } from "react";
+import { AUTH_CONTEXT } from "@/providers/auth";
 
 // const navItems = [
 //   // { name: "Dashboard", href: "/dashboard" },
@@ -26,8 +27,8 @@ import { useUser } from "../user/useUser";
 export function Navbar() {
   // const pathname = usePathname()
 
-  const { user} = useUser();
-  
+  const { isLoading, isLoggedIn } = useContext(AUTH_CONTEXT);
+
   return (
     <nav className="border-b bg-white">
       <div className="flex h-16 items-center px-4">
@@ -82,7 +83,11 @@ export function Navbar() {
             <Bell className="h-5 w-5" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-600" />
           </Button>
-          {user ? (
+          {isLoading ? (
+            <Button className="w-20" variant="outline">
+              <LoaderCircle className="animate-spin h-5 w-5" />
+            </Button>
+          ) : isLoggedIn ? (
             <Button>
               <Link href="/signup">
                 {/* Wrap the text with Link, and avoid using 'to' */}

@@ -1,5 +1,5 @@
 export const getUserDetails = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/auth/user-details`, {
+    const response = await fetch(`/api/auth/user-details`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -12,6 +12,8 @@ export const getUserDetails = async () => {
     }
   
     const data = await response.json();
-    return data;
+
+    if(!data["success"]) throw new Error(data["message"]);
+    return data["data"]["userDetails"];
   };
   

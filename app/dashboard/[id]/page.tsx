@@ -88,7 +88,7 @@ export default function ServiceDetailsPage(): JSX.Element {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASEURL}/booking/services/${id}`
+        `/api/booking/services/${id}`
       );
       const data = await response.json();
       setService(data?.data);
@@ -107,7 +107,7 @@ export default function ServiceDetailsPage(): JSX.Element {
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASEURL}/booking/slots?productId=${id}&date=${formattedDate}`
+        `/api/booking/slots?productId=${id}&date=${formattedDate}`
       );
       const data = await response.json();
       setSlots(data?.data || []);
