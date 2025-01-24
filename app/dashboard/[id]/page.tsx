@@ -20,13 +20,6 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
 
-// Keep all the existing interfaces
-interface BookingStep {
-  id: number;
-  name: string;
-  description: string;
-}
-
 interface ServiceImage {
   url: string;
   description?: string;
@@ -104,27 +97,22 @@ const ServiceDetailsPage: React.FC = () => {
     zipCode: "",
   });
 
-  // Track visited sections
   const [visitedSections, setVisitedSections] = useState({
+    county: false,
     dateTime: false,
     contact: false,
     additional: false,
   });
 
-  // Track completed sections
   const [completedSections, setCompletedSections] = useState({
+    county: false,
     dateTime: false,
     contact: false,
     additional: false,
   });
 
-  // Track which section is currently open
-  const [openSection, setOpenSection] = useState<string>("dateTime");
-
-  // Track if this is the first time going through the flow
+  const [openSection, setOpenSection] = useState<string>("county");
   const [isInitialFlow, setIsInitialFlow] = useState(true);
-
-  // Add new state for editing section
   const [editingSection, setEditingSection] = useState<string | null>(null);
 
   const getServiceDetails = async (): Promise<void> => {
@@ -136,6 +124,23 @@ const ServiceDetailsPage: React.FC = () => {
       );
       const data = await response.json();
       setService(data?.data);
+
+      // Initialize formData with default values
+      const initialFormData: FormData = {};
+      data?.data.fields.forEach((field: ServiceField) => {
+        if (field.type === "checkbox") {
+          initialFormData[field.id] = field.defaultState || false;
+        } else if (
+          field.type === "dropdown" &&
+          field.values &&
+          field.values.length > 0
+        ) {
+          initialFormData[field.id] = field.values[0].id;
+        } else {
+          initialFormData[field.id] = "";
+        }
+      });
+      setFormData(initialFormData);
     } catch (error) {
       console.error("Error fetching service details:", error);
       toast.error("Failed to load service details");
@@ -143,7 +148,9 @@ const ServiceDetailsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (id) getServiceDetails();
+    if (id) {
+      getServiceDetails();
+    }
   }, [id]);
 
   const getSlots = async (date?: Date): Promise<void> => {
@@ -151,8 +158,16 @@ const ServiceDetailsPage: React.FC = () => {
 
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
+      const countyField = service?.fields.find(
+        (field) => field.name === "Please select your County"
+      );
+      const selectedCountyId = countyField ? formData[countyField.id] : null;
+      const selectedCountyName = countyField?.values?.find(
+        (v) => v.id === selectedCountyId
+      )?.name;
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?productId=${id}&date=${formattedDate}`
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?productId=${id}&date=${formattedDate}&preAnswerId=${selectedCountyId}&preAnswerValue=${selectedCountyName}`
       );
       const data = await response.json();
       setSlots(data?.data || []);
@@ -213,8 +228,10 @@ const ServiceDetailsPage: React.FC = () => {
     setEditingSection(null);
 
     if (isInitialFlow) {
-      // Move to next section automatically during initial flow
       switch (section) {
+        case "county":
+          setOpenSection("dateTime");
+          break;
         case "dateTime":
           setOpenSection("contact");
           break;
@@ -226,7 +243,6 @@ const ServiceDetailsPage: React.FC = () => {
           break;
       }
     } else {
-      // Close the current section when not in initial flow
       setOpenSection("");
     }
   };
@@ -236,7 +252,6 @@ const ServiceDetailsPage: React.FC = () => {
       isInitialFlow &&
       !visitedSections[section as keyof typeof visitedSections]
     ) {
-      // During initial flow, only allow opening the current section
       return;
     }
     if (openSection === section) {
@@ -296,45 +311,51 @@ const ServiceDetailsPage: React.FC = () => {
     </div>
   );
 
-  const renderUserDetails = () => (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          {Object.entries(userDetails).map(([key, value]) => (
-            <div key={key} className="flex-grow">
-              <Label htmlFor={key}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </Label>
-              <Input
-                id={key}
-                type={
-                  key === "email" ? "email" : key === "phone" ? "tel" : "text"
-                }
-                value={value}
-                onChange={(e) =>
-                  setUserDetails((prev) => ({
-                    ...prev,
-                    [key]: e.target.value,
-                  }))
-                }
-                className="mt-1"
-              />
-            </div>
-          ))}
-          <Button
-            className="w-full"
-            onClick={() => {
-              if (validateContactInfo()) {
-                handleSectionComplete("contact");
+  const renderCountySelection = () => {
+    const countyField = service?.fields.find(
+      (field) => field.name === "Please select your County"
+    );
+    if (!countyField) return null;
+
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <Label htmlFor={countyField.id}>{countyField.name}</Label>
+            <Select
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, [countyField.id]: value }))
               }
-            }}
-          >
-            Continue
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+              value={formData[countyField.id] as string}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a county" />
+              </SelectTrigger>
+              <SelectContent>
+                {countyField.values?.map((value) => (
+                  <SelectItem key={value.id} value={value.id}>
+                    {value.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              className="w-full"
+              onClick={() => {
+                if (formData[countyField.id]) {
+                  handleSectionComplete("county");
+                } else {
+                  toast.error("Please select a county");
+                }
+              }}
+            >
+              Continue
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderDateAndTime = () => (
     <Card>
@@ -387,69 +408,115 @@ const ServiceDetailsPage: React.FC = () => {
     </Card>
   );
 
+  const renderUserDetails = () => (
+    <Card>
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          {Object.entries(userDetails).map(([key, value]) => (
+            <div key={key} className="flex-grow">
+              <Label htmlFor={key}>
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </Label>
+              <Input
+                id={key}
+                type={
+                  key === "email" ? "email" : key === "phone" ? "tel" : "text"
+                }
+                value={value}
+                onChange={(e) =>
+                  setUserDetails((prev) => ({
+                    ...prev,
+                    [key]: e.target.value,
+                  }))
+                }
+                className="mt-1"
+              />
+            </div>
+          ))}
+          <Button
+            className="w-full"
+            onClick={() => {
+              if (validateContactInfo()) {
+                handleSectionComplete("contact");
+              }
+            }}
+          >
+            Continue
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   const renderAdditionalInfo = () => (
     <Card>
       <CardContent className="pt-6">
         <div className="space-y-4">
-          {service?.fields.map((field) => (
-            <div key={field.id} className="flex-grow">
-              <div className="flex-grow space-y-2">
-                <Label>
-                  {field.name}
-                  {field.id === "central_ac" && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Please check if you have central air conditioning (Please
-                      do not include window units)
-                    </p>
-                  )}
-                </Label>
-                {field.type === "dropdown" && field.values ? (
-                  <Select
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, [field.id]: value }))
-                    }
-                    value={formData[field.id] as string}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {field.values.map((value) => (
-                        <SelectItem key={value.id} value={value.name}>
-                          {value.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : field.type === "checkbox" ? (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={formData[field.id] as boolean}
-                      onCheckedChange={(checked) =>
+          {service?.fields
+            .filter((field) => field.name !== "Please select your County")
+            .map((field) => (
+              <div key={field.id} className="flex-grow">
+                <div className="flex-grow space-y-2">
+                  <Label htmlFor={field.id}>
+                    {field.name}
+                    {field.description && (
+                      <p
+                        className="text-sm text-gray-500 mt-1"
+                        dangerouslySetInnerHTML={{ __html: field.description }}
+                      />
+                    )}
+                  </Label>
+                  {field.type === "dropdown" && field.values ? (
+                    <Select
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, [field.id]: value }))
+                      }
+                      value={formData[field.id] as string}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {field.values.map((value) => (
+                          <SelectItem key={value.id} value={value.id}>
+                            {value.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : field.type === "checkbox" ? (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={field.id}
+                        checked={formData[field.id] as boolean}
+                        onCheckedChange={(checked) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            [field.id]: checked,
+                          }))
+                        }
+                      />
+                      <Label htmlFor={field.id} className="text-sm">
+                        {field.name}
+                      </Label>
+                    </div>
+                  ) : (
+                    <Input
+                      id={field.id}
+                      placeholder={field.description}
+                      required={field.required}
+                      value={formData[field.id] as string}
+                      onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          [field.id]: checked,
+                          [field.id]: e.target.value,
                         }))
                       }
                     />
-                    <Label className="text-sm">{field.description}</Label>
-                  </div>
-                ) : (
-                  <Input
-                    placeholder={field.description}
-                    required={field.required}
-                    value={formData[field.id] as string}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        [field.id]: e.target.value,
-                      }))
-                    }
-                  />
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           <Button
             className="w-full"
             onClick={() => {
@@ -474,6 +541,25 @@ const ServiceDetailsPage: React.FC = () => {
             <p>{service?.name}</p>
             <p className="text-green-600 font-medium">
               ${service?.price?.amount}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-lg mb-2">Selected County</h3>
+            <p>
+              {
+                service?.fields
+                  .find((field) => field.name === "Please select your County")
+                  ?.values?.find(
+                    (v) =>
+                      v.id ===
+                      formData[
+                        service.fields.find(
+                          (field) => field.name === "Please select your County"
+                        )?.id || ""
+                      ]
+                  )?.name
+              }
             </p>
           </div>
 
@@ -507,22 +593,26 @@ const ServiceDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          {Object.keys(formData).length > 0 && (
-            <div>
-              <h3 className="font-medium text-lg mb-2">
-                Additional Information
-              </h3>
-              {Object.entries(formData).map(([key, value]) => {
-                const field = service?.fields.find((f) => f.id === key);
-                return (
-                  <div key={key} className="mb-2">
-                    <span className="text-gray-600">{field?.name}: </span>
-                    <span>{value.toString()}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <div>
+            <h3 className="font-medium text-lg mb-2">Additional Information</h3>
+            {service?.fields
+              .filter((field) => field.name !== "Please select your County")
+              .map((field) => (
+                <div key={field.id} className="mb-2">
+                  <span className="text-gray-600">{field.name}: </span>
+                  <span>
+                    {field.type === "dropdown"
+                      ? field.values?.find((v) => v.id === formData[field.id])
+                          ?.name
+                      : field.type === "checkbox"
+                      ? formData[field.id]
+                        ? "Yes"
+                        : "No"
+                      : formData[field.id]}
+                  </span>
+                </div>
+              ))}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -556,7 +646,9 @@ const ServiceDetailsPage: React.FC = () => {
   };
 
   const validateAdditionalInfo = (): boolean => {
-    const requiredFields = service?.fields.filter((field) => field.required);
+    const requiredFields = service?.fields.filter(
+      (field) => field.required && field.name !== "Please select your County"
+    );
     const missingFields = requiredFields?.filter(
       (field) => !formData[field.id]
     );
@@ -593,11 +685,36 @@ const ServiceDetailsPage: React.FC = () => {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent
-            className="text-gray-600"
-            dangerouslySetInnerHTML={{ __html: service?.description ?? "" }}
-          ></CardContent>
+          <CardContent>
+            <p
+              className="text-gray-600"
+              dangerouslySetInnerHTML={{ __html: service?.description || "" }}
+            ></p>
+          </CardContent>
         </Card>
+
+        {/* County Selection Section */}
+        <div className="border rounded-lg bg-white">
+          {renderSectionHeader(
+            "County Selection",
+            "county",
+            completedSections.county,
+            service?.fields
+              .find((field) => field.name === "Please select your County")
+              ?.values?.find(
+                (v) =>
+                  v.id ===
+                  formData[
+                    service.fields.find(
+                      (field) => field.name === "Please select your County"
+                    )?.id || ""
+                  ]
+              )?.name,
+            true
+          )}
+          {(openSection === "county" || editingSection === "county") &&
+            renderCountySelection()}
+        </div>
 
         {/* Date & Time Section */}
         <div className="border rounded-lg bg-white">
@@ -637,9 +754,7 @@ const ServiceDetailsPage: React.FC = () => {
             "Additional Information",
             "additional",
             completedSections.additional,
-            Object.keys(formData).length > 0
-              ? "All information provided"
-              : undefined,
+            "All information provided",
             true
           )}
           {(openSection === "additional" || editingSection === "additional") &&
