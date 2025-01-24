@@ -959,7 +959,7 @@ const ServiceDetailsPage: React.FC = () => {
             <h3 className="font-medium text-lg mb-2">Selected County</h3>
             <p className="text-lg">
               {
-                service?.preField.values?.find(
+                service?.preField?.values?.find(
                   (v) => v.id === formData[service.preField.id]
                 )?.name
               }
