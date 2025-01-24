@@ -99,7 +99,7 @@ interface FormData {
 const ServiceDetailsPage: React.FC = () => {
   const { id } = useParams();
   const router = useRouter();
-  const [loading,setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [service, setService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -206,8 +206,7 @@ const ServiceDetailsPage: React.FC = () => {
     } catch (error) {
       console.error("Error fetching service details:", error);
       toast.error("Failed to load service details");
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -250,7 +249,12 @@ const ServiceDetailsPage: React.FC = () => {
   }, [selectedDate, service, id]);
 
   const formatTime = (timeString: string): string => {
-    return timeString ? timeString.split("T")[1].slice(0, 5) : "";
+    if (!timeString) return "";
+    const [hours, minutes] = timeString.split("T")[1].slice(0, 5).split(":");
+    const hour = Number.parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
   };
 
   const handleSubmitBooking = async () => {
@@ -260,7 +264,9 @@ const ServiceDetailsPage: React.FC = () => {
       console.log("selected slot", selectedSlot);
 
       // Format date in UTC to avoid timezone issues
-      const formattedDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
+      const formattedDate = selectedDate
+        ? format(selectedDate, "yyyy-MM-dd")
+        : "";
 
       // Convert the time slot to proper format (assuming it's in ISO or HH:mm format)
       let formattedStartTime = selectedSlot?.startTime;
@@ -538,22 +544,28 @@ const ServiceDetailsPage: React.FC = () => {
           {selectedDate && (
             <div className="mt-6">
               <h3 className="text-lg font-medium mb-4">Available Slots</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {slots.map((slot) => (
-                  <Button
-                    key={slot.eventId}
-                    variant={
-                      selectedSlot?.eventId === slot.eventId
-                        ? "default"
-                        : "outline"
-                    }
-                    className="text-xs"
-                    onClick={() => setSelectedSlot(slot)}
-                  >
-                    {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                  </Button>
-                ))}
-              </div>
+              {slots.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2">
+                  {slots.map((slot) => (
+                    <Button
+                      key={slot.eventId}
+                      variant={
+                        selectedSlot?.eventId === slot.eventId
+                          ? "default"
+                          : "outline"
+                      }
+                      className="text-xs"
+                      onClick={() => setSelectedSlot(slot)}
+                    >
+                      {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-red-500">
+                  No Slots Available for this Selection
+                </p>
+              )}
             </div>
           )}
           <Button
