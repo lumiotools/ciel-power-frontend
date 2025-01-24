@@ -16,8 +16,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const [email, setEmail] = useState("johndoe7@gmail.com");
-  const [password, setPassword] = useState("StrongP@ssw0rd");
+  const [email, setEmail] = useState("john.doe@gmail.com");
+  const [password, setPassword] = useState("StrongP@ssw0rd!");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +28,17 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASEURL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // credentials: "include", // Include cookies in the request
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASEURL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // credentials: "include", // Include cookies in the request
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -51,7 +54,7 @@ export default function Login() {
     } catch (error) {
       setError("An error occurred during login. Please try again later.");
       console.error("Error during login:", (error as Error).message);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -97,7 +100,7 @@ export default function Login() {
           </CardContent>
           <CardFooter className="flex flex-col gap-1">
             <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
             <div className="mt-2">OR</div>
             <Button
