@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { AUTH_CONTEXT } from "@/providers/auth";
 
 interface ServiceImage {
   url: string;
@@ -66,15 +67,30 @@ interface Service {
   price?: ServicePrice;
   duration?: ServiceDuration;
   fields: ServiceField[];
+  preField: ServiceField;
+}
+
+interface PhoneNumber {
+  number: string;
+  type: "mobile" | "work" | "home" | "fax";
+}
+
+interface StreetAddress {
+  address1: string;
+  address2?: string;
+  city: string;
+  countryCode: string;
+  state: string;
+  postcode: string;
 }
 
 interface UserDetails {
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  emailAddress: string;
+  phoneNumbers: PhoneNumber[];
+  streetAddress: StreetAddress;
 }
 
 interface FormData {
@@ -88,15 +104,50 @@ const ServiceDetailsPage: React.FC = () => {
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [formData, setFormData] = useState<FormData>({});
-  const [userDetails, setUserDetails] = useState<UserDetails>({
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-  });
+  const authContext = useContext(AUTH_CONTEXT).userDetails;
 
+  const [userDetails, setUserDetails] = useState<UserDetails>({
+    firstName: "",
+    middleName: "", // Optional, can be omitted if not needed
+    lastName: "",
+    emailAddress: "",
+    phoneNumbers: [
+      {
+        number: "",
+        type: "mobile", // Default type, can be updated later
+      },
+    ],
+    streetAddress: {
+      address1: "",
+      address2: "", // Optional, can be omitted if not needed
+      city: "",
+      countryCode: "", // e.g., "US" for United States
+      state: "",
+      postcode: "",
+    },
+  });
+  useEffect(() => {
+    if (authContext) {
+      console.log("auth context", authContext);
+      setUserDetails((prev) => ({
+        firstName: authContext.firstName || "",
+        middleName: prev.middleName, // Not provided in AUTH_CONTEXT, retain initial default
+        lastName: authContext.lastName || "",
+        emailAddress: authContext.emailAddress || "",
+        phoneNumbers: authContext.phoneNumbers?.length
+          ? authContext.phoneNumbers
+          : prev.phoneNumbers, // Use provided phoneNumbers or default
+        streetAddress: {
+          address1: authContext.streetAddress?.line1 || "",
+          address2: authContext.streetAddress?.line2 || "",
+          city: authContext.streetAddress?.city || "",
+          countryCode: authContext.streetAddress?.countryCode || "",
+          state: authContext.streetAddress?.province || "", // Map `province` to `state`
+          postcode: authContext.streetAddress?.postalCode || "",
+        },
+      }));
+    }
+  }, [authContext]);
   const [visitedSections, setVisitedSections] = useState({
     county: false,
     dateTime: false,
@@ -127,6 +178,18 @@ const ServiceDetailsPage: React.FC = () => {
 
       // Initialize formData with default values
       const initialFormData: FormData = {};
+
+      // Set preField (county) value
+      if (
+        data?.data.preField &&
+        data?.data.preField.values &&
+        data?.data.preField.values.length > 0
+      ) {
+        initialFormData[data.data.preField.id] =
+          data.data.preField.values[0].id;
+      }
+
+      // Set other fields
       data?.data.fields.forEach((field: ServiceField) => {
         if (field.type === "checkbox") {
           initialFormData[field.id] = field.defaultState || false;
@@ -154,20 +217,21 @@ const ServiceDetailsPage: React.FC = () => {
   }, [id]);
 
   const getSlots = async (date?: Date): Promise<void> => {
-    if (!id || typeof id !== "string" || !date) return;
+    if (!id || typeof id !== "string" || !date || !service) return;
 
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
-      const countyField = service?.fields.find(
-        (field) => field.name === "Please select your County"
-      );
-      const selectedCountyId = countyField ? formData[countyField.id] : null;
-      const selectedCountyName = countyField?.values?.find(
+      const preFieldId = service?.preField?.id;
+
+      const selectedCountyId = formData[service.preField.id];
+      const selectedCountyName = service.preField.values?.find(
         (v) => v.id === selectedCountyId
       )?.name;
 
+      if (!selectedCountyId || !selectedCountyName) return;
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?productId=${id}&date=${formattedDate}&preAnswerId=${selectedCountyId}&preAnswerValue=${selectedCountyName}`
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?productId=${id}&date=${formattedDate}&preAnswerId=${preFieldId}&preAnswerValue=${selectedCountyName}`
       );
       const data = await response.json();
       setSlots(data?.data || []);
@@ -178,10 +242,10 @@ const ServiceDetailsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && service) {
       getSlots(selectedDate);
     }
-  }, [selectedDate, id]);
+  }, [selectedDate, service, id]);
 
   const formatTime = (timeString: string): string => {
     return timeString ? timeString.split("T")[1].slice(0, 5) : "";
@@ -312,27 +376,27 @@ const ServiceDetailsPage: React.FC = () => {
   );
 
   const renderCountySelection = () => {
-    const countyField = service?.fields.find(
-      (field) => field.name === "Please select your County"
-    );
-    if (!countyField) return null;
+    if (!service || !service.preField) return null;
 
     return (
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <Label htmlFor={countyField.id}>{countyField.name}</Label>
+            <Label htmlFor={service.preField.id}>{service.preField.name}</Label>
             <Select
               onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, [countyField.id]: value }))
+                setFormData((prev) => ({
+                  ...prev,
+                  [service.preField.id]: value,
+                }))
               }
-              value={formData[countyField.id] as string}
+              value={formData[service.preField.id] as string}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a county" />
               </SelectTrigger>
               <SelectContent>
-                {countyField.values?.map((value) => (
+                {service.preField.values?.map((value) => (
                   <SelectItem key={value.id} value={value.id}>
                     {value.name}
                   </SelectItem>
@@ -342,7 +406,7 @@ const ServiceDetailsPage: React.FC = () => {
             <Button
               className="w-full"
               onClick={() => {
-                if (formData[countyField.id]) {
+                if (formData[service.preField.id]) {
                   handleSectionComplete("county");
                 } else {
                   toast.error("Please select a county");
@@ -411,28 +475,272 @@ const ServiceDetailsPage: React.FC = () => {
   const renderUserDetails = () => (
     <Card>
       <CardContent className="pt-6">
-        <div className="space-y-4">
-          {Object.entries(userDetails).map(([key, value]) => (
-            <div key={key} className="flex-grow">
-              <Label htmlFor={key}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </Label>
+        <div className="space-y-6">
+          {/* Name Fields */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
-                id={key}
-                type={
-                  key === "email" ? "email" : key === "phone" ? "tel" : "text"
-                }
-                value={value}
+                id="firstName"
+                value={userDetails.firstName}
                 onChange={(e) =>
                   setUserDetails((prev) => ({
                     ...prev,
-                    [key]: e.target.value,
+                    firstName: e.target.value,
                   }))
                 }
                 className="mt-1"
               />
             </div>
-          ))}
+            <div>
+              <Label htmlFor="middleName">Middle Name</Label>
+              <Input
+                id="middleName"
+                value={userDetails.middleName}
+                onChange={(e) =>
+                  setUserDetails((prev) => ({
+                    ...prev,
+                    middleName: e.target.value,
+                  }))
+                }
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={userDetails.lastName}
+                onChange={(e) =>
+                  setUserDetails((prev) => ({
+                    ...prev,
+                    lastName: e.target.value,
+                  }))
+                }
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          {/* Email Field */}
+          <div>
+            <Label htmlFor="emailAddress">Email Address</Label>
+            <Input
+              id="emailAddress"
+              type="email"
+              value={userDetails.emailAddress}
+              onChange={(e) =>
+                setUserDetails((prev) => ({
+                  ...prev,
+                  emailAddress: e.target.value,
+                }))
+              }
+              className="mt-1"
+            />
+          </div>
+
+          {/* Phone Numbers Section */}
+          <div className="space-y-2">
+            <Label>Phone Numbers</Label>
+            {userDetails.phoneNumbers.map((phone, index) => (
+              <div key={index} className="flex gap-4 items-start">
+                <div className="flex-1">
+                  <Input
+                    value={phone.number}
+                    onChange={(e) => {
+                      const newPhoneNumbers = [...userDetails.phoneNumbers];
+                      newPhoneNumbers[index] = {
+                        ...newPhoneNumbers[index],
+                        number: e.target.value,
+                      };
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        phoneNumbers: newPhoneNumbers,
+                      }));
+                    }}
+                    placeholder="Enter phone number"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="w-[150px]">
+                  <Select
+                    value={phone.type}
+                    onValueChange={(
+                      value: "mobile" | "work" | "home" | "fax"
+                    ) => {
+                      const newPhoneNumbers = [...userDetails.phoneNumbers];
+                      newPhoneNumbers[index] = {
+                        ...newPhoneNumbers[index],
+                        type: value,
+                      };
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        phoneNumbers: newPhoneNumbers,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mobile">Mobile</SelectItem>
+                      <SelectItem value="work">Work</SelectItem>
+                      <SelectItem value="home">Home</SelectItem>
+                      <SelectItem value="fax">Fax</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {userDetails.phoneNumbers.length > 1 && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => {
+                      const newPhoneNumbers = userDetails.phoneNumbers.filter(
+                        (_, i) => i !== index
+                      );
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        phoneNumbers: newPhoneNumbers,
+                      }));
+                    }}
+                    className="mt-1"
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setUserDetails((prev) => ({
+                  ...prev,
+                  phoneNumbers: [
+                    ...prev.phoneNumbers,
+                    { number: "", type: "mobile" },
+                  ],
+                }));
+              }}
+            >
+              Add Phone Number
+            </Button>
+          </div>
+
+          {/* Street Address Section */}
+          <div className="space-y-4">
+            <Label>Street Address</Label>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="address1">Address Line 1</Label>
+                <Input
+                  id="address1"
+                  value={userDetails.streetAddress.address1}
+                  onChange={(e) =>
+                    setUserDetails((prev) => ({
+                      ...prev,
+                      streetAddress: {
+                        ...prev.streetAddress,
+                        address1: e.target.value,
+                      },
+                    }))
+                  }
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="address2">Address Line 2 (Optional)</Label>
+                <Input
+                  id="address2"
+                  value={userDetails.streetAddress.address2}
+                  onChange={(e) =>
+                    setUserDetails((prev) => ({
+                      ...prev,
+                      streetAddress: {
+                        ...prev.streetAddress,
+                        address2: e.target.value,
+                      },
+                    }))
+                  }
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={userDetails.streetAddress.city}
+                    onChange={(e) =>
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        streetAddress: {
+                          ...prev.streetAddress,
+                          city: e.target.value,
+                        },
+                      }))
+                    }
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    value={userDetails.streetAddress.state}
+                    onChange={(e) =>
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        streetAddress: {
+                          ...prev.streetAddress,
+                          state: e.target.value,
+                        },
+                      }))
+                    }
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="postcode">Postcode</Label>
+                  <Input
+                    id="postcode"
+                    value={userDetails.streetAddress.postcode}
+                    onChange={(e) =>
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        streetAddress: {
+                          ...prev.streetAddress,
+                          postcode: e.target.value,
+                        },
+                      }))
+                    }
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="countryCode">Country Code</Label>
+                  <Input
+                    id="countryCode"
+                    value={userDetails.streetAddress.countryCode}
+                    onChange={(e) =>
+                      setUserDetails((prev) => ({
+                        ...prev,
+                        streetAddress: {
+                          ...prev.streetAddress,
+                          countryCode: e.target.value,
+                        },
+                      }))
+                    }
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           <Button
             className="w-full"
             onClick={() => {
@@ -452,71 +760,69 @@ const ServiceDetailsPage: React.FC = () => {
     <Card>
       <CardContent className="pt-6">
         <div className="space-y-4">
-          {service?.fields
-            .filter((field) => field.name !== "Please select your County")
-            .map((field) => (
-              <div key={field.id} className="flex-grow">
-                <div className="flex-grow space-y-2">
-                  <Label htmlFor={field.id}>
-                    {field.name}
-                    {field.description && (
-                      <p
-                        className="text-sm text-gray-500 mt-1"
-                        dangerouslySetInnerHTML={{ __html: field.description }}
-                      />
-                    )}
-                  </Label>
-                  {field.type === "dropdown" && field.values ? (
-                    <Select
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, [field.id]: value }))
-                      }
-                      value={formData[field.id] as string}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an option" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {field.values.map((value) => (
-                          <SelectItem key={value.id} value={value.id}>
-                            {value.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : field.type === "checkbox" ? (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={field.id}
-                        checked={formData[field.id] as boolean}
-                        onCheckedChange={(checked) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            [field.id]: checked,
-                          }))
-                        }
-                      />
-                      <Label htmlFor={field.id} className="text-sm">
-                        {field.name}
-                      </Label>
-                    </div>
-                  ) : (
-                    <Input
+          {service?.fields.map((field) => (
+            <div key={field.id} className="flex-grow">
+              <div className="flex-grow space-y-2">
+                <Label htmlFor={field.id}>
+                  {field.name}
+                  {field.description && (
+                    <p
+                      className="text-sm text-gray-500 mt-1"
+                      dangerouslySetInnerHTML={{ __html: field.description }}
+                    />
+                  )}
+                </Label>
+                {field.type === "dropdown" && field.values ? (
+                  <Select
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, [field.id]: value }))
+                    }
+                    value={formData[field.id] as string}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.values.map((value) => (
+                        <SelectItem key={value.id} value={value.id}>
+                          {value.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : field.type === "checkbox" ? (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
                       id={field.id}
-                      placeholder={field.description}
-                      required={field.required}
-                      value={formData[field.id] as string}
-                      onChange={(e) =>
+                      checked={formData[field.id] as boolean}
+                      onCheckedChange={(checked) =>
                         setFormData((prev) => ({
                           ...prev,
-                          [field.id]: e.target.value,
+                          [field.id]: checked,
                         }))
                       }
                     />
-                  )}
-                </div>
+                    <Label htmlFor={field.id} className="text-sm">
+                      {field.name}
+                    </Label>
+                  </div>
+                ) : (
+                  <Input
+                    id={field.id}
+                    placeholder={field.description}
+                    required={field.required}
+                    value={formData[field.id] as string}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        [field.id]: e.target.value,
+                      }))
+                    }
+                  />
+                )}
               </div>
-            ))}
+            </div>
+          ))}
           <Button
             className="w-full"
             onClick={() => {
@@ -538,35 +844,29 @@ const ServiceDetailsPage: React.FC = () => {
         <div className="space-y-6">
           <div>
             <h3 className="font-medium text-lg mb-2">Selected Service</h3>
-            <p>{service?.name}</p>
-            <p className="text-green-600 font-medium">
+            <p className="text-lg">{service?.name}</p>
+            <p className="text-green-600 font-medium text-lg">
               ${service?.price?.amount}
             </p>
           </div>
 
           <div>
             <h3 className="font-medium text-lg mb-2">Selected County</h3>
-            <p>
+            <p className="text-lg">
               {
-                service?.fields
-                  .find((field) => field.name === "Please select your County")
-                  ?.values?.find(
-                    (v) =>
-                      v.id ===
-                      formData[
-                        service.fields.find(
-                          (field) => field.name === "Please select your County"
-                        )?.id || ""
-                      ]
-                  )?.name
+                service?.preField.values?.find(
+                  (v) => v.id === formData[service.preField.id]
+                )?.name
               }
             </p>
           </div>
 
           <div>
             <h3 className="font-medium text-lg mb-2">Date & Time</h3>
-            <p>{selectedDate && format(selectedDate, "MMMM d, yyyy")}</p>
-            <p>
+            <p className="text-lg">
+              {selectedDate && format(selectedDate, "MMMM d, yyyy")}
+            </p>
+            <p className="text-lg">
               {selectedSlot &&
                 `${formatTime(selectedSlot.startTime)} - ${formatTime(
                   selectedSlot.endTime
@@ -576,31 +876,64 @@ const ServiceDetailsPage: React.FC = () => {
 
           <div>
             <h3 className="font-medium text-lg mb-2">Contact Information</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4">
+              <div>
+                <p className="text-gray-600">Name:</p>
+                <p className="text-lg">
+                  {[
+                    userDetails.firstName,
+                    userDetails.middleName,
+                    userDetails.lastName,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                </p>
+              </div>
               <div>
                 <p className="text-gray-600">Email:</p>
-                <p>{userDetails.email}</p>
+                <p className="text-lg">{userDetails.emailAddress}</p>
               </div>
               <div>
-                <p className="text-gray-600">Phone:</p>
-                <p>{userDetails.phone}</p>
+                <p className="text-gray-600">Phone Numbers:</p>
+                <div className="space-y-1">
+                  {userDetails.phoneNumbers.map((phone, index) => (
+                    <p key={index} className="text-lg capitalize">
+                      {phone.type}: {phone.number}
+                    </p>
+                  ))}
+                </div>
               </div>
-              <div className="col-span-2">
+              <div>
                 <p className="text-gray-600">Address:</p>
-                <p>{userDetails.address}</p>
-                <p>{`${userDetails.city}, ${userDetails.state} ${userDetails.zipCode}`}</p>
+                <div className="space-y-1">
+                  <p className="text-lg">
+                    {userDetails.streetAddress.address1}
+                  </p>
+                  {userDetails.streetAddress.address2 && (
+                    <p className="text-lg">
+                      {userDetails.streetAddress.address2}
+                    </p>
+                  )}
+                  <p className="text-lg">
+                    {userDetails.streetAddress.city},{" "}
+                    {userDetails.streetAddress.state}{" "}
+                    {userDetails.streetAddress.postcode}
+                  </p>
+                  <p className="text-lg">
+                    Country: {userDetails.streetAddress.countryCode}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           <div>
             <h3 className="font-medium text-lg mb-2">Additional Information</h3>
-            {service?.fields
-              .filter((field) => field.name !== "Please select your County")
-              .map((field) => (
-                <div key={field.id} className="mb-2">
-                  <span className="text-gray-600">{field.name}: </span>
-                  <span>
+            <div className="space-y-2">
+              {service?.fields.map((field) => (
+                <div key={field.id}>
+                  <p className="text-gray-600">{field.name}:</p>
+                  <p className="text-lg">
                     {field.type === "dropdown"
                       ? field.values?.find((v) => v.id === formData[field.id])
                           ?.name
@@ -609,9 +942,10 @@ const ServiceDetailsPage: React.FC = () => {
                         ? "Yes"
                         : "No"
                       : formData[field.id]}
-                  </span>
+                  </p>
                 </div>
               ))}
+            </div>
           </div>
         </div>
       </CardContent>
@@ -628,27 +962,32 @@ const ServiceDetailsPage: React.FC = () => {
 
   const validateContactInfo = (): boolean => {
     if (
-      !userDetails.email ||
-      !userDetails.phone ||
-      !userDetails.address ||
-      !userDetails.city ||
-      !userDetails.state ||
-      !userDetails.zipCode
+      !userDetails.firstName ||
+      !userDetails.lastName ||
+      !userDetails.emailAddress ||
+      userDetails.phoneNumbers.length === 0 ||
+      !userDetails.streetAddress.address1 ||
+      !userDetails.streetAddress.city ||
+      !userDetails.streetAddress.state ||
+      !userDetails.streetAddress.postcode ||
+      !userDetails.streetAddress.countryCode
     ) {
-      toast.error("Please fill in all contact information");
+      toast.error("Please fill in all required contact information");
       return false;
     }
-    if (!userDetails.email.includes("@")) {
+    if (!userDetails.emailAddress.includes("@")) {
       toast.error("Please enter a valid email address");
+      return false;
+    }
+    if (userDetails.phoneNumbers.some((phone) => !phone.number)) {
+      toast.error("Please enter all phone numbers");
       return false;
     }
     return true;
   };
 
   const validateAdditionalInfo = (): boolean => {
-    const requiredFields = service?.fields.filter(
-      (field) => field.required && field.name !== "Please select your County"
-    );
+    const requiredFields = service?.fields.filter((field) => field.required);
     const missingFields = requiredFields?.filter(
       (field) => !formData[field.id]
     );
@@ -699,17 +1038,9 @@ const ServiceDetailsPage: React.FC = () => {
             "County Selection",
             "county",
             completedSections.county,
-            service?.fields
-              .find((field) => field.name === "Please select your County")
-              ?.values?.find(
-                (v) =>
-                  v.id ===
-                  formData[
-                    service.fields.find(
-                      (field) => field.name === "Please select your County"
-                    )?.id || ""
-                  ]
-              )?.name,
+            service?.preField.values?.find(
+              (v) => v.id === formData[service?.preField.id || ""]
+            )?.name,
             true
           )}
           {(openSection === "county" || editingSection === "county") &&

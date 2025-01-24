@@ -31,7 +31,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     checkAuth();
-  });
+  }, []);
 
   return (
     <AUTH_CONTEXT.Provider
