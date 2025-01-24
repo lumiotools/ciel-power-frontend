@@ -6,6 +6,7 @@ export const AUTH_CONTEXT = createContext({
   isLoading: true,
   isLoggedIn: false,
   userDetails: {},
+  checkAuth: () => {},
 });
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -13,7 +14,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userDetails, setUserDetails] = useState({});
 
-  useEffect(() => {
+  const checkAuth = () => {
     getUserDetails()
       .then((userDetails) => {
         setUserDetails(userDetails);
@@ -26,10 +27,16 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  useEffect(() => {
+    checkAuth();
   });
 
   return (
-    <AUTH_CONTEXT.Provider value={{ isLoading, isLoggedIn, userDetails }}>
+    <AUTH_CONTEXT.Provider
+      value={{ isLoading, isLoggedIn, userDetails, checkAuth }}
+    >
       {children}
     </AUTH_CONTEXT.Provider>
   );

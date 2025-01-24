@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormEvent, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AUTH_CONTEXT } from "@/providers/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("dawood@teamlumio.ai");
@@ -22,27 +23,28 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { checkAuth } = useContext(AUTH_CONTEXT);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null); // Reset the error state
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include cookies in the request
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch(`/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Include cookies in the request
+        body: JSON.stringify({ email, password }),
+      });
 
       if (response.ok) {
         const data = await response.json();
         console.log(data);
+
+        checkAuth();
 
         // Redirect to the dashboard on successful login
         router.push("/dashboard");
