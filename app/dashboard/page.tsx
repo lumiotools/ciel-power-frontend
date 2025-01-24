@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 interface Service {
   id: string;
   name: string;
@@ -28,6 +29,7 @@ export default function DashboardPage() {
       setServices(data?.data?.services || []);
     } catch (error) {
       console.log(error);
+      toast.error('No Services Found');
     }finally{
       setLoading(false);
     }
