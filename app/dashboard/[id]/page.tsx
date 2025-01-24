@@ -388,7 +388,7 @@ const ServiceDetailsPage: React.FC = () => {
       // You might want to redirect or perform additional actions after successful booking
     } catch (error) {
       console.error("Error submitting booking:", error);
-      toast.error("Failed to submit booking. Please try again.");
+      toast.error(`Failed to submit ${(error as Error).message}.`);
     } finally {
       setIsBookingConfirming(false);
     }
