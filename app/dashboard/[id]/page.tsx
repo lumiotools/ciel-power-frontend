@@ -252,7 +252,9 @@ const ServiceDetailsPage: React.FC = () => {
       console.error("Error fetching slots:", error);
       toast.error("Failed to load available slots");
     } finally {
-      setIsFetchingSlots(false);
+      setTimeout(() => {
+        setIsFetchingSlots(false);
+      }, 1000);
     }
   };
 
@@ -401,13 +403,16 @@ const ServiceDetailsPage: React.FC = () => {
       // You might want to redirect or perform additional actions after successful booking
     } catch (error) {
       console.error("Error submitting booking:", error);
-      toast.error("Failed to submit booking. Please try again.");
+      toast.error(`Failed to submit ${(error as Error).message}.`);
     } finally {
       setIsBookingConfirming(false);
     }
   };
 
   const handleSectionComplete = (section: string) => {
+    if (selectedDate) {
+      getSlots(selectedDate);
+    }
     setCompletedSections((prev) => ({
       ...prev,
       [section]: true,
