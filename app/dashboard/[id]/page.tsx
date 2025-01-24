@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -99,6 +99,8 @@ interface FormData {
 
 const ServiceDetailsPage: React.FC = () => {
   const { id } = useParams();
+  const router = useRouter();
+
   const [service, setService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -352,6 +354,7 @@ const ServiceDetailsPage: React.FC = () => {
       const result = await response.json();
       console.log("booking result", result);
       toast.success("Booking submitted successfully!");
+      router.push(`/dashboard/bookings/${result.data.bookingNumber}`);
 
       // Optional: Log the successful booking details
       console.log("Booking Details:", {
