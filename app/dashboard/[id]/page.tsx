@@ -218,8 +218,8 @@ const ServiceDetailsPage: React.FC = () => {
       const formattedDate = format(date, "yyyy-MM-dd");
       const preFieldId = service?.preField?.id;
 
-      const selectedCountyId = formData[service.preField.id];
-      const selectedCountyName = service.preField.values?.find(
+      const selectedCountyId = service ? formData[service.preField.id] : "";
+      const selectedCountyName = service?.preField.values?.find(
         (v) => v.id === selectedCountyId
       )?.name;
 
@@ -253,15 +253,13 @@ const ServiceDetailsPage: React.FC = () => {
       console.log("selected slot", selectedSlot);
 
       // Format date in UTC to avoid timezone issues
-      const formattedDate = format(selectedDate, "yyyy-MM-dd", {
-        timeZone: "UTC",
-      });
+      const formattedDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
 
       // Convert the time slot to proper format (assuming it's in ISO or HH:mm format)
-      let formattedStartTime = selectedSlot.startTime;
+      let formattedStartTime = selectedSlot?.startTime;
 
       // If time includes timezone info, clean it to get just HH:mm
-      if (formattedStartTime.includes("T")) {
+      if (formattedStartTime?.includes("T")) {
         formattedStartTime = formattedStartTime.split("T")[1].substring(0, 5);
       }
 
@@ -271,8 +269,8 @@ const ServiceDetailsPage: React.FC = () => {
       // Transform the additional information into the required fields array format
       // Get the selected county name from preField
       const preFieldId = service?.preField?.id;
-      const selectedCountyId = formData[service.preField.id];
-      const selectedCountyName = service.preField.values?.find(
+      const selectedCountyId = service ? formData[service.preField.id] : "";
+      const selectedCountyName = service?.preField.values?.find(
         (v) => v.id === selectedCountyId
       )?.name;
 
@@ -285,7 +283,7 @@ const ServiceDetailsPage: React.FC = () => {
           }
 
           // Find the field configuration from service
-          const fieldConfig = service.fields?.find((field) => field.id === id);
+          const fieldConfig = service?.fields?.find((field) => field.id === id);
 
           if (fieldConfig?.values) {
             // If field has predefined values, find the selected value's name
@@ -308,8 +306,8 @@ const ServiceDetailsPage: React.FC = () => {
 
       // Add preField at the beginning of the array
       fields.unshift({
-        id: preFieldId,
-        value: selectedCountyName,
+        id: preFieldId || "",
+        value: selectedCountyName || "",
       });
       // Prepare the request payload
       const requestData = {
