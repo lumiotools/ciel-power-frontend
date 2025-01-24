@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -48,8 +49,9 @@ export default function SignUp() {
 
       const data = await response.json();
       console.log(data);
+      toast.success("User created successfully");
 
-      router.push("/signup");
+      router.push("/login");
     } catch (error) {
       setError((error as Error).message);
       console.log(error);
