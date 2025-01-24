@@ -18,8 +18,8 @@ import { AUTH_CONTEXT } from "@/providers/auth";
 import { toast } from "sonner";
 
 export default function Login() {
-  const [email, setEmail] = useState("dawood@teamlumio.ai");
-  const [password, setPassword] = useState("password");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,15 +105,15 @@ export default function Login() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </Button>
-            <div className="mt-2">OR</div>
+            {/* <div className="mt-2">OR</div>
             <Button
               variant={"outline"}
               onClick={handleGoogleSignin}
               className="w-full mt-2 text-black"
             >
               Continue with Google
-            </Button>
-            <p className="mt-2 text-xs text-center text-gray-700">
+            </Button> */}
+            <p className="mt-4 text-xs text-center text-gray-700">
               Don&apos;t have an account?{" "}
               <Link href="/signup" className="text-blue-600 hover:underline">
                 Sign up

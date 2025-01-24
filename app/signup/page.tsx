@@ -21,12 +21,14 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
 
     try {
       const response = await fetch(`/api/auth/register`, {
@@ -55,6 +57,8 @@ export default function SignUp() {
     } catch (error) {
       setError((error as Error).message);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -72,7 +76,7 @@ export default function SignUp() {
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="flex gap-3">
               <div className="grid gap-2">
-                <Label htmlFor="firstname">FirstName</Label>
+                <Label htmlFor="firstname">First Name</Label>
                 <Input
                   id="firstname"
                   type="text"
@@ -83,7 +87,7 @@ export default function SignUp() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">LastName</Label>
+                <Label htmlFor="email">Last Name</Label>
                 <Input
                   id="lastname"
                   type="text"
@@ -117,17 +121,17 @@ export default function SignUp() {
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full">
-              Sign Up
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Creating Account..." : "Sign Up"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col gap-1">
-          <div className="text-sm">OR</div>
+          {/* <div className="text-sm">OR</div>
           <Button variant={"outline"} className="w-full mt-2 text-black ">
             Continue with Google
-          </Button>
-          <p className="mt-2 text-xs text-center text-gray-700">
+          </Button> */}
+          <p className="text-xs text-center text-gray-700">
             Already have an account?{" "}
             <Link href="/login" className="text-blue-600 hover:underline">
               Login
