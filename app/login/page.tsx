@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { FormEvent, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AUTH_CONTEXT } from "@/providers/auth";
+import { toast } from "sonner";
 
 export default function Login() {
   const [email, setEmail] = useState("dawood@teamlumio.ai");
@@ -45,7 +46,7 @@ export default function Login() {
         console.log(data);
 
         checkAuth();
-
+        toast.success("Logged in successfully!");
         // Redirect to the dashboard on successful login
         router.push("/dashboard");
       } else {
