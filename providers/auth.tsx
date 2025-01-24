@@ -2,17 +2,42 @@
 import { getUserDetails } from "@/utils/getUserDetails";
 import React, { createContext, useEffect, useState } from "react";
 
-export const AUTH_CONTEXT = createContext({
+export const AUTH_CONTEXT = createContext<{
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  userDetails?: UserDetails;
+  checkAuth: () => void;
+}>({
   isLoading: true,
   isLoggedIn: false,
-  userDetails: {},
   checkAuth: () => {},
 });
+
+interface UserPhoneNumber {
+  number: string;
+  type: "mobile" | "work" | "home" | "fax";
+}
+
+interface UserStreetAddress {
+  line1: string;
+  line2: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
+
+export interface UserDetails {
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  phoneNumbers: UserPhoneNumber[];
+  streetAddress: UserStreetAddress;
+}
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userDetails, setUserDetails] = useState({});
+  const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
 
   const checkAuth = () => {
     getUserDetails()
