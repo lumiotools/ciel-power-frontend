@@ -21,7 +21,7 @@ interface Price {
     amount: string;
     currency: string;
   };
-  taxes: any[];
+  taxes: Array<[]>;
 }
 
 interface Booking {
@@ -93,7 +93,7 @@ const BookingsPage: React.FC = () => {
     router.push(`/dashboard/bookings/${bookingNumber}`);
   };
 
-  const getStatusBadge = (booking: Booking): JSX.Element => {
+  const getStatusBadge = (booking: Booking): React.ReactElement => {
     if (booking.canceled) {
       return (
         <span className="px-3 py-1 text-sm font-medium rounded-full bg-red-100 text-red-800">
@@ -118,7 +118,7 @@ const BookingsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
       </div>
     );
   }

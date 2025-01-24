@@ -16,7 +16,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { AUTH_CONTEXT } from "@/providers/auth";
@@ -99,6 +99,7 @@ interface FormData {
 const ServiceDetailsPage: React.FC = () => {
   const { id } = useParams();
   const router = useRouter();
+  const [loading,setLoading] = useState<boolean>(true);
 
   const [service, setService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -165,6 +166,7 @@ const ServiceDetailsPage: React.FC = () => {
 
   const getServiceDetails = async (): Promise<void> => {
     if (!id || typeof id !== "string") return;
+    setLoading(true);
 
     try {
       const response = await fetch(
@@ -204,6 +206,9 @@ const ServiceDetailsPage: React.FC = () => {
     } catch (error) {
       console.error("Error fetching service details:", error);
       toast.error("Failed to load service details");
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -1035,6 +1040,14 @@ const ServiceDetailsPage: React.FC = () => {
     }
     return true;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

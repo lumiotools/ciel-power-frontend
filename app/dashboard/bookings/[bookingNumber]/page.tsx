@@ -1,6 +1,7 @@
 // app/bookings/[bookingNumber]/page.tsx
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import React from "react";
 
@@ -13,7 +14,7 @@ const BookingDetailsPage = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-6">
-            <button
+            <Button variant={'outline'} size={'icon'}
               onClick={() => window.history.back()}
               className="mr-4 text-gray-600 hover:text-gray-900"
             >
@@ -31,7 +32,7 @@ const BookingDetailsPage = () => {
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-            </button>
+            </Button>
             <h1 className="text-3xl font-bold text-gray-900">
               Booking Details
             </h1>

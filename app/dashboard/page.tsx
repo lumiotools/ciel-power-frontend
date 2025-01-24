@@ -3,11 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+interface Service {
+  id: string;
+  name: string;
+  images?: { url: string }[];
+  price?: { amount: number };
+  description: string;
+}
 
 export default function DashboardPage() {
-  const [services, setServices] = useState([]);
+  const [services, setServices] = useState<Service[]>([]);
+   const [loading, setLoading] = useState<boolean>(true);
 
   const getServices = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`/api/booking/services`, {
         method: "GET",
@@ -16,15 +25,25 @@ export default function DashboardPage() {
         },
       });
       const data = await response.json();
-      setServices(data?.data?.services);
+      setServices(data?.data?.services || []);
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getServices();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
