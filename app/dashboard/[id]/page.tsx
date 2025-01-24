@@ -16,7 +16,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { AUTH_CONTEXT } from "@/providers/auth";
@@ -246,33 +246,131 @@ const ServiceDetailsPage: React.FC = () => {
     return timeString ? timeString.split("T")[1].slice(0, 5) : "";
   };
 
-  const handleSubmitBooking = () => {
-    const bookingData = {
-      serviceId: id,
-      userDetails,
-      formData,
-      selectedDate,
-      selectedSlot,
-    };
+  const handleSubmitBooking = async () => {
+    try {
+      // Format the date and time for eventId
+      console.log("selected date", selectedDate);
+      console.log("selected slot", selectedSlot);
 
-    console.log("Booking Details:", {
-      service: {
-        name: service?.name,
-        price: service?.price,
-        duration: service?.duration,
-      },
-      date: selectedDate ? format(selectedDate, "MMMM d, yyyy") : null,
-      timeSlot: selectedSlot
-        ? {
-            start: formatTime(selectedSlot.startTime),
-            end: formatTime(selectedSlot.endTime),
+      // Format date in UTC to avoid timezone issues
+      const formattedDate = format(selectedDate, "yyyy-MM-dd", {
+        timeZone: "UTC",
+      });
+
+      // Convert the time slot to proper format (assuming it's in ISO or HH:mm format)
+      let formattedStartTime = selectedSlot.startTime;
+
+      // If time includes timezone info, clean it to get just HH:mm
+      if (formattedStartTime.includes("T")) {
+        formattedStartTime = formattedStartTime.split("T")[1].substring(0, 5);
+      }
+
+      const eventId = `FT_${formattedDate}_${formattedStartTime}`;
+      console.log("Generated eventId:", eventId);
+
+      // Transform the additional information into the required fields array format
+      // Get the selected county name from preField
+      const preFieldId = service?.preField?.id;
+      const selectedCountyId = formData[service.preField.id];
+      const selectedCountyName = service.preField.values?.find(
+        (v) => v.id === selectedCountyId
+      )?.name;
+
+      // Transform fields and add preField
+      const fields = Object.entries(formData)
+        .map(([id, value]) => {
+          // Skip the preField ID as we'll add it separately
+          if (id === preFieldId) {
+            return null;
           }
-        : null,
-      userDetails,
-      additionalInformation: formData,
-    });
 
-    toast.success("Booking submitted successfully!");
+          // Find the field configuration from service
+          const fieldConfig = service.fields?.find((field) => field.id === id);
+
+          if (fieldConfig?.values) {
+            // If field has predefined values, find the selected value's name
+            const selectedValue = fieldConfig.values.find(
+              (v) => v.id === value
+            );
+            return {
+              id,
+              value: selectedValue?.name || value.toString(),
+            };
+          } else {
+            // For boolean or text fields, use the value directly
+            return {
+              id,
+              value: value.toString(),
+            };
+          }
+        })
+        .filter((field) => field !== null); // Remove the null entry from preField skip
+
+      // Add preField at the beginning of the array
+      fields.unshift({
+        id: preFieldId,
+        value: selectedCountyName,
+      });
+      // Prepare the request payload
+      const requestData = {
+        productId: id, // Assuming 'id' is your serviceId/productId
+        eventId,
+        fields,
+        userDetails: {
+          firstName: userDetails.firstName,
+          lastName: userDetails.lastName,
+          phoneNumbers: userDetails.phoneNumbers,
+          streetAddress: {
+            line1: userDetails.streetAddress.address1,
+            line2: userDetails.streetAddress.address2,
+            city: userDetails.streetAddress.city,
+            province: userDetails.streetAddress.state,
+            postalCode: userDetails.streetAddress.postcode,
+          },
+        },
+      };
+
+      // Make the API call
+      const response = await fetch(`/api/booking/create-new`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Booking failed");
+      }
+
+      const result = await response.json();
+      console.log("booking result", result);
+      toast.success("Booking submitted successfully!");
+
+      // Optional: Log the successful booking details
+      console.log("Booking Details:", {
+        service: {
+          name: service?.name,
+          price: service?.price,
+          duration: service?.duration,
+        },
+        date: selectedDate ? format(selectedDate, "MMMM d, yyyy") : null,
+        timeSlot: selectedSlot
+          ? {
+              start: formatTime(selectedSlot.startTime),
+              end: formatTime(selectedSlot.endTime),
+            }
+          : null,
+        userDetails,
+        additionalInformation: formData,
+      });
+
+      // You might want to redirect or perform additional actions after successful booking
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      toast.error("Failed to submit booking. Please try again.");
+    }
   };
 
   const handleSectionComplete = (section: string) => {
