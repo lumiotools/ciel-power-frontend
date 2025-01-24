@@ -1,62 +1,60 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  Calendar,
-  Clock,
-  User,
-  Building2,
-  Loader2,
-  BadgeCheck,
-  XCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import React, { useState, useEffect } from "react";
+import { Calendar, Clock, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Price {
-  totalGross: { amount: string; currency: string };
-  totalNet: { amount: string; currency: string };
-  totalTaxes: { amount: string; currency: string };
-  totalPaid: { amount: string; currency: string };
-  taxes: unknown[];
+  totalGross: {
+    amount: string;
+    currency: string;
+  };
+  totalNet: {
+    amount: string;
+    currency: string;
+  };
+  totalTaxes: {
+    amount: string;
+    currency: string;
+  };
+  totalPaid: {
+    amount: string;
+    currency: string;
+  };
+  taxes: Array<[]>;
 }
 
-interface BookingDetails {
+interface Booking {
   bookingNumber: string;
   startTime: string;
   endTime: string;
   title: string;
-  creationTime: string;
   canceled: boolean;
-  cancelationTime?: string;
   accepted: boolean;
+  creationTime: string;
   serviceName: string;
   serviceId: string;
   price: Price;
-  auditor: string;
 }
 
-interface ApiResponse {
+interface BookingsResponse {
   success: boolean;
   message: string;
   data: {
-    booking: BookingDetails;
+    bookings: Booking[];
   };
 }
 
-const BookingDetailsPage = () => {
-  const { bookingNumber } = useParams();
-  const [booking, setBooking] = useState<BookingDetails | null>(null);
-  const [loading, setLoading] = useState(true);
+const BookingsPage: React.FC = () => {
+  const router = useRouter();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchBookingDetails = async () => {
+    const fetchBookings = async () => {
       try {
-        const response = await fetch(`/api/user/bookings/${bookingNumber}`, {
+        const response = await fetch(`/api/user/bookings`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -64,11 +62,11 @@ const BookingDetailsPage = () => {
           credentials: "include",
         });
 
-        const data: ApiResponse = await response.json();
+        const data: BookingsResponse = await response.json();
         if (data.success) {
-          setBooking(data.data.booking);
+          setBookings(data.data.bookings);
         } else {
-          throw new Error(data.message || "Failed to fetch booking details");
+          throw new Error(data.message || "Failed to fetch bookings");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -77,218 +75,143 @@ const BookingDetailsPage = () => {
       }
     };
 
-    fetchBookingDetails();
-  }, [bookingNumber]);
+    fetchBookings();
+  }, []);
 
-  const formatDateTime = (startTime: string, endTime?: string): string => {
-    const startDate = new Date(startTime);
-    const endDate = endTime ? new Date(endTime) : null;
-
-    const dateOptions: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      month: "long",
+  const formatDateTime = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
       day: "numeric",
-      year: "numeric",
-    };
-
-    const timeOptions: Intl.DateTimeFormatOptions = {
       hour: "numeric",
-      minute: "2-digit",
+      minute: "numeric",
       hour12: true,
-    };
-
-    const formattedDate = startDate.toLocaleDateString("en-US", dateOptions);
-    const formattedStartTime = startDate.toLocaleTimeString(
-      "en-US",
-      timeOptions
-    );
-
-    if (!endDate) {
-      return `${formattedDate} at ${formattedStartTime}`;
-    }
-
-    if (
-      startDate.getFullYear() === endDate.getFullYear() &&
-      startDate.getMonth() === endDate.getMonth() &&
-      startDate.getDate() === endDate.getDate()
-    ) {
-      // Same day event
-      const formattedEndTime = endDate.toLocaleTimeString("en-US", timeOptions);
-      return `${formattedDate} at ${formattedStartTime} to ${formattedEndTime}`;
-    } else {
-      // Multi-day event
-      const formattedEndDate = endDate.toLocaleDateString("en-US", dateOptions);
-      const formattedEndTime = endDate.toLocaleTimeString("en-US", timeOptions);
-      return `${formattedDate} at ${formattedStartTime} to ${formattedEndDate} at ${formattedEndTime}`;
-    }
+    }).format(date);
   };
 
-  const formatPrice = (amount: string): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(Number(amount));
+  const handleViewDetails = (bookingNumber: string) => {
+    router.push(`/dashboard/bookings/${bookingNumber}`);
+  };
+
+  const getStatusBadge = (booking: Booking): React.ReactElement => {
+    if (booking.canceled) {
+      return (
+        <span className="px-3 py-1 text-sm font-medium rounded-full bg-red-100 text-red-800">
+          Cancelled
+        </span>
+      );
+    }
+    if (booking.accepted) {
+      return (
+        <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+          Confirmed
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">
+        Pending
+      </span>
+    );
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          <p className="text-lg text-gray-600">Loading booking details...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
       </div>
     );
   }
 
-  if (error || !booking) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-lg">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Error Loading Booking
-              </h3>
-              <p className="text-gray-500">
-                {error || "Unable to load booking details"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-700 text-center">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center py-6">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => window.history.back()}
-              className="mr-4"
+          <div className="flex justify-between items-center py-6">
+            <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Booking Details
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Reference: {booking.bookingNumber}
-              </p>
-            </div>
+              New Booking
+            </button>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* Status Card */}
-          <Card className="md:col-span-3">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {booking.canceled ? (
-                    <XCircle className="h-5 w-5 text-red-500" />
-                  ) : booking.accepted ? (
-                    <BadgeCheck className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <Clock className="h-5 w-5 text-yellow-500" />
-                  )}
-                  <span
-                    className={`text-sm font-medium ${
-                      booking.canceled
-                        ? "text-red-700"
-                        : booking.accepted
-                        ? "text-green-700"
-                        : "text-yellow-700"
-                    }`}
-                  >
-                    {booking.canceled
-                      ? "Cancelled"
-                      : booking.accepted
-                      ? "Confirmed"
-                      : "Pending"}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Total Amount</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {formatPrice(booking.price.totalGross.amount)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Service Details */}
-          <Card className="md:col-span-2">
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="flex items-center text-lg font-medium text-gray-900">
-                    <Building2 className="h-5 w-5 mr-2 text-gray-400" />
-                    Service Information
-                  </h3>
-                  <Separator className="my-3" />
-                  <div className="space-y-2">
-                    <p className="text-gray-900 font-medium">
+        <div className="space-y-4">
+          {bookings.map((booking) => (
+            <div
+              key={booking.bookingNumber}
+              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       {booking.serviceName}
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      Service ID: {booking.serviceId}
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      Auditor: {booking.auditor}
-                    </p>
+                    </h2>
+                    {getStatusBadge(booking)}
+                  </div>
+
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center text-gray-600">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>
+                        {formatDateTime(booking.startTime)} -{" "}
+                        {formatDateTime(booking.endTime)}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>Booking #{booking.bookingNumber}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="flex items-center text-lg font-medium text-gray-900 mt-6">
-                    <Calendar className="h-5 w-5 mr-2 text-gray-400" />
-                    Schedule
-                  </h3>
-                  <Separator className="my-3" />
-                  <div className="flex items-center text-gray-600 space-x-2">
-                    <Clock className="h-4 w-4 flex-shrink-0 mt-1.5" />
-                    <p className="text-gray-900">
-                      {formatDateTime(booking.startTime, booking.endTime)}
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-gray-900">
+                      ${booking.price.totalGross.amount}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {booking.price.totalPaid.amount === "0"
+                        ? "Unpaid"
+                        : "Paid"}
                     </p>
                   </div>
+                  <button
+                    onClick={() => handleViewDetails(booking.bookingNumber)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          ))}
 
-          {/* Customer Details */}
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="flex items-center text-lg font-medium text-gray-900">
-                <User className="h-5 w-5 mr-2 text-gray-400" />
-                Customer Details
-              </h3>
-              <Separator className="my-3" />
-              <div className="space-y-2">
-                <p className="text-gray-900 font-medium">{booking.title}</p>
-                <div className="text-sm text-gray-500 space-y-1">
-                  <p>Created: {formatDateTime(booking.creationTime)}</p>
-                  {booking.canceled && booking.cancelationTime && (
-                    <p>Cancelled: {formatDateTime(booking.cancelationTime)}</p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {bookings.length === 0 && (
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <p className="text-gray-500">No bookings found.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
   );
 };
 
-export default BookingDetailsPage;
+export default BookingsPage;
