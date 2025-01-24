@@ -80,16 +80,28 @@ const BookingDetailsPage = () => {
     fetchBookingDetails();
   }, [bookingNumber]);
 
-  const formatDateTime = (dateStr: string): string => {
-    return new Intl.DateTimeFormat("en-US", {
+  const formatDateTime = (startStr: string, endStr: string): string => {
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+
+    const dateFormat = new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
+    });
+
+    const timeFormat = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
-    }).format(new Date(dateStr));
+    });
+
+    const dateStr = dateFormat.format(start);
+    const startTimeStr = timeFormat.format(start);
+    const endTimeStr = timeFormat.format(end);
+
+    return `${dateStr} at ${startTimeStr} to ${endTimeStr}`;
   };
 
   if (loading) {
@@ -222,11 +234,7 @@ const BookingDetailsPage = () => {
                       <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
                       <div>
                         <p className="text-gray-900">
-                          {formatDateTime(booking.startTime)}
-                        </p>
-                        <p className="text-gray-500 text-sm">to</p>
-                        <p className="text-gray-900">
-                          {formatDateTime(booking.endTime)}
+                          {formatDateTime(booking.startTime, booking.endTime)}
                         </p>
                       </div>
                     </div>
@@ -247,9 +255,18 @@ const BookingDetailsPage = () => {
               <div className="space-y-2">
                 <p className="text-gray-900 font-medium">{booking.title}</p>
                 <div className="text-sm text-gray-500 space-y-1">
-                  <p>Created: {formatDateTime(booking.creationTime)}</p>
+                  <p>
+                    Created:{" "}
+                    {formatDateTime(booking.creationTime, booking.creationTime)}
+                  </p>
                   {booking.canceled && booking.cancelationTime && (
-                    <p>Cancelled: {formatDateTime(booking.cancelationTime)}</p>
+                    <p>
+                      Cancelled:{" "}
+                      {formatDateTime(
+                        booking.cancelationTime,
+                        booking.cancelationTime
+                      )}
+                    </p>
                   )}
                 </div>
               </div>
