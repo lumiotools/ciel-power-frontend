@@ -62,9 +62,9 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSignin = async () => {
-    console.log("Google Sign-In not implemented yet");
-  };
+  // const handleGoogleSignin = async () => {
+  //   console.log("Google Sign-In not implemented yet");
+  // };
 
   return (
     <div className="mx-5 flex items-center justify-center h-screen">
