@@ -243,7 +243,9 @@ const ServiceDetailsPage: React.FC = () => {
       console.error("Error fetching slots:", error);
       toast.error("Failed to load available slots");
     } finally {
-      setIsFetchingSlots(false);
+      setTimeout(() => {
+        setIsFetchingSlots(false);
+      }, 1000);
     }
   };
 
@@ -395,6 +397,9 @@ const ServiceDetailsPage: React.FC = () => {
   };
 
   const handleSectionComplete = (section: string) => {
+    if (selectedDate) {
+      getSlots(selectedDate);
+    }
     setCompletedSections((prev) => ({
       ...prev,
       [section]: true,
