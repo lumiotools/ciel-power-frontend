@@ -104,9 +104,11 @@ const ServiceDetailsPage: React.FC = () => {
   const [service, setService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [isFetchingSlots, setIsFetchingSlots] = useState(false);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [formData, setFormData] = useState<FormData>({});
   const authContext = useContext(AUTH_CONTEXT).userDetails;
+  const [isBookingConfirming, setIsBookingConfirming] = useState(false);
 
   const [userDetails, setUserDetails] = useState<UserDetails>({
     firstName: "",
@@ -188,10 +190,6 @@ const ServiceDetailsPage: React.FC = () => {
           data.data.preField.values[0].id;
       }
 
-      if (!data?.data.preField) {
-        setOpenSection("dateTime");
-      }
-
       // Set other fields
       data?.data.fields.forEach((field: ServiceField) => {
         if (field.type === "checkbox") {
@@ -223,31 +221,29 @@ const ServiceDetailsPage: React.FC = () => {
 
   const getSlots = async (date?: Date): Promise<void> => {
     if (!id || typeof id !== "string" || !date || !service) return;
+    setIsFetchingSlots(true);
 
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
-      let searchParams = `productId=${id}&date=${formattedDate}`;
-      if (service?.preField) {
-        const preFieldId = service?.preField?.id;
+      const preFieldId = service?.preField?.id;
 
-        const selectedCountyId = service ? formData[service.preField.id] : "";
-        const selectedCountyName = service?.preField.values?.find(
-          (v) => v.id === selectedCountyId
-        )?.name;
+      const selectedCountyId = service ? formData[service.preField.id] : "";
+      const selectedCountyName = service?.preField.values?.find(
+        (v) => v.id === selectedCountyId
+      )?.name;
 
-        if (!selectedCountyId || !selectedCountyName) return;
-
-        searchParams += `&preAnswerId=${preFieldId}&preAnswerValue=${selectedCountyName}`;
-      }
+      if (!selectedCountyId || !selectedCountyName) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?${searchParams}`
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/slots?productId=${id}&date=${formattedDate}&preAnswerId=${preFieldId}&preAnswerValue=${selectedCountyName}`
       );
       const data = await response.json();
       setSlots(data?.data || []);
     } catch (error) {
       console.error("Error fetching slots:", error);
       toast.error("Failed to load available slots");
+    } finally {
+      setIsFetchingSlots(false);
     }
   };
 
@@ -267,6 +263,8 @@ const ServiceDetailsPage: React.FC = () => {
   };
 
   const handleSubmitBooking = async () => {
+    setIsBookingConfirming(true);
+
     try {
       // Format the date and time for eventId
       console.log("selected date", selectedDate);
@@ -288,9 +286,22 @@ const ServiceDetailsPage: React.FC = () => {
       const eventId = `FT_${formattedDate}_${formattedStartTime}`;
       console.log("Generated eventId:", eventId);
 
+      // Transform the additional information into the required fields array format
+      // Get the selected county name from preField
+      const preFieldId = service?.preField?.id;
+      const selectedCountyId = service ? formData[service.preField.id] : "";
+      const selectedCountyName = service?.preField.values?.find(
+        (v) => v.id === selectedCountyId
+      )?.name;
+
       // Transform fields and add preField
       const fields = Object.entries(formData)
         .map(([id, value]) => {
+          // Skip the preField ID as we'll add it separately
+          if (id === preFieldId) {
+            return null;
+          }
+
           // Find the field configuration from service
           const fieldConfig = service?.fields?.find((field) => field.id === id);
 
@@ -313,21 +324,11 @@ const ServiceDetailsPage: React.FC = () => {
         })
         .filter((field) => field !== null); // Remove the null entry from preField skip
 
-      if (service?.preField) {
-        // Transform the additional information into the required fields array format
-        // Get the selected county name from preField
-        const preFieldId = service?.preField?.id;
-        const selectedCountyId = service ? formData[service.preField.id] : "";
-        const selectedCountyName = service?.preField.values?.find(
-          (v) => v.id === selectedCountyId
-        )?.name;
-
-        // Add preField at the beginning of the array
-        fields.unshift({
-          id: preFieldId || "",
-          value: selectedCountyName || "",
-        });
-      }
+      // Add preField at the beginning of the array
+      fields.unshift({
+        id: preFieldId || "",
+        value: selectedCountyName || "",
+      });
       // Prepare the request payload
       const requestData = {
         productId: id, // Assuming 'id' is your serviceId/productId
@@ -388,6 +389,8 @@ const ServiceDetailsPage: React.FC = () => {
     } catch (error) {
       console.error("Error submitting booking:", error);
       toast.error("Failed to submit booking. Please try again.");
+    } finally {
+      setIsBookingConfirming(false);
     }
   };
 
@@ -495,12 +498,15 @@ const ServiceDetailsPage: React.FC = () => {
           <div className="space-y-4">
             <Label htmlFor={service.preField.id}>{service.preField.name}</Label>
             <Select
-              onValueChange={(value) =>
+              onValueChange={(value) => {
                 setFormData((prev) => ({
                   ...prev,
                   [service.preField.id]: value,
-                }))
-              }
+                }));
+                if (selectedDate) {
+                  getSlots(selectedDate);
+                }
+              }}
               value={formData[service.preField.id] as string}
             >
               <SelectTrigger>
@@ -550,7 +556,9 @@ const ServiceDetailsPage: React.FC = () => {
           {selectedDate && (
             <div className="mt-6">
               <h3 className="text-lg font-medium mb-4">Available Slots</h3>
-              {slots.length > 0 ? (
+              {isFetchingSlots ? (
+                <p>Fetching available slots...</p>
+              ) : slots.length > 0 ? (
                 <div className="grid grid-cols-3 gap-2">
                   {slots.map((slot) => (
                     <Button
@@ -929,20 +937,16 @@ const ServiceDetailsPage: React.FC = () => {
             </p>
           </div>
 
-          {service?.preField ? (
-            <div>
-              <h3 className="font-medium text-lg mb-2">Selected County</h3>
-              <p className="text-lg">
-                {
-                  service?.preField.values?.find(
-                    (v) => v.id === formData[service.preField.id]
-                  )?.name
-                }
-              </p>
-            </div>
-          ) : (
-            <></>
-          )}
+          <div>
+            <h3 className="font-medium text-lg mb-2">Selected County</h3>
+            <p className="text-lg">
+              {
+                service?.preField.values?.find(
+                  (v) => v.id === formData[service.preField.id]
+                )?.name
+              }
+            </p>
+          </div>
 
           <div>
             <h3 className="font-medium text-lg mb-2">Date & Time</h3>
@@ -1102,23 +1106,19 @@ const ServiceDetailsPage: React.FC = () => {
         </Card>
 
         {/* County Selection Section */}
-        {service?.preField ? (
-          <div className="border rounded-lg bg-white">
-            {renderSectionHeader(
-              "County Selection",
-              "county",
-              completedSections.county,
-              service?.preField?.values?.find(
-                (v) => v.id === formData[service?.preField?.id || ""]
-              )?.name,
-              true
-            )}
-            {(openSection === "county" || editingSection === "county") &&
-              renderCountySelection()}
-          </div>
-        ) : (
-          <></>
-        )}
+        <div className="border rounded-lg bg-white">
+          {renderSectionHeader(
+            "County Selection",
+            "county",
+            completedSections.county,
+            service?.preField.values?.find(
+              (v) => v.id === formData[service?.preField.id || ""]
+            )?.name,
+            true
+          )}
+          {(openSection === "county" || editingSection === "county") &&
+            renderCountySelection()}
+        </div>
 
         {/* Date & Time Section */}
         <div className="border rounded-lg bg-white">
@@ -1186,8 +1186,9 @@ const ServiceDetailsPage: React.FC = () => {
             }}
             className="w-full bg-blue-600 hover:bg-blue-700"
             size="lg"
+            disabled={isBookingConfirming}
           >
-            Confirm Booking
+            {isBookingConfirming ? "Creating Booking..." : "Confirm Booking"}
           </Button>
         )}
       </div>
