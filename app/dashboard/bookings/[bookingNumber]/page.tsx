@@ -292,7 +292,7 @@ const BookingDetailsPage = () => {
                 <div className="text-sm text-gray-500 space-y-1">
                   <p>
                     Created:{" "}
-                    {formatDateTime(booking.creationTime)}
+                    {formatDateTime(booking.creationTime, booking.creationTime)}
                   </p>
                   {booking.canceled && booking.cancelationTime && (
                     <p>
