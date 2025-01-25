@@ -86,6 +86,7 @@ const BookingsPage: React.FC = () => {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
+      timeZone: "UTC",
     }).format(date);
   };
 
