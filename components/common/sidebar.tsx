@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Bookings", href: "/dashboard/bookings", icon: Calendar },
+  { name: "What to Expect", href: "/dashboard/expect", icon: Calendar },
 ];
 
 export function Sidebar() {
