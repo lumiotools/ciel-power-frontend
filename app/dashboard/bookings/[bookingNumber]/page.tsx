@@ -107,29 +107,41 @@ const BookingDetailsPage = () => {
 
   const formatDateTime = (startStr: string, endStr?: string): string => {
     const start = new Date(startStr);
-    const end = new Date(endStr?? "");
-
+    if (isNaN(start.getTime())) {
+      return "Invalid start time"; // Handle invalid start date
+    }
+  
     const dateFormat = new Intl.DateTimeFormat("en-US", {
-      timeZone: 'UTC',
+      timeZone: "UTC",
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-
+  
     const timeFormat = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
-      timeZone: 'UTC'
+      timeZone: "UTC",
     });
-
+  
     const dateStr = dateFormat.format(start);
     const startTimeStr = timeFormat.format(start);
+  
+    if (!endStr) {
+      return `${dateStr} at ${startTimeStr}`;
+    }
+  
+    const end = new Date(endStr);
+    if (isNaN(end.getTime())) {
+      return `${dateStr} at ${startTimeStr}`; // Ignore invalid end date
+    }
+  
     const endTimeStr = timeFormat.format(end);
-
-    return `${dateStr} at ${startTimeStr}${ endStr ? " to "+endTimeStr : ''}`;
+    return `${dateStr} at ${startTimeStr} to ${endTimeStr}`;
   };
+  
 
   if (loading) {
     return (
@@ -292,7 +304,7 @@ const BookingDetailsPage = () => {
                 <div className="text-sm text-gray-500 space-y-1">
                   <p>
                     Created:{" "}
-                    {formatDateTime(booking.creationTime, booking.creationTime)}
+                    {formatDateTime(booking.creationTime)}
                   </p>
                   {booking.canceled && booking.cancelationTime && (
                     <p>
