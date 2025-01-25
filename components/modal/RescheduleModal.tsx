@@ -117,10 +117,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
 
   useEffect(() => {
     if (selectedDate) {
-        // setTimeout(()=>{
-
-            getSlots(selectedDate);
-        // },1000);
+        getSlots(selectedDate);
     }
   }, [selectedDate]);
 
