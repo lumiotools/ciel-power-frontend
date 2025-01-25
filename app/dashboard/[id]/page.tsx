@@ -364,7 +364,7 @@ const ServiceDetailsPage: React.FC = () => {
       };
 
       // Make the API call
-      const response = await fetch(`/api/booking/create-new`, {
+      const response = await fetch(`/api/user/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
