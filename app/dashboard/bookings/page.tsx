@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import CountdownTimer from "@/components/component/CountdownTimer";
 
 interface Price {
   totalGross: {
@@ -104,9 +106,12 @@ const BookingsPage: React.FC = () => {
     }
     if (booking.accepted) {
       return (
-        <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
-          Confirmed
-        </span>
+        <div className="flex items-center">
+          <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-green-800">
+            Confirmed
+          </span>
+          <CountdownTimer startTime={booking.startTime} />
+        </div>
       );
     }
     return (
