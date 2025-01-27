@@ -11,12 +11,11 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ startTime }) => {
   useEffect(() => {
     const calculateTimeRemaining = () => {
       const now = new Date();
-      
       const start = new Date(startTime);
       const diff = start.getTime() - now.getTime();
 
       if (diff <= 0) {
-        return "Started";
+        return "Visit started";
       } else {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
@@ -25,7 +24,13 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ startTime }) => {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        const parts = [];
+        if (days > 0) parts.push(`${days}d`);
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+
+        return parts.join(" ");
       }
     };
 
@@ -56,8 +61,16 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ startTime }) => {
           clipRule="evenodd"
         />
       </svg>
-      {timeRemaining}
-      <span className="ml-1 text-sm">for visit ⁠</span>
+      {timeRemaining === "Visit started" ? (
+        <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-blue-100 text-blue-800">
+          Visit Started
+        </span>
+      ) : (
+        <>
+          {timeRemaining}
+          <span className="ml-1 text-sm">for visit</span>
+        </>
+      )}
     </div>
   );
 };
