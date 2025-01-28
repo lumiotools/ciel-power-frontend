@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "../ui/card";
-import { Upload } from "lucide-react";
+import { Upload, XCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import FileUploadModal from "../modal/FileUploadModal";
+import { toast } from "sonner";
 
 interface FileDetails {
   id: string;
@@ -36,6 +37,26 @@ const UtilityBills = ({ bookingNumber }: { bookingNumber: string }) => {
     filesList();
   }, [bookingNumber]);
 
+  const handleDeleteImage = async(id: string)=>{
+    try{
+        const response = await fetch(`/api/user/bookings/${bookingNumber}/utility-bills/${id}`,{
+            method:"DELETE",
+        });
+        const data = await response.json();
+        console.log(data);
+        if(data.success){
+            setFiles((files)=>(
+                files.filter((file)=>file.id!== id)
+            ))
+            toast.success('File Deleted Successfully')
+        }
+
+    }catch(error){
+        toast.error('Something wents wrong!!')
+        console.log(error);
+    }
+  }
+
 
 
   return (
@@ -54,28 +75,31 @@ const UtilityBills = ({ bookingNumber }: { bookingNumber: string }) => {
         </CardHeader>
         <CardContent>
           {files.length > 0 ? (
-            <div className="space-y-2">
-              {files.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
-                >
-                  <div className="flex flex-1 items-center space-x-3">
-                    <img
-                      src={file.thumbnailLink}
-                      alt={file.thumbnailLink}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <p className="flex-1 text-sm text-gray-800 truncate line-clamp-1">
-                      {file.name}
-                    </p>
-                    <a href={file.thumbnailLink} target="_blank">
-                        <Button>View</Button>
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="flex relative flex-col items-center bg-gray-100 p-3 rounded-lg space-y-2"
+              >
+                <Button onClick={()=>handleDeleteImage(file.id)}
+                className="text-red-500 hover:text-red-600 absolute top-2 right-2"
+              >
+                <XCircle className="w-6 h-6 " />
+              </Button>
+                <img
+                  src={file.thumbnailLink}
+                  alt={file.name}
+                  className="w-20 h-20 object-cover rounded"
+                />
+                <p className="text-sm text-gray-800 truncate line-clamp-1 text-ellipsis max-w-20">
+                  {file.name}
+                </p>
+                <a href={`/api/user/bookings/${bookingNumber}/utility-bills/${file.id}`} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm">View</Button>
+                </a>
+              </div>
+            ))}
+          </div>
           ) : (
             <div className="flex items-center justify-center text-sm text-gray-500">
               <p>No Files Uploaded Yet</p>
@@ -87,6 +111,7 @@ const UtilityBills = ({ bookingNumber }: { bookingNumber: string }) => {
       {uploadeModal && (
         <FileUploadModal
           isOpen={uploadeModal}
+          reload={filesList}
           bookingNumber={bookingNumber}
           onClose={() => setUploadModal(false)}
         />

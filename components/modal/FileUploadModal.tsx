@@ -3,22 +3,24 @@ import { XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Input } from "../ui/input";
 
 interface FileUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookingNumber: string;
+  reload: () => void;
 }
 
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
   isOpen,
   onClose,
   bookingNumber,
+  reload,
 }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const MAX_SIZE_MB = 10; // Maximum file size in MB
-
   if (!isOpen) return null;
 
   const handleFileSelect = () => {
@@ -62,20 +64,20 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     if (fileType === "application/pdf") {
       return (
         <div className="flex items-center justify-center w-20 h-20 bg-gray-100 border rounded">
- <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-8 w-8 text-gray-400 mb-1"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
-        />
-      </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8 text-gray-400 mb-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+            />
+          </svg>
         </div>
       );
     }
@@ -83,31 +85,34 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     return null;
   };
 
-  const handleUpload = async() => {
+  const handleUpload = async () => {
     setUploading(true);
     const formData = new FormData();
-    files.forEach((file)=>{
-        formData.append("files",file);
-    })
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
 
-    try{
-        
-        const response = await fetch(`/api/user/bookings/${bookingNumber}/utility-bills`,{
-            method:"POST",
-            body:formData,
-        })
-        const data = await response.json();
-        console.log(data);
-        if(data.success){
-            toast.success("Files uploaded successfully!");
-            setFiles([]);
-            onClose();
+    try {
+      const response = await fetch(
+        `/api/user/bookings/${bookingNumber}/utility-bills`,
+        {
+          method: "POST",
+          body: formData,
         }
-    }catch(error){
-        console.log(error);
-        toast.success("Failed to upload files!");
-    }finally{
-        setUploading(false);
+      );
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        toast.success("Files uploaded successfully!");
+        setFiles([]);
+        reload();
+        onClose();
+      }
+    } catch (error) {
+      console.log(error);
+      toast.success("Failed to upload files!");
+    } finally {
+      setUploading(false);
     }
 
     // Simulate upload delay for demo
@@ -129,12 +134,13 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
               <CardTitle className="text-lg font-medium">
                 Upload Utility Bills
               </CardTitle>
-              <button
+              <Button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <XCircle className="w-6 h-6" />
-              </button>
+                
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -154,7 +160,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                       Drag and drop your utilities bill here, or click to select
                       file
                     </p>
-                    <input
+                    <Input
                       type="file"
                       id="file-input"
                       multiple
@@ -196,12 +202,12 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                         {file.name}
                       </p>
                     </div>
-                    <button
+                    <Button
                       onClick={() => handleFileRemove(index)}
                       className="text-red-500 hover:text-red-600"
                     >
                       <XCircle className="w-5 h-5" />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
