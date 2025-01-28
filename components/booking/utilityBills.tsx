@@ -81,8 +81,8 @@ const UtilityBills = ({ bookingNumber }: { bookingNumber: string }) => {
                 key={file.id}
                 className="flex relative flex-col items-center bg-gray-100 p-3 rounded-lg space-y-2"
               >
-                <Button onClick={()=>handleDeleteImage(file.id)}
-                className="text-red-500 hover:text-red-600 absolute top-2 right-2"
+                <Button onClick={()=>handleDeleteImage(file.id)} variant="outline"
+                className="text-red-500 hover:text-red-600 absolute top-2 right-2 bg-transparent outline-none border-none"
               >
                 <XCircle className="w-6 h-6 " />
               </Button>
