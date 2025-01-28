@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 // import { usePathname } from "next/navigation"
-import { Bell, LoaderCircle, Menu, Search } from "lucide-react";
+import { Bell, Calendar, LayoutDashboard, LoaderCircle, Menu, Search } from "lucide-react";
 
 // import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button";
@@ -15,21 +15,25 @@ import { Button } from "@/components/ui/button";
 //   DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AUTH_CONTEXT } from "@/providers/auth";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-// const navItems = [
-//   // { name: "Dashboard", href: "/dashboard" },
-//   // { name: "Users", href: "/dashboard/users" },
-//   // { name: "Settings", href: "/dashboard/settings" },
-// ]
+const sidebarItems = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "My Bookings", href: "/dashboard/bookings", icon: Calendar },
+  { name: "What to Expect", href: "/dashboard/expect", icon: Calendar },
+];
+
 
 export function Navbar() {
   // const pathname = usePathname()
 
   const { isLoading, isLoggedIn } = useContext(AUTH_CONTEXT);
   const router = useRouter();
+  const pathname = usePathname(); 
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
     const response = await (
@@ -138,9 +142,35 @@ export function Navbar() {
               <DropdownMenuItem>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu> */}
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle className="mb-3">Menu</SheetTitle>
+              </SheetHeader>
+              <div className="space-y-4">
+                {sidebarItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setIsSheetOpen(false)} 
+                    className={`flex items-center space-x-3 p-2 rounded-md ${
+                      pathname === item.href
+                        ? "bg-gray-100 text-gray-900"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    <item.icon className="mr-3 h-6 w-6" />
+                    <span>{item.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>
