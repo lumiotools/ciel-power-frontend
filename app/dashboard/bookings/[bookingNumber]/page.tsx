@@ -13,9 +13,10 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import RescheduleModal from "@/components/modal/RescheduleModal";
+import UtilityBills from "@/components/booking/utilityBills";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -53,30 +54,33 @@ const BookingDetailsPage = () => {
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setModalOpen] = useState<boolean>(false)
+  const [isModalOpen, setModalOpen] = useState<boolean>(false);
 
   const handleRescheduleClick = () => {
-    setModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setModalOpen(false)
-  }
-
-  const handleReschedule = (startTime?: string, endTime?: string) => {
-    setBooking(prevBooking => {
-      if (!prevBooking) return null;
-      
-      return {
-        ...prevBooking,
-        startTime: startTime || prevBooking.startTime,
-        endTime: endTime || prevBooking.endTime
-      };
-    });
+    setModalOpen(true);
   };
   
 
 
+  // const [uploading, setUploading] = useState(false);
+  // const MAX_SIZE_MB = 20; 
+  
+ 
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleReschedule = (startTime?: string, endTime?: string) => {
+    setBooking((prevBooking) => {
+      if (!prevBooking) return null;
+
+      return {
+        ...prevBooking,
+        startTime: startTime || prevBooking.startTime,
+        endTime: endTime || prevBooking.endTime,
+      };
+    });
+  };
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -107,10 +111,10 @@ const BookingDetailsPage = () => {
 
   const formatDateTime = (startStr: string, endStr?: string): string => {
     const start = new Date(startStr);
-    const end = new Date(endStr?? "");
+    const end = new Date(endStr ?? "");
 
     const dateFormat = new Intl.DateTimeFormat("en-US", {
-      timeZone: 'UTC',
+      timeZone: "UTC",
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -121,14 +125,14 @@ const BookingDetailsPage = () => {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
-      timeZone: 'UTC'
+      timeZone: "UTC",
     });
 
     const dateStr = dateFormat.format(start);
     const startTimeStr = timeFormat.format(start);
     const endTimeStr = timeFormat.format(end);
 
-    return `${dateStr} at ${startTimeStr}${ endStr ? " to "+endTimeStr : ''}`;
+    return `${dateStr} at ${startTimeStr}${endStr ? " to " + endTimeStr : ""}`;
   };
 
   if (loading) {
@@ -277,7 +281,6 @@ const BookingDetailsPage = () => {
               </div>
             </CardContent>
           </Card>
-          
 
           {/* Customer Details */}
           <Card>
@@ -307,6 +310,8 @@ const BookingDetailsPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          <UtilityBills bookingNumber={bookingNumber as string}  />
         </div>
       </main>
       {booking && (
@@ -317,6 +322,7 @@ const BookingDetailsPage = () => {
           bookingNumber={booking.bookingNumber}
         />
       )}
+
     </div>
   );
 };
