@@ -23,7 +23,7 @@ interface TimeSlot {
 interface RescheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onReschedule: (startTime:string, endTime:string)=>void,
+  onReschedule: (startTime: string, endTime: string) => void;
   bookingNumber: string;
 }
 
@@ -40,34 +40,42 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   const [isFetchingSlots, setIsFetchingSlots] = useState(false);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
 
   const handleReschedule = async () => {
-    if (selectedDate && selectedSlot) {
-      const response = await fetch(
-        `/api/user/bookings/${bookingNumber}/reschedule`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            eventId: selectedSlot?.eventId,
-          }),
-        }
-      );
+    setIsLoading(true);
+    try {
+      if (selectedDate && selectedSlot) {
+        const response = await fetch(
+          `/api/user/bookings/${bookingNumber}/reschedule`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              eventId: selectedSlot?.eventId,
+            }),
+          }
+        );
 
-      const data = await response.json();
-      if (data.success) {
-        onClose();
-        toast.success("Booking Rescheduled Successfully");
-        router.refresh();
-        onReschedule(selectedSlot?.startTime,  selectedSlot?.endTime);
+        const data = await response.json();
+        if (data.success) {
+          onClose();
+          toast.success("Booking Rescheduled Successfully");
+          router.refresh();
+          onReschedule(selectedSlot?.startTime, selectedSlot?.endTime);
+        } else {
+          toast.error(`${data.detail}`);
+        }
       } else {
-        toast.error(`${data.detail}`);
+        toast.error("Please select a date and time slot");
       }
-    } else {
-      toast.error("Please select a date and time slot");
+    } catch (error) {
+        console.log((error as Error).message);
+    }finally{
+        setIsLoading(false);
     }
   };
 
@@ -109,7 +117,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
 
   useEffect(() => {
     if (selectedDate) {
-      getSlots(selectedDate);
+        getSlots(selectedDate);
     }
   }, [selectedDate]);
 
@@ -120,6 +128,15 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
     const ampm = hour >= 12 ? "PM" : "AM";
     const formattedHour = hour % 12 || 12;
     return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   };
 
   return (
@@ -181,9 +198,14 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
           </Button>
           <Button
             onClick={handleReschedule}
-            disabled={!selectedDate || !selectedSlot}
+            disabled={
+              !selectedDate ||
+              !selectedSlot ||
+              isLoading ||
+              isToday(selectedDate)
+            }
           >
-            Confirm Reschedule
+            {isLoading ? "Rescheduling..." : "Confirm Reschedule"}
           </Button>
         </DialogFooter>
       </DialogContent>
