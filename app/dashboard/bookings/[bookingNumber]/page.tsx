@@ -338,7 +338,17 @@ const BookingDetailsPage = () => {
                         >
                           Reschedule
                         </Button>
+
+                        
                       )}
+
+                      <Button
+                        variant="link"
+                        className="text-red-600 hover:underline"
+                        onClick={handleCancelBooking}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
                 </div>
