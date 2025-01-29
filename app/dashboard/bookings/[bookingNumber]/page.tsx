@@ -51,7 +51,9 @@ interface ApiResponse {
 }
 
 const BookingDetailsPage = () => {
-  const { bookingNumber } = useParams();
+  const params = useParams<{ bookingNumber: string }>();
+  const bookingNumber = params.bookingNumber;
+
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +81,53 @@ const BookingDetailsPage = () => {
       };
     });
   };
+
+  const handleCancelBooking = async () => {
+    try {
+      const requestUrl = `/api/user/bookings/${bookingNumber}`;
+     
+  
+      const response = await fetch(requestUrl, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+  
+   
+      console.log("Booking canceled successfully:", response);
+      let data;
+      if (response.status !== 204) {
+        data = await response.json();
+      }
+  
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to cancel the booking");
+      }
+  
+      console.log("Booking canceled successfully:", data);
+      setBooking(null);
+      alert("Booking canceled successfully");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); 
+  
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error canceling booking:", error.message);
+        alert(`Error canceling booking: ${error.message}`);
+      } else {
+        console.error("Unknown error occurred:", error);
+        alert("An unknown error occurred");
+      }
+    }
+    
+  };
+  
+  
+
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -289,7 +338,17 @@ const BookingDetailsPage = () => {
                         >
                           Reschedule
                         </Button>
+
+                        
                       )}
+
+                      <Button
+                        variant="link"
+                        className="text-red-600 hover:underline"
+                        onClick={handleCancelBooking}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
                 </div>
