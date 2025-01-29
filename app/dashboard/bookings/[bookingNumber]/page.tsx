@@ -50,7 +50,9 @@ interface ApiResponse {
 }
 
 const BookingDetailsPage = () => {
-  const { bookingNumber } = useParams();
+  const params = useParams<{ bookingNumber: string }>();
+  const bookingNumber = params.bookingNumber;
+
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,10 +116,16 @@ const BookingDetailsPage = () => {
         window.location.reload();
       }, 500); 
   
-    } catch (error:any) {
-      console.error("Error canceling booking:", error);
-      alert(`Error canceling booking: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error canceling booking:", error.message);
+        alert(`Error canceling booking: ${error.message}`);
+      } else {
+        console.error("Unknown error occurred:", error);
+        alert("An unknown error occurred");
+      }
     }
+    
   };
   
   
