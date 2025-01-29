@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar } from "lucide-react";
+import { Calendar, Globe, Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const sidebarItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Bookings", href: "/dashboard/bookings", icon: Calendar },
-  { name: "What to Expect", href: "/dashboard/expect", icon: Calendar },
+  { name: "Create Booking", href: "/dashboard", icon: Plus },
+  { name: "What to Expect", href: "/dashboard/expect", icon: Globe },
 ];
 
 export function Sidebar() {

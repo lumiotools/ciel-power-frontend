@@ -25,6 +25,8 @@ interface RescheduleModalProps {
   onClose: () => void;
   onReschedule: (startTime: string, endTime: string) => void;
   bookingNumber: string;
+  initialDate: Date;
+  bookedSlot: TimeSlot | null;
 }
 
 const RescheduleModal: React.FC<RescheduleModalProps> = ({
@@ -32,15 +34,23 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   onClose,
   onReschedule,
   bookingNumber,
+  initialDate,
+  bookedSlot,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
+    initialDate
   );
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [isFetchingSlots, setIsFetchingSlots] = useState(false);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedDate(initialDate); // Reset to initial scheduled date on modal open
+    }
+  }, [isOpen, initialDate]);
 
   const handleReschedule = async () => {
     setIsLoading(true);
@@ -73,9 +83,9 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
         toast.error("Please select a date and time slot");
       }
     } catch (error) {
-        console.log((error as Error).message);
-    }finally{
-        setIsLoading(false);
+      console.log((error as Error).message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -117,7 +127,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
 
   useEffect(() => {
     if (selectedDate) {
-        getSlots(selectedDate);
+      getSlots(selectedDate);
     }
   }, [selectedDate]);
 
@@ -154,9 +164,11 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                 onSelect={(date) => {
                   setSelectedDate(date);
                   setSelectedSlot(null);
+                  getSlots(date);
                 }}
                 className="rounded-md border"
                 disabled={(date) => date < new Date()}
+                month={selectedDate}
               />
 
               {selectedDate && (
@@ -166,21 +178,31 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                     <p>Fetching available slots...</p>
                   ) : slots.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2">
-                      {slots.map((slot) => (
-                        <Button
-                          key={slot.eventId}
-                          variant={
-                            selectedSlot?.eventId === slot.eventId
-                              ? "default"
-                              : "outline"
-                          }
-                          className="text-xs"
-                          onClick={() => setSelectedSlot(slot)}
-                        >
-                          {formatTime(slot.startTime)} -{" "}
-                          {formatTime(slot.endTime)}
-                        </Button>
-                      ))}
+                      {slots.map((slot) => {
+                        const isBookedSlot = Boolean(
+                          bookedSlot &&
+                          slot.startTime === bookedSlot.startTime &&
+                          slot.endTime === bookedSlot.endTime
+                        );
+
+                        return (
+                          <Button
+                            key={slot.eventId}
+                            variant={
+                              selectedSlot?.eventId === slot.eventId
+                                ? "default"
+                                : "outline"
+                            }
+                            className="text-xs"
+                           
+                            onClick={() => setSelectedSlot(slot)}
+                            disabled={isBookedSlot} 
+                          >
+                            {formatTime(slot.startTime)} -{" "}
+                            {formatTime(slot.endTime)}
+                          </Button>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-red-500">
