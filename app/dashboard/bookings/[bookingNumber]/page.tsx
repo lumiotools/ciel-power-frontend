@@ -98,7 +98,7 @@ const BookingDetailsPage = () => {
       });
   
    
-  
+      console.log("Booking canceled successfully:", response);
       let data;
       if (response.status !== 204) {
         data = await response.json();
