@@ -48,7 +48,7 @@ export default function Login() {
         checkAuth();
         toast.success("Logged in successfully!");
         // Redirect to the dashboard on successful login
-        router.push("/dashboard");
+        router.push("/dashboard/bookings");
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Login failed. Please try again."); // Display server error

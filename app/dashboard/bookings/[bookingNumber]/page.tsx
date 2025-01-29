@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import RescheduleModal from "@/components/modal/RescheduleModal";
 import UtilityBills from "@/components/booking/utilityBills";
 import { isBefore } from "date-fns";
+import { toast } from "sonner";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -108,7 +109,8 @@ const BookingDetailsPage = () => {
   
       console.log("Booking canceled successfully:", data);
       setBooking(null);
-      alert("Booking canceled successfully");
+      // alert("Booking canceled successfully");
+      toast.success('Booking canceled successfully')
 
       setTimeout(() => {
         window.location.reload();
@@ -298,10 +300,21 @@ const BookingDetailsPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 <div>
+                  <div className="flex items-center justify-between">
                   <h3 className="flex items-center text-lg font-medium text-gray-900">
                     <Building2 className="h-5 w-5 mr-2 text-gray-400" />
                     Service Information
                   </h3>
+                  {!booking.canceled &&  isPastBooking &&(<Button
+                        variant="link"
+                        className="text-red-600 hover:underline"
+                        onClick={handleCancelBooking}
+                      >
+                        Cancel
+                      </Button>)}
+
+                  </div>
+
                   <Separator className="my-3" />
                   <div className="space-y-2">
                     <p className="text-gray-900 font-medium">
@@ -338,17 +351,7 @@ const BookingDetailsPage = () => {
                         >
                           Reschedule
                         </Button>
-
-                        
                       )}
-
-                      <Button
-                        variant="link"
-                        className="text-red-600 hover:underline"
-                        onClick={handleCancelBooking}
-                      >
-                        Cancel
-                      </Button>
                     </div>
                   </div>
                 </div>
