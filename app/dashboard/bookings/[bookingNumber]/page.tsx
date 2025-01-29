@@ -82,6 +82,47 @@ const BookingDetailsPage = () => {
     });
   };
 
+  const handleCancelBooking = async () => {
+    try {
+      const requestUrl = `/api/user/bookings/${bookingNumber}`;
+     
+  
+      const response = await fetch(requestUrl, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+  
+   
+  
+      let data;
+      if (response.status !== 204) {
+        data = await response.json();
+      }
+  
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to cancel the booking");
+      }
+  
+      console.log("Booking canceled successfully:", data);
+      setBooking(null);
+      alert("Booking canceled successfully");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); 
+  
+    } catch (error:any) {
+      console.error("Error canceling booking:", error);
+      alert(`Error canceling booking: ${error.message}`);
+    }
+  };
+  
+  
+
+
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
@@ -286,6 +327,14 @@ const BookingDetailsPage = () => {
                         onClick={handleRescheduleClick}
                       >
                         Reschedule
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        className="text-red-600 hover:underline"
+                        onClick={handleCancelBooking}
+                      >
+                        Cancel
                       </Button>
                     </div>
                   </div>
