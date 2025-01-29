@@ -13,10 +13,11 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import RescheduleModal from "@/components/modal/RescheduleModal";
 import UtilityBills from "@/components/booking/utilityBills";
+import { isBefore } from "date-fns";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -61,13 +62,10 @@ const BookingDetailsPage = () => {
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
-  
-
 
   // const [uploading, setUploading] = useState(false);
-  // const MAX_SIZE_MB = 20; 
-  
- 
+  // const MAX_SIZE_MB = 20;
+
   const closeModal = () => {
     setModalOpen(false);
   };
@@ -163,7 +161,7 @@ const BookingDetailsPage = () => {
     if (isNaN(start.getTime())) {
       return "Invalid start time"; // Handle invalid start date
     }
-  
+
     const dateFormat = new Intl.DateTimeFormat("en-US", {
       timeZone: "UTC",
       weekday: "long",
@@ -171,30 +169,33 @@ const BookingDetailsPage = () => {
       month: "long",
       day: "numeric",
     });
-  
+
     const timeFormat = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
       timeZone: "UTC",
     });
-  
+
     const dateStr = dateFormat.format(start);
     const startTimeStr = timeFormat.format(start);
-  
+
     if (!endStr) {
       return `${dateStr} at ${startTimeStr}`;
     }
-  
+
     const end = new Date(endStr);
     if (isNaN(end.getTime())) {
       return `${dateStr} at ${startTimeStr}`; // Ignore invalid end date
     }
-  
+
     const endTimeStr = timeFormat.format(end);
     return `${dateStr} at ${startTimeStr} to ${endTimeStr}`;
   };
-  
+
+  const isPastBooking = booking
+    ? isBefore(new Date(), new Date(booking.startTime))
+    : false;
 
   if (loading) {
     return (
@@ -329,21 +330,15 @@ const BookingDetailsPage = () => {
                           {formatDateTime(booking.startTime, booking.endTime)}
                         </p>
                       </div>
-                      <Button
-                        variant="link"
-                        className="text-blue-600 hover:underline"
-                        onClick={handleRescheduleClick}
-                      >
-                        Reschedule
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        className="text-red-600 hover:underline"
-                        onClick={handleCancelBooking}
-                      >
-                        Cancel
-                      </Button>
+                      {!booking.canceled && isPastBooking && (
+                        <Button
+                          variant="link"
+                          className="text-blue-600 hover:underline"
+                          onClick={handleRescheduleClick}
+                        >
+                          Reschedule
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -362,10 +357,7 @@ const BookingDetailsPage = () => {
               <div className="space-y-2">
                 <p className="text-gray-900 font-medium">{booking.title}</p>
                 <div className="text-sm text-gray-500 space-y-1">
-                  <p>
-                    Created:{" "}
-                    {formatDateTime(booking.creationTime)}
-                  </p>
+                  <p>Created: {formatDateTime(booking.creationTime)}</p>
                   {booking.canceled && booking.cancelationTime && (
                     <p>
                       Cancelled:{" "}
@@ -380,7 +372,10 @@ const BookingDetailsPage = () => {
             </CardContent>
           </Card>
 
-          <UtilityBills bookingNumber={bookingNumber as string}  />
+          <UtilityBills
+            bookingNumber={bookingNumber as string}
+            bookingCancelled={Boolean(booking.canceled)}
+          />
         </div>
       </main>
       {booking && (
@@ -389,9 +384,14 @@ const BookingDetailsPage = () => {
           onClose={closeModal}
           onReschedule={handleReschedule}
           bookingNumber={booking.bookingNumber}
+          initialDate={new Date(booking.startTime)}
+          bookedSlot={{
+            eventId: booking.bookingNumber,
+            startTime: booking.startTime, // Start time from booking details
+            endTime: booking.endTime,
+          }}
         />
       )}
-
     </div>
   );
 };

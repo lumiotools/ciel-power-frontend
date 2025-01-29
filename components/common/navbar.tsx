@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 // import { usePathname } from "next/navigation"
-import { Bell, Calendar, LayoutDashboard, LoaderCircle, Menu, Search } from "lucide-react";
+import { Bell, Calendar, Globe, LoaderCircle, Menu, Plus, Search } from "lucide-react";
 
 // import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const sidebarItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Bookings", href: "/dashboard/bookings", icon: Calendar },
-  { name: "What to Expect", href: "/dashboard/expect", icon: Calendar },
+  { name: "Create Booking", href: "/dashboard", icon: Plus },
+  { name: "What to Expect", href: "/dashboard/expect", icon: Globe },
 ];
 
 
