@@ -17,6 +17,7 @@ import { Card, CardContent} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import RescheduleModal from "@/components/modal/RescheduleModal";
 import UtilityBills from "@/components/booking/utilityBills";
+import KnowledgeContent from "@/components/booking/knowledgeContent";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -324,6 +325,8 @@ const BookingDetailsPage = () => {
           </Card>
 
           <UtilityBills bookingNumber={bookingNumber as string}  />
+
+          <KnowledgeContent/>
         </div>
       </main>
       {booking && (

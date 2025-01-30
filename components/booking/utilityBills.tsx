@@ -65,7 +65,7 @@ const UtilityBills = ({ bookingNumber }: { bookingNumber: string }) => {
         <CardHeader className="space-y-3">
           <div className="justify-between flex items-center">
             <h3 className="flex items-center text-lg font-medium text-gray-900">
-              <Upload className="w-5 h-5 text-gray-400 mr-3" />
+              <Upload className="w-5 h-5 text-gray-400 mr-2" />
               Upload Utility Bills
             </h3>
             <Button onClick={() => setUploadModal(true)}>Upload</Button>
