@@ -11,8 +11,17 @@ interface Content {
   description: string;
   thumbnail: string;
 }
+interface YouTubeVideo {
+  id: number;
+  title: string;
+  description: string;
+  thumbnail: string;
+}
 
-const KnowledgeContent: React.FC = () => {
+interface KnowledgeContentProps {
+  youtubeSuggestions: YouTubeVideo[]; // You pass the array of YouTubeVideo objects
+}
+const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions }) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Define the contents with proper typing
@@ -89,7 +98,7 @@ const KnowledgeContent: React.FC = () => {
           ref={scrollContainerRef}
         >
           <div className="flex gap-5 min-w-full pb-1 ">
-            {contents.map((content) => (
+            {youtubeSuggestions.map((content) => (
               <div key={content.id} className="flex-none w-72">
                 <div className="group relative">
                   {/* Thumbnail Container */}

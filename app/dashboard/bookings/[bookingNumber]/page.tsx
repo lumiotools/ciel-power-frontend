@@ -47,7 +47,15 @@ interface ApiResponse {
   message: string;
   data: {
     booking: BookingDetails;
+    youtubeVideos: YouTubeVideo[]; 
   };
+}
+
+interface YouTubeVideo {
+  id: number;
+  title: string;
+  description: string;
+  thumbnail: string;
 }
 
 const BookingDetailsPage = () => {
@@ -56,12 +64,13 @@ const BookingDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [youtubeSuggestions, setYoutubeSuggestions] = useState<YouTubeVideo[]>([]); 
 
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
   
-
+  console.log('youtubesuggestions', youtubeSuggestions);
 
   // const [uploading, setUploading] = useState(false);
   // const MAX_SIZE_MB = 20; 
@@ -97,6 +106,8 @@ const BookingDetailsPage = () => {
         const data: ApiResponse = await response.json();
         if (data.success) {
           setBooking(data.data.booking);
+          console.log( 'youtube videos',data.data.youtubeVideos)
+          setYoutubeSuggestions(data.data.youtubeVideos)
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -326,7 +337,9 @@ const BookingDetailsPage = () => {
 
           <UtilityBills bookingNumber={bookingNumber as string}  />
 
-          <KnowledgeContent/>
+          <KnowledgeContent
+          youtubeSuggestions={youtubeSuggestions}
+          />
         </div>
       </main>
       {booking && (
