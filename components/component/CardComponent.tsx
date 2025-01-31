@@ -8,13 +8,14 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow relative h-[300px] overflow-hidden", // Adjusted height and added overflow-hidden
+      "rounded-lg border bg-card text-card-foreground shadow relative h-[250px] overflow-hidden", // Reduced border radius and height
       className
     )}
     {...props}
   />
 ))
 Card.displayName = "Card"
+
 
 
 const CardHeader = React.forwardRef<
@@ -48,7 +49,7 @@ const CardDescription = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-sm text-muted-foreground overflow-hidden text-ellipsis line-clamp-2", // Limit to 2 lines and truncate
+      "text-sm text-muted-foreground overflow-hidden text-ellipsis line-clamp-1", // Limit to 2 lines and truncate
       className
     )}
     {...props}

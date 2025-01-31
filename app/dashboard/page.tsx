@@ -1,130 +1,344 @@
-'use client';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import ServiceCard from '../../components/component/ServiceCard'; // Import the ServiceCard component
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import ServiceCard from "../../components/component/ServiceCard"
+import BookingProgress from "@/components/component/booking-progress"
+import CountdownTimer from "@/components/component/CountdownTimer"
+import { Clock, AlertCircle } from "lucide-react"
 
 interface Service {
-  id: string;
-  name: string;
-  images?: { url: string }[];
-  price?: { amount: number };
-  description: string;
+  id: string
+  name: string
+  images?: { url: string }[]
+  price?: { amount: number }
+  description: string
+}
+
+interface Price {
+  totalGross: {
+    amount: string
+    currency: string
+  }
+  totalNet: {
+    amount: string
+    currency: string
+  }
+  totalTaxes: {
+    amount: string
+    currency: string
+  }
+  totalPaid: {
+    amount: string
+    currency: string
+  }
+  taxes: Array<[]>
+}
+
+interface Booking {
+  bookingNumber: string
+  startTime: string
+  endTime: string
+  title: string
+  canceled: boolean
+  accepted: boolean
+  creationTime: string
+  serviceName: string
+  serviceId: string
+  price: Price
+}
+
+interface BookingsResponse {
+  success: boolean
+  message: string
+  data: {
+    bookings: Booking[]
+  }
 }
 
 export default function DashboardPage() {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const router = useRouter()
+  const [services, setServices] = useState<Service[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentIndex, setCurrentIndex] = useState<number>(0)
 
   const getServices = async () => {
-    setLoading(true);
     try {
       const response = await fetch(`/api/booking/services`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      });
-      const data = await response.json();
-      setServices(data?.data?.services || []);
+      })
+      const data = await response.json()
+      setServices(data?.data?.services || [])
+      
     } catch (error) {
-      console.log(error);
-      toast.error('No Services Found');
-    } finally {
-      setLoading(false);
+      console.log(error)
+      toast.error("No Services Found")
     }
-  };
+  }
+
+  const getBookings = async () => {
+    try {
+      const response = await fetch(`/api/user/bookings`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      })
+      const data: BookingsResponse = await response.json()
+      if (data.success) {
+        setBookings(data.data.bookings)
+       
+      } else {
+        throw new Error(data.message || "Failed to fetch bookings")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred")
+      toast.error("No Bookings Found")
+    }
+  }
 
   const handleNext = () => {
     if (currentIndex < services.length - 3) {
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex(currentIndex + 1)
     }
-  };
+  }
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+      setCurrentIndex(currentIndex - 1)
     }
-  };
+  }
 
   const handleWheel = (e: React.WheelEvent) => {
-    // Slide left if scrolling left, slide right if scrolling right
     if (e.deltaY > 0) {
-      handleNext(); // Scroll down -> Move cards to the right
+      handleNext()
     } else {
-      handlePrev(); // Scroll up -> Move cards to the left
+      handlePrev()
     }
-  };
+  }
 
-  useEffect(() => {
+  const formatDateTime = (dateStr: string): string => {
+    const date = new Date(dateStr)
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "UTC",
+    }).format(date)
+  }
+
+  const handleViewDetails = (bookingNumber: string) => {
+    router.push(`/dashboard/bookings/${bookingNumber}`)
+  }
+
+  const getStatusBadge = (booking: Booking): React.ReactElement => {
+    if (booking.canceled) {
+      return <span className="px-3 py-1 text-sm font-medium rounded-full bg-red-100 text-red-800">Cancelled</span>
+    }
+    if (booking.accepted) {
+      return (
+        <div className="flex items-center">
+          <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-green-800">Confirmed</span>
+          <CountdownTimer startTime={booking.startTime} />
+        </div>
+      )
+    }
+    return <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+  }
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true)
+  //     await Promise.all([getServices(), getBookings()])
+  //     setLoading(false)
+  //   }
+  //   fetchData()
+  // }, [getBookings]) 
+
+    useEffect(() => {
     getServices();
+    getBookings(); // Fetch bookings as well
   }, []);
 
-  if (loading) {
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
+  //     </div>
+  //   )
+  // }
+
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-700 text-center">{error}</p>
+        </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="space-y-6 p-5"> {/* Increased space for better section separation */}
-      {/* Suggested Services Title */}
+    <div className="min-h-screen bg-white">
+    <div className="space-y-6 p-5" >
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-medium">Suggested Services</h2>
       </div>
 
       <div className="relative overflow-hidden">
-        {/* Parent container that holds both the cards and the flexbox */}
-        <div
-          className="flex relative overflow-x-auto"
-          onWheel={handleWheel} // Enable mouse scrolling to slide the cards
-          style={{ cursor: 'pointer' }}
-        >
-          {/* Cards container */}
+        <div className="flex relative overflow-x-auto" onWheel={handleWheel} style={{ cursor: "pointer", overflow:"hidden" }}>
           <div
-          className="flex transition-all ease-in-out duration-300 gap-6" // Added gap-6 to increase the space between the cards
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-        >
-          {services.map((service) => (
-            <ServiceCard service={service} key={service.id} />
-          ))}
+            className="flex transition-all ease-in-out duration-300 gap-6"
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {services.map((service) => (
+              <ServiceCard service={service} key={service.id} />
+            ))}
+          </div>
+
+          <div
+            onClick={handleNext}
+            className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
+            style={{
+              background:
+                "linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)",
+            }}
+          >
+            <svg width="13" height="35" viewBox="0 0 13 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect
+                x="0.979004"
+                width="20.4583"
+                height="1.16905"
+                transform="rotate(56.8778 0.979004 0)"
+                fill="#D9D9D9"
+              />
+              <rect
+                width="20.4583"
+                height="1.16905"
+                transform="matrix(0.546427 -0.837507 -0.837507 -0.546427 0.979004 34.5779)"
+                fill="#D9D9D9"
+              />
+            </svg>
+          </div>
         </div>
+      </div>
 
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-medium">Your Bookings</h2>
+      </div>
 
-          {/* Right-most flexbox container with transparent gradient */}
-          <div
-              onClick={handleNext}
-              className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
-              style={{
-                background: 'linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)'
-              }}
-            >
-              <svg width="13" height="35" viewBox="0 0 13 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0.979004" width="20.4583" height="1.16905" transform="rotate(56.8778 0.979004 0)" fill="#D9D9D9"/>
-                <rect width="20.4583" height="1.16905" transform="matrix(0.546427 -0.837507 -0.837507 -0.546427 0.979004 34.5779)" fill="#D9D9D9"/>
-              </svg>
+      <section className="bg-white rounded-lg p-0">
+       
+        {bookings.map((booking) => (
+          <div key={booking.bookingNumber} className="mb-6 relative">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-medium">{formatDateTime(booking.startTime)}</h3>
+                <p className="text-[#636561]">{booking.serviceName}</p>
+                <div className="flex items-center text-[#636561] text-sm mt-1">
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span>Booking #{booking.bookingNumber}</span>
+                </div>
+              </div>
+            
             </div>
 
-        </div>
+            <BookingProgress
+              steps={[
+                { label: "Created", status: "completed" },
+                { label: "Confirmed", status: booking.accepted ? "completed" : "upcoming" },
+                { label: "Auditor Assigned", status: "upcoming" },
+                { label: "On the Way", status: "upcoming" },
+                { label: "Ongoing", status: "upcoming" },
+                { label: "Complete", status: "upcoming" },
+              ]}
+            />
+
+            <div className="flex justify-between mt-4">
+              <Button variant="link" className="text-blue-600" onClick={() => handleViewDetails(booking.bookingNumber)}>
+                View Details
+              </Button>
+              <div>
+                <Button className="bg-[#5ea502] hover:bg-[#5ea502]/90">Reschedule</Button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+
+        
+{bookings.length === 0 && (
+
+
+<div className="relative flex h-[250px] items-stretch rounded-lg bg-[#f0f8e6] overflow-hidden">
+{/* Left Column with Image (30% width) */}
+<div className="relative w-[30%]">
+  <img
+    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsLeft-HfKNAPd5hBQiuWSXWbJBLgcAfYZg76.png"
+    alt="Left Icon"
+    className="h-full w-full object-cover"
+  />
+  <div
+    className="absolute inset-0"
+    style={{
+      background:
+        "linear-gradient(90deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
+    }}
+  />
+</div>
+
+{/* Middle Column with Text Content (40% width) */}
+<div className="flex w-[40%] flex-col items-center justify-center gap-4 px-8">
+  <div className="flex items-center gap-2">
+    <img src="/calendarIcon.png" alt="Icon" className="h-8 w-8" />
+    <p className="text-lg font-medium text-[#4d4e4b]">No Current Bookings</p>
+  </div>
+  <Button className="rounded-3xl bg-[#76BC1C] px-6 py-2 text-white hover:bg-[#67b502] outline outline-2 outline-white outline-offset-2 focus:outline-offset-2 focus:outline-white">
+      Book Your First Service
+    </Button>
+</div>
+
+{/* Right Column with Image (30% width) */}
+<div className="relative w-[30%]">
+  <img
+    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsRight-Cmh90ifFQDGvXhLdSTeJDXVP0hWr3i.png"
+    alt="Right Icon"
+    className="h-full w-full object-cover"
+  />
+  <div
+    className="absolute inset-0"
+    style={{
+      background:
+        "linear-gradient(270deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
+    }}
+  />
+</div>
+</div>
+)}
+
+
+      
+      </section>
+
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-medium">FAQs</h2>
       </div>
 
-      {/* Your Bookings Section */}
-      <div className="mt-6">
-        <h3 className="text-xl font-semibold">Your Bookings</h3>
-        <p className="text-sm text-muted-foreground">No Current Bookings</p>
-
-        {/* Button to Book your first service */}
-        <div className="flex justify-center mt-4">
-          <Button className="w-full max-w-xs">Book your first service</Button>
-        </div>
-      </div>
     </div>
-  );
+
+    </div>
+  )
 }
 
 
@@ -132,95 +346,3 @@ export default function DashboardPage() {
 
 
 
-
-
-
-
-
-// 'use client';
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import Link from "next/link";
-// import { useEffect, useState } from "react";
-// import { toast } from "sonner";
-// interface Service {
-//   id: string;
-//   name: string;
-//   images?: { url: string }[];
-//   price?: { amount: number };
-//   description: string;
-// }
-
-// export default function DashboardPage() {
-//   const [services, setServices] = useState<Service[]>([]);
-//    const [loading, setLoading] = useState<boolean>(true);
-
-//   const getServices = async () => {
-//     setLoading(true);
-//     try {
-//       const response = await fetch(`/api/booking/services`, {
-//         method: "GET",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       });
-//       const data = await response.json();
-//       setServices(data?.data?.services || []);
-//     } catch (error) {
-//       console.log(error);
-//       toast.error('No Services Found');
-//     }finally{
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     getServices();
-//   }, []);
-
-//   if (loading) {
-//     return (
-//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-//         <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-4">
-//       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-//         {services.map((service) => (
-//           <Link href={`dashboard/${service.id}`} key={service.id}>
-//             <Card className="cursor-pointer hover:shadow-lg">
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//                 <CardTitle className="text-md font-medium line-clamp-1">{service.name}</CardTitle>
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="aspect-video relative mb-2">
-//                   {service.images ? (
-//                     <img
-//                       src={service.images[0]?.url}
-//                       alt={service.name}
-//                       width={200}
-//                       height={200}
-//                       loading="lazy"
-//                     />
-//                   ) : (
-//                     <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center">No Image</div>
-//                   )}
-//                 </div>
-//                 <div className="text-2xl font-bold mb-2">
-//                   {service?.price?.amount ? `$${service.price.amount}` : "Price N/A"}
-//                 </div>
-//                 <p className="text-sm text-muted-foreground line-clamp-2">
-//                   {service?.description.replace(/<[^>]*>/g, "").slice(0, 100)}...
-//                 </p>
-//                 <Button className="mt-2">Book Now</Button>
-//               </CardContent>
-//             </Card>
-//           </Link>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
