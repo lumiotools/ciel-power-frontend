@@ -30,7 +30,7 @@ const sidebarItems = [
 export function Navbar() {
   // const pathname = usePathname()
 
-  const { isLoading, isLoggedIn } = useContext(AUTH_CONTEXT);
+  const { isLoading, isLoggedIn, logoutUser } = useContext(AUTH_CONTEXT);
   const router = useRouter();
   const pathname = usePathname(); 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -44,6 +44,7 @@ export function Navbar() {
     ).json();
 
     if (response["message"]) {
+      logoutUser();
       router.replace("/login");
     }
   };
