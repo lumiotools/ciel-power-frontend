@@ -5,12 +5,12 @@ import { Globe, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 
 // Define type for content items
-interface Content {
-  id: number;
-  title: string;
-  description: string;
-  thumbnail: string;
-}
+// interface Content {
+//   id: number;
+//   title: string;
+//   description: string;
+//   thumbnail: string;
+// }
 interface YouTubeVideo {
   id: number;
   title: string;
@@ -25,38 +25,38 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Define the contents with proper typing
-  const contents: Content[] = [
-    {
-      id: 1,
-      title: "React Fundamentals",
-      description: "Learn the core concepts of React",
-      thumbnail: "/api/placeholder/280/160",
-    },
-    {
-      id: 2,
-      title: "State Management",
-      description: "Master React state handling",
-      thumbnail: "/api/placeholder/280/160",
-    },
-    {
-      id: 3,
-      title: "Hooks in Depth",
-      description: "Understanding React Hooks",
-      thumbnail: "/api/placeholder/280/160",
-    },
-    {
-      id: 4,
-      title: "Component Patterns",
-      description: "Advanced component techniques",
-      thumbnail: "/api/placeholder/280/160",
-    },
-    {
-      id: 5,
-      title: "Performance Tips",
-      description: "Optimize your React apps",
-      thumbnail: "/api/placeholder/280/160",
-    },
-  ];
+  // const contents: Content[] = [
+  //   {
+  //     id: 1,
+  //     title: "React Fundamentals",
+  //     description: "Learn the core concepts of React",
+  //     thumbnail: "/api/placeholder/280/160",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "State Management",
+  //     description: "Master React state handling",
+  //     thumbnail: "/api/placeholder/280/160",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Hooks in Depth",
+  //     description: "Understanding React Hooks",
+  //     thumbnail: "/api/placeholder/280/160",
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Component Patterns",
+  //     description: "Advanced component techniques",
+  //     thumbnail: "/api/placeholder/280/160",
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "Performance Tips",
+  //     description: "Optimize your React apps",
+  //     thumbnail: "/api/placeholder/280/160",
+  //   },
+  // ];
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
