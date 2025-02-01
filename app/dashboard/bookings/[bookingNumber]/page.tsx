@@ -25,6 +25,7 @@ import RescheduleModal from "@/components/modal/RescheduleModal";
 import UtilityBills from "@/components/booking/utilityBills";
 import KnowledgeContent from "@/components/booking/knowledgeContent";
 import BookingProgress from "@/components/component/booking-progress";
+import BlogContent from "@/components/booking/blogs";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -55,14 +56,23 @@ interface ApiResponse {
   data: {
     booking: BookingDetails;
     youtubeVideos: YouTubeVideo[]; 
+    blogs: BlogPost[];
   };
 }
 
 interface YouTubeVideo {
-  id: number;
+  videoId: string;
   title: string;
   description: string;
   thumbnail: string;
+}
+
+interface BlogPost {
+  blog_id: number
+  title: string
+  description: string
+  thumbnailLink: string
+  pageLink: string
 }
 
 const BookingDetailsPage = () => {
@@ -72,7 +82,7 @@ const BookingDetailsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [youtubeSuggestions, setYoutubeSuggestions] = useState<YouTubeVideo[]>([]); 
-
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const { userDetails, isLoggedIn, isLoading, checkAuth } =
   useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
@@ -83,7 +93,7 @@ const BookingDetailsPage = () => {
   
  
   
-  console.log('userdetails', userDetails);
+
   let full_address = "";
   if (userDetails) {
     const street_address = userDetails.streetAddress;
@@ -150,6 +160,7 @@ const BookingDetailsPage = () => {
           setBooking(data.data.booking);
           console.log( 'youtube videos',data.data.youtubeVideos)
           setYoutubeSuggestions(data.data.youtubeVideos)
+          setBlogs(data.data.blogs)
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -421,6 +432,7 @@ const BookingDetailsPage = () => {
 
           <UtilityBills bookingNumber={bookingNumber as string} />
           <KnowledgeContent youtubeSuggestions={youtubeSuggestions} />
+          <BlogContent  blogs={blogs} />
         </div>
       </main>
 

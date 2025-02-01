@@ -4,15 +4,9 @@ import { Separator } from "@/components/ui/separator";
 import { Globe, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 
-// Define type for content items
-// interface Content {
-//   id: number;
-//   title: string;
-//   description: string;
-//   thumbnail: string;
-// }
+
 interface YouTubeVideo {
-  id: number;
+  videoId: string;
   title: string;
   description: string;
   thumbnail: string;
@@ -24,40 +18,11 @@ interface KnowledgeContentProps {
 const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions }) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Define the contents with proper typing
-  // const contents: Content[] = [
-  //   {
-  //     id: 1,
-  //     title: "React Fundamentals",
-  //     description: "Learn the core concepts of React",
-  //     thumbnail: "/api/placeholder/280/160",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "State Management",
-  //     description: "Master React state handling",
-  //     thumbnail: "/api/placeholder/280/160",
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Hooks in Depth",
-  //     description: "Understanding React Hooks",
-  //     thumbnail: "/api/placeholder/280/160",
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Component Patterns",
-  //     description: "Advanced component techniques",
-  //     thumbnail: "/api/placeholder/280/160",
-  //   },
-  //   {
-  //     id: 5,
-  //     title: "Performance Tips",
-  //     description: "Optimize your React apps",
-  //     thumbnail: "/api/placeholder/280/160",
-  //   },
-  // ];
 
+  const handlePlayClick = (videoId: string) => {
+    const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    window.open(youtubeUrl, "_blank");
+  };
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
       const scrollAmount = 300; // Adjust this value to control scroll distance
@@ -79,7 +44,7 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
         <div className="justify-between flex items-center">
           <h3 className="flex items-center text-lg font-medium text-gray-900">
             <Globe className="w-5 h-5 text-gray-400 mr-3" />
-            Knowledge Content
+            Suggested Videos
           </h3>
           <div className="flex items-center gap-2">
             <Button variant={'outline'} size='icon' onClick={() => scroll("left")} className='rounded-full'>
@@ -99,7 +64,7 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
         >
           <div className="flex gap-5 min-w-full pb-1 ">
             {youtubeSuggestions.map((content) => (
-              <div key={content.id} className="flex-none w-72">
+              <div key={content.videoId} className="flex-none w-72">
                 <div className="group relative">
                   {/* Thumbnail Container */}
                   <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden ">
@@ -109,7 +74,10 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
                       className="w-full h-full object-cover"
                     />
                     {/* Play Button Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                    <div
+                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30"
+                      onClick={() => handlePlayClick(content.videoId)} // Open YouTube video
+                    >
                       <div className="bg-white rounded-full p-3">
                         <Play className="w-6 h-6 text-red-600" />
                       </div>
