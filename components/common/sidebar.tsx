@@ -57,7 +57,7 @@ export function Sidebar() {
       <div className="mt-auto">
         <Button
           variant="ghost"
-          className="flex transition-all ease-in items-center space-x-2 text-white hover:text-gray-200 hover:text-black"
+          className="flex transition-all ease-in items-center space-x-2 text-white hover:text-black"
         >
           <LogOut className="h-10 w-10" />
           <span className='text-[15px]'>Logout</span>

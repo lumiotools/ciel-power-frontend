@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, CardTitle, CardDescription, CardContent } from './CardComponent'; // Adjust import path as necessary
-import Link from 'next/link';
+import React from "react";
+import { Card, CardTitle, CardDescription, CardContent } from "./CardComponent"; // Adjust import path as necessary
+import Link from "next/link";
 
 // Define the type for the service object
 interface Service {
@@ -26,19 +26,31 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => (
           className="object-cover w-full h-full"
         />
       ) : (
-        <div className="w-full h-full bg-gray-200 flex items-center justify-center">No Image</div>
+        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+          No Image
+        </div>
       )}
     </div>
 
-    <CardContent className="flex flex-col relative flex-grow" style={{ backgroundColor: '#F0F8E6' }}>
+    <CardContent
+      className="flex flex-col relative flex-grow"
+      style={{ backgroundColor: "#F0F8E6" }}
+    >
       {/* Reduced height for content section */}
       <CardTitle className="mt-4">{service.name}</CardTitle>
-      <CardDescription className="mt-4">{service.description}</CardDescription>
+      <CardDescription
+        className="mt-4"
+        dangerouslySetInnerHTML={{ __html: service.description }}
+      ></CardDescription>
 
       {/* Right Arrow Button */}
       <Link href={`dashboard/${service.id}`} key={service.id}>
         <div className="absolute right-4 bottom-4 cursor-pointer z-10">
-          <img src="/rightArrowGrey.svg" alt="Right Arrow" className="w-6 h-6" />
+          <img
+            src="/rightArrowGrey.svg"
+            alt="Right Arrow"
+            className="w-6 h-6"
+          />
         </div>
       </Link>
     </CardContent>

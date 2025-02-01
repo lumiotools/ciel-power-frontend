@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import KnowledgeContent from "@/components/booking/knowledgeContent";
 import BookingProgress from "@/components/component/booking-progress";
 import BlogContent from "@/components/booking/blogs";
+import Link from "next/link";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -66,7 +67,7 @@ interface YouTubeVideo {
 }
 
 interface BlogPost {
-  blog_id: number;
+  blog_id: string;
   title: string;
   description: string;
   thumbnailLink: string;
@@ -299,18 +300,18 @@ const BookingDetailsPage = () => {
             <h1 className="text-2xl font-bold">Booking Details</h1>
             <p className="text-gray-500">View and manage booking</p>
             <div className="mt-2 flex items-center space-x-2 text-sm text-gray-500">
-              <span>Dashboard</span>
+              <Link href={"/dashboard"}>Dashboard</Link>
               <ChevronRight size={16} />
-              <span>Bookings</span>
+              <Link href={"/dashboard/bookings"}>Bookings</Link>
               <ChevronRight size={16} />
               <span>View Details</span>
             </div>
           </div>
           {/* Notification Toggle (Right Side) */}
-          <div className="flex items-center space-x-3">
+          {/* <div className="flex items-center space-x-3">
             <span className="text-sm text-gray-600">Push Notifications</span>
-            {/* <Switch /> or any toggle component */}
-          </div>
+       
+          </div> */}
         </div>
 
         {/* ========== PROGRESS BAR ========== */}
@@ -319,8 +320,12 @@ const BookingDetailsPage = () => {
             steps={[
               { label: "Created", status: "completed" },
               {
-                label: "Confirmed",
-                status: booking.accepted ? "completed" : "upcoming",
+                label: booking.canceled ? "Cancelled" : "Confirmed",
+                status: booking.canceled
+                  ? "cancelled"
+                  : booking.accepted
+                  ? "completed"
+                  : "upcoming",
               },
               { label: "Auditor Assigned", status: "upcoming" },
               { label: "On the Way", status: "upcoming" },
@@ -422,7 +427,9 @@ const BookingDetailsPage = () => {
               </div>
               <div className="mb-6 flex justify-between">
                 <span className="text-muted-foreground">Payment Amount</span>
-                {/* e.g., credit card brand logo or PayPal */}
+                <span className="font-medium text-green-600">
+                  ${booking.price.totalGross.amount}
+                </span>
               </div>
               <Button
                 variant="outline"
@@ -441,7 +448,13 @@ const BookingDetailsPage = () => {
               <div className="mb-4 flex flex-col items-center">
                 <div className="mb-4 overflow-hidden rounded-lg">
                   {/* Auditor avatar or placeholder image */}
-                  {/* <Image src="/placeholder.svg" alt="Auditor" width={120} height={120} className="object-cover" /> */}
+                  <img
+                    src="/auditor.png"
+                    alt="Auditor"
+                    width={120}
+                    height={120}
+                    className="object-cover"
+                  />
                 </div>
                 <h5 className="font-medium">{booking.auditor}</h5>
               </div>
@@ -485,7 +498,7 @@ const BookingDetailsPage = () => {
             bookingCancelled={Boolean(booking.canceled)}
           />
           <KnowledgeContent youtubeSuggestions={youtubeSuggestions} />
-          {/* <BlogContent  blogs={blogs} /> */}
+          <BlogContent blogs={blogs} />
         </div>
       </main>
 

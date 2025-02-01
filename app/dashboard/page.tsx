@@ -9,6 +9,7 @@ import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path a
 import BookingProgress from "@/components/component/booking-progress";
 import CountdownTimer from "@/components/component/CountdownTimer";
 import { Clock, AlertCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface Service {
   id: string;
@@ -67,8 +68,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-
-    const { userDetails, isLoggedIn, isLoading, checkAuth } =
+  const { userDetails, isLoggedIn, isLoading, checkAuth } =
     useContext(AUTH_CONTEXT);
   const getServices = async () => {
     try {
@@ -197,9 +197,14 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-white">
       <div className="space-y-6">
         {/* Header Section */}
-        <div className="flex-1 p-8" style={{ backgroundColor: '#F0F8E6' }}>
-          <div className="flex justify-between items-center mb-3">
-            <h1 className="text-2xl font-bold">Welcome {userDetails?.firstName}!</h1>
+        <div
+          className="flex-1 px-8 py-4"
+          style={{ backgroundColor: "#F0F8E6" }}
+        >
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">
+              Welcome {userDetails?.firstName}!
+            </h1>
             <div className="p-2 rounded-full bg-gray-100">
               {/* Profile Image with Circular Crop */}
               <img
@@ -210,19 +215,19 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-  
+
         {/* Main Content Container */}
         <div className="container mx-auto p-6">
           {/* Suggested Services Section */}
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-2xl font-medium">Suggested Services</h2>
           </div>
-  
+
           <div className="relative overflow-hidden">
             <div
               className="flex relative overflow-x-auto"
               onWheel={handleWheel}
-              style={{ cursor: 'pointer', overflow: 'hidden' }}
+              style={{ cursor: "pointer", overflow: "hidden" }}
             >
               <div
                 className="flex transition-all ease-in-out duration-300 gap-6"
@@ -232,13 +237,13 @@ export default function DashboardPage() {
                   <ServiceCard service={service} key={service.id} />
                 ))}
               </div>
-  
+
               <div
                 onClick={handleNext}
                 className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
                 style={{
                   background:
-                    'linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)',
+                    "linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)",
                 }}
               >
                 <svg
@@ -265,19 +270,25 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-  
+
           {/* Your Bookings Section */}
           <div className="flex justify-between items-center mt-5">
             <h2 className="text-2xl font-medium">Your Bookings</h2>
           </div>
-  
-          <section className="bg-white rounded-lg p-6 mt-6">
+
+          <section
+            className="bg-white rounded-lg p-6 mt-6"
+            style={{ backgroundColor: "#F0F8E6" }}
+          >
             {bookings.length > 0 ? (
               bookings.map((booking) => (
-                <div key={booking.bookingNumber} className="mb-6 relative">
+                <Card key={booking.bookingNumber} className="mb-6 relative p-6">
+                  {/* <div key={booking.bookingNumber} className="mb-6 relative"> */}
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-medium">{formatDateTime(booking.startTime)}</h3>
+                      <h3 className="text-lg font-medium">
+                        {formatDateTime(booking.startTime)}
+                      </h3>
                       <p className="text-[#636561]">{booking.serviceName}</p>
                       <div className="flex items-center text-[#636561] text-sm mt-1">
                         <Clock className="h-4 w-4 mr-2" />
@@ -285,21 +296,25 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-  
+
                   <BookingProgress
                     steps={[
-                      { label: 'Created', status: 'completed' },
+                      { label: "Created", status: "completed" },
                       {
-                        label: 'Confirmed',
-                        status: booking.accepted ? 'completed' : 'upcoming',
+                        label: booking.canceled ? "Cancelled" : "Confirmed",
+                        status: booking.canceled
+                          ? "cancelled"
+                          : booking.accepted
+                          ? "completed"
+                          : "upcoming",
                       },
-                      { label: 'Auditor Assigned', status: 'upcoming' },
-                      { label: 'On the Way', status: 'upcoming' },
-                      { label: 'Ongoing', status: 'upcoming' },
-                      { label: 'Complete', status: 'upcoming' },
+                      { label: "Auditor Assigned", status: "upcoming" },
+                      { label: "On the Way", status: "upcoming" },
+                      { label: "Ongoing", status: "upcoming" },
+                      { label: "Complete", status: "upcoming" },
                     ]}
                   />
-  
+
                   <div className="flex justify-between mt-4">
                     <Button
                       variant="link"
@@ -314,7 +329,8 @@ export default function DashboardPage() {
                       </Button>
                     </div>
                   </div>
-                </div>
+                  {/* </div> */}
+                </Card>
               ))
             ) : (
               <div className="relative flex h-[250px] items-stretch rounded-lg bg-[#f0f8e6] overflow-hidden">
@@ -333,11 +349,15 @@ export default function DashboardPage() {
                     }}
                   />
                 </div>
-  
+
                 {/* Middle Column with Text Content (40% width) */}
                 <div className="flex w-[40%] flex-col items-center justify-center gap-4 px-8">
                   <div className="flex items-center gap-2">
-                    <img src="/calendarIcon.png" alt="Icon" className="h-8 w-8" />
+                    <img
+                      src="/calendarIcon.png"
+                      alt="Icon"
+                      className="h-8 w-8"
+                    />
                     <p className="text-lg font-medium text-[#4d4e4b]">
                       No Current Bookings
                     </p>
@@ -346,7 +366,7 @@ export default function DashboardPage() {
                     Book Your First Service
                   </Button>
                 </div>
-  
+
                 {/* Right Column with Image (30% width) */}
                 <div className="relative w-[30%]">
                   <img
@@ -365,7 +385,7 @@ export default function DashboardPage() {
               </div>
             )}
           </section>
-  
+
           {/* FAQs Section */}
           <div className="flex justify-between items-center mt-5">
             <h2 className="text-2xl font-medium">FAQs</h2>
@@ -373,5 +393,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )};
-  
+  );
+}
