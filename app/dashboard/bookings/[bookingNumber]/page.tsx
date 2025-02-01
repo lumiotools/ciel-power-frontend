@@ -171,7 +171,7 @@ const BookingDetailsPage = () => {
       }
 
       console.log("Booking canceled successfully:", data);
-      setBooking(null);
+      // setBooking(null);
       // alert("Booking canceled successfully");
       toast.success("Booking canceled successfully");
 

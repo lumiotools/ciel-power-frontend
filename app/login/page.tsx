@@ -11,8 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FormEvent, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useContext, useState } from "react";
+// import { useRouter } from "next/navigation";
 import { AUTH_CONTEXT } from "@/providers/auth";
 import { toast } from "sonner";
 import AuthSideImage from "@/components/ui/auth-side-image";
@@ -21,7 +21,7 @@ import { Eye, EyeOff } from "lucide-react";
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const router = useRouter()
+  // const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -56,7 +56,7 @@ export default function Login() {
         checkAuth()
         toast.success("Logged in successfully!")
         // Redirect to the dashboard on successful login
-        router.push("/dashboard/bookings")
+        // router.push("/dashboard/bookings")
       } else {
         const errorData = await response.json()
         setError(errorData.message || "Login failed. Please try again.") // Display server error
