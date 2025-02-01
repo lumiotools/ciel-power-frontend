@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ServiceCard from "../../components/component/ServiceCard";
+import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
 import CountdownTimer from "@/components/component/CountdownTimer";
 import { Clock, AlertCircle } from "lucide-react";
@@ -66,6 +67,9 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
+
+    const { userDetails, isLoggedIn, isLoading, checkAuth } =
+    useContext(AUTH_CONTEXT);
   const getServices = async () => {
     try {
       const response = await fetch(`/api/booking/services`, {
@@ -164,27 +168,20 @@ export default function DashboardPage() {
     );
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true)
-  //     await Promise.all([getServices(), getBookings()])
-  //     setLoading(false)
-  //   }
-  //   fetchData()
-  // }, [getBookings])
-
   useEffect(() => {
+    setLoading(true);
     getServices();
-    getBookings(); // Fetch bookings as well
-  }, []);
+    getBookings();
+    setLoading(false);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-  //       <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -196,167 +193,185 @@ export default function DashboardPage() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-white">
-      <div className="space-y-6 p-5">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-medium">Suggested Services</h2>
-        </div>
-
-        <div className="relative overflow-hidden">
-          <div
-            className="flex relative overflow-x-auto"
-            onWheel={handleWheel}
-            style={{ cursor: "pointer", overflow: "hidden" }}
-          >
-            <div
-              className="flex transition-all ease-in-out duration-300 gap-6"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {services.map((service) => (
-                <ServiceCard service={service} key={service.id} />
-              ))}
-            </div>
-
-            <div
-              onClick={handleNext}
-              className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
-              style={{
-                background:
-                  "linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)",
-              }}
-            >
-              <svg
-                width="13"
-                height="35"
-                viewBox="0 0 13 35"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect
-                  x="0.979004"
-                  width="20.4583"
-                  height="1.16905"
-                  transform="rotate(56.8778 0.979004 0)"
-                  fill="#D9D9D9"
-                />
-                <rect
-                  width="20.4583"
-                  height="1.16905"
-                  transform="matrix(0.546427 -0.837507 -0.837507 -0.546427 0.979004 34.5779)"
-                  fill="#D9D9D9"
-                />
-              </svg>
+      <div className="space-y-6">
+        {/* Header Section */}
+        <div className="flex-1 p-8" style={{ backgroundColor: '#F0F8E6' }}>
+          <div className="flex justify-between items-center mb-3">
+            <h1 className="text-2xl font-bold">Welcome {userDetails?.firstName}!</h1>
+            <div className="p-2 rounded-full bg-gray-100">
+              {/* Profile Image with Circular Crop */}
+              <img
+                src="profile.png"
+                alt="Profile"
+                className="h-10 w-10 rounded-full"
+              />
             </div>
           </div>
         </div>
-
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-medium">Your Bookings</h2>
-        </div>
-
-        <section className="bg-white rounded-lg p-0">
-          {bookings.map((booking) => (
-            <div key={booking.bookingNumber} className="mb-6 relative">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-medium">
-                    {formatDateTime(booking.startTime)}
-                  </h3>
-                  <p className="text-[#636561]">{booking.serviceName}</p>
-                  <div className="flex items-center text-[#636561] text-sm mt-1">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>Booking #{booking.bookingNumber}</span>
+  
+        {/* Main Content Container */}
+        <div className="container mx-auto p-6">
+          {/* Suggested Services Section */}
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-2xl font-medium">Suggested Services</h2>
+          </div>
+  
+          <div className="relative overflow-hidden">
+            <div
+              className="flex relative overflow-x-auto"
+              onWheel={handleWheel}
+              style={{ cursor: 'pointer', overflow: 'hidden' }}
+            >
+              <div
+                className="flex transition-all ease-in-out duration-300 gap-6"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              >
+                {services.map((service) => (
+                  <ServiceCard service={service} key={service.id} />
+                ))}
+              </div>
+  
+              <div
+                onClick={handleNext}
+                className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
+                style={{
+                  background:
+                    'linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)',
+                }}
+              >
+                <svg
+                  width="13"
+                  height="35"
+                  viewBox="0 0 13 35"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="0.979004"
+                    width="20.4583"
+                    height="1.16905"
+                    transform="rotate(56.8778 0.979004 0)"
+                    fill="#D9D9D9"
+                  />
+                  <rect
+                    width="20.4583"
+                    height="1.16905"
+                    transform="matrix(0.546427 -0.837507 -0.837507 -0.546427 0.979004 34.5779)"
+                    fill="#D9D9D9"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+  
+          {/* Your Bookings Section */}
+          <div className="flex justify-between items-center mt-5">
+            <h2 className="text-2xl font-medium">Your Bookings</h2>
+          </div>
+  
+          <section className="bg-white rounded-lg p-6 mt-6">
+            {bookings.length > 0 ? (
+              bookings.map((booking) => (
+                <div key={booking.bookingNumber} className="mb-6 relative">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-medium">{formatDateTime(booking.startTime)}</h3>
+                      <p className="text-[#636561]">{booking.serviceName}</p>
+                      <div className="flex items-center text-[#636561] text-sm mt-1">
+                        <Clock className="h-4 w-4 mr-2" />
+                        <span>Booking #{booking.bookingNumber}</span>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <BookingProgress
+                    steps={[
+                      { label: 'Created', status: 'completed' },
+                      {
+                        label: 'Confirmed',
+                        status: booking.accepted ? 'completed' : 'upcoming',
+                      },
+                      { label: 'Auditor Assigned', status: 'upcoming' },
+                      { label: 'On the Way', status: 'upcoming' },
+                      { label: 'Ongoing', status: 'upcoming' },
+                      { label: 'Complete', status: 'upcoming' },
+                    ]}
+                  />
+  
+                  <div className="flex justify-between mt-4">
+                    <Button
+                      variant="link"
+                      className="text-blue-600"
+                      onClick={() => handleViewDetails(booking.bookingNumber)}
+                    >
+                      View Details
+                    </Button>
+                    <div>
+                      <Button className="bg-[#5ea502] hover:bg-[#5ea502]/90">
+                        Reschedule
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <BookingProgress
-                steps={[
-                  { label: "Created", status: "completed" },
-                  {
-                    label: "Confirmed",
-                    status: booking.accepted ? "completed" : "upcoming",
-                  },
-                  { label: "Auditor Assigned", status: "upcoming" },
-                  { label: "On the Way", status: "upcoming" },
-                  { label: "Ongoing", status: "upcoming" },
-                  { label: "Complete", status: "upcoming" },
-                ]}
-              />
-
-              <div className="flex justify-between mt-4">
-                <Button
-                  variant="link"
-                  className="text-blue-600"
-                  onClick={() => handleViewDetails(booking.bookingNumber)}
-                >
-                  View Details
-                </Button>
-                <div>
-                  <Button className="bg-[#5ea502] hover:bg-[#5ea502]/90">
-                    Reschedule
+              ))
+            ) : (
+              <div className="relative flex h-[250px] items-stretch rounded-lg bg-[#f0f8e6] overflow-hidden">
+                {/* Left Column with Image (30% width) */}
+                <div className="relative w-[30%]">
+                  <img
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsLeft-HfKNAPd5hBQiuWSXWbJBLgcAfYZg76.png"
+                    alt="Left Icon"
+                    className="h-full w-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
+                    }}
+                  />
+                </div>
+  
+                {/* Middle Column with Text Content (40% width) */}
+                <div className="flex w-[40%] flex-col items-center justify-center gap-4 px-8">
+                  <div className="flex items-center gap-2">
+                    <img src="/calendarIcon.png" alt="Icon" className="h-8 w-8" />
+                    <p className="text-lg font-medium text-[#4d4e4b]">
+                      No Current Bookings
+                    </p>
+                  </div>
+                  <Button className="rounded-3xl bg-[#76BC1C] px-6 py-2 text-white hover:bg-[#67b502] outline outline-2 outline-white outline-offset-2 focus:outline-offset-2 focus:outline-white">
+                    Book Your First Service
                   </Button>
                 </div>
-              </div>
-            </div>
-          ))}
-
-          {bookings.length === 0 && (
-            <div className="relative flex h-[250px] items-stretch rounded-lg bg-[#f0f8e6] overflow-hidden">
-              {/* Left Column with Image (30% width) */}
-              <div className="relative w-[30%]">
-                <img
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsLeft-HfKNAPd5hBQiuWSXWbJBLgcAfYZg76.png"
-                  alt="Left Icon"
-                  className="h-full w-full object-cover"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
-                  }}
-                />
-              </div>
-
-              {/* Middle Column with Text Content (40% width) */}
-              <div className="flex w-[40%] flex-col items-center justify-center gap-4 px-8">
-                <div className="flex items-center gap-2">
-                  <img src="/calendarIcon.png" alt="Icon" className="h-8 w-8" />
-                  <p className="text-lg font-medium text-[#4d4e4b]">
-                    No Current Bookings
-                  </p>
+  
+                {/* Right Column with Image (30% width) */}
+                <div className="relative w-[30%]">
+                  <img
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsRight-Cmh90ifFQDGvXhLdSTeJDXVP0hWr3i.png"
+                    alt="Right Icon"
+                    className="h-full w-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(270deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
+                    }}
+                  />
                 </div>
-                <Button className="rounded-3xl bg-[#76BC1C] px-6 py-2 text-white hover:bg-[#67b502] outline outline-2 outline-white outline-offset-2 focus:outline-offset-2 focus:outline-white">
-                  Book Your First Service
-                </Button>
               </div>
-
-              {/* Right Column with Image (30% width) */}
-              <div className="relative w-[30%]">
-                <img
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsRight-Cmh90ifFQDGvXhLdSTeJDXVP0hWr3i.png"
-                  alt="Right Icon"
-                  className="h-full w-full object-cover"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(270deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </section>
-
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-medium">FAQs</h2>
+            )}
+          </section>
+  
+          {/* FAQs Section */}
+          <div className="flex justify-between items-center mt-5">
+            <h2 className="text-2xl font-medium">FAQs</h2>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+  
