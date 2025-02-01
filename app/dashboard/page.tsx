@@ -83,6 +83,8 @@ export default function DashboardPage() {
     } catch (error) {
       console.log(error);
       toast.error("No Services Found");
+    } finally {
+      setLoading(false);
     }
   };
 

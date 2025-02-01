@@ -1,16 +1,19 @@
 "use client";
 import { getUserDetails } from "@/utils/getUserDetails";
 import React, { createContext, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export const AUTH_CONTEXT = createContext<{
   isLoading: boolean;
   isLoggedIn: boolean;
   userDetails?: UserDetails;
   checkAuth: () => void;
+  logoutUser: () => void;
 }>({
   isLoading: true,
   isLoggedIn: false,
   checkAuth: () => {},
+  logoutUser: ()  => {}
 });
 
 interface UserPhoneNumber {
@@ -38,6 +41,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const checkAuth = () => {
     getUserDetails()
@@ -58,9 +63,23 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
   }, []);
 
+   useEffect(() => {
+      if (!isLoading && !isLoggedIn && pathname.includes("/dashboard")) {
+        router.replace('/login');
+      }
+
+
+      if (!isLoading && isLoggedIn && [ "/login", "/signup", "/forgot-password" ].includes(pathname)) {
+        router.replace("/dashboard")
+      }
+    }, [isLoading, isLoggedIn, router, pathname]);
+
+    function logoutUser() {
+      setIsLoggedIn(false);
+    }
   return (
     <AUTH_CONTEXT.Provider
-      value={{ isLoading, isLoggedIn, userDetails, checkAuth }}
+      value={{ isLoading, isLoggedIn, userDetails, checkAuth, logoutUser }}
     >
       {children}
     </AUTH_CONTEXT.Provider>

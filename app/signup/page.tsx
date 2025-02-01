@@ -1,144 +1,209 @@
-"use client";
+"use client"
 import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+import { Button } from "@/components/ui/button"
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FormEvent, useState } from "react";
+import { type FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import AuthSideImage from "@/components/ui/auth-side-image";
+import { Eye, EyeOff } from "lucide-react";
+import { AUTH_CONTEXT } from "@/providers/auth";
 
 export default function SignUp() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstname, setFirstName] = useState("");
-  const [lastname, setLastName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [firstname, setFirstName] = useState("")
+  const [lastname, setLastName] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const router = useRouter()
+  const { isLoggedIn, isLoading } = useContext(AUTH_CONTEXT);
+
+  // useEffect(() => {
+  //   if (!isLoading && isLoggedIn) {
+  //     router.push("/dashboard/bookings")
+  //   }
+  // }, [isLoading, isLoggedIn, router])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
 
-    try {
-      const response = await fetch(`/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          firstName: firstname,
-          lastName: lastname,
-        }),
-      });
+    if (password === confirmPassword) {
+      try {
+        const response = await fetch(`/api/auth/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            firstName: firstname,
+            lastName: lastname,
+          }),
+        })
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to sign up");
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || "Failed to sign up")
+        }
+
+        const data = await response.json()
+        console.log(data)
+        toast.success("User created successfully")
+
+        router.push("/login")
+      } catch (error) {
+        setError((error as Error).message)
+        console.log(error)
+      } finally {
+        setLoading(false)
       }
-
-      const data = await response.json();
-      console.log(data);
-      toast.success("User created successfully");
-
-      router.push("/login");
-    } catch (error) {
-      setError((error as Error).message);
-      console.log(error);
-    } finally {
-      setLoading(false);
+    } else {
+      setError("Passwords don't match!")
+      setLoading(false)
     }
-  };
+  }
+
+  const inputClassName =
+    "focus:ring-2 focus:ring-[#5ea502] focus:border-[#5ea502] outline-none transition-colors duration-300 !important"
+
   return (
-    <div className="mx-5 flex items-center justify-center h-screen">
-      <Card>
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-medium text-center">
-            Sign Up
-          </CardTitle>
-          <CardDescription>
-            Enter your email and password to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="flex gap-3">
-              <div className="grid gap-2">
-                <Label htmlFor="firstname">First Name</Label>
-                <Input
-                  id="firstname"
-                  type="text"
-                  value={firstname}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="John"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Last Name</Label>
-                <Input
-                  id="lastname"
-                  type="text"
-                  value={lastname}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Deo"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+    <div className="flex h-screen">
+      <div className="hidden md:block md:w-1/2">
+        <AuthSideImage />
+      </div>
+
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4 overflow-y-auto">
+        <Card className="w-full max-w-sm my-8">
+          <form onSubmit={handleSubmit}>
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-2xl font-medium text-left">Sign Up</CardTitle>
+              <CardDescription className="text-sm">Create an account to get started.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="m@example.com"
+                placeholder="Email"
                 required
+                className={inputClassName}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  required
+                  className={inputClassName}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm Password"
+                  required
+                  className={inputClassName}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
               <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                id="firstname"
+                type="text"
+                value={firstname}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="First Name"
                 required
+                className={inputClassName}
               />
+              <Input
+                id="lastname"
+                type="text"
+                value={lastname}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Last Name"
+                required
+                className={inputClassName}
+              />
+
+              {error && <p className="text-xs text-red-500">{error}</p>}
+              <Button
+                type="submit"
+                className={`w-full ${loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"}`}
+                disabled={loading}
+              >
+                {loading ? "Creating Account..." : "Sign Up"}
+              </Button>
+            </CardContent>
+            <div className="flex items-center justify-center my-2">
+              <hr className="flex-grow border-t border-gray-300" />
+              <span className="mx-2 text-xs text-gray-600">OR</span>
+              <hr className="flex-grow border-t border-gray-300" />
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating Account..." : "Sign Up"}
-            </Button>
+            <CardFooter className="flex flex-col gap-2 pt-0">
+              <button className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                <img src="/google-logo.png" alt="Google logo" className="w-4 h-4 mr-2" />
+                <span className="text-sm text-gray-800 font-medium">Sign Up with Google</span>
+              </button>
+              <button className="flex items-center justify-center w-full px-4 py-2 border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                <img src="/apple-logo.svg" alt="Apple logo" className="w-4 h-4 mr-2" />
+                <span className="text-sm text-white font-medium">Sign Up with Apple</span>
+              </button>
+              <a href="http://" target="_blank" rel="noopener noreferrer" className="text-center">
+                <p className="font-thin text-xs">More Sign Up Options</p>
+              </a>
+              <p className="mt-2 text-sm text-center text-gray-700">
+                Already have an account?{" "}
+                <Link href="/login" className="text-[#67b502]">
+                  Log in here
+                </Link>
+              </p>
+            </CardFooter>
           </form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-1">
-          {/* <div className="text-sm">OR</div>
-          <Button variant={"outline"} className="w-full mt-2 text-black ">
-            Continue with Google
-          </Button> */}
-          <p className="text-xs text-center text-gray-700">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
+

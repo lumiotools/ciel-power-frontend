@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { useContext } from "react";
+import { AUTH_CONTEXT } from "@/providers/auth";
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: "/dashboard.svg" },
@@ -15,6 +17,24 @@ const sidebarItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+
+  const { isLoading, isLoggedIn, logoutUser } = useContext(AUTH_CONTEXT);
+  const router = useRouter();
+  // const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleLogout = async () => {
+    const response = await (
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+    ).json();
+
+    if (response["message"]) {
+      logoutUser();
+      router.replace("/login");
+    }
+  };
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col bg-gradient-to-b from-[#B9DD8B] via-[#99CD55] to-[#67B502] py-6 px-[22px] items-center">
@@ -58,9 +78,10 @@ export function Sidebar() {
         <Button
           variant="ghost"
           className="flex transition-all ease-in items-center space-x-2 text-white hover:text-black"
+          onClick={handleLogout}
         >
           <LogOut className="h-10 w-10" />
-          <span className='text-[15px]'>Logout</span>
+          <span className="text-[15px]">Logout</span>
         </Button>
       </div>
     </div>
