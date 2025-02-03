@@ -446,11 +446,11 @@ const BookingDetailsPage = () => {
                 <div className="mb-4 overflow-hidden rounded-lg">
                   {/* Auditor avatar or placeholder image */}
                   <img
-                    src="/auditor.png"
+                    src="https://st2.depositphotos.com/9998432/48284/v/450/depositphotos_482842120-stock-illustration-default-avatar-photo-placeholder-grey.jpg"
                     alt="Auditor"
                     width={120}
                     height={120}
-                    className="object-cover"
+                    className="object-cover rounded-full"
                   />
                 </div>
                 <h5 className="font-medium">{booking.auditor}</h5>
