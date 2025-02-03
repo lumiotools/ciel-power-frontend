@@ -11,8 +11,8 @@ import { AUTH_CONTEXT } from "@/providers/auth";
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: "/dashboard.svg" },
-  { name: "Audit Info", href: "/dashboard/bookings", icon: "/peopleIcon.svg" },
-  { name: "Proposals", href: "/dashboard/expect", icon: "/handIcon.svg" },
+  { name: "Audit Info", href: "/dashboard/expect", icon: "/peopleIcon.svg" },
+  // { name: "Proposals", href: "/dashboard/expect", icon: "/handIcon.svg" },
 ];
 
 export function Sidebar() {
