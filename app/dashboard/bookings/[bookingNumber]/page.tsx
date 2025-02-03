@@ -3,20 +3,10 @@
 import { useParams } from "next/navigation";
 import React, { useEffect, useState, useContext } from "react";
 import { AUTH_CONTEXT } from "../../../../providers/auth"; // Adjust the import path as needed
-import {
-  ArrowLeft,
-  Clock,
-  User,
-  Building2,
-  Calendar,
-  Loader2,
-  BadgeCheck,
-  XCircle,
-  ChevronRight,
-} from "lucide-react";
+import { Loader2, XCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+// import { Separator } from "@/components/ui/separator";
 import RescheduleModal from "@/components/modal/RescheduleModal";
 import UtilityBills from "@/components/booking/utilityBills";
 import { isBefore } from "date-fns";
@@ -86,8 +76,7 @@ const BookingDetailsPage = () => {
     []
   );
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
-  const { userDetails, isLoggedIn, isLoading, checkAuth } =
-    useContext(AUTH_CONTEXT);
+  const { userDetails } = useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
@@ -219,42 +208,42 @@ const BookingDetailsPage = () => {
     fetchBookingDetails();
   }, [bookingNumber]);
 
-  const formatDateTime = (startStr: string, endStr?: string): string => {
-    const start = new Date(startStr);
-    if (isNaN(start.getTime())) {
-      return "Invalid start time"; // Handle invalid start date
-    }
+  // const formatDateTime = (startStr: string, endStr?: string): string => {
+  //   const start = new Date(startStr);
+  //   if (isNaN(start.getTime())) {
+  //     return "Invalid start time"; // Handle invalid start date
+  //   }
 
-    const dateFormat = new Intl.DateTimeFormat("en-US", {
-      timeZone: "UTC",
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  //   const dateFormat = new Intl.DateTimeFormat("en-US", {
+  //     timeZone: "UTC",
+  //     weekday: "long",
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //   });
 
-    const timeFormat = new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-      timeZone: "UTC",
-    });
+  //   const timeFormat = new Intl.DateTimeFormat("en-US", {
+  //     hour: "numeric",
+  //     minute: "numeric",
+  //     hour12: true,
+  //     timeZone: "UTC",
+  //   });
 
-    const dateStr = dateFormat.format(start);
-    const startTimeStr = timeFormat.format(start);
+  //   const dateStr = dateFormat.format(start);
+  //   const startTimeStr = timeFormat.format(start);
 
-    if (!endStr) {
-      return `${dateStr} at ${startTimeStr}`;
-    }
+  //   if (!endStr) {
+  //     return `${dateStr} at ${startTimeStr}`;
+  //   }
 
-    const end = new Date(endStr);
-    if (isNaN(end.getTime())) {
-      return `${dateStr} at ${startTimeStr}`; // Ignore invalid end date
-    }
+  //   const end = new Date(endStr);
+  //   if (isNaN(end.getTime())) {
+  //     return `${dateStr} at ${startTimeStr}`; // Ignore invalid end date
+  //   }
 
-    const endTimeStr = timeFormat.format(end);
-    return `${dateStr} at ${startTimeStr} to ${endTimeStr}`;
-  };
+  //   const endTimeStr = timeFormat.format(end);
+  //   return `${dateStr} at ${startTimeStr} to ${endTimeStr}`;
+  // };
 
   const isPastBooking = booking
     ? isBefore(new Date(), new Date(booking.startTime))
@@ -264,8 +253,8 @@ const BookingDetailsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          <p className="text-lg text-gray-600">Loading booking details...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-lime-400" />
+          <p className="text-md text-gray-600">Loading booking details...</p>
         </div>
       </div>
     );
@@ -302,7 +291,7 @@ const BookingDetailsPage = () => {
             <div className="mt-2 flex items-center space-x-2 text-sm text-gray-500">
               <Link href={"/dashboard"}>Dashboard</Link>
               <ChevronRight size={16} />
-              <Link href={"/dashboard/bookings"}>Bookings</Link>
+              <Link href={"/dashboard"}>Bookings</Link>
               <ChevronRight size={16} />
               <span>View Details</span>
             </div>
@@ -315,7 +304,7 @@ const BookingDetailsPage = () => {
         </div>
 
         {/* ========== PROGRESS BAR ========== */}
-        <div className="mb-10 mt-10">
+        <div className="my-6">
           <BookingProgress
             steps={[
               { label: "Created", status: "completed" },
@@ -336,13 +325,13 @@ const BookingDetailsPage = () => {
         </div>
 
         {/* ========== MAIN SECTION: Left (Service Details) & Right (Payment, Auditor) ========== */}
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* LEFT COLUMN (2/3 width) */}
-          <div className="col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-6">
             {/* Service Details */}
             <div>
-              <h2 className="text-2xl font-bold">Thu 30 Jan | 10:00 AM</h2>
-              <h3 className="text-xl font-semibold">{booking.serviceName}</h3>
+              <h2 className="text-xl font-bold">Thu 30 Jan | 10:00 AM</h2>
+              <h3 className="text-[16px] font-semibold">{booking.serviceName}</h3>
             </div>
 
             {/* Address */}
@@ -363,7 +352,7 @@ const BookingDetailsPage = () => {
             </div>
 
             {/* Appointment Time */}
-            <div>
+            {/* <div>
               <h3 className="mb-3 flex items-center text-lg font-medium text-gray-900">
                 <Calendar className="mr-2 h-5 w-5 text-gray-400" />
                 Appointment Time
@@ -379,69 +368,77 @@ const BookingDetailsPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* What to Expect */}
             <div>
               <h4 className="mb-4 font-medium">What to expect?</h4>
-              <ul className="list-inside space-y-2 text-muted-foreground">
+              <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
                 <li>
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
                   do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </li>
-              </ul>
+                <li>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </li>
+              </ol>
             </div>
 
             {/* View Report Button */}
-            <Button variant="secondary" className="w-full">
+            {/* <Button variant="secondary" className="w-full">
               View Report
-            </Button>
+            </Button> */}
 
             {/* Reschedule / Cancel Buttons */}
-            <div className="flex gap-4">
-              <Button
-                onClick={handleRescheduleClick}
-                variant="default"
-                className="flex-1 bg-[#96C93D] hover:bg-[#85b234]"
-              >
-                Reschedule Booking
-              </Button>
-              <Button
-                onClick={() => handleCancelBooking()}
-                variant="outline"
-                className="flex-1 text-red-500 hover:bg-red-50 hover:text-red-600"
-              >
-                Cancel Booking
-              </Button>
+            <div className="flex flex-wrap gap-4">
+              {isPastBooking && (
+                <Button
+                  onClick={handleRescheduleClick}
+                  variant="default"
+                  className="flex-1 bg-[#96C93D] hover:bg-[#85b234]"
+                >
+                  Reschedule Booking
+                </Button>
+              )}
+              {isPastBooking && (
+                <Button
+                  onClick={() => handleCancelBooking()}
+                  variant="outline"
+                  className="flex-1 text-red-500 hover:bg-red-50 hover:text-red-600"
+                >
+                  Cancel Booking
+                </Button>
+              )}
             </div>
           </div>
 
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
-          <div className="col-span-1 space-y-6">
+          <div className="space-y-6">
             {/* Payment Details Card */}
-            <Card className="p-6 bg-[#F0F8E6]">
+            <Card className="p-6 bg-[#F0F8E6] shadow-md">
               <h4 className="mb-4 text-lg font-medium">Payment details</h4>
               <div className="mb-4 flex justify-between">
                 <span className="text-muted-foreground">Payment Status</span>
                 <span className="font-medium text-green-600">Paid</span>
               </div>
-              <div className="mb-6 flex justify-between">
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Payment Amount</span>
                 <span className="font-medium text-green-600">
                   ${booking.price.totalGross.amount}
                 </span>
               </div>
-              <Button
+              {/* <Button
                 variant="outline"
                 className="w-full bg-[#96C93D] hover:bg-[#85b234]"
               >
-                {/* <Download className="mr-2 size-4" /> */}
+                {/* <Download className="mr-2 size-4" /> *
                 Download Invoice
-              </Button>
+              </Button> */}
             </Card>
 
             {/* Auditor Card */}
-            <Card className="p-6 bg-[#F0F8E6]">
+            <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px]">
               <h4 className="mb-4 text-lg font-medium">
                 Your Assigned Auditor
               </h4>
@@ -466,9 +463,10 @@ const BookingDetailsPage = () => {
         </div>
 
         {/* ========== ADDITIONAL SECTIONS BELOW ========== */}
-        <div className="mt-8 space-y-6">
-          {/* Customer Details */}
-          {/* <Card>
+      </main>
+      <div>
+        {/* Customer Details */}
+        {/* <Card>
             <CardContent className="pt-6">
               <h3 className="flex items-center text-lg font-medium text-gray-900">
                 <User className="mr-2 h-5 w-5 text-gray-400" />
@@ -493,14 +491,13 @@ const BookingDetailsPage = () => {
             </CardContent>
           </Card> */}
 
-          <UtilityBills
-            bookingNumber={bookingNumber as string}
-            bookingCancelled={Boolean(booking.canceled)}
-          />
-          <KnowledgeContent youtubeSuggestions={youtubeSuggestions} />
-          <BlogContent blogs={blogs} />
-        </div>
-      </main>
+        <UtilityBills
+          bookingNumber={bookingNumber as string}
+          bookingCancelled={Boolean(booking.canceled)}
+        />
+        <KnowledgeContent youtubeSuggestions={youtubeSuggestions} />
+        <BlogContent blogs={blogs} />
+      </div>
 
       {booking && (
         <RescheduleModal

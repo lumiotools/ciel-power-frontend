@@ -18,7 +18,7 @@ const sidebarItems = [
 export function Sidebar() {
   const pathname = usePathname();
 
-  const { isLoading, isLoggedIn, logoutUser } = useContext(AUTH_CONTEXT);
+  const { logoutUser } = useContext(AUTH_CONTEXT);
   const router = useRouter();
   // const [isSheetOpen, setIsSheetOpen] = useState(false);
 
