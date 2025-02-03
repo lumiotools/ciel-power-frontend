@@ -182,14 +182,14 @@ export default function SignUp() {
               <hr className="flex-grow border-t border-gray-300" />
             </div>
             <CardFooter className="flex flex-col gap-3">
-              <button className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              <button type='button' disabled className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/google-logo.png" alt="Google logo" className="w-4 h-4 mr-2" />
                 <span className="text-sm text-gray-800 font-medium">Sign Up with Google</span>
               </button>
-              <button className="flex items-center justify-center w-full h-[48px] border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              {/* <button className="flex items-center justify-center w-full h-[48px] border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/apple-logo.svg" alt="Apple logo" className="w-4 h-4 mr-2" />
                 <span className="text-sm text-white font-medium">Sign Up with Apple</span>
-              </button>
+              </button> */}
               <a href="http://" target="_blank" rel="noopener noreferrer" className="text-center">
                 <p className="text-[12px] font-thin text-[#1C2C14]">More Sign Up Options</p>
               </a>
