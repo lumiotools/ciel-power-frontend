@@ -245,6 +245,18 @@ const BookingDetailsPage = () => {
   //   return `${dateStr} at ${startTimeStr} to ${endTimeStr}`;
   // };
 
+  const formatDateTime = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "UTC",
+    }).format(date);
+  };
+
   const isPastBooking = booking
     ? isBefore(new Date(), new Date(booking.startTime))
     : false;
@@ -330,7 +342,7 @@ const BookingDetailsPage = () => {
           <div className="md:col-span-2 space-y-6">
             {/* Service Details */}
             <div>
-              <h2 className="text-xl font-bold">Thu 30 Jan | 10:00 AM</h2>
+              <h2 className="text-xl font-bold">{formatDateTime(booking.startTime)}</h2>
               <h3 className="text-[16px] font-semibold">{booking.serviceName}</h3>
             </div>
 
