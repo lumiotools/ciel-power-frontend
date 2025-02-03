@@ -152,9 +152,9 @@ export default function Login() {
                 <span className="text-white font-medium text-[14px]">Log in with Apple</span>
               </button> */}
 
-              <a href="http://" target="_blank" rel="noopener noreferrer" className="text-center">
+              <div className="text-center">
                 <p className="text-[12px] font-thin text-[#1C2C14]">More Sign Up Options</p>
-              </a>
+              </div>
 
               {/* Sign Up Link */}
               <p className="mt-4 text-center text-gray-700 text-[14px]">

@@ -190,9 +190,9 @@ export default function SignUp() {
                 <img src="/apple-logo.svg" alt="Apple logo" className="w-4 h-4 mr-2" />
                 <span className="text-sm text-white font-medium">Sign Up with Apple</span>
               </button> */}
-              <a href="http://" target="_blank" rel="noopener noreferrer" className="text-center">
+              <div className="text-center">
                 <p className="text-[12px] font-thin text-[#1C2C14]">More Sign Up Options</p>
-              </a>
+              </div>
               <p className="mt-2 text-sm text-center text-gray-700">
                 Already have an account?{" "}
                 <Link href="/login" className="text-[#67b502]">
