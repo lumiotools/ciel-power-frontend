@@ -226,6 +226,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               isLoading ||
               isToday(selectedDate)
             }
+            className="bg-lime-500"
           >
             {isLoading ? "Rescheduling..." : "Confirm Reschedule"}
           </Button>

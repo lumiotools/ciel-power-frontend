@@ -16,7 +16,7 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => (
-  <Card className="w-full flex flex-col">
+  <Card className="flex flex-col">
     {/* Image Section */}
     <div className="h-[50%] w-full relative">
       {service.images ? (
@@ -37,15 +37,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => (
       style={{ backgroundColor: "#F0F8E6" }}
     >
       {/* Reduced height for content section */}
-      <CardTitle className="mt-4">{service.name}</CardTitle>
+      <CardTitle className="mt-4 line-clamp-1 text-ellipsis leading-5 text-[12px]">{service.name}</CardTitle>
       <CardDescription
-        className="mt-4"
+        className="mt-4 line-clamp-2 text-ellipsis text-[10px] font-medium"
         dangerouslySetInnerHTML={{ __html: service.description }}
       ></CardDescription>
 
       {/* Right Arrow Button */}
       <Link href={`dashboard/${service.id}`} key={service.id}>
-        <div className="absolute right-4 bottom-4 cursor-pointer z-10">
+        <div className="absolute right-4 bottom-2 cursor-pointer z-10">
           <img
             src="/rightArrowGrey.svg"
             alt="Right Arrow"

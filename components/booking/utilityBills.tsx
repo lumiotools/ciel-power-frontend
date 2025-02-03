@@ -73,7 +73,7 @@ const UtilityBills = ({
               Upload Utility Bills
             </h3>
             {!bookingCancelled && (
-              <Button onClick={() => setUploadModal(true)}>Upload</Button>
+              <Button onClick={() => setUploadModal(true)} className="bg-[#96C93D]">Upload</Button>
             )}
           </div>
 

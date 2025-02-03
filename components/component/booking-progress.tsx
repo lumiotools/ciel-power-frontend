@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { BadgeCheck, BadgeX, CircleX } from "lucide-react";
+import { BadgeX } from "lucide-react";
 import type React from "react"; // Import React
 
 interface Step {
@@ -16,13 +16,6 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
   status === "cancelled" ? (
     <BadgeX className="size-11 fill-destructive text-white" />
   ) : (
-    // <BadgeCheck
-    //   className={cn("size-12", {
-    //     "fill-[#5ea502] text-white": status === "completed",
-    //     "fill-[#b9dd8b] text-white": status === "current",
-    //     "fill-[#d1d5db] text-white": status === "upcoming",
-    //   })}
-    // />
     <div className="relative w-8 h-8">
       <svg
         width="32"
@@ -34,7 +27,6 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
           "text-[#5ea502]": status === "completed",
           "text-[#b9dd8b]": status === "current",
           "text-[#d1d5db]": status === "upcoming",
-          // "text-destructive": status === "cancelled",
         })}
       >
         <circle cx="16" cy="16" r="16" fill="white" />
@@ -52,30 +44,31 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
 }) => {
   return (
     <div
-      className={cn("flex items-center justify-between w-full mt-4", className)}
+      className={cn("relative w-full mt-4", className)}
     >
-      {steps.map((step, index) => (
-        <div
-          key={step.label}
-          className="flex items-center flex-1 last:flex-none"
-        >
-          <div className="flex flex-col items-center">
-            <StatusIcon status={step.status} />
-            <span className="text-sm text-[#4d4e4b] mt-2 whitespace-nowrap">
-              {step.label}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <div
-              className={cn(
-                "h-[2px] flex-grow mx-2",
-                step.status === "completed" ? "bg-[#5ea502]" : "bg-[#d1d5db]"
+       <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
+        <div className="flex flex-nowrap items-center">
+          {steps.map((step, index) => (
+            <div key={step.label} className="flex items-center flex-none">
+              <div className="flex flex-col items-center text-center min-w-[80px] sm:min-w-[100px]">
+                <StatusIcon status={step.status} />
+                <span className="text-[12px] sm:text-[12px] text-black font-medium mt-2 ">
+                  {step.label}
+                </span>
+              </div>
+              {index < steps.length - 1 && (
+                <div
+                  className={cn(
+                    "h-[2px] w-8 sm:w-12 md:w-16",
+                    step.status === "completed" ? "bg-[#5ea502]" : "bg-[#d1d5db]"
+                  )}
+                  aria-hidden="true"
+                />
               )}
-              aria-hidden="true"
-            />
-          )}
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 };

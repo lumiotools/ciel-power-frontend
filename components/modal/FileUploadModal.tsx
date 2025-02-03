@@ -128,7 +128,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl">
-        <Card>
+        <Card className="rounded-lg">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg font-medium">
@@ -182,7 +182,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 </>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+                  <Loader2 className="h-6 w-6 animate-spin text-lime-500" />
                   <p className="text-sm text-gray-600">Uploading...</p>
                 </div>
               )}
@@ -217,7 +217,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
             {/* Upload Button */}
             {files.length > 0 && !uploading && (
               <div className="mt-4">
-                <Button onClick={handleUpload} className="rounded-full">
+                <Button onClick={handleUpload} className="rounded-full bg-lime-500">
                   Upload Files
                 </Button>
               </div>

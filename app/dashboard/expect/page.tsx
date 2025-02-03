@@ -36,7 +36,7 @@ const HomePage: FC = () => {
         <p className="text-xl text-muted-foreground mb-6">
           Thank you for scheduling your Home Energy Audit
         </p>
-        <Alert className="bg-blue-50 border-blue-200 mb-8">
+        <Alert className="bg-lime-200 border-lime-400 mb-8">
           <AlertDescription>
             This important first step is a prerequisite for participating in the
             Whole House Energy Efficiency Programs available through New
@@ -73,7 +73,7 @@ const HomePage: FC = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <ClipboardList className="h-6 w-6 text-blue-600" />
+                <ClipboardList className="h-6 w-6 text-lime-500" />
                 <CardTitle>1. On-Site Inspection</CardTitle>
               </div>
             </CardHeader>
@@ -85,14 +85,14 @@ const HomePage: FC = () => {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
-                  <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
                   <span>
                     Gathering information about insulation, construction
                     details, and your heating, cooling, and hot water systems
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
                   <span>
                     Performing a blower door test to measure air tightness and
                     using infrared cameras to identify areas where air may be
@@ -100,7 +100,7 @@ const HomePage: FC = () => {
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
                   <span>
                     Conducting safety checks for issues such as gas leaks,
                     carbon monoxide, mold, and asbestos
@@ -113,7 +113,7 @@ const HomePage: FC = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Settings2 className="h-6 w-6 text-blue-600" />
+                <Settings2 className="h-6 w-6 text-lime-500" />
                 <CardTitle>2. Engineering Analysis</CardTitle>
               </div>
             </CardHeader>
@@ -124,13 +124,13 @@ const HomePage: FC = () => {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
-                  <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
                   <span>
                     Projects energy savings from recommended improvements
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
                   <span>
                     Identifies utility incentives and tax credits available to
                     you (up to 30% of costs)
@@ -146,7 +146,7 @@ const HomePage: FC = () => {
       <Card className="mb-12">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <FileText className="h-6 w-6 text-blue-600" />
+            <FileText className="h-6 w-6 text-lime-500" />
             <CardTitle>Your Final Report</CardTitle>
           </div>
           <CardDescription>
@@ -157,20 +157,20 @@ const HomePage: FC = () => {
         <CardContent>
           <ul className="space-y-3">
             <li className="flex items-start gap-2">
-              <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+              <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
               <span>
                 A breakdown of your home&apos;s current energy performance
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+              <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
               <span>
                 A prioritized list of suggested upgrades, including costs,
                 incentives, and estimated savings
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="h-2 w-2 mt-2 rounded-full bg-blue-500" />
+              <span className="h-2 w-2 mt-2 rounded-full bg-lime-500" />
               <span>
                 Steps you can take to enhance your home&apos;s comfort and
                 efficiency
@@ -184,7 +184,7 @@ const HomePage: FC = () => {
       <Card className="mb-12">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Home className="h-6 w-6 text-blue-600" />
+            <Home className="h-6 w-6 text-lime-500" />
             <CardTitle>How to Prepare</CardTitle>
           </div>
           <CardDescription>
@@ -196,7 +196,7 @@ const HomePage: FC = () => {
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Home className="h-5 w-5 text-blue-600" />
+                  <Home className="h-5 w-5 text-lime-500" />
                   <h3 className="font-semibold">1. Provide Access</h3>
                 </div>
                 <p>
@@ -212,7 +212,7 @@ const HomePage: FC = () => {
 
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <PawPrint className="h-5 w-5 text-blue-600" />
+                  <PawPrint className="h-5 w-5 text-lime-500" />
                   <h3 className="font-semibold">2. Secure Pets</h3>
                 </div>
                 <p>
@@ -226,7 +226,7 @@ const HomePage: FC = () => {
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Upload className="h-5 w-5 text-blue-600" />
+                  <Upload className="h-5 w-5 text-lime-500" />
                   <h3 className="font-semibold">3. Utility Information</h3>
                 </div>
                 <p>
@@ -239,7 +239,7 @@ const HomePage: FC = () => {
 
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Users className="h-5 w-5 text-blue-600" />
+                  <Users className="h-5 w-5 text-lime-500" />
                   <h3 className="font-semibold">
                     4. Plan for Someone to Be Home
                   </h3>
@@ -258,7 +258,7 @@ const HomePage: FC = () => {
       <Card className="mb-12">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-blue-600" />
+            <Shield className="h-6 w-6 text-lime-500" />
             <CardTitle>Frequently Asked Questions</CardTitle>
           </div>
         </CardHeader>
