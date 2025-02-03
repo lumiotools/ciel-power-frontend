@@ -81,7 +81,7 @@ const UtilityBills = ({
         </CardHeader>
         <CardContent>
           {files.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {files.map((file) => (
                 <div
                   key={file.id}
@@ -108,7 +108,7 @@ const UtilityBills = ({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm">View</Button>
+                    <Button size="sm" className="bg-[#96C93D] hover:bg-[#85b234]">View</Button>
                   </a>
                 </div>
               ))}
