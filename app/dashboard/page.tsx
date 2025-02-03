@@ -417,9 +417,9 @@ export default function DashboardPage() {
           </section>
 
           {/* FAQs Section */}
-          <div className="flex justify-between items-center mt-5">
+          {/* <div className="flex justify-between items-center mt-5">
             <h2 className="text-2xl font-medium">FAQs</h2>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
