@@ -50,9 +50,9 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
         <div className="flex flex-nowrap items-center">
           {steps.map((step, index) => (
             <div key={step.label} className="flex items-center flex-none">
-              <div className="flex flex-col items-center text-center min-w-[80px] sm:min-w-[100px]">
+              <div className="flex flex-col items-center text-center min-w-[120px] sm:min-w-[100px]">
                 <StatusIcon status={step.status} />
-                <span className="text-[12px] sm:text-[12px] text-black font-medium mt-2 ">
+                <span className="text-[14px] sm:text-[12px] text-black font-medium mt-2 ">
                   {step.label}
                 </span>
               </div>

@@ -39,7 +39,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => (
       {/* Reduced height for content section */}
       <CardTitle className="mt-4 line-clamp-1 text-ellipsis leading-5 text-[14px]">{service.name}</CardTitle>
       <CardDescription
-        className="mt-4 line-clamp-2 text-ellipsis text-[10px] font-medium"
+        className="mt-4 line-clamp-2 text-ellipsis text-[12px] font-medium"
         dangerouslySetInnerHTML={{ __html: service.description }}
       ></CardDescription>
 
