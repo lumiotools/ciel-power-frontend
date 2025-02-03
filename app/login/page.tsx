@@ -141,16 +141,16 @@ export default function Login() {
 
             <CardFooter className="flex flex-col gap-3">
               {/* Google Button */}
-              <button className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              <button type="button" disabled className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/google-logo.png" alt="Google logo" className="w-5 h-5 mr-2" />
                 <span className="text-gray-800 font-medium text-[14px]">Log In with Google</span>
               </button>
 
               {/* Apple Button */}
-              <button className="flex items-center justify-center w-full h-[48px] border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              {/* <button type="button" className="flex items-center justify-center w-full h-[48px] border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/apple-logo.svg" alt="Apple logo" className="w-5 h-5 mr-2" />
                 <span className="text-white font-medium text-[14px]">Log in with Apple</span>
-              </button>
+              </button> */}
 
               <a href="http://" target="_blank" rel="noopener noreferrer" className="text-center">
                 <p className="text-[12px] font-thin text-[#1C2C14]">More Sign Up Options</p>
