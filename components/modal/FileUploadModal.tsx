@@ -217,7 +217,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
             {/* Upload Button */}
             {files.length > 0 && !uploading && (
               <div className="mt-4">
-                <Button onClick={handleUpload} className="rounded-full bg-lime-500">
+                <Button onClick={handleUpload} className="rounded-full bg-[#96C93D] hover:bg-[#85b234]">
                   Upload Files
                 </Button>
               </div>
