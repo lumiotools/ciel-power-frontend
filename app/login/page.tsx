@@ -59,7 +59,17 @@ export default function Login() {
         // router.push("/dashboard/bookings")
       } else {
         const errorData = await response.json()
-        setError(errorData.message || "Login failed. Please try again.") // Display server error
+        const errorMessage = errorData.detail || "Login failed. Please try again."
+
+        // Extract error code
+        const errorCodeMatch = errorMessage.match(/: ([A-Z_]+)$/)
+        const errorCode = errorCodeMatch ? errorCodeMatch[1] : "UNKNOWN_ERROR"
+
+        if (errorCode === "INVALID_LOGIN_CREDENTIALS") {
+          setError("Invalid email or password")
+        } else {
+          setError(errorMessage)
+        }
         console.error("Login failed:", errorData)
       }
     } catch (error) {

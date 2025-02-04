@@ -1,12 +1,12 @@
 "use client"
 import Link from "next/link";
 import { Button } from "@/components/ui/button"
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
   CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,10 @@ export default function SignUp() {
 
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || "Failed to sign up")
+          const match = errorData.detail.match(/400:\s(.+)/);
+          const extractedMessage = match ? match[1] : "";
+          console.log(extractedMessage);
+          throw new Error(extractedMessage || "Failed to sign up")
         }
 
         const data = await response.json()
