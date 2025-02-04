@@ -404,7 +404,7 @@ const BookingDetailsPage = () => {
 
             {/* Reschedule / Cancel Buttons */}
             <div className="flex flex-wrap gap-4">
-              {isPastBooking && (
+              {!booking.canceled && isPastBooking && (
                 <Button
                   onClick={handleRescheduleClick}
                   variant="default"
@@ -413,7 +413,7 @@ const BookingDetailsPage = () => {
                   Reschedule Booking
                 </Button>
               )}
-              {isPastBooking && (
+              {!booking.canceled && isPastBooking && (
                 <Button
                   onClick={() => handleCancelBooking()}
                   variant="outline"
