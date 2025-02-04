@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useContext, useEffect } from 'react';
+import { FormEvent, useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,15 +15,15 @@ import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import AuthSideImage from '@/components/ui/auth-side-image';
 import { toast } from 'sonner';
-import { AUTH_CONTEXT } from '@/providers/auth';
+// import { AUTH_CONTEXT } from '@/providers/auth';
 
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [loading, setIsLoading] = useState(false);
-    const [error, setError] = useState<String | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { isLoading, isLoggedIn } = useContext(AUTH_CONTEXT);
+    // const { isLoading, isLoggedIn } = useContext(AUTH_CONTEXT);
 
     // useEffect(() => {
     //     if(isLoggedIn && !isLoading) {
@@ -79,7 +79,7 @@ export default function ForgotPassword() {
         "focus:ring-2 focus:ring-[#b9dd8b] focus:border-[#b9dd8b] outline-none transition-colors duration-300 !important"
     return (
         <div className="flex h-screen">
-      <div className="hidden md:block md:w-1/2">
+      <div className="hidden md:flex md:w-1/2 p-2">
         <AuthSideImage />
       </div>
 
@@ -105,7 +105,7 @@ export default function ForgotPassword() {
               {error && <p className="text-sm text-red-500 text-center">{error}</p>}
               <Button
                 type="submit"
-                className={`w-full ${loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"}`}
+                className={`w-full h-[48px] text-[18px] ${loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"}`}
                 disabled={loading}
               >
                 {loading ? "Sending reset link..." : "Send Reset Link"}

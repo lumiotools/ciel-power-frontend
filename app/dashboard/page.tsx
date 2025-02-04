@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import ServiceCard from "../../components/component/ServiceCard";
 import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
-import CountdownTimer from "@/components/component/CountdownTimer";
+// import CountdownTimer from "@/components/component/CountdownTimer";
 import { Clock, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -68,8 +68,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  const { userDetails, isLoggedIn, isLoading, checkAuth } =
-    useContext(AUTH_CONTEXT);
+  const { userDetails } = useContext(AUTH_CONTEXT);
   const getServices = async () => {
     try {
       const response = await fetch(`/api/booking/services`, {
@@ -110,15 +109,11 @@ export default function DashboardPage() {
   };
 
   const handleNext = () => {
-    if (currentIndex < services.length - 3) {
-      setCurrentIndex(currentIndex + 1);
-    }
+      setCurrentIndex((prev) => Math.min(services.length - 1, prev + 1));
   };
 
   const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
+      setCurrentIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -145,30 +140,30 @@ export default function DashboardPage() {
     router.push(`/dashboard/bookings/${bookingNumber}`);
   };
 
-  const getStatusBadge = (booking: Booking): React.ReactElement => {
-    if (booking.canceled) {
-      return (
-        <span className="px-3 py-1 text-sm font-medium rounded-full bg-red-100 text-red-800">
-          Cancelled
-        </span>
-      );
-    }
-    if (booking.accepted) {
-      return (
-        <div className="flex items-center">
-          <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-green-800">
-            Confirmed
-          </span>
-          <CountdownTimer startTime={booking.startTime} />
-        </div>
-      );
-    }
-    return (
-      <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">
-        Pending
-      </span>
-    );
-  };
+  // const getStatusBadge = (booking: Booking): React.ReactElement => {
+  //   if (booking.canceled) {
+  //     return (
+  //       <span className="px-3 py-1 text-sm font-medium rounded-full bg-red-100 text-red-800">
+  //         Cancelled
+  //       </span>
+  //     );
+  //   }
+  //   if (booking.accepted) {
+  //     return (
+  //       <div className="flex items-center">
+  //         <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-green-800">
+  //           Confirmed
+  //         </span>
+  //         <CountdownTimer startTime={booking.startTime} />
+  //       </div>
+  //     );
+  //   }
+  //   return (
+  //     <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">
+  //       Pending
+  //     </span>
+  //   );
+  // };
 
   useEffect(() => {
     setLoading(true);
@@ -180,7 +175,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-lime-500 border-t-transparent"></div>
       </div>
     );
   }
@@ -240,6 +235,39 @@ export default function DashboardPage() {
                 ))}
               </div>
 
+              {currentIndex > 0 && (
+                <div
+                  onClick={handlePrev} // Implement handlePrev
+                  className="absolute top-0 left-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)",
+                  }}
+                >
+                  <svg
+                    width="13"
+                    height="35"
+                    viewBox="0 0 13 35"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="12"
+                      width="20.4583"
+                      height="1.16905"
+                      transform="rotate(123.122 12 0)"
+                      fill="#D9D9D9"
+                    />
+                    <rect
+                      width="20.4583"
+                      height="1.16905"
+                      transform="matrix(-0.546427 -0.837507 0.837507 -0.546427 12 34.5779)"
+                      fill="#D9D9D9"
+                    />
+                  </svg>
+                </div>
+              )}
+
               <div
                 onClick={handleNext}
                 className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
@@ -284,14 +312,14 @@ export default function DashboardPage() {
           >
             {bookings.length > 0 ? (
               bookings.map((booking) => (
-                <Card key={booking.bookingNumber} className="mb-6 relative p-6">
+                <Card key={booking.bookingNumber} className="mb-6 relative p-6 rounded-[12px]">
                   {/* <div key={booking.bookingNumber} className="mb-6 relative"> */}
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-lg font-medium">
                         {formatDateTime(booking.startTime)}
                       </h3>
-                      <p className="text-[#636561]">{booking.serviceName}</p>
+                      <p className="text-[#636561] font-medium">{booking.serviceName}</p>
                       <div className="flex items-center text-[#636561] text-sm mt-1">
                         <Clock className="h-4 w-4 mr-2" />
                         <span>Booking #{booking.bookingNumber}</span>
@@ -317,7 +345,7 @@ export default function DashboardPage() {
                     ]}
                   />
 
-                  <div className="flex justify-between mt-4">
+                  <div className="flex flex-wrap justify-between mt-4">
                     <Button
                       variant="link"
                       className="text-blue-600"
@@ -325,11 +353,11 @@ export default function DashboardPage() {
                     >
                       View Details
                     </Button>
-                    <div>
+                    {/* <div>
                       <Button className="bg-[#5ea502] hover:bg-[#5ea502]/90">
                         Reschedule
                       </Button>
-                    </div>
+                    </div> */}
                   </div>
                   {/* </div> */}
                 </Card>
@@ -389,9 +417,9 @@ export default function DashboardPage() {
           </section>
 
           {/* FAQs Section */}
-          <div className="flex justify-between items-center mt-5">
+          {/* <div className="flex justify-between items-center mt-5">
             <h2 className="text-2xl font-medium">FAQs</h2>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

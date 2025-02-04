@@ -10,12 +10,12 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { type FormEvent, useContext, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import AuthSideImage from "@/components/ui/auth-side-image";
 import { Eye, EyeOff } from "lucide-react";
-import { AUTH_CONTEXT } from "@/providers/auth";
+// import { AUTH_CONTEXT } from "@/providers/auth";
 
 export default function SignUp() {
   const [email, setEmail] = useState("")
@@ -28,7 +28,7 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
-  const { isLoggedIn, isLoading } = useContext(AUTH_CONTEXT);
+  // const { isLoggedIn, isLoadsing } = useContext(AUTH_CONTEXT);
 
   // useEffect(() => {
   //   if (!isLoading && isLoggedIn) {
@@ -86,12 +86,12 @@ export default function SignUp() {
 
   return (
     <div className="flex h-screen">
-      <div className="hidden md:block md:w-1/2">
+      <div className="hidden md:block md:w-1/2 p-2">
         <AuthSideImage />
       </div>
 
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 overflow-y-auto">
-        <Card className="w-full max-w-sm my-8">
+        <Card className="w-full max-w-sm  sm:max-w-md">
           <form onSubmit={handleSubmit}>
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-2xl font-medium text-left">Sign Up</CardTitle>
@@ -173,29 +173,29 @@ export default function SignUp() {
               {error && <p className="text-xs text-red-500">{error}</p>}
               <Button
                 type="submit"
-                className={`w-full ${loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"}`}
+                className={`w-full text-[18px] h-[48px] ${loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"}`}
                 disabled={loading}
               >
                 {loading ? "Creating Account..." : "Sign Up"}
               </Button>
             </CardContent>
-            <div className="flex items-center justify-center my-2">
+            <div className="flex items-center justify-center my-2 px-6">
               <hr className="flex-grow border-t border-gray-300" />
               <span className="mx-2 text-xs text-gray-600">OR</span>
               <hr className="flex-grow border-t border-gray-300" />
             </div>
-            <CardFooter className="flex flex-col gap-2 pt-0">
-              <button className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
+            <CardFooter className="flex flex-col gap-3">
+              <button type='button' disabled className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/google-logo.png" alt="Google logo" className="w-4 h-4 mr-2" />
                 <span className="text-sm text-gray-800 font-medium">Sign Up with Google</span>
               </button>
-              <button className="flex items-center justify-center w-full px-4 py-2 border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              {/* <button className="flex items-center justify-center w-full h-[48px] border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/apple-logo.svg" alt="Apple logo" className="w-4 h-4 mr-2" />
                 <span className="text-sm text-white font-medium">Sign Up with Apple</span>
-              </button>
-              <a href="http://" target="_blank" rel="noopener noreferrer" className="text-center">
-                <p className="font-thin text-xs">More Sign Up Options</p>
-              </a>
+              </button> */}
+              <div className="text-center">
+                <p className="text-[12px] font-thin text-[#1C2C14]">More Sign Up Options</p>
+              </div>
               <p className="mt-2 text-sm text-center text-gray-700">
                 Already have an account?{" "}
                 <Link href="/login" className="text-[#67b502]">
