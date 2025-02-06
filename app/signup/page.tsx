@@ -281,7 +281,7 @@ export default function SignUpPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="flex items-center space-x-2">
             <Loader2 className="h-8 w-8 animate-spin text-lime-400" />
-            <p className="text-md text-gray-600">Loading dashboard...</p>
+            <p className="text-md text-gray-600">Loading Sign Up page...</p>
           </div>
         </div>
       }

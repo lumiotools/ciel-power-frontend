@@ -18,7 +18,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { AUTH_CONTEXT } from "@/providers/auth";
 // import { AUTH_CONTEXT } from "@/providers/auth";
 
-export default function SignUp() {
+export default function SignUpForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [firstname, setFirstName] = useState("")
