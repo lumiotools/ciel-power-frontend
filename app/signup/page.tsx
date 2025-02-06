@@ -51,7 +51,7 @@ export default function SignUp() {
     window.location.href = googleAuthUrl;
   }
 
-  const handleGoogleAuth = async (code: String) => {
+  const handleGoogleAuth = async (code: string) => {
     setError(null)
     setGoogleLoading(true)
 
