@@ -10,11 +10,12 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { type FormEvent, useContext, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import AuthSideImage from "@/components/ui/auth-side-image";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { AUTH_CONTEXT } from "@/providers/auth";
 // import { AUTH_CONTEXT } from "@/providers/auth";
 
 export default function SignUp() {
@@ -23,18 +24,65 @@ export default function SignUp() {
   const [firstname, setFirstName] = useState("")
   const [lastname, setLastName] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
-  // const { isLoggedIn, isLoadsing } = useContext(AUTH_CONTEXT);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { checkAuth } = useContext(AUTH_CONTEXT);
 
-  // useEffect(() => {
-  //   if (!isLoading && isLoggedIn) {
-  //     router.push("/dashboard/bookings")
-  //   }
-  // }, [isLoading, isLoggedIn, router])
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code) {
+      handleGoogleAuth(code)
+    }
+  }, [searchParams])
+
+  const handleGoogleSignup = () => {
+    setGoogleLoading(true)
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const redirectURI = encodeURIComponent(`${window.location.origin}/signup`)
+
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectURI}&response_type=code&scope=email%20profile`;
+
+    window.location.href = googleAuthUrl;
+  }
+
+  const handleGoogleAuth = async (code: String) => {
+    setError(null)
+    setGoogleLoading(true)
+
+    try {
+      const response = await fetch(`/api/auth/google-auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ 
+          code,
+          redirect_uri: `${window.location.origin}/signup`
+        }),
+      })
+
+      if (response.ok) {
+        checkAuth()
+        toast.success("Signed up with Google successfully!")
+      } else {
+        const errorData = await response.json()
+        setError(errorData.detail || "Google sign up failed. Please try again.")
+        console.error("Google sign up failed:", errorData)
+        router.replace(pathname);
+      }
+    } catch (error) {
+      console.log("Error", error as Error)
+      setError("An error occurred during Google sign up. Please try again later.")
+      router.replace(pathname)
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -185,10 +233,21 @@ export default function SignUp() {
               <hr className="flex-grow border-t border-gray-300" />
             </div>
             <CardFooter className="flex flex-col gap-3">
-              <button type='button' disabled className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                <img src="/google-logo.png" alt="Google logo" className="w-4 h-4 mr-2" />
-                <span className="text-sm text-gray-800 font-medium">Sign Up with Google</span>
-              </button>
+            <Button
+                type="button"
+                onClick={handleGoogleSignup}
+                disabled={googleLoading}
+                className="flex items-center justify-center w-full h-[48px] border border-gray-300 rounded-lg bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+              >
+                {googleLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <img src="/google-logo.png" alt="Google logo" className="w-5 h-5 mr-2" />
+                )}
+                <span className="text-gray-800 font-medium text-[14px]">
+                  {googleLoading ? "Signing up..." : "Sign up with Google"}
+                </span>
+              </Button>
               {/* <button className="flex items-center justify-center w-full h-[48px] border border-black rounded-lg bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <img src="/apple-logo.svg" alt="Apple logo" className="w-4 h-4 mr-2" />
                 <span className="text-sm text-white font-medium">Sign Up with Apple</span>
