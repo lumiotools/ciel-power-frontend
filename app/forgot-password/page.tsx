@@ -52,9 +52,20 @@ export default function ForgotPassword() {
                 toast.success("Link to reset your password has been sent to your email!")
                 router.push("/login");
             } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Email not found!");
-                console.log("Email either not found or error occured!");
+              const errorData = await response.json();
+                
+                // Check for specific error messages and set errors accordingly
+                if (errorData.detail === "Email is required") {
+                    setError("Email field cannot be empty.");
+                    console.error("Error: Email field is empty.");
+                } else if (errorData.detail === "Error: Failed to generate email action link.") {
+                    setError("Email not found! Please check your input.");
+                    console.error("Error: The provided email does not exist.");
+                } else {
+                    setError("An error occurred. Please try again later.");
+                    console.error("Unexpected error:", errorData.detail || "Unknown error");
+                }
+
             }
         } catch (error) {
             setError("An error occurred during login. Please try again later.")
