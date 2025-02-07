@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ServiceCard from "../../components/component/ServiceCard";
 import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
 // import CountdownTimer from "@/components/component/CountdownTimer";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface Service {
@@ -69,25 +69,25 @@ export default function DashboardPage() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const { userDetails } = useContext(AUTH_CONTEXT);
-  const getServices = async () => {
+  
+  const getServices = useCallback(async () => {
     try {
       const response = await fetch(`/api/booking/services`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      });
-      const data = await response.json();
-      setServices(data?.data?.services || []);
+      })
+      const data = await response.json()
+      setServices(data?.data?.services || [])
     } catch (error) {
-      console.log(error);
-      toast.error("No Services Found");
-    } finally {
-      setLoading(false);
+      console.log(error)
+      toast.error("No Services Found")
     }
-  };
+  }, [])
 
-  const getBookings = async () => {
+
+  const getBookings = useCallback(async () => {
     try {
       const response = await fetch(`/api/user/bookings`, {
         method: "GET",
@@ -95,25 +95,25 @@ export default function DashboardPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-      });
-      const data: BookingsResponse = await response.json();
+      })
+      const data: BookingsResponse = await response.json()
       if (data.success) {
-        setBookings(data.data.bookings);
+        setBookings(data.data.bookings)
       } else {
-        throw new Error(data.message || "Failed to fetch bookings");
+        throw new Error(data.message || "Failed to fetch bookings")
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      toast.error("No Bookings Found");
+      setError(err instanceof Error ? err.message : "An error occurred")
+      toast.error("No Bookings Found")
     }
-  };
+  }, [])
 
   const handleNext = () => {
-      setCurrentIndex((prev) => Math.min(services.length - 1, prev + 1));
+    setCurrentIndex((prev) => Math.min(services.length - 1, prev + 1));
   };
 
   const handlePrev = () => {
-      setCurrentIndex((prev) => Math.max(0, prev - 1));
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -166,16 +166,28 @@ export default function DashboardPage() {
   // };
 
   useEffect(() => {
-    setLoading(true);
-    getServices();
-    getBookings();
-    setLoading(false);
-  }, []); // Empty dependency array ensures this runs only once on mount
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        await Promise.all([getServices(), getBookings()])
+      } catch (error) {
+        console.error("Error fetching data:", error)
+        setError("Failed to load dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [getServices, getBookings])
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-lime-500 border-t-transparent"></div>
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-8 w-8 animate-spin text-lime-400" />
+          <p className="text-md text-gray-600">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -335,8 +347,8 @@ export default function DashboardPage() {
                         status: booking.canceled
                           ? "cancelled"
                           : booking.accepted
-                          ? "completed"
-                          : "upcoming",
+                            ? "completed"
+                            : "upcoming",
                       },
                       { label: "Auditor Assigned", status: "upcoming" },
                       { label: "On the Way", status: "upcoming" },
