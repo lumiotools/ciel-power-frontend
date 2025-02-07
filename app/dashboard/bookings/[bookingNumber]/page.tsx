@@ -24,6 +24,15 @@ interface Price {
   taxes: unknown[];
 }
 
+interface MeetingDetails {
+  name: string;
+  start_time: string;
+  end_time: string;
+  meeting_link: string;
+  reschedule: string;
+  is_followup: boolean;
+  
+}
 interface BookingDetails {
   bookingNumber: string;
   startTime: string;
@@ -46,6 +55,11 @@ interface ApiResponse {
     booking: BookingDetails;
     youtubeVideos: YouTubeVideo[];
     blogs: BlogPost[];
+    meetings: MeetingDetails;
+    currentStage: string;
+    scheduleMeeting?: {
+      schedule_link: string;
+    };
   };
 }
 
@@ -64,6 +78,29 @@ interface BlogPost {
   pageLink: string;
 }
 
+
+const stepsSequence = [
+  { label: "Booking Created", key: "bookingCreated" },
+  { label: "Utility Bills Uploaded", key: "utilityBills" },
+  { label: "Audit Performed", key: "auditPerformed" },
+  { label: "Report Generated", key: "reportsGenerated" },
+  { label: "Follow Up Scheduled", key: "followUpSchedule" },
+  { label: "Proposal Signed", key: "proposalSigned" },
+  { label: "Payment Done", key: "paymentDone" },
+];
+
+const getStepStatus = (currentStage: string) => {
+  return stepsSequence.map((step, index) => {
+    const status: "completed" | "current" | "upcoming" | "cancelled" =
+      stepsSequence.findIndex(s => s.key === currentStage) > index
+        ? "completed"
+        : stepsSequence.findIndex(s => s.key === currentStage) === index
+        ? "current"
+        : "upcoming";
+    return { label: step.label, status };
+  });
+};
+
 const BookingDetailsPage = () => {
   const params = useParams<{ bookingNumber: string }>();
   const bookingNumber = params.bookingNumber;
@@ -75,7 +112,11 @@ const BookingDetailsPage = () => {
   const [youtubeSuggestions, setYoutubeSuggestions] = useState<YouTubeVideo[]>(
     []
   );
+  const [meeting, setMeeting] = useState<MeetingDetails | null>(null);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [currentStage, setCurrentStage] = useState<string>("");
+  const [followUpMeetingLink, setFollowUpMeetingLink] = useState<string | null>(null);
+
   const { userDetails } = useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
     setModalOpen(true);
@@ -96,30 +137,6 @@ const BookingDetailsPage = () => {
   }
   // const [uploading, setUploading] = useState(false);
   // const MAX_SIZE_MB = 20;
-
-  // async function handleCancelBooking(bookingNumber:BookingDetails['bookingNumber']) {
-  //   try {
-  //     // Adjust your endpoint as needed (e.g., "/api/bookings" vs. "/bookings")
-  //     const response = await fetch(`/api/user/bookings/${bookingNumber}`, {
-  //       method: "DELETE",
-  //     });
-
-  //     if (!response.ok) {
-  //       // Handle non-2xx responses
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.detail || "Failed to cancel booking");
-  //     }
-
-  //     // If successful, parse JSON
-  //     const data = await response.json();
-  //     alert(data.message || "Booking canceled successfully");
-
-  //    window.location.reload(); // or setState(...)
-
-  //   } catch (err) {
-  //     setError(err instanceof Error ? err.message : "An error occurred");
-  //   }
-  // }
 
   const closeModal = () => {
     setModalOpen(false);
@@ -195,6 +212,9 @@ const BookingDetailsPage = () => {
           console.log("youtube videos", data.data.youtubeVideos);
           setYoutubeSuggestions(data.data.youtubeVideos);
           setBlogs(data.data.blogs);
+          setMeeting(data.data.meetings);
+          setCurrentStage(data.data.currentStage);
+          setFollowUpMeetingLink(data.data.scheduleMeeting?.schedule_link || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -317,23 +337,18 @@ const BookingDetailsPage = () => {
 
         {/* ========== PROGRESS BAR ========== */}
         <div className="my-6">
-          <BookingProgress
+          {/* <BookingProgress
             steps={[
-              { label: "Created", status: "completed" },
-              {
-                label: booking.canceled ? "Cancelled" : "Confirmed",
-                status: booking.canceled
-                  ? "cancelled"
-                  : booking.accepted
-                  ? "completed"
-                  : "upcoming",
-              },
-              { label: "Auditor Assigned", status: "upcoming" },
-              { label: "On the Way", status: "upcoming" },
-              { label: "Ongoing", status: "upcoming" },
-              { label: "Complete", status: "upcoming" },
+              { label: "Booking Created", status: "completed" },
+              { label: "Utility Bills Uploaded", status: "completed" },
+              { label: "Audit Performed", status: "upcoming" },
+              { label: "Report Generated", status: "upcoming" },
+              { label: "Follow Up Scheduled", status: "upcoming" },
+              { label: "Proposal Signed", status: "upcoming" },
+              { label: "Payment Done", status: "upcoming" },
             ]}
-          />
+          /> */}
+          <BookingProgress steps={getStepStatus(currentStage)} />
         </div>
 
         {/* ========== MAIN SECTION: Left (Service Details) & Right (Payment, Auditor) ========== */}
@@ -342,8 +357,12 @@ const BookingDetailsPage = () => {
           <div className="md:col-span-2 space-y-6">
             {/* Service Details */}
             <div>
-              <h2 className="text-xl font-bold">{formatDateTime(booking.startTime)}</h2>
-              <h3 className="text-[16px] font-semibold">{booking.serviceName}</h3>
+              <h2 className="text-xl font-bold">
+                {formatDateTime(booking.startTime)}
+              </h2>
+              <h3 className="text-[16px] font-semibold">
+                {booking.serviceName}
+              </h3>
             </div>
 
             {/* Address */}
@@ -404,6 +423,7 @@ const BookingDetailsPage = () => {
 
             {/* Reschedule / Cancel Buttons */}
             <div className="flex flex-wrap gap-4">
+              {/* Reschedule and Cancel Booking Buttons */}
               {!booking.canceled && isPastBooking && (
                 <Button
                   onClick={handleRescheduleClick}
@@ -423,8 +443,68 @@ const BookingDetailsPage = () => {
                 </Button>
               )}
             </div>
-          </div>
 
+            {/* Follow Up Button */}
+            {meeting?.is_followup ? (
+              // If a meeting exists, show meeting details and reschedule button
+              <>
+                {/* Meet Link and Scheduled Time Section */}
+                <div className="mt-4 flex items-center justify-between">
+                  {/* <div className="flex items-center gap-1">
+                    <LinkIcon className="h-3 w-3 text-blue-600 hover:text-blue-700 hover:underline" />
+                    <a
+                      href={"#"}
+                      target="_blank"
+                      className="text-[14px] hover:text-blue-700 hover:underline"
+                    >
+                      Meet Link
+                    </a>
+                  </div> */}
+
+                  <div className="mt-2">
+                    <p className="text-sm">
+                      Scheduled Time:{" "}
+                      <span className="font-semibold">
+                        {formatDateTime(meeting.start_time)}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Reschedule Button */}
+                <div className="mt-4">
+              <a
+                href={meeting?.reschedule} // Using the reschedule link from the meeting object
+                target="_blank"
+              >
+                <Button
+                  variant="default"
+                  className="w-full bg-[#96C93D] hover:bg-[#85b234]"
+                >
+                  Reschedule Meeting
+                </Button>
+              </a>
+            </div>
+              </>
+            ) : (
+              // If no meeting exists, show follow-up button
+              <div className="mt-4">
+               {currentStage === "reportsGenerated" && (
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        window.open(
+                          followUpMeetingLink || undefined
+                        )
+                      }
+                      className="w-full"
+                    >
+                      Follow Up
+                    </Button>
+                  )}
+              </div>
+            )}
+          </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
           <div className="space-y-6">
             {/* Payment Details Card */}

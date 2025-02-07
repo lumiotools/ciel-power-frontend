@@ -50,6 +50,7 @@ interface Booking {
   serviceName: string;
   serviceId: string;
   price: Price;
+  currentStage?: string;
 }
 
 interface BookingsResponse {
@@ -59,6 +60,29 @@ interface BookingsResponse {
     bookings: Booking[];
   };
 }
+
+const stepsSequence = [
+  { label: "Booking Created", key: "bookingCreated" },
+  { label: "Utility Bills Uploaded", key: "utilityBills" },
+  { label: "Audit Performed", key: "auditPerformed" },
+  { label: "Report Generated", key: "reportsGenerated" },
+  { label: "Follow Up Scheduled", key: "followUpSchedule" },
+  { label: "Proposal Signed", key: "proposalSigned" },
+  { label: "Payment Done", key: "paymentDone" },
+];
+
+const getStepStatus = (currentStage: string) => {
+  return stepsSequence.map((step, index) => {
+    const status: "completed" | "current" | "upcoming" | "cancelled" =
+      stepsSequence.findIndex(s => s.key === currentStage) > index
+        ? "completed"
+        : stepsSequence.findIndex(s => s.key === currentStage) === index
+        ? "current"
+        : "upcoming";
+    return { label: step.label, status };
+  });
+};
+
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -339,7 +363,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <BookingProgress
+                  {/* <BookingProgress
                     steps={[
                       { label: "Created", status: "completed" },
                       {
@@ -355,7 +379,10 @@ export default function DashboardPage() {
                       { label: "Ongoing", status: "upcoming" },
                       { label: "Complete", status: "upcoming" },
                     ]}
-                  />
+                  /> */}
+
+                <BookingProgress steps={getStepStatus(booking.currentStage || "bookingCreated")} />
+
 
                   <div className="flex flex-wrap justify-between mt-4">
                     <Button
