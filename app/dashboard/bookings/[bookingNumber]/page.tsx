@@ -56,6 +56,10 @@ interface ApiResponse {
     youtubeVideos: YouTubeVideo[];
     blogs: BlogPost[];
     meetings: MeetingDetails;
+    currentStage: string;
+    scheduleMeeting?: {
+      schedule_link: string;
+    };
   };
 }
 
@@ -74,6 +78,29 @@ interface BlogPost {
   pageLink: string;
 }
 
+
+const stepsSequence = [
+  { label: "Booking Created", key: "bookingCreated" },
+  { label: "Utility Bills Uploaded", key: "utilityBills" },
+  { label: "Audit Performed", key: "auditPerformed" },
+  { label: "Report Generated", key: "reportsGenerated" },
+  { label: "Follow Up Scheduled", key: "followUpSchedule" },
+  { label: "Proposal Signed", key: "proposalSigned" },
+  { label: "Payment Done", key: "paymentDone" },
+];
+
+const getStepStatus = (currentStage: string) => {
+  return stepsSequence.map((step, index) => {
+    const status: "completed" | "current" | "upcoming" | "cancelled" =
+      stepsSequence.findIndex(s => s.key === currentStage) > index
+        ? "completed"
+        : stepsSequence.findIndex(s => s.key === currentStage) === index
+        ? "current"
+        : "upcoming";
+    return { label: step.label, status };
+  });
+};
+
 const BookingDetailsPage = () => {
   const params = useParams<{ bookingNumber: string }>();
   const bookingNumber = params.bookingNumber;
@@ -87,6 +114,9 @@ const BookingDetailsPage = () => {
   );
   const [meeting, setMeeting] = useState<MeetingDetails | null>(null);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [currentStage, setCurrentStage] = useState<string>("");
+  const [followUpMeetingLink, setFollowUpMeetingLink] = useState<string | null>(null);
+
   const { userDetails } = useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
     setModalOpen(true);
@@ -182,8 +212,9 @@ const BookingDetailsPage = () => {
           console.log("youtube videos", data.data.youtubeVideos);
           setYoutubeSuggestions(data.data.youtubeVideos);
           setBlogs(data.data.blogs);
-          console.log(data);
           setMeeting(data.data.meetings);
+          setCurrentStage(data.data.currentStage);
+          setFollowUpMeetingLink(data.data.scheduleMeeting?.schedule_link || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -306,23 +337,18 @@ const BookingDetailsPage = () => {
 
         {/* ========== PROGRESS BAR ========== */}
         <div className="my-6">
-          <BookingProgress
+          {/* <BookingProgress
             steps={[
-              { label: "Created", status: "completed" },
-              {
-                label: booking.canceled ? "Cancelled" : "Confirmed",
-                status: booking.canceled
-                  ? "cancelled"
-                  : booking.accepted
-                  ? "completed"
-                  : "upcoming",
-              },
-              { label: "Auditor Assigned", status: "upcoming" },
-              { label: "On the Way", status: "upcoming" },
-              { label: "Ongoing", status: "upcoming" },
-              { label: "Complete", status: "upcoming" },
+              { label: "Booking Created", status: "completed" },
+              { label: "Utility Bills Uploaded", status: "completed" },
+              { label: "Audit Performed", status: "upcoming" },
+              { label: "Report Generated", status: "upcoming" },
+              { label: "Follow Up Scheduled", status: "upcoming" },
+              { label: "Proposal Signed", status: "upcoming" },
+              { label: "Payment Done", status: "upcoming" },
             ]}
-          />
+          /> */}
+          <BookingProgress steps={getStepStatus(currentStage)} />
         </div>
 
         {/* ========== MAIN SECTION: Left (Service Details) & Right (Payment, Auditor) ========== */}
@@ -463,18 +489,19 @@ const BookingDetailsPage = () => {
             ) : (
               // If no meeting exists, show follow-up button
               <div className="mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    window.open(
-                      "https://nutshelltrial.com/ell/schedule-booking/373182/QkjdbV",
-                      "_blank"
-                    )
-                  }
-                  className="w-full"
-                >
-                  Follow Up
-                </Button>
+               {currentStage === "reportsGenerated" && (
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        window.open(
+                          followUpMeetingLink || undefined
+                        )
+                      }
+                      className="w-full"
+                    >
+                      Follow Up
+                    </Button>
+                  )}
               </div>
             )}
           </div>
