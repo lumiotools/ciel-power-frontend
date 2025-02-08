@@ -488,7 +488,7 @@ const BookingDetailsPage = () => {
               </>
             ) : (
               // If no meeting exists, show header & follow-up link (Spaced Apart)
-              (currentStage === "followUpSchedule") && (
+              (currentStage === "followUpSchedule" || currentStage === "reportGenerated") && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold">Schedule Follow-Up Consultation</h4>
