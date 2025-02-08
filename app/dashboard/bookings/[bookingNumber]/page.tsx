@@ -31,7 +31,7 @@ interface MeetingDetails {
   meeting_link: string;
   reschedule: string;
   is_followup: boolean;
-
+  is_cancelled: boolean;
 }
 interface BookingDetails {
   bookingNumber: string;
@@ -156,7 +156,7 @@ const BookingDetailsPage = () => {
 
   const handleCancelBooking = async () => {
     try {
-      const requestUrl = `/api/user/bookings/${bookingNumber}`;
+      const requestUrl = `http://localhost:8000/user/bookings/${bookingNumber}`;
 
       const response = await fetch(requestUrl, {
         method: "DELETE",
@@ -447,7 +447,7 @@ const BookingDetailsPage = () => {
             )}
 
             {/* Follow Up Section */}
-            {meeting?.is_followup ? (
+            {meeting?.is_followup && !meeting?.is_cancelled ? (
               <>
                 <h4 className="mt-6 text-lg font-bold">Your Follow-Up Consultation Details</h4>
                 <div className="mt-4 flex items-center justify-between">
