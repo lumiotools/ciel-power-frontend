@@ -30,8 +30,9 @@ interface MeetingDetails {
   end_time: string;
   meeting_link: string;
   reschedule: string;
-  is_followup: boolean;
   is_cancelled: boolean;
+  is_editable: boolean;
+  lead_ids: [];
 }
 interface BookingDetails {
   bookingNumber: string;
@@ -57,9 +58,9 @@ interface ApiResponse {
     blogs: BlogPost[];
     meetings: MeetingDetails;
     currentStage: string;
-    scheduleMeeting?: {
-      schedule_link: string;
-    };
+    leadId: string;
+    scheduleMeeting: string; // Now directly a string URL
+    reportUrl?: string; // Optional URL for the report
   };
 }
 
@@ -116,6 +117,7 @@ const BookingDetailsPage = () => {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [currentStage, setCurrentStage] = useState<string>("");
   const [followUpMeetingLink, setFollowUpMeetingLink] = useState<string | null>(null);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
 
   const { userDetails } = useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
@@ -156,7 +158,7 @@ const BookingDetailsPage = () => {
 
   const handleCancelBooking = async () => {
     try {
-      const requestUrl = `http://localhost:8000/user/bookings/${bookingNumber}`;
+      const requestUrl = `/api/user/bookings/${bookingNumber}`;
 
       const response = await fetch(requestUrl, {
         method: "DELETE",
@@ -214,7 +216,8 @@ const BookingDetailsPage = () => {
           setBlogs(data.data.blogs);
           setMeeting(data.data.meetings);
           setCurrentStage(data.data.currentStage);
-          setFollowUpMeetingLink(data.data.scheduleMeeting?.schedule_link || null);
+          setFollowUpMeetingLink(data.data.scheduleMeeting || null);
+          setReportUrl(data.data.reportUrl || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -401,7 +404,7 @@ const BookingDetailsPage = () => {
             </div> */}
 
             {/* What to Expect */}
-            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && !meeting?.is_followup && (
+            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && (
               <div>
                 <h4 className="mb-4 font-medium">What to expect?</h4>
                 <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
@@ -423,7 +426,7 @@ const BookingDetailsPage = () => {
             </Button> */}
 
             {/* Reschedule / Cancel Buttons (Only if NOT a Follow-up Meeting) */}
-            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && !meeting?.is_followup && (
+            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && (
               <div className="flex flex-wrap gap-4">
                 {!booking.canceled && isPastBooking && (
                   <Button
@@ -446,20 +449,38 @@ const BookingDetailsPage = () => {
               </div>
             )}
 
-            {/* Follow Up Section */}
-            {meeting?.is_followup && !meeting?.is_cancelled ? (
+
+            {(currentStage === "reportGenerated" || currentStage === "followUpSchedule" || currentStage === "proposalSigned" || currentStage === "paymentDone") && (
+              <div>
+                <h4 className="text-lg font-bold">
+                  Congratulations, your audit report has been generated!
+                </h4>
+                {reportUrl && (
+                  <a
+                    href={reportUrl}
+                    target="_blank"
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                  >
+                    Click here to download the report
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Schedule Follow-Up Consultation */}
+            {currentStage === "followUpSchedule" && !meeting?.is_cancelled ? (
               <>
                 <h4 className="mt-6 text-lg font-bold">Your Follow-Up Consultation Details</h4>
                 <div className="mt-4 flex items-center justify-between">
                   <p className="text-sm">
                     Scheduled Time:{" "}
-                    <span className="font-semibold">{formatDateTime(meeting.start_time)}</span>
+                    {meeting && <span className="font-semibold">{formatDateTime(meeting.start_time)}</span>}
                   </p>
                   {/* Meeting Link (Right) */}
                   <a
-                    href={meeting?.meeting_link}
+                    href={meeting?.reschedule}
                     target="_blank"
-                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
                   >
                     Cancel or Reschedule?
                   </a>
@@ -467,7 +488,7 @@ const BookingDetailsPage = () => {
               </>
             ) : (
               // If no meeting exists, show header & follow-up link (Spaced Apart)
-              currentStage === "reportsGenerated" && (
+              (currentStage === "followUpSchedule") && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold">Schedule Follow-Up Consultation</h4>
@@ -475,7 +496,7 @@ const BookingDetailsPage = () => {
                       <a
                         href={followUpMeetingLink}
                         target="_blank"
-                        className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                        className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
                       >
                         Schedule Now
                       </a>
@@ -484,6 +505,7 @@ const BookingDetailsPage = () => {
                 </div>
               )
             )}
+
 
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
