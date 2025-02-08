@@ -24,8 +24,8 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={cn("transition-colors", {
-          "text-[#5ea502]": status === "completed",
-          "text-[#b9dd8b]": status === "current",
+          "text-[#5ea502]": status === "completed" || status === "current",
+          // "text-[#b9dd8b]": status === "current",
           "text-[#d1d5db]": status === "upcoming",
         })}
       >

@@ -30,8 +30,9 @@ interface MeetingDetails {
   end_time: string;
   meeting_link: string;
   reschedule: string;
-  is_followup: boolean;
-  
+  is_cancelled: boolean;
+  is_editable: boolean;
+  lead_ids: [];
 }
 interface BookingDetails {
   bookingNumber: string;
@@ -57,9 +58,9 @@ interface ApiResponse {
     blogs: BlogPost[];
     meetings: MeetingDetails;
     currentStage: string;
-    scheduleMeeting?: {
-      schedule_link: string;
-    };
+    leadId: string;
+    scheduleMeeting: string; // Now directly a string URL
+    reportUrl?: string; // Optional URL for the report
   };
 }
 
@@ -95,8 +96,8 @@ const getStepStatus = (currentStage: string) => {
       stepsSequence.findIndex(s => s.key === currentStage) > index
         ? "completed"
         : stepsSequence.findIndex(s => s.key === currentStage) === index
-        ? "current"
-        : "upcoming";
+          ? "current"
+          : "upcoming";
     return { label: step.label, status };
   });
 };
@@ -116,6 +117,7 @@ const BookingDetailsPage = () => {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [currentStage, setCurrentStage] = useState<string>("");
   const [followUpMeetingLink, setFollowUpMeetingLink] = useState<string | null>(null);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
 
   const { userDetails } = useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
@@ -214,7 +216,8 @@ const BookingDetailsPage = () => {
           setBlogs(data.data.blogs);
           setMeeting(data.data.meetings);
           setCurrentStage(data.data.currentStage);
-          setFollowUpMeetingLink(data.data.scheduleMeeting?.schedule_link || null);
+          setFollowUpMeetingLink(data.data.scheduleMeeting || null);
+          setReportUrl(data.data.reportUrl || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -375,9 +378,8 @@ const BookingDetailsPage = () => {
             <div>
               <h4 className="font-medium">
                 {" "}
-                {`${userDetails?.firstName ?? ""} ${
-                  userDetails?.lastName ?? ""
-                }`}{" "}
+                {`${userDetails?.firstName ?? ""} ${userDetails?.lastName ?? ""
+                  }`}{" "}
               </h4>
               <p className="text-muted-foreground">{contact_number} </p>
             </div>
@@ -402,108 +404,109 @@ const BookingDetailsPage = () => {
             </div> */}
 
             {/* What to Expect */}
-            <div>
-              <h4 className="mb-4 font-medium">What to expect?</h4>
-              <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
-                <li>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </li>
-                <li>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </li>
-              </ol>
-            </div>
+            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && (
+              <div>
+                <h4 className="mb-4 font-medium">What to expect?</h4>
+                <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
+                  <li>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                    do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  </li>
+                  <li>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                    do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  </li>
+                </ol>
+              </div>
+            )}
 
             {/* View Report Button */}
             {/* <Button variant="secondary" className="w-full">
               View Report
             </Button> */}
 
-            {/* Reschedule / Cancel Buttons */}
-            <div className="flex flex-wrap gap-4">
-              {/* Reschedule and Cancel Booking Buttons */}
-              {!booking.canceled && isPastBooking && (
-                <Button
-                  onClick={handleRescheduleClick}
-                  variant="default"
-                  className="flex-1 bg-[#96C93D] hover:bg-[#85b234]"
-                >
-                  Reschedule Booking
-                </Button>
-              )}
-              {!booking.canceled && isPastBooking && (
-                <Button
-                  onClick={() => handleCancelBooking()}
-                  variant="outline"
-                  className="flex-1 text-red-500 hover:bg-red-50 hover:text-red-600"
-                >
-                  Cancel Booking
-                </Button>
-              )}
-            </div>
-
-            {/* Follow Up Button */}
-            {meeting?.is_followup ? (
-              // If a meeting exists, show meeting details and reschedule button
-              <>
-                {/* Meet Link and Scheduled Time Section */}
-                <div className="mt-4 flex items-center justify-between">
-                  {/* <div className="flex items-center gap-1">
-                    <LinkIcon className="h-3 w-3 text-blue-600 hover:text-blue-700 hover:underline" />
-                    <a
-                      href={"#"}
-                      target="_blank"
-                      className="text-[14px] hover:text-blue-700 hover:underline"
-                    >
-                      Meet Link
-                    </a>
-                  </div> */}
-
-                  <div className="mt-2">
-                    <p className="text-sm">
-                      Scheduled Time:{" "}
-                      <span className="font-semibold">
-                        {formatDateTime(meeting.start_time)}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Reschedule Button */}
-                <div className="mt-4">
-              <a
-                href={meeting?.reschedule} // Using the reschedule link from the meeting object
-                target="_blank"
-              >
-                <Button
-                  variant="default"
-                  className="w-full bg-[#96C93D] hover:bg-[#85b234]"
-                >
-                  Reschedule Meeting
-                </Button>
-              </a>
-            </div>
-              </>
-            ) : (
-              // If no meeting exists, show follow-up button
-              <div className="mt-4">
-               {currentStage === "reportsGenerated" && (
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        window.open(
-                          followUpMeetingLink || undefined
-                        )
-                      }
-                      className="w-full"
-                    >
-                      Follow Up
-                    </Button>
-                  )}
+            {/* Reschedule / Cancel Buttons (Only if NOT a Follow-up Meeting) */}
+            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && (
+              <div className="flex flex-wrap gap-4">
+                {!booking.canceled && isPastBooking && (
+                  <Button
+                    onClick={handleRescheduleClick}
+                    variant="default"
+                    className="flex-1 bg-[#96C93D] hover:bg-[#85b234]"
+                  >
+                    Reschedule Booking
+                  </Button>
+                )}
+                {!booking.canceled && isPastBooking && (
+                  <Button
+                    onClick={() => handleCancelBooking()}
+                    variant="outline"
+                    className="flex-1 text-red-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    Cancel Booking
+                  </Button>
+                )}
               </div>
             )}
+
+
+            {(currentStage === "reportGenerated" || currentStage === "followUpSchedule" || currentStage === "proposalSigned" || currentStage === "paymentDone") && (
+              <div>
+                <h4 className="text-lg font-bold">
+                  Congratulations, your audit report has been generated!
+                </h4>
+                {reportUrl && (
+                  <a
+                    href={reportUrl}
+                    target="_blank"
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                  >
+                    Click here to download the report
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Schedule Follow-Up Consultation */}
+            {currentStage === "followUpSchedule" && !meeting?.is_cancelled ? (
+              <>
+                <h4 className="mt-6 text-lg font-bold">Your Follow-Up Consultation Details</h4>
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-sm">
+                    Scheduled Time:{" "}
+                    {meeting && <span className="font-semibold">{formatDateTime(meeting.start_time)}</span>}
+                  </p>
+                  {/* Meeting Link (Right) */}
+                  <a
+                    href={meeting?.reschedule}
+                    target="_blank"
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
+                  >
+                    Cancel or Reschedule?
+                  </a>
+                </div>
+              </>
+            ) : (
+              // If no meeting exists, show header & follow-up link (Spaced Apart)
+              (currentStage === "followUpSchedule") && (
+                <div className="mt-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-bold">Schedule Follow-Up Consultation</h4>
+                    {followUpMeetingLink && (
+                      <a
+                        href={followUpMeetingLink}
+                        target="_blank"
+                        className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
+                      >
+                        Schedule Now
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )
+            )}
+
+
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
           <div className="space-y-6">
