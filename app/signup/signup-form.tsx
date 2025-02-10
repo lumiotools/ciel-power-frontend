@@ -60,7 +60,7 @@ export default function SignUpForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           code,
           redirect_uri: `${window.location.origin}/signup`
         }),
@@ -85,9 +85,9 @@ export default function SignUpForm() {
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
     if (password === confirmPassword) {
       try {
@@ -102,32 +102,39 @@ export default function SignUpForm() {
             firstName: firstname,
             lastName: lastname,
           }),
-        })
+        });
 
         if (!response.ok) {
-          const errorData = await response.json()
+          const errorData = await response.json();
+
+          // Extract error message if it's a known case
           const match = errorData.detail.match(/400:\s(.+)/);
-          const extractedMessage = match ? match[1] : "";
-          console.log(extractedMessage);
-          throw new Error(extractedMessage || "Failed to sign up")
+          const extractedMessage = match ? match[1] : errorData.detail;
+
+          // Handle "EMAIL_EXISTS" error case
+          if (errorData.detail.includes("EMAIL_EXISTS")) {
+            throw new Error("An account with this email already exists. Please use a different email or log in.");
+          }
+
+          throw new Error(extractedMessage || "Failed to sign up");
         }
 
-        const data = await response.json()
-        console.log(data)
-        toast.success("User created successfully")
+        const data = await response.json();
+        console.log(data);
+        toast.success("User created successfully");
 
-        router.push("/login")
+        router.push("/login");
       } catch (error) {
-        setError((error as Error).message)
-        console.log(error)
+        setError((error as Error).message);
+        console.log(error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     } else {
-      setError("Passwords don't match!")
-      setLoading(false)
+      setError("Passwords don't match!");
+      setLoading(false);
     }
-  }
+  };
 
   const inputClassName =
     "focus:ring-2 focus:ring-[#5ea502] focus:border-[#5ea502] outline-none transition-colors duration-300 !important"
@@ -233,7 +240,7 @@ export default function SignUpForm() {
               <hr className="flex-grow border-t border-gray-300" />
             </div>
             <CardFooter className="flex flex-col gap-3">
-            <Button
+              <Button
                 type="button"
                 onClick={handleGoogleSignup}
                 disabled={googleLoading}
