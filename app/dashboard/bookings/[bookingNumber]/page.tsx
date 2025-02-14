@@ -456,13 +456,13 @@ const BookingDetailsPage = () => {
                   Congratulations, your audit report has been generated!
                 </h4>
                 {reportUrl && (
-                  <a
-                    href={reportUrl}
-                    target="_blank"
+                  <Link
+                    href={`${bookingNumber}/reports`}
+                    // target="_blank"
                     className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
                   >
                     Click here to download the report
-                  </a>
+                  </Link>
                 )}
               </div>
             )}
