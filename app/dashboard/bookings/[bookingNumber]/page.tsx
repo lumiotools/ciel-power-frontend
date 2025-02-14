@@ -461,7 +461,7 @@ const BookingDetailsPage = () => {
                     // target="_blank"
                     className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
                   >
-                    Click here to download the report
+                    Click here to view the report
                   </Link>
                 )}
               </div>
