@@ -8,8 +8,9 @@ import ServiceCard from "../../components/component/ServiceCard";
 import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
 // import CountdownTimer from "@/components/component/CountdownTimer";
-import { Clock, AlertCircle, Loader2 } from "lucide-react";
+import { Clock, AlertCircle, Loader2, } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { ChatBot } from "@/components/modal/ChatBot";
 
 interface Service {
   id: string;
@@ -454,6 +455,8 @@ export default function DashboardPage() {
               </div>
             )}
           </section>
+
+          <ChatBot />
 
           {/* FAQs Section */}
           {/* <div className="flex justify-between items-center mt-5">
