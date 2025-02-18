@@ -37,7 +37,7 @@ export function ChatBot() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [])
+  }, [messages]) // Make sure the scroll happens when messages update
 
   const scrollToBottom = () => {
     if (chatEndRef.current) {
@@ -104,8 +104,6 @@ export function ChatBot() {
         content: data.response || "Sorry, I couldn't process that request.",
         timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
       }
-
-      // console.log(data.response)
 
       setMessages((prevMessages) => [...prevMessages, aiMessage])
     } catch (error) {
@@ -227,7 +225,7 @@ export function ChatBot() {
               <Input
                 placeholder="Type your message..."
                 value={inputValue}
-                className='h-10'
+                className="h-10"
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSend(inputValue)}
               />
@@ -241,4 +239,3 @@ export function ChatBot() {
     </>
   )
 }
-
