@@ -84,7 +84,7 @@ export function ChatBot() {
     setIsTyping(true)
 
     try {
-      const response = await fetch("http://localhost:8000/api/chatbot/chat", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chatbot/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +128,7 @@ export function ChatBot() {
     <>
       <div
         className={`fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity ${
-          isOpen ? "opacity-20" : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-40" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsOpen(false)}
       />
