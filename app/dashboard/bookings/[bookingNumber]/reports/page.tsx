@@ -224,7 +224,7 @@ const ReportPage = () => {
                   title: "Efficiency",
                   description:
                     "We determined the efficiency of your home's heating, cooling and hot water systems. We analyzed the impact of your home's construction, insulation and air flow rates",
-                  color: "text-green-600",
+                  color: "text-lime-500",
                   bgColor: "bg-green-50 dark:bg-green-900/50",
                 },
               ].map((goal, index) => (

@@ -176,7 +176,7 @@ export default function DashboardPage() {
   //   if (booking.accepted) {
   //     return (
   //       <div className="flex items-center">
-  //         <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-green-800">
+  //         <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-lime-500">
   //           Confirmed
   //         </span>
   //         <CountdownTimer startTime={booking.startTime} />

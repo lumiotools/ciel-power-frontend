@@ -17,7 +17,7 @@ export function CrawlspaceAssessment() {
     >
       <Card>
         <CardHeader className="bg-green-50 dark:bg-green-900/50">
-          <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+          <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
             Your Home&apos;s Crawlspace Wall Insulation
           </CardTitle>
         </CardHeader>
@@ -57,7 +57,7 @@ export function CrawlspaceAssessment() {
 
               <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-green-800 dark:text-green-200">BPI Recommendation</h3>
+                  <h3 className="font-semibold mb-2 text-lime-500 dark:text-green-200">BPI Recommendation</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     BPI recommends Crawlspace Walls be insulated to R10 for optimal
                     energy efficiency and moisture control.

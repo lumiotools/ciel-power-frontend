@@ -8,7 +8,7 @@ export function SeasonalPerformance() {
     <div className="space-y-8">
       <Card className="h-full flex flex-col"> {/* Adjusted height to match Technical Aspects */}
         <CardHeader className="bg-green-50 dark:bg-green-900/50">
-          <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+          <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
             Seasonal Performance
           </CardTitle>
         </CardHeader>

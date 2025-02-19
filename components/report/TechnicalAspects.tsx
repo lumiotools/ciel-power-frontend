@@ -10,7 +10,7 @@ export function TechnicalAspects() {
     <div className="space-y-8">
       <Card>
         <CardHeader className="bg-green-50 dark:bg-green-900/50">
-          <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+          <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
             Technical Aspects
           </CardTitle>
         </CardHeader>
@@ -18,8 +18,8 @@ export function TechnicalAspects() {
           <div className="space-y-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <RulerIcon className="h-5 w-5 text-green-600" />
-                <h3 className="text-xl font-semibold text-green-700 dark:text-green-300">
+                <RulerIcon className="h-5 w-5 text-lime-500" />
+                <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300">
                   R-Value
                 </h3>
               </div>
@@ -31,7 +31,7 @@ export function TechnicalAspects() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600 dark:text-gray-400">Insulation Effectiveness</span>
-                  <span className="text-green-600 dark:text-green-400 font-semibold">R-49</span>
+                  <span className="text-lime-500 dark:text-green-400 font-semibold">R-49</span>
                 </div>
                 <Progress value={75} className="h-2 bg-green-200 dark:bg-green-700" />
               </div>
@@ -39,8 +39,8 @@ export function TechnicalAspects() {
 
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <CameraIcon className="h-5 w-5 text-green-600" />
-                <h3 className="text-xl font-semibold text-green-700 dark:text-green-300">
+                <CameraIcon className="h-5 w-5 text-lime-500" />
+                <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300">
                   Thermal Imaging
                 </h3>
               </div>
@@ -50,8 +50,8 @@ export function TechnicalAspects() {
               </p>
             </div>
 
-            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
-              <CardContent className="p-4 flex items-center gap-2 text-green-600 dark:text-green-400">
+            <Card className="bg-green-50 dark:bg-green-900/30 border-green-100 dark:border-green-700">
+              <CardContent className="p-4 flex items-center gap-2 text-lime-500 dark:text-green-400">
                 <BugIcon className="h-5 w-5 shrink-0" />
                 <p className="text-sm">
                   Did you know? Cellulose insulation treated with borate will

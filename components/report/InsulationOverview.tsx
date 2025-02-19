@@ -9,7 +9,7 @@ export function InsulationOverview() {
     <div className="space-y-8">
       <Card>
         <CardHeader className="bg-green-50 dark:bg-green-900/50">
-          <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+          <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
             Understanding Insulation
           </CardTitle>
         </CardHeader>
@@ -17,7 +17,7 @@ export function InsulationOverview() {
           <div className="flex flex-col md:flex-row items-start gap-8">
             <div className="flex-1 space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-green-700 dark:text-green-300 mb-3">
+                <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300 mb-3">
                   What is Insulation?
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
@@ -25,7 +25,7 @@ export function InsulationOverview() {
                   sound from going into or out of something.
                 </p>
               </div>
-              <blockquote className="border-l-4 border-green-500 pl-4 italic text-gray-600 dark:text-gray-300">
+              <blockquote className="border-l-4 border-lime-500 pl-4 italic text-gray-600 dark:text-gray-300">
                 &quot;Insulation is one of the keys to a comfortable, energy-efficient
                 home. But simply having the right amount of insulation is not
                 enough. If insulation is not properly installed, a home can have
@@ -35,7 +35,7 @@ export function InsulationOverview() {
                   — United States EPA
                 </footer>
               </blockquote>
-              <div className="flex items-center space-x-2 text-green-600 dark:text-green-400">
+              <div className="flex items-center space-x-2 text-lime-500 dark:text-green-400">
                 <Info className="h-5 w-5" />
                 <span className="font-medium">
                   Proper insulation can significantly reduce energy costs and improve comfort.

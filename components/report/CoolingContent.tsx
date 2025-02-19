@@ -89,7 +89,7 @@ export function CoolingContent() {
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-green-800 dark:text-green-200 flex items-center gap-2">
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200 flex items-center gap-2">
               <Snowflake className="h-6 w-6" />
               Air Conditioning Assessment
             </CardTitle>
@@ -101,7 +101,7 @@ export function CoolingContent() {
               of the system.
             </p>
             <div className="flex items-start space-x-4 text-gray-600 dark:text-gray-300">
-              <Info className="h-5 w-5 mt-1 flex-shrink-0 text-green-600" />
+              <Info className="h-5 w-5 mt-1 flex-shrink-0 text-lime-500" />
               <p className="text-sm leading-relaxed">
                 SEER (Seasonal Energy Efficiency Ratio) - A ratio of the cooling
                 output during a typical cooling season with the total electric
@@ -116,7 +116,7 @@ export function CoolingContent() {
       <motion.div {...fadeInUp}>
         <Card className="overflow-hidden">
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-green-800 dark:text-green-200 flex items-center gap-2">
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200 flex items-center gap-2">
               <Snowflake className="h-6 w-6" />
               Your Home&apos;s Air Conditioner SEER
             </CardTitle>
@@ -133,7 +133,7 @@ export function CoolingContent() {
                       filter: 'blur(8px)',
                     }}
                   />
-                  <h3 className="relative text-2xl font-semibold text-[#166534] dark:text-green-300 mb-6">
+                  <h3 className="relative text-2xl font-semibold text-lime-500 dark:text-green-300 mb-6">
                     Current Performance
                   </h3>
                   <GaugeChart

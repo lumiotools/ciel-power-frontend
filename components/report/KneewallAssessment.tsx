@@ -155,7 +155,7 @@ export function KneewallAssessment() {
         >
           <Card>
             <CardHeader className="bg-green-50 dark:bg-green-900/50">
-              <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+              <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
                 {data.title}
               </CardTitle>
             </CardHeader>
@@ -163,7 +163,7 @@ export function KneewallAssessment() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="relative">
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-4 py-1 rounded-full text-sm">
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
                       Current Status
                     </div>
                     <img
@@ -223,7 +223,7 @@ export function KneewallAssessment() {
                         mixBlendMode: "overlay",
                       }}
                     />
-                    <h3 className="relative text-2xl font-semibold text-[#166534] dark:text-green-300 mb-6">
+                    <h3 className="relative text-2xl font-semibold text-lime-500 dark:text-green-300 mb-6">
                       Current Performance
                     </h3>
                     <GaugeChart

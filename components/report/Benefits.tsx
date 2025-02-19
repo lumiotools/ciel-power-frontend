@@ -9,7 +9,7 @@ export function Benefits() {
   return (
     <Card className="w-full">
       <CardHeader className="bg-green-50 dark:bg-green-900/50">
-        <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+        <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
           Benefits of Properly Installed Insulation
         </CardTitle>
       </CardHeader>
@@ -20,9 +20,9 @@ export function Benefits() {
               <CardContent className="p-6 flex flex-col h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <HomeIcon className="h-6 w-6 text-green-600" />
+                    <HomeIcon className="h-6 w-6 text-lime-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-green-700 dark:text-green-300">
+                  <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300">
                     Enhanced Comfort
                   </h3>
                 </div>
@@ -38,9 +38,9 @@ export function Benefits() {
               <CardContent className="p-6 flex flex-col h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <ShieldIcon className="h-6 w-6 text-green-600" />
+                    <ShieldIcon className="h-6 w-6 text-lime-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-green-700 dark:text-green-300">
+                  <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300">
                     Improved Durability
                   </h3>
                 </div>
@@ -51,7 +51,7 @@ export function Benefits() {
                   <div className="mt-4">
                     <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600 dark:text-gray-400">Efficiency Impact</span>
-                      <span className="text-green-600 dark:text-green-400">35%</span>
+                      <span className="text-lime-500 dark:text-green-400">35%</span>
                     </div>
                     <Progress value={35} className="h-2 bg-green-100 dark:bg-green-700" />
                   </div>
@@ -65,9 +65,9 @@ export function Benefits() {
               <CardContent className="p-6 flex flex-col h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <DollarSignIcon className="h-6 w-6 text-green-600" />
+                    <DollarSignIcon className="h-6 w-6 text-lime-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-green-700 dark:text-green-300">
+                  <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300">
                     Lower Utility Bills
                   </h3>
                 </div>
@@ -78,7 +78,7 @@ export function Benefits() {
                   <div className="mt-4">
                     <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600 dark:text-gray-400">Efficiency Impact</span>
-                      <span className="text-green-600 dark:text-green-400">50%</span>
+                      <span className="text-lime-500 dark:text-green-400">50%</span>
                     </div>
                     <Progress value={50} className="h-2 bg-green-100 dark:bg-green-700" />
                   </div>
@@ -90,9 +90,9 @@ export function Benefits() {
               <CardContent className="p-6 flex flex-col h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <TrendingUpIcon className="h-6 w-6 text-green-600" />
+                    <TrendingUpIcon className="h-6 w-6 text-lime-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-green-700 dark:text-green-300">
+                  <h3 className="text-xl font-semibold text-lime-500 dark:text-green-300">
                     Better Resale Position
                   </h3>
                 </div>

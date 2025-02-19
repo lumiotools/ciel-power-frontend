@@ -126,14 +126,14 @@ export function HeatingContent() {
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-green-800 dark:text-green-200 flex items-center gap-2">
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200 flex items-center gap-2">
               <Thermometer className="h-6 w-6" />
               Understanding Your Home&apos;s Heating Systems
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex items-start space-x-4 text-gray-600 dark:text-gray-300">
-              <Info className="h-5 w-5 mt-1 flex-shrink-0 text-green-600" />
+              <Info className="h-5 w-5 mt-1 flex-shrink-0 text-lime-500" />
               <p className="text-sm leading-relaxed">
                 Your home&apos;s heating system is crucial for comfort and
                 energy efficiency. We assess both your furnace&apos;s AFUE
@@ -150,7 +150,7 @@ export function HeatingContent() {
       <motion.div {...fadeInUp}>
         <Card className="overflow-hidden">
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-green-800 dark:text-green-200 flex items-center gap-2">
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200 flex items-center gap-2">
               <Flame className="h-6 w-6" />
               Furnace Performance (AFUE)
             </CardTitle>
@@ -166,7 +166,7 @@ export function HeatingContent() {
                       mixBlendMode: 'overlay',
                     }}
                   />
-                  <h3 className="relative text-2xl font-semibold text-[#166534] dark:text-green-300 mb-6">
+                  <h3 className="relative text-2xl font-semibold text-lime-500 dark:text-green-300 mb-6">
                     Current Performance
                   </h3>
                   <GaugeChart
@@ -233,7 +233,7 @@ export function HeatingContent() {
       <motion.div {...fadeInUp}>
         <Card className="overflow-hidden">
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-green-800 dark:text-green-200 flex items-center gap-2">
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200 flex items-center gap-2">
               <Droplets className="h-6 w-6" />
               Water Heater Efficiency (UEF)
             </CardTitle>
@@ -249,7 +249,7 @@ export function HeatingContent() {
                       mixBlendMode: 'overlay',
                     }}
                   />
-                  <h3 className="relative text-2xl font-semibold text-[#166534] dark:text-green-300 mb-6">
+                  <h3 className="relative text-2xl font-semibold text-lime-500 dark:text-green-300 mb-6">
                     Current Performance
                   </h3>
                   <GaugeChart

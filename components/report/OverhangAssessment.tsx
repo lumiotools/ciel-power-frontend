@@ -135,7 +135,7 @@ export function OverhangAssessment() {
     >
       <Card className="dark:bg-green-950/20">
         <CardHeader className="bg-green-50 dark:bg-green-900/50">
-          <CardTitle className="text-2xl text-green-800 dark:text-green-200">
+          <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
             Your Home&apos;s Overhang Insulation
           </CardTitle>
         </CardHeader>
@@ -143,7 +143,7 @@ export function OverhangAssessment() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div className="relative">
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 px-4 py-1 rounded-full text-sm">
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
                   Current Status
                 </div>
                 <img
@@ -174,8 +174,8 @@ export function OverhangAssessment() {
               <Card className="bg-[#f0fdf4] dark:bg-green-900/20">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <ThermometerIcon className="h-5 w-5 text-green-600" />
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    <ThermometerIcon className="h-5 w-5 text-lime-500" />
+                    <h3 className="font-semibold text-lime-500 dark:text-gray-100">
                       Efficiency Rating
                     </h3>
                   </div>
