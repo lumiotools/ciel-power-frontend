@@ -49,7 +49,7 @@ export function AirLeakageContent() {
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
             <CardTitle
-              className="text-2xl text-green-800 dark:text-green-200"
+              className="text-2xl text-lime-500 dark:text-green-200"
             >
               BPI Approach to Air Sealing
             </CardTitle>
@@ -64,7 +64,7 @@ export function AirLeakageContent() {
               sealed.
             </p>
             <div
-              className="flex items-center space-x-2 text-green-600 dark:text-green-400"
+              className="flex items-center space-x-2 text-lime-500 dark:text-green-400"
             >
               <Info className="h-5 w-5" />
               <span className="font-medium">
@@ -81,7 +81,7 @@ export function AirLeakageContent() {
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
             <CardTitle
-              className="text-2xl text-green-800 dark:text-green-200"
+              className="text-2xl text-lime-500 dark:text-green-200"
             >
               Understanding Air Flow Rates
             </CardTitle>
@@ -132,7 +132,7 @@ export function AirLeakageContent() {
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
             <CardTitle
-              className="text-2xl text-green-800 dark:text-green-200"
+              className="text-2xl text-lime-500 dark:text-green-200"
             >
               Your Home&apos;s Air Changes Per Hour (ACH)
             </CardTitle>
@@ -148,7 +148,7 @@ export function AirLeakageContent() {
                   </p>
                   <div className="flex items-center space-x-4">
                     <div
-                      className="text-4xl font-bold text-green-600"
+                      className="text-4xl font-bold text-lime-500"
                     >
                       0.95
                     </div>
@@ -202,7 +202,7 @@ export function AirLeakageContent() {
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
             <CardTitle
-              className="text-2xl text-green-800 dark:text-green-200"
+              className="text-2xl text-lime-500 dark:text-green-200"
             >
               Common Air Leak Points
             </CardTitle>
@@ -226,11 +226,11 @@ export function AirLeakageContent() {
                     id={`17fjqk_${index}`}
                   >
                     <div
-                      className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center"
+                      className="flex-shrink-0 w-8 h-8 rounded-full bg-lime-100 dark:bg-green-900 flex items-center justify-center"
                       id={`b46dud_${index}`}
                     >
                       <span
-                        className="text-green-600 dark:text-green-400 font-medium"
+                        className="text-lime-600 dark:text-green-400 font-medium"
                         id={`9c0odf_${index}`}
                       >
                         {point.id}
