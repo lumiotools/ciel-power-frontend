@@ -3,12 +3,31 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Edit2, Check, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GaugeChartProps {
   value: number;
   maxValue: number;
   label: string;
   animate: boolean;
+}
+
+interface KneewallData {
+  title: string;
+  material: string;
+  condition: string;
+  rValue: string;
+  recommendation: string;
+  currentValue: number;
+  maxValue: number;
+  image: string;
 }
 
 const GaugeChart: React.FC<GaugeChartProps> = ({
@@ -21,7 +40,6 @@ const GaugeChart: React.FC<GaugeChartProps> = ({
   return (
     <div className="relative w-full max-w-[400px] mx-auto">
       <svg viewBox="-10 0 220 110" className="w-full">
-        {/* Background arc */}
         <path
           d="M 0 110 A 100 100 0 0 1 200 110"
           fill="none"
@@ -29,8 +47,6 @@ const GaugeChart: React.FC<GaugeChartProps> = ({
           strokeWidth="16"
           strokeLinecap="round"
         />
-
-        {/* Colored arc with gradient */}
         <defs>
           <linearGradient
             id={`gauge-gradient-${label}`}
@@ -45,7 +61,6 @@ const GaugeChart: React.FC<GaugeChartProps> = ({
             <stop offset="100%" stopColor="#84cc16" />
           </linearGradient>
         </defs>
-
         <motion.path
           d="M 0 110 A 100 100 0 0 1 200 110"
           fill="none"
@@ -60,8 +75,6 @@ const GaugeChart: React.FC<GaugeChartProps> = ({
           }
           transition={{ duration: 1, ease: "easeOut" }}
         />
-
-        {/* Center text */}
         <text
           x="100"
           y="95"
@@ -85,8 +98,152 @@ const GaugeChart: React.FC<GaugeChartProps> = ({
   );
 };
 
+const EditableField = ({
+  value,
+  onSave,
+  type = "text",
+  options = [],
+}: {
+  value: string;
+  onSave: (value: string) => void;
+  type?: "text" | "select";
+  options?: string[];
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+
+  const handleSave = () => {
+    onSave(editValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value);
+    setIsEditing(false);
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <span>{value}</span>
+        <button
+          onClick={() => setIsEditing(true)}
+          className="p-1 hover:bg-gray-100 rounded"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {type === "select" ? (
+        <Select
+          value={editValue}
+          onValueChange={(value) => setEditValue(value)}
+        >
+          <SelectTrigger className="w-32">
+            <SelectValue>{editValue}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <input
+          type="text"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          className="border rounded px-2 py-1 w-32"
+        />
+      )}
+      <button
+        onClick={handleSave}
+        className="p-1 hover:bg-green-100 rounded text-green-600"
+      >
+        <Check className="w-4 h-4" />
+      </button>
+      <button
+        onClick={handleCancel}
+        className="p-1 hover:bg-red-100 rounded text-red-600"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+const ImageUpload = ({
+  image,
+  onImageChange,
+}: {
+  image: string;
+  onImageChange: (newImage: string) => void;
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Here you would typically upload the file to your server
+      // For now, we'll just create a local URL
+      const imageUrl = URL.createObjectURL(file);
+      onImageChange(imageUrl);
+      setIsEditing(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <img
+        src={image}
+        alt="Insulation inspection"
+        className="w-full h-64 object-cover rounded-lg mt-4"
+      />
+      {isEditing && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg mt-4">
+          <div className="bg-white p-4 rounded">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Choose New Image
+            </button>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      <button
+        onClick={() => setIsEditing(true)}
+        className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
+      >
+        <Edit2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
 export function KneewallAssessment() {
-  const kneewallData = [
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [kneewallData, setKneewallData] = useState<KneewallData[]>([
     {
       title: "Your Home's Kneewall Flat Insulation",
       material: '3-4" Cellulose',
@@ -107,16 +264,21 @@ export function KneewallAssessment() {
       maxValue: 13,
       image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png",
     },
-  ];
+  ]);
 
   const [animateCharts, setAnimateCharts] = useState(
     kneewallData.map(() => false)
   );
+
   const chartRefs = useRef(
     kneewallData.map(() => React.createRef<HTMLDivElement>())
   );
 
   useEffect(() => {
+    // Check if 'admin' exists in the URL
+    const isAdminUrl = window.location.href.includes("admin");
+    setIsAdmin(isAdminUrl);
+
     const observers = chartRefs.current.map((ref, index) => {
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -144,6 +306,27 @@ export function KneewallAssessment() {
     };
   }, []);
 
+  const updateKneewallData = (
+    index: number,
+    field: keyof KneewallData,
+    value: string
+  ) => {
+    setKneewallData((prev) => {
+      const newData = [...prev];
+      newData[index] = { ...newData[index], [field]: value };
+
+      // Update currentValue if rValue changes
+      if (field === "rValue") {
+        const numericValue = parseInt(value.replace("R", ""));
+        if (!isNaN(numericValue)) {
+          newData[index].currentValue = numericValue;
+        }
+      }
+
+      return newData;
+    });
+  };
+
   return (
     <div className="space-y-8">
       {kneewallData.map((data, index) => (
@@ -166,11 +349,20 @@ export function KneewallAssessment() {
                     <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
                       Current Status
                     </div>
-                    <img
-                      src={data.image}
-                      alt="Insulation inspection"
-                      className="w-full h-64 object-cover rounded-lg mt-4"
-                    />
+                    {isAdmin ? (
+                      <ImageUpload
+                        image={data.image}
+                        onImageChange={(newImage) =>
+                          updateKneewallData(index, "image", newImage)
+                        }
+                      />
+                    ) : (
+                      <img
+                        src={data.image}
+                        alt="Insulation inspection"
+                        className="w-full h-64 object-cover rounded-lg mt-4"
+                      />
+                    )}
                   </div>
                   <Card>
                     <CardContent className="p-4">
@@ -180,7 +372,16 @@ export function KneewallAssessment() {
                             Material
                           </dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">
-                            {data.material}
+                            {isAdmin ? (
+                              <EditableField
+                                value={data.material}
+                                onSave={(value) =>
+                                  updateKneewallData(index, "material", value)
+                                }
+                              />
+                            ) : (
+                              data.material
+                            )}
                           </dd>
                         </div>
                         <div>
@@ -188,7 +389,18 @@ export function KneewallAssessment() {
                             Condition
                           </dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">
-                            {data.condition}
+                            {isAdmin ? (
+                              <EditableField
+                                value={data.condition}
+                                onSave={(value) =>
+                                  updateKneewallData(index, "condition", value)
+                                }
+                                type="select"
+                                options={["Poor", "Fair", "Good", "Excellent"]}
+                              />
+                            ) : (
+                              data.condition
+                            )}
                           </dd>
                         </div>
                         <div>
@@ -196,7 +408,16 @@ export function KneewallAssessment() {
                             Current R-Value
                           </dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">
-                            {data.rValue}
+                            {isAdmin ? (
+                              <EditableField
+                                value={data.rValue}
+                                onSave={(value) =>
+                                  updateKneewallData(index, "rValue", value)
+                                }
+                              />
+                            ) : (
+                              data.rValue
+                            )}
                           </dd>
                         </div>
                         <div>
@@ -216,7 +437,6 @@ export function KneewallAssessment() {
                     ref={chartRefs.current[index]}
                     className="relative bg-[#f0fdf4] dark:bg-green-900/20 rounded-lg p-6"
                   >
-                    {/* Rainbow gradient overlay */}
                     <div
                       className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 opacity-5 rounded-lg"
                       style={{

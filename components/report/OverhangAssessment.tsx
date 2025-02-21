@@ -3,8 +3,15 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
-import { ThermometerIcon, InfoIcon } from 'lucide-react';
+import { ThermometerIcon, InfoIcon, Edit2, Check, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GaugeChartProps {
   value: number;
@@ -13,12 +20,43 @@ interface GaugeChartProps {
   animate: boolean;
 }
 
-const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate }) => {
+interface EditableFieldProps {
+  value: string;
+  onSave: (value: string) => void;
+  type: "text" | "select" | "number";
+  options?: string[];
+  min?: number;
+  max?: number;
+}
+
+interface OverhangData {
+  material: string;
+  condition: string;
+  rValue: number;
+  recommendedValue: number;
+  maxValue: number;
+  efficiency: number;
+  image: string;
+}
+
+interface FieldItem {
+  label: string;
+  value: string;
+  field: keyof OverhangData;
+  type: "text" | "select" | "number";
+  options?: string[];
+}
+
+const GaugeChart: React.FC<GaugeChartProps> = ({
+  value,
+  maxValue,
+  label,
+  animate,
+}) => {
   const percentage = (value / maxValue) * 100;
   return (
     <div className="relative w-full max-w-[300px] mx-auto">
       <svg viewBox="-10 0 220 120" className="w-full">
-        {/* Background arc */}
         <path
           d="M 0 110 A 100 100 0 0 1 200 110"
           fill="none"
@@ -27,16 +65,21 @@ const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate
           strokeLinecap="round"
         />
 
-        {/* Colored arc with gradient */}
         <defs>
-          <linearGradient id={`gauge-gradient-${label}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient
+            id={`gauge-gradient-${label}`}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor="#ef4444" />
             <stop offset="33%" stopColor="#f97316" />
             <stop offset="66%" stopColor="#eab308" />
             <stop offset="100%" stopColor="#84cc16" />
           </linearGradient>
         </defs>
-        
+
         <motion.path
           d="M 0 110 A 100 100 0 0 1 200 110"
           fill="none"
@@ -44,16 +87,16 @@ const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate
           strokeWidth="16"
           strokeLinecap="round"
           initial={{ strokeDasharray: "0, 314" }}
-          animate={animate ? { strokeDasharray: `${percentage * 3.14}, 314` } : { strokeDasharray: "0, 314" }}
+          animate={
+            animate
+              ? { strokeDasharray: `${percentage * 3.14}, 314` }
+              : { strokeDasharray: "0, 314" }
+          }
           transition={{ duration: 1, ease: "easeOut" }}
         />
 
-        {/* Markers inside the rainbow */}
         {[0, 10, 20, 30, 40].map((markerValue, index) => (
-          <g
-            key={index}
-            transform={`rotate(${-135 + index * 67.5}, 100, 110)`}
-          >
+          <g key={index} transform={`rotate(${-135 + index * 67.5}, 100, 110)`}>
             <line
               x1="100"
               y1="35"
@@ -69,12 +112,11 @@ const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate
               fill="#374151"
               className="text-xs"
             >
-              {markerValue > 0 ? `R${markerValue}` : ''}
+              {markerValue > 0 ? `R${markerValue}` : ""}
             </text>
           </g>
         ))}
 
-        {/* Center text */}
         <text
           x="100"
           y="85"
@@ -98,15 +140,204 @@ const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate
   );
 };
 
-export function OverhangAssessment() {
-  const rValue = 30; // Current R-Value
-  const recommendedValue = 30; // BPI recommended R-Value
-  const maxValue = 40; // Maximum value on the gauge
+const EditableField: React.FC<EditableFieldProps> = ({
+  value,
+  onSave,
+  type,
+  options = [],
+  min,
+  max,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
 
+  const handleSave = () => {
+    onSave(editValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value);
+    setIsEditing(false);
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <span>{value}</span>
+        <button
+          onClick={() => setIsEditing(true)}
+          className="p-1 hover:bg-gray-100 rounded"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {type === "number" ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={editValue}
+            min={min}
+            max={max}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="border rounded px-2 py-1 w-32"
+          />
+          <button
+            onClick={handleSave}
+            className="p-1 hover:bg-green-100 rounded text-green-600"
+          >
+            <Check className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : type === "select" ? (
+        <div className="flex items-center gap-2">
+          <Select
+            value={editValue}
+            onValueChange={(value) => {
+              setEditValue(value);
+              onSave(value);
+              setIsEditing(false);
+            }}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue>{editValue}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="border rounded px-2 py-1 w-32"
+          />
+          <button
+            onClick={handleSave}
+            className="p-1 hover:bg-green-100 rounded text-green-600"
+          >
+            <Check className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ImageUpload: React.FC<{
+  src: string;
+  onImageChange: (newImage: string) => void;
+}> = ({ src, onImageChange }) => {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      onImageChange(imageUrl);
+      setIsEditing(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
+        Current Status
+      </div>
+      <div className="relative">
+        <img
+          src={src}
+          alt="Overhang insulation"
+          className="w-full h-64 object-cover rounded-lg mt-4"
+        />
+        {isEditing && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center mt-4 rounded-lg">
+            <div className="bg-white p-4 rounded">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Choose New Image
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        {!isEditing && (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export function OverhangAssessment() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [animateChart, setAnimateChart] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
+  const [overhangData, setOverhangData] = useState<OverhangData>({
+    material: '9.5" Fiberglass',
+    condition: "Good",
+    rValue: 30,
+    recommendedValue: 30,
+    maxValue: 40,
+    efficiency: 100,
+    image: "https://i.postimg.cc/sgBfY3FS/Screenshot-2024-11-25-033139.png",
+  });
+
   useEffect(() => {
+    const isAdminUrl = window.location.href.includes("admin");
+    setIsAdmin(isAdminUrl);
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -128,11 +359,35 @@ export function OverhangAssessment() {
     };
   }, []);
 
+  const updateOverhangData = (
+    field: keyof OverhangData,
+    value: string | number
+  ) => {
+    setOverhangData((prev) => {
+      const newData = { ...prev, [field]: value };
+
+      if (field === "rValue") {
+        const numericValue =
+          typeof value === "string" ? parseInt(value.replace("R", "")) : value;
+        if (!isNaN(numericValue)) {
+          newData.rValue = numericValue;
+          newData.efficiency = (numericValue / prev.recommendedValue) * 100;
+        }
+      } else if (field === "efficiency") {
+        const numericValue =
+          typeof value === "string" ? parseInt(value) : value;
+        if (!isNaN(numericValue)) {
+          newData.efficiency = numericValue;
+          newData.rValue = (numericValue * prev.recommendedValue) / 100;
+        }
+      }
+
+      return newData;
+    });
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="dark:bg-green-950/20">
         <CardHeader className="bg-green-50 dark:bg-green-900/50">
           <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
@@ -142,28 +397,85 @@ export function OverhangAssessment() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
-              <div className="relative">
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
-                  Current Status
-                </div>
-                <img
-                  src="https://i.postimg.cc/sgBfY3FS/Screenshot-2024-11-25-033139.png"
-                  alt="Overhang insulation"
-                  className="w-full h-64 object-cover rounded-lg mt-4"
+              {isAdmin ? (
+                <ImageUpload
+                  src={overhangData.image}
+                  onImageChange={(newImage) =>
+                    updateOverhangData("image", newImage)
+                  }
                 />
-              </div>
+              ) : (
+                <div className="relative">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
+                    Current Status
+                  </div>
+                  <img
+                    src={overhangData.image}
+                    alt="Overhang insulation"
+                    className="w-full h-64 object-cover rounded-lg mt-4"
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
-                {[
-                  { label: "Material", value: '9.5" Fiberglass' },
-                  { label: "Condition", value: "Good" },
-                  { label: "Current R-Value", value: "R30" },
-                  { label: "Recommended", value: "R30" },
-                ].map((item, index) => (
+                {(
+                  [
+                    {
+                      label: "Material",
+                      value: overhangData.material,
+                      field: "material" as const,
+                      type: "text" as const,
+                    },
+                    {
+                      label: "Condition",
+                      value: overhangData.condition,
+                      field: "condition" as const,
+                      type: "select" as const,
+                      options: ["N/A", "Poor", "Fair", "Good", "Excellent"],
+                    },
+                    {
+                      label: "Current R-Value",
+                      value: `R${overhangData.rValue}`,
+                      field: "rValue" as const,
+                      type: "text" as const,
+                    },
+                    {
+                      label: "Recommended",
+                      value: `R${overhangData.recommendedValue}`,
+                      field: "recommendedValue" as const,
+                      type: "text" as const,
+                    },
+                  ] satisfies FieldItem[]
+                ).map((item, index) => (
                   <Card key={index}>
                     <CardContent className="p-4">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{item.label}</div>
-                      <div className="font-medium mt-1 text-gray-900 dark:text-gray-100">{item.value}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {item.label}
+                      </div>
+                      <div className="font-medium mt-1 text-gray-900 dark:text-gray-100">
+                        {isAdmin ? (
+                          <EditableField
+                            value={item.value}
+                            onSave={(value) => {
+                              if (
+                                item.field === "rValue" ||
+                                item.field === "recommendedValue"
+                              ) {
+                                updateOverhangData(
+                                  item.field,
+                                  parseInt(value.replace("R", ""))
+                                );
+                              } else {
+                                updateOverhangData(item.field, value);
+                              }
+                            }}
+                            type={item.type}
+                            options={item.options}
+                          />
+                        ) : (
+                          item.value
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -181,21 +493,49 @@ export function OverhangAssessment() {
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-400">Current Efficiency</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Current Efficiency
+                      </span>
                       <span className="text-gray-900 dark:text-gray-100">
-                        {Math.round((rValue / recommendedValue) * 100)}%
+                        {isAdmin ? (
+                          <EditableField
+                            value={`${Math.round(
+                              (overhangData.rValue /
+                                overhangData.recommendedValue) *
+                                100
+                            )}`}
+                            onSave={(value) => {
+                              const efficiency = parseInt(value);
+                              if (!isNaN(efficiency)) {
+                                updateOverhangData("efficiency", efficiency);
+                              }
+                            }}
+                            type="number"
+                            min={0}
+                            max={100}
+                          />
+                        ) : (
+                          `${Math.round(
+                            (overhangData.rValue /
+                              overhangData.recommendedValue) *
+                              100
+                          )}%`
+                        )}
                       </span>
                     </div>
                     <Progress
-                      value={(rValue / maxValue) * 100}
+                      value={
+                        (overhangData.rValue / overhangData.maxValue) * 100
+                      }
                       className="h-2 bg-green-100 dark:bg-green-700"
                     />
 
                     <div className="flex items-start gap-2 mt-4 text-sm text-gray-600 dark:text-gray-300">
                       <InfoIcon className="h-4 w-4 mt-0.5 shrink-0" />
                       <p>
-                        Your overhang insulation is meeting the recommended standards,
-                        providing optimal thermal protection for your home.
+                        Your overhang insulation is meeting the recommended
+                        standards, providing optimal thermal protection for your
+                        home.
                       </p>
                     </div>
                   </div>
@@ -209,8 +549,8 @@ export function OverhangAssessment() {
                   </h3>
                   <div ref={chartRef} className="relative">
                     <GaugeChart
-                      value={rValue}
-                      maxValue={maxValue}
+                      value={overhangData.rValue}
+                      maxValue={overhangData.maxValue}
                       label="distribution"
                       animate={animateChart}
                     />

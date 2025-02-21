@@ -1,19 +1,23 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React from "react";
+import type React from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  Wind,
-  Home,
-  ArrowUp,
-  ArrowDown,
-  Info,
-} from "lucide-react";
+import { Wind, Home, ArrowUp, ArrowDown, Info, Pencil } from "lucide-react";
 // import { Chatbot } from "./Chatbot";
 
 export function AirLeakageContent() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsAdmin(window.location.href.includes("admin"));
+    }
+  }, []);
+
   const airLeakagePoints = [
     { id: 1, label: "Air Barrier and Thermal Barrier Alignment" },
     { id: 2, label: "Attic Air Sealing" },
@@ -48,9 +52,7 @@ export function AirLeakageContent() {
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle
-              className="text-2xl text-lime-500 dark:text-green-200"
-            >
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
               BPI Approach to Air Sealing
             </CardTitle>
           </CardHeader>
@@ -63,9 +65,7 @@ export function AirLeakageContent() {
               exterior of the home around windows, baseboards, and doors are
               sealed.
             </p>
-            <div
-              className="flex items-center space-x-2 text-lime-500 dark:text-green-400"
-            >
+            <div className="flex items-center space-x-2 text-lime-500 dark:text-green-400">
               <Info className="h-5 w-5" />
               <span className="font-medium">
                 A 1/16th inch unsealed crack around a window lets in as much
@@ -80,9 +80,7 @@ export function AirLeakageContent() {
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle
-              className="text-2xl text-lime-500 dark:text-green-200"
-            >
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
               Understanding Air Flow Rates
             </CardTitle>
           </CardHeader>
@@ -96,11 +94,12 @@ export function AirLeakageContent() {
                 </p>
                 <div className="flex items-center space-x-4">
                   <div className="w-32">
-                    <Progress value={35} className="h-2 bg-green-100 dark:bg-green-700" />
+                    <Progress
+                      value={35}
+                      className="h-2 bg-green-100 dark:bg-green-700"
+                    />
                   </div>
-                  <span
-                    className="text-sm text-gray-600 dark:text-gray-400"
-                  >
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     Recommended: 35%
                   </span>
                 </div>
@@ -114,12 +113,10 @@ export function AirLeakageContent() {
                   }}
                   transition={{
                     duration: 2,
-                    repeat: Infinity,
+                    repeat: Number.POSITIVE_INFINITY,
                   }}
                 >
-                  <Wind
-                    className="h-24 w-24 text-green-500 opacity-50"
-                  />
+                  <Wind className="h-24 w-24 text-green-500 opacity-50" />
                 </motion.div>
               </div>
             </div>
@@ -131,9 +128,7 @@ export function AirLeakageContent() {
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle
-              className="text-2xl text-lime-500 dark:text-green-200"
-            >
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
               Your Home&apos;s Air Changes Per Hour (ACH)
             </CardTitle>
           </CardHeader>
@@ -141,20 +136,12 @@ export function AirLeakageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <div className="space-y-4">
-                  <p
-                    className="text-lg font-semibold text-gray-900 dark:text-gray-100"
-                  >
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Your Results
                   </p>
                   <div className="flex items-center space-x-4">
-                    <div
-                      className="text-4xl font-bold text-lime-500"
-                    >
-                      0.95
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      ACH
-                    </div>
+                    <InPlaceEdit initialValue="0.95" isAdmin={isAdmin} />
+                    <div className="text-sm text-gray-600">ACH</div>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300">
                     BPI recommends the Air Changes per Hour be 0.35
@@ -169,25 +156,17 @@ export function AirLeakageContent() {
                   }}
                   transition={{
                     duration: 20,
-                    repeat: Infinity,
+                    repeat: Number.POSITIVE_INFINITY,
                     ease: "linear",
                   }}
                 >
-                  <div
-                    className="h-full w-full flex items-center justify-center"
-                  >
+                  <div className="h-full w-full flex items-center justify-center">
                     <div className="relative w-32 h-32">
-                      <ArrowUp
-                        className="absolute top-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-red-500"
-                      />
+                      <ArrowUp className="absolute top-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-red-500" />
 
-                      <ArrowDown
-                        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-green-500"
-                      />
+                      <ArrowDown className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-green-500" />
 
-                      <Home
-                        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 h-16 w-16 text-gray-400"
-                      />
+                      <Home className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 h-16 w-16 text-gray-400" />
                     </div>
                   </div>
                 </motion.div>
@@ -201,16 +180,12 @@ export function AirLeakageContent() {
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle
-              className="text-2xl text-lime-500 dark:text-green-200"
-            >
+            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
               Common Air Leak Points
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {airLeakagePoints.map((point, index) => (
                 <motion.div
                   key={point.id}
@@ -252,6 +227,63 @@ export function AirLeakageContent() {
 
       {/* Chatbot */}
       {/* <Chatbot activeMenu="air-leakage" /> */}
+    </div>
+  );
+}
+
+interface InPlaceEditProps {
+  initialValue: string;
+  isAdmin: boolean;
+}
+
+function InPlaceEdit({ initialValue, isAdmin }: InPlaceEditProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(initialValue);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  const handleClick = () => {
+    if (isAdmin) {
+      setIsEditing(true);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        className="text-4xl font-bold text-lime-500 bg-transparent border-b border-lime-500 outline-none"
+      />
+    );
+  }
+
+  return (
+    <div
+      className="text-4xl font-bold text-lime-500 flex items-center cursor-pointer"
+      onClick={handleClick}
+    >
+      {value}
+      {isAdmin && <Pencil className="ml-2 h-5 w-5 text-gray-400" />}
     </div>
   );
 }
