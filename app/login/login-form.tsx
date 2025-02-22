@@ -25,7 +25,7 @@ export default function LoginForm() {
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,53 +33,62 @@ export default function LoginForm() {
 
   useEffect(() => {
     const code = searchParams.get("code");
+    const emailToken = searchParams.get("token");
     if (code) {
-      handleGoogleAuth(code)
+      handleGoogleAuth(code);
     }
-  }, [searchParams])
+    if (emailToken) {
+      const validEmail = decodeURIComponent(
+        Buffer.from(emailToken || "", "hex").toString("utf8")
+      );
+      setEmail(validEmail);
+    }
+  }, [searchParams]);
 
   const handleGoogleAuth = async (code: string) => {
-    setError(null)
-    setGoogleLoading(true)
+    setError(null);
+    setGoogleLoading(true);
 
     try {
       const response = await fetch(`/api/auth/google-auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           code,
-          redirect_uri: `${window.location.origin}/login`
+          redirect_uri: `${window.location.origin}/login`,
         }),
-      })
+      });
 
       if (response.ok) {
-        checkAuth()
-        toast.success("Logged in with Google successfully!")
+        checkAuth();
+        toast.success("Logged in with Google successfully!");
       } else {
-        const errorData = await response.json()
-        setError(errorData.detail || "Google login failed. Please try again.")
-        console.error("Google login failed:", errorData)
+        const errorData = await response.json();
+        setError(errorData.detail || "Google login failed. Please try again.");
+        console.error("Google login failed:", errorData);
         router.replace(pathname);
       }
     } catch (error) {
-      console.log("Error", error as Error)
-      setError("An error occurred during Google login. Please try again later.")
-      router.replace(pathname)
+      console.log("Error", error as Error);
+      setError(
+        "An error occurred during Google login. Please try again later."
+      );
+      router.replace(pathname);
     } finally {
-      setGoogleLoading(false)
+      setGoogleLoading(false);
     }
-  }
+  };
 
   const handleGoogleLogin = () => {
-    setGoogleLoading(true)
+    setGoogleLoading(true);
     const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     const redirectURI = encodeURIComponent(`${window.location.origin}/login`);
 
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectURI}&response_type=code&scope=email%20profile`;
 
     window.location.href = googleAuthUrl;
-  }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,22 +107,23 @@ export default function LoginForm() {
         checkAuth();
         toast.success("Logged in successfully!");
       } else {
-        const errorData = await response.json()
-        const errorMessage = errorData.detail || "Login failed. Please try again."
+        const errorData = await response.json();
+        const errorMessage =
+          errorData.detail || "Login failed. Please try again.";
 
         // Extract error code
-        const errorCodeMatch = errorMessage.match(/: ([A-Z_]+)$/)
-        const errorCode = errorCodeMatch ? errorCodeMatch[1] : "UNKNOWN_ERROR"
+        const errorCodeMatch = errorMessage.match(/: ([A-Z_]+)$/);
+        const errorCode = errorCodeMatch ? errorCodeMatch[1] : "UNKNOWN_ERROR";
 
         if (errorCode === "INVALID_LOGIN_CREDENTIALS") {
-          setError("Invalid email or password")
+          setError("Invalid email or password");
         } else {
-          setError(errorMessage)
+          setError(errorMessage);
         }
-        console.error("Login failed:", errorData)
+        console.error("Login failed:", errorData);
       }
     } catch (error) {
-      console.log("Error", (error as Error))
+      console.log("Error", error as Error);
       setError("An error occurred during login. Please try again later.");
     } finally {
       setLoading(false);
@@ -138,7 +148,9 @@ export default function LoginForm() {
               <CardTitle className="text-xl sm:text-2xl font-medium text-left">
                 Log In
               </CardTitle>
-              <CardDescription>Welcome back! Log in to your account.</CardDescription>
+              <CardDescription>
+                Welcome back! Log in to your account.
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="grid gap-4">
@@ -179,13 +191,18 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
-                className={`w-full h-[48px] text-[18px] ${loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"}`}
+                className={`w-full h-[48px] text-[18px] ${
+                  loading ? "bg-gray-400" : "bg-[#5ea502] hover:bg-[#5ea502]"
+                }`}
                 disabled={loading}
               >
                 {loading ? "Logging in..." : "Login"}
               </Button>
 
-              <Link href="/forgot-password" className="text-right text-[#1c2c14] text-[14px]">
+              <Link
+                href="/forgot-password"
+                className="text-right text-[#1c2c14] text-[14px]"
+              >
                 Forgot Password?
               </Link>
             </CardContent>
@@ -208,7 +225,11 @@ export default function LoginForm() {
                 {googleLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <img src="/google-logo.png" alt="Google logo" className="w-5 h-5 mr-2" />
+                  <img
+                    src="/google-logo.png"
+                    alt="Google logo"
+                    className="w-5 h-5 mr-2"
+                  />
                 )}
                 <span className="text-gray-800 font-medium text-[14px]">
                   {googleLoading ? "Signing in..." : "Sign in with Google"}
@@ -222,7 +243,9 @@ export default function LoginForm() {
               </button> */}
 
               <div className="text-center">
-                <p className="text-[12px] font-thin text-[#1C2C14]">More Sign Up Options</p>
+                <p className="text-[12px] font-thin text-[#1C2C14]">
+                  More Sign Up Options
+                </p>
               </div>
 
               {/* Sign Up Link */}
