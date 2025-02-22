@@ -123,9 +123,16 @@ export default function SignUpForm() {
 
         if (!response.ok) {
           const errorData = await response.json();
+
+          // Extract error message if it's a known case
           const match = errorData.detail.match(/400:\s(.+)/);
-          const extractedMessage = match ? match[1] : "";
-          console.log(extractedMessage);
+          const extractedMessage = match ? match[1] : errorData.detail;
+
+          // Handle "EMAIL_EXISTS" error case
+          if (errorData.detail.includes("EMAIL_EXISTS")) {
+            throw new Error("An account with this email already exists. Please use a different email or log in.");
+          }
+
           throw new Error(extractedMessage || "Failed to sign up");
         }
 

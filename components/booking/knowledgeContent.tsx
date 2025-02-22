@@ -86,7 +86,7 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
                           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30"
                           onClick={() => handlePlayClick(content.videoId)} // Open YouTube video
                         >
-                          <div className="bg-white rounded-full p-3">
+                          <div className="bg-white rounded-full p-3 cursor-pointer">
                             <Play className="w-6 h-6 text-red-600" />
                           </div>
                         </div>

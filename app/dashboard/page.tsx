@@ -8,8 +8,9 @@ import ServiceCard from "../../components/component/ServiceCard";
 import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
 // import CountdownTimer from "@/components/component/CountdownTimer";
-import { Clock, AlertCircle, Loader2 } from "lucide-react";
+import { Clock, AlertCircle, Loader2, } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { ChatBot } from "@/components/modal/ChatBot";
 
 interface Service {
   id: string;
@@ -175,7 +176,7 @@ export default function DashboardPage() {
   //   if (booking.accepted) {
   //     return (
   //       <div className="flex items-center">
-  //         <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-green-800">
+  //         <span className="px-3 py-1.5 text-sm font-medium rounded-full bg-green-100 text-lime-500">
   //           Confirmed
   //         </span>
   //         <CountdownTimer startTime={booking.startTime} />
@@ -454,6 +455,8 @@ export default function DashboardPage() {
               </div>
             )}
           </section>
+
+          <ChatBot />
 
           {/* FAQs Section */}
           {/* <div className="flex justify-between items-center mt-5">

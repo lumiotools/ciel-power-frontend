@@ -104,8 +104,18 @@ export default function LoginForm() {
       });
 
       if (response.ok) {
-        checkAuth();
-        toast.success("Logged in successfully!");
+        const data = await response.json();
+
+        // Check role and redirect accordingly
+        if (data.role === "admin") {
+          await checkAuth(); // Make sure auth state is updated before redirect
+          toast.success("Admin logged in successfully!");
+          router.push("/admin");
+        } else {
+          await checkAuth();
+          toast.success("Logged in successfully!");
+          router.push("/dashboard"); // or wherever regular users should go
+        }
       } else {
         const errorData = await response.json();
         const errorMessage =
