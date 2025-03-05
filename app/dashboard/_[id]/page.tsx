@@ -131,7 +131,7 @@ const ServiceDetailsPage: React.FC = () => {
   useEffect(() => {
     if (authContext) {
       console.log("auth context", authContext);
-      setUserDetails((prev) => ({
+      setUserDetails(() => ({
         firstName: authContext.firstName || "",
         lastName: authContext.lastName || "",
         emailAddress: authContext.emailAddress || "",
