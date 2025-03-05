@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useContext, useCallback } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import ServiceCard from "../../components/component/ServiceCard";
+// import { useRouter } from "next/navigation";
+// import ServiceCard from "../../components/component/ServiceCard";
 import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
 // import CountdownTimer from "@/components/component/CountdownTimer";
@@ -13,13 +13,13 @@ import { Card } from "@/components/ui/card";
 import { ChatBot } from "@/components/modal/ChatBot";
 import Link from "next/link";
 
-interface Service {
-  id: string;
-  name: string;
-  images?: { url: string }[];
-  price?: { amount: number };
-  description: string;
-}
+// interface Service {
+//   id: string;
+//   name: string;
+//   images?: { url: string }[];
+//   price?: { amount: number };
+//   description: string;
+// }
 
 interface Price {
   totalGross: {
@@ -86,12 +86,12 @@ const getStepStatus = (currentStage: string) => {
 };
 
 export default function DashboardPage() {
-  const router = useRouter();
+  // const router = useRouter();
   // const [services, setServices] = useState<Service[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  // const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const { userDetails } = useContext(AUTH_CONTEXT);
 

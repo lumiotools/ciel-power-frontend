@@ -1,8 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React, { useEffect, useState, useContext } from "react";
-import { AUTH_CONTEXT } from "../../../../providers/auth"; // Adjust the import path as needed
+import React, { useEffect, useState } from "react";
 import { Loader2, XCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -137,7 +136,7 @@ const BookingDetailsPage = () => {
   const [newFollowUpScheduleLink, setNewFollowUpScheduleLink] = useState<
     string | null
   >(null);
-  const [reportUrl, setReportUrl] = useState<string | null>(null);
+  // const [reportUrl, setReportUrl] = useState<string | null>(null);
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
@@ -473,7 +472,7 @@ const BookingDetailsPage = () => {
                 <h4 className="text-lg font-bold">
                   Congratulations, your audit report has been generated!
                 </h4>
-                {reportUrl && (
+                {/* {reportUrl && (
                   <Link
                     href={`${bookingNumber}/reports`}
                     // target="_blank"
@@ -481,7 +480,7 @@ const BookingDetailsPage = () => {
                   >
                     Click here to view the report
                   </Link>
-                )}
+                )} */}
               </div>
             )}
 
