@@ -1166,7 +1166,7 @@ const ServiceDetailsPage: React.FC = () => {
             "contact",
             completedSections.contact,
             userDetails.emailAddress
-              ? `${userDetails.emailAddress} • ${userDetails.phoneNumbers[0]?.number}`
+              ? `${userDetails.emailAddress} • ${userDetails.phoneNumbers?.[0]?.number}`
               : undefined,
             true
           )}

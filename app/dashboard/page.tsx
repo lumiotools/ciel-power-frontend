@@ -8,9 +8,10 @@ import ServiceCard from "../../components/component/ServiceCard";
 import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
 import BookingProgress from "@/components/component/booking-progress";
 // import CountdownTimer from "@/components/component/CountdownTimer";
-import { Clock, AlertCircle, Loader2, } from "lucide-react";
+import { Clock, AlertCircle, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ChatBot } from "@/components/modal/ChatBot";
+import Link from "next/link";
 
 interface Service {
   id: string;
@@ -75,42 +76,40 @@ const stepsSequence = [
 const getStepStatus = (currentStage: string) => {
   return stepsSequence.map((step, index) => {
     const status: "completed" | "current" | "upcoming" | "cancelled" =
-      stepsSequence.findIndex(s => s.key === currentStage) > index
+      stepsSequence.findIndex((s) => s.key === currentStage) > index
         ? "completed"
-        : stepsSequence.findIndex(s => s.key === currentStage) === index
+        : stepsSequence.findIndex((s) => s.key === currentStage) === index
         ? "current"
         : "upcoming";
     return { label: step.label, status };
   });
 };
 
-
 export default function DashboardPage() {
   const router = useRouter();
-  const [services, setServices] = useState<Service[]>([]);
+  // const [services, setServices] = useState<Service[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const { userDetails } = useContext(AUTH_CONTEXT);
-  
-  const getServices = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/booking/services`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      const data = await response.json()
-      setServices(data?.data?.services || [])
-    } catch (error) {
-      console.log(error)
-      toast.error("No Services Found")
-    }
-  }, [])
 
+  // const getServices = useCallback(async () => {
+  //   try {
+  //     const response = await fetch(`/api/booking/services`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     const data = await response.json();
+  //     setServices(data?.data?.services || []);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("No Services Found");
+  //   }
+  // }, []);
 
   const getBookings = useCallback(async () => {
     try {
@@ -120,34 +119,34 @@ export default function DashboardPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-      })
-      const data: BookingsResponse = await response.json()
+      });
+      const data: BookingsResponse = await response.json();
       if (data.success) {
-        setBookings(data.data.bookings)
+        setBookings(data.data.bookings);
       } else {
-        throw new Error(data.message || "Failed to fetch bookings")
+        throw new Error(data.message || "Failed to fetch bookings");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
-      toast.error("No Bookings Found")
+      setError(err instanceof Error ? err.message : "An error occurred");
+      toast.error("No Bookings Found");
     }
-  }, [])
+  }, []);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => Math.min(services.length - 1, prev + 1));
-  };
+  // const handleNext = () => {
+  //   setCurrentIndex((prev) => Math.min(services.length - 1, prev + 1));
+  // };
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
-  };
+  // const handlePrev = () => {
+  //   setCurrentIndex((prev) => Math.max(0, prev - 1));
+  // };
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.deltaY > 0) {
-      handleNext();
-    } else {
-      handlePrev();
-    }
-  };
+  // const handleWheel = (e: React.WheelEvent) => {
+  //   if (e.deltaY > 0) {
+  //     handleNext();
+  //   } else {
+  //     handlePrev();
+  //   }
+  // };
 
   const formatDateTime = (dateStr: string): string => {
     const date = new Date(dateStr);
@@ -159,10 +158,6 @@ export default function DashboardPage() {
       hour12: true,
       timeZone: "UTC",
     }).format(date);
-  };
-
-  const handleViewDetails = (bookingNumber: string) => {
-    router.push(`/dashboard/bookings/${bookingNumber}`);
   };
 
   // const getStatusBadge = (booking: Booking): React.ReactElement => {
@@ -192,19 +187,25 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        await Promise.all([getServices(), getBookings()])
+        await Promise.all([
+          // getServices(),
+          getBookings(),
+        ]);
       } catch (error) {
-        console.error("Error fetching data:", error)
-        setError("Failed to load dashboard data")
+        console.error("Error fetching data:", error);
+        setError("Failed to load dashboard data");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [getServices, getBookings])
+    fetchData();
+  }, [
+    // getServices,
+    getBookings,
+  ]);
 
   if (loading) {
     return (
@@ -253,7 +254,7 @@ export default function DashboardPage() {
         {/* Main Content Container */}
         <div className="container mx-auto p-6">
           {/* Suggested Services Section */}
-          <div className="flex justify-between items-center mb-5">
+          {/* <div className="flex justify-between items-center mb-5">
             <h2 className="text-2xl font-medium">Suggested Services</h2>
           </div>
 
@@ -336,7 +337,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Your Bookings Section */}
           <div className="flex justify-between items-center mt-5">
@@ -349,14 +350,19 @@ export default function DashboardPage() {
           >
             {bookings.length > 0 ? (
               bookings.map((booking) => (
-                <Card key={booking.bookingNumber} className="mb-6 relative p-6 rounded-[12px]">
+                <Card
+                  key={booking.bookingNumber}
+                  className="mb-6 relative p-6 rounded-[12px]"
+                >
                   {/* <div key={booking.bookingNumber} className="mb-6 relative"> */}
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-lg font-medium">
                         {formatDateTime(booking.startTime)}
                       </h3>
-                      <p className="text-[#636561] font-medium">{booking.serviceName}</p>
+                      <p className="text-[#636561] font-medium">
+                        {booking.serviceName}
+                      </p>
                       <div className="flex items-center text-[#636561] text-sm mt-1">
                         <Clock className="h-4 w-4 mr-2" />
                         <span>Booking #{booking.bookingNumber}</span>
@@ -382,17 +388,18 @@ export default function DashboardPage() {
                     ]}
                   /> */}
 
-                <BookingProgress steps={getStepStatus(booking.currentStage || "bookingCreated")} />
-
+                  <BookingProgress
+                    steps={getStepStatus(
+                      booking.currentStage || "bookingCreated"
+                    )}
+                  />
 
                   <div className="flex flex-wrap justify-between mt-4">
-                    <Button
-                      variant="link"
-                      className="text-blue-600"
-                      onClick={() => handleViewDetails(booking.bookingNumber)}
-                    >
-                      View Details
-                    </Button>
+                    <Link href={`/dashboard/bookings/${booking.bookingNumber}`}>
+                      <Button variant="link" className="text-blue-600">
+                        View Details
+                      </Button>
+                    </Link>
                     {/* <div>
                       <Button className="bg-[#5ea502] hover:bg-[#5ea502]/90">
                         Reschedule
