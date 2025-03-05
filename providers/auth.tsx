@@ -16,25 +16,10 @@ export const AUTH_CONTEXT = createContext<{
   logoutUser: ()  => {}
 });
 
-interface UserPhoneNumber {
-  number: string;
-  type: "mobile" | "work" | "home" | "fax";
-}
-
-interface UserStreetAddress {
-  line1: string;
-  line2: string;
-  city: string;
-  province: string;
-  postalCode: string;
-}
-
 export interface UserDetails {
   firstName: string;
   lastName: string;
   emailAddress: string;
-  phoneNumbers: UserPhoneNumber[];
-  streetAddress: UserStreetAddress;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {

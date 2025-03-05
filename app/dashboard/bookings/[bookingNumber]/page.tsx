@@ -24,15 +24,11 @@ interface Price {
   taxes: unknown[];
 }
 
-interface MeetingDetails {
-  name: string;
-  start_time: string;
-  end_time: string;
-  meeting_link: string;
-  reschedule: string;
-  is_cancelled: boolean;
-  is_editable: boolean;
-  lead_ids: [];
+interface FollowUpDetals {
+  startTime: string;
+  endTime: string;
+  isCancelled: string;
+  rescheduleLink: string;
 }
 interface BookingDetails {
   bookingNumber: string;
@@ -54,13 +50,12 @@ interface ApiResponse {
   message: string;
   data: {
     booking: BookingDetails;
+    customer: CustomerDetails;
+    currentStage: string;
+    newFollowUpScheduleUrl: string;
+    followUpScheduleDetails: FollowUpDetals;
     youtubeVideos: YouTubeVideo[];
     blogs: BlogPost[];
-    meetings: MeetingDetails;
-    currentStage: string;
-    leadId: string;
-    scheduleMeeting: string; // Now directly a string URL
-    reportUrl?: string; // Optional URL for the report
   };
 }
 
@@ -79,13 +74,33 @@ interface BlogPost {
   pageLink: string;
 }
 
+interface CustomerDetails {
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  phoneNumbers: CustomerPhoneNumber[];
+  streetAddress: CustomerStreetAddress;
+}
+
+interface CustomerPhoneNumber {
+  number: string;
+  type: "mobile" | "work" | "home" | "fax";
+}
+
+interface CustomerStreetAddress {
+  line1: string;
+  line2: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
 
 const stepsSequence = [
   { label: "Booking Created", key: "bookingCreated" },
   { label: "Utility Bills Uploaded", key: "utilityBills" },
   { label: "Audit Performed", key: "auditPerformed" },
   { label: "Report Generated", key: "reportGenerated" },
-  { label: "Follow Up Scheduled", key: "followUpSchedule" },
+  { label: "Follow Up Scheduled", key: "followUpScheduled" },
   { label: "Proposal Signed", key: "proposalSigned" },
   { label: "Payment Done", key: "paymentDone" },
 ];
@@ -93,11 +108,11 @@ const stepsSequence = [
 const getStepStatus = (currentStage: string) => {
   return stepsSequence.map((step, index) => {
     const status: "completed" | "current" | "upcoming" | "cancelled" =
-      stepsSequence.findIndex(s => s.key === currentStage) > index
+      stepsSequence.findIndex((s) => s.key === currentStage) > index
         ? "completed"
-        : stepsSequence.findIndex(s => s.key === currentStage) === index
-          ? "current"
-          : "upcoming";
+        : stepsSequence.findIndex((s) => s.key === currentStage) === index
+        ? "current"
+        : "upcoming";
     return { label: step.label, status };
   });
 };
@@ -107,38 +122,25 @@ const BookingDetailsPage = () => {
   const bookingNumber = params.bookingNumber;
 
   const [booking, setBooking] = useState<BookingDetails | null>(null);
+  const [customerDetails, setCustomerDetails] =
+    useState<CustomerDetails | null>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [youtubeSuggestions, setYoutubeSuggestions] = useState<YouTubeVideo[]>(
     []
   );
-  const [meeting, setMeeting] = useState<MeetingDetails | null>(null);
+  const [followUpScheduleDetails, setFollowUpScheduleDetails] =
+    useState<FollowUpDetals | null>(null);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [currentStage, setCurrentStage] = useState<string>("");
-  const [followUpMeetingLink, setFollowUpMeetingLink] = useState<string | null>(null);
+  const [newFollowUpScheduleLink, setNewFollowUpScheduleLink] = useState<
+    string | null
+  >(null);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
-
-  const { userDetails } = useContext(AUTH_CONTEXT);
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
-
-  // const [uploading, setUploading] = useState(false);
-  // const MAX_SIZE_MB = 20;
-
-  const contact_number = userDetails
-    ? userDetails["phoneNumbers"][0]["number"]
-    : "";
-
-  let full_address = "";
-  if (userDetails) {
-    const street_address = userDetails.streetAddress;
-    full_address = `${street_address.line1} ${street_address.line2}, ${street_address.city}, ${street_address.province} ${street_address.postalCode}`;
-    console.log(full_address);
-  }
-  // const [uploading, setUploading] = useState(false);
-  // const MAX_SIZE_MB = 20;
 
   const closeModal = () => {
     setModalOpen(false);
@@ -211,13 +213,14 @@ const BookingDetailsPage = () => {
         const data: ApiResponse = await response.json();
         if (data.success) {
           setBooking(data.data.booking);
+          setCustomerDetails(data.data.customer);
           console.log("youtube videos", data.data.youtubeVideos);
           setYoutubeSuggestions(data.data.youtubeVideos);
           setBlogs(data.data.blogs);
-          setMeeting(data.data.meetings);
+          setFollowUpScheduleDetails(data.data.followUpScheduleDetails);
           setCurrentStage(data.data.currentStage);
-          setFollowUpMeetingLink(data.data.scheduleMeeting || null);
-          setReportUrl(data.data.reportUrl || null);
+          setNewFollowUpScheduleLink(data.data.newFollowUpScheduleUrl || null);
+          // setReportUrl(data.data.reportUrl || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -371,17 +374,26 @@ const BookingDetailsPage = () => {
             {/* Address */}
             <div className="flex items-start gap-2">
               {/* Icon or any marker if needed */}
-              <p className="text-muted-foreground">{full_address}</p>
+              <p className="text-muted-foreground">{`${
+                customerDetails?.streetAddress.line1 ?? ""
+              } ${customerDetails?.streetAddress.line2 ?? ""}, ${
+                customerDetails?.streetAddress.city ?? ""
+              }, ${customerDetails?.streetAddress.province ?? ""} ${
+                customerDetails?.streetAddress.postalCode ?? ""
+              }`}</p>
             </div>
 
             {/* Contact */}
             <div>
               <h4 className="font-medium">
                 {" "}
-                {`${userDetails?.firstName ?? ""} ${userDetails?.lastName ?? ""
-                  }`}{" "}
+                {`${customerDetails?.firstName ?? ""} ${
+                  customerDetails?.lastName ?? ""
+                }`}{" "}
               </h4>
-              <p className="text-muted-foreground">{contact_number} </p>
+              <p className="text-muted-foreground">
+                {customerDetails?.phoneNumbers?.[0].number}{" "}
+              </p>
             </div>
 
             {/* Appointment Time */}
@@ -404,17 +416,20 @@ const BookingDetailsPage = () => {
             </div> */}
 
             {/* What to Expect */}
-            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && (
+            {(currentStage === "bookingCreated" ||
+              currentStage === "utilityBills") && (
               <div>
                 <h4 className="mb-4 font-medium">What to expect?</h4>
                 <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
                   <li>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua.
                   </li>
                   <li>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua.
                   </li>
                 </ol>
               </div>
@@ -426,7 +441,8 @@ const BookingDetailsPage = () => {
             </Button> */}
 
             {/* Reschedule / Cancel Buttons (Only if NOT a Follow-up Meeting) */}
-            {(currentStage === "bookingCreated" || currentStage === "utilityBills") && (
+            {(currentStage === "bookingCreated" ||
+              currentStage === "utilityBills") && (
               <div className="flex flex-wrap gap-4">
                 {!booking.canceled && isPastBooking && (
                   <Button
@@ -449,8 +465,10 @@ const BookingDetailsPage = () => {
               </div>
             )}
 
-
-            {(currentStage === "reportGenerated" || currentStage === "followUpSchedule" || currentStage === "proposalSigned" || currentStage === "paymentDone") && (
+            {(currentStage === "reportGenerated" ||
+              currentStage === "followUpScheduled" ||
+              currentStage === "proposalSigned" ||
+              currentStage === "paymentDone") && (
               <div>
                 <h4 className="text-lg font-bold">
                   Congratulations, your audit report has been generated!
@@ -468,17 +486,24 @@ const BookingDetailsPage = () => {
             )}
 
             {/* Schedule Follow-Up Consultation */}
-            {currentStage === "followUpSchedule" && !meeting?.is_cancelled ? (
+            {currentStage === "followUpScheduled" &&
+            !followUpScheduleDetails?.isCancelled ? (
               <>
-                <h4 className="mt-6 text-lg font-bold">Your Follow-Up Consultation Details</h4>
+                <h4 className="mt-6 text-lg font-bold">
+                  Your Follow-Up Consultation Details
+                </h4>
                 <div className="mt-4 flex items-center justify-between">
                   <p className="text-sm">
                     Scheduled Time:{" "}
-                    {meeting && <span className="font-semibold">{formatDateTime(meeting.start_time)}</span>}
+                    {followUpScheduleDetails && (
+                      <span className="font-semibold">
+                        {formatDateTime(followUpScheduleDetails.startTime)}
+                      </span>
+                    )}
                   </p>
                   {/* Meeting Link (Right) */}
                   <a
-                    href={meeting?.reschedule}
+                    href={followUpScheduleDetails?.rescheduleLink}
                     target="_blank"
                     className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
                   >
@@ -487,14 +512,17 @@ const BookingDetailsPage = () => {
                 </div>
               </>
             ) : (
-              // If no meeting exists, show header & follow-up link (Spaced Apart)
-              (currentStage === "followUpSchedule" || currentStage === "reportGenerated") && (
+              // If no followUpScheduleDetails exists, show header & follow-up link (Spaced Apart)
+              (currentStage === "followUpScheduled" ||
+                currentStage === "reportGenerated") && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold">Schedule Follow-Up Consultation</h4>
-                    {followUpMeetingLink && (
+                    <h4 className="text-lg font-bold">
+                      Schedule Follow-Up Consultation
+                    </h4>
+                    {newFollowUpScheduleLink && (
                       <a
-                        href={followUpMeetingLink}
+                        href={newFollowUpScheduleLink}
                         target="_blank"
                         className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
                       >
@@ -505,8 +533,6 @@ const BookingDetailsPage = () => {
                 </div>
               )
             )}
-
-
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
           <div className="space-y-6">
