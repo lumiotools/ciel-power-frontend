@@ -70,26 +70,26 @@ interface Service {
   preField: ServiceField;
 }
 
-interface PhoneNumber {
-  number: string;
-  type: "mobile" | "work" | "home" | "fax";
-}
+// interface PhoneNumber {
+//   number: string;
+//   type: "mobile" | "work" | "home" | "fax";
+// }
 
-interface StreetAddress {
-  address1: string;
-  address2?: string;
-  city: string;
-  state: string;
-  postcode: string;
-}
+// interface StreetAddress {
+//   address1: string;
+//   address2?: string;
+//   city: string;
+//   state: string;
+//   postcode: string;
+// }
 
 interface UserDetails {
   firstName: string;
   middleName?: string;
   lastName: string;
   emailAddress: string;
-  phoneNumbers: PhoneNumber[];
-  streetAddress: StreetAddress;
+  // phoneNumbers: PhoneNumber[];
+  // streetAddress: StreetAddress;
 }
 
 interface FormData {
@@ -114,19 +114,19 @@ const ServiceDetailsPage: React.FC = () => {
     firstName: "",
     lastName: "",
     emailAddress: "",
-    phoneNumbers: [
-      {
-        number: "",
-        type: "mobile", // Default type, can be updated later
-      },
-    ],
-    streetAddress: {
-      address1: "",
-      address2: "", // Optional, can be omitted if not needed
-      city: "",
-      state: "",
-      postcode: "",
-    },
+    // phoneNumbers: [
+    //   {
+    //     number: "",
+    //     type: "mobile", // Default type, can be updated later
+    //   },
+    // ],
+    // streetAddress: {
+    //   address1: "",
+    //   address2: "", // Optional, can be omitted if not needed
+    //   city: "",
+    //   state: "",
+    //   postcode: "",
+    // },
   });
   useEffect(() => {
     if (authContext) {
@@ -135,16 +135,16 @@ const ServiceDetailsPage: React.FC = () => {
         firstName: authContext.firstName || "",
         lastName: authContext.lastName || "",
         emailAddress: authContext.emailAddress || "",
-        phoneNumbers: authContext.phoneNumbers?.length
-          ? authContext.phoneNumbers
-          : prev.phoneNumbers, // Use provided phoneNumbers or default
-        streetAddress: {
-          address1: authContext.streetAddress?.line1 || "",
-          address2: authContext.streetAddress?.line2 || "",
-          city: authContext.streetAddress?.city || "",
-          state: authContext.streetAddress?.province || "", // Map `province` to `state`
-          postcode: authContext.streetAddress?.postalCode || "",
-        },
+        // phoneNumbers: authContext.phoneNumbers?.length
+        //   ? authContext.phoneNumbers
+        //   : prev.phoneNumbers, // Use provided phoneNumbers or default
+        // streetAddress: {
+        //   address1: authContext.streetAddress?.line1 || "",
+        //   address2: authContext.streetAddress?.line2 || "",
+        //   city: authContext.streetAddress?.city || "",
+        //   state: authContext.streetAddress?.province || "", // Map `province` to `state`
+        //   postcode: authContext.streetAddress?.postalCode || "",
+        // },
       }));
     }
   }, [authContext]);
@@ -352,14 +352,14 @@ const ServiceDetailsPage: React.FC = () => {
         userDetails: {
           firstName: userDetails.firstName,
           lastName: userDetails.lastName,
-          phoneNumbers: userDetails.phoneNumbers,
-          streetAddress: {
-            line1: userDetails.streetAddress.address1,
-            line2: userDetails.streetAddress.address2,
-            city: userDetails.streetAddress.city,
-            province: userDetails.streetAddress.state,
-            postalCode: userDetails.streetAddress.postcode,
-          },
+          // phoneNumbers: userDetails.phoneNumbers,
+          // streetAddress: {
+          //   line1: userDetails.streetAddress.address1,
+          //   line2: userDetails.streetAddress.address2,
+          //   city: userDetails.streetAddress.city,
+          //   province: userDetails.streetAddress.state,
+          //   postalCode: userDetails.streetAddress.postcode,
+          // },
         },
       };
 
@@ -666,7 +666,7 @@ const ServiceDetailsPage: React.FC = () => {
           {/* Phone Numbers Section */}
           <div className="space-y-2">
             <Label>Phone Numbers</Label>
-            {userDetails.phoneNumbers.map((phone, index) => (
+            {/* {userDetails.phoneNumbers.map((phone, index) => (
               <div key={index} className="flex gap-4 items-start">
                 <div className="flex-1">
                   <Input
@@ -733,8 +733,8 @@ const ServiceDetailsPage: React.FC = () => {
                   </Button>
                 )}
               </div>
-            ))}
-            <Button
+            ))} */}
+            {/* <Button
               type="button"
               variant="outline"
               size="sm"
@@ -749,14 +749,14 @@ const ServiceDetailsPage: React.FC = () => {
               }}
             >
               Add Phone Number
-            </Button>
+            </Button> */}
           </div>
 
           {/* Street Address Section */}
           <div className="space-y-4">
             <Label>Street Address</Label>
             <div className="space-y-4">
-              <div>
+              {/* <div>
                 <Label htmlFor="address1">Address Line 1</Label>
                 <Input
                   id="address1"
@@ -772,8 +772,8 @@ const ServiceDetailsPage: React.FC = () => {
                   }
                   className="mt-1"
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="address2">Address Line 2 (Optional)</Label>
                 <Input
                   id="address2"
@@ -842,7 +842,7 @@ const ServiceDetailsPage: React.FC = () => {
                     className="mt-1"
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -1000,13 +1000,13 @@ const ServiceDetailsPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-gray-600">Phone Numbers:</p>
-                <div className="space-y-1">
+                {/* <div className="space-y-1">
                   {userDetails.phoneNumbers.map((phone, index) => (
                     <p key={index} className="text-lg capitalize">
                       {phone.type}: {phone.number}
                     </p>
                   ))}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -1048,12 +1048,13 @@ const ServiceDetailsPage: React.FC = () => {
     if (
       !userDetails.firstName ||
       !userDetails.lastName ||
-      !userDetails.emailAddress ||
-      userDetails.phoneNumbers.length === 0 ||
-      !userDetails.streetAddress.address1 ||
-      !userDetails.streetAddress.city ||
-      !userDetails.streetAddress.state ||
-      !userDetails.streetAddress.postcode
+      !userDetails.emailAddress 
+      // ||
+      // userDetails.phoneNumbers.length === 0 ||
+      // !userDetails.streetAddress.address1 ||
+      // !userDetails.streetAddress.city ||
+      // !userDetails.streetAddress.state ||
+      // !userDetails.streetAddress.postcode
     ) {
       toast.error("Please fill in all required contact information");
       return false;
@@ -1062,10 +1063,10 @@ const ServiceDetailsPage: React.FC = () => {
       toast.error("Please enter a valid email address");
       return false;
     }
-    if (userDetails.phoneNumbers.some((phone) => !phone.number)) {
-      toast.error("Please enter all phone numbers");
-      return false;
-    }
+    // if (userDetails.phoneNumbers.some((phone) => !phone.number)) {
+    //   toast.error("Please enter all phone numbers");
+    //   return false;
+    // }
     return true;
   };
 
@@ -1166,7 +1167,9 @@ const ServiceDetailsPage: React.FC = () => {
             "contact",
             completedSections.contact,
             userDetails.emailAddress
-              ? `${userDetails.emailAddress} • ${userDetails.phoneNumbers?.[0]?.number}`
+              ? `${userDetails.emailAddress} • ${""
+                // userDetails.phoneNumbers?.[0]?.number 
+              }`
               : undefined,
             true
           )}
