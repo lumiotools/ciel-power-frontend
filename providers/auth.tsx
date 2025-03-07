@@ -13,13 +13,14 @@ export const AUTH_CONTEXT = createContext<{
   isLoading: true,
   isLoggedIn: false,
   checkAuth: () => {},
-  logoutUser: ()  => {}
+  logoutUser: () => {},
 });
 
 export interface UserDetails {
   firstName: string;
   lastName: string;
   emailAddress: string;
+  admin?: boolean | undefined;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -48,20 +49,49 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
   }, []);
 
-   useEffect(() => {
-      if (!isLoading && !isLoggedIn && pathname.includes("/dashboard")) {
-        router.replace('/login');
-      }
-
-
-      if (!isLoading && isLoggedIn && [ "/login", "/signup", "/forgot-password" ].includes(pathname)) {
-        router.replace("/dashboard")
-      }
-    }, [isLoading, isLoggedIn, router, pathname]);
-
-    function logoutUser() {
-      setIsLoggedIn(false);
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !isLoggedIn &&
+      (pathname.includes("/dashboard") || pathname.includes("/admin"))
+    ) {
+      router.replace("/login");
     }
+
+    if (
+      !isLoading &&
+      isLoggedIn &&
+      userDetails?.admin &&
+      pathname.includes("/dashboard")
+    ) {
+      router.replace("/admin");
+    }
+
+    if (
+      !isLoading &&
+      isLoggedIn &&
+      !userDetails?.admin &&
+      pathname.includes("/admin")
+    ) {
+      router.replace("/dashboard");
+    }
+
+    if (
+      !isLoading &&
+      isLoggedIn &&
+      ["/login", "/signup", "/forgot-password"].includes(pathname)
+    ) {
+      if (userDetails?.admin) {
+        router.replace("/admin");
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  }, [isLoading, isLoggedIn, router, pathname]);
+
+  function logoutUser() {
+    setIsLoggedIn(false);
+  }
   return (
     <AUTH_CONTEXT.Provider
       value={{ isLoading, isLoggedIn, userDetails, checkAuth, logoutUser }}
