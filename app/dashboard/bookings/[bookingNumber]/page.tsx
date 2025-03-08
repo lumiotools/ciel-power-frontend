@@ -51,6 +51,7 @@ interface ApiResponse {
     booking: BookingDetails;
     customer: CustomerDetails;
     currentStage: string;
+    reportUrl?: string | null;
     newFollowUpScheduleUrl: string;
     followUpScheduleDetails: FollowUpDetals;
     youtubeVideos: YouTubeVideo[];
@@ -136,7 +137,7 @@ const BookingDetailsPage = () => {
   const [newFollowUpScheduleLink, setNewFollowUpScheduleLink] = useState<
     string | null
   >(null);
-  // const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
@@ -219,7 +220,7 @@ const BookingDetailsPage = () => {
           setFollowUpScheduleDetails(data.data.followUpScheduleDetails);
           setCurrentStage(data.data.currentStage);
           setNewFollowUpScheduleLink(data.data.newFollowUpScheduleUrl || null);
-          // setReportUrl(data.data.reportUrl || null);
+          setReportUrl(data.data.reportUrl || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -472,15 +473,15 @@ const BookingDetailsPage = () => {
                 <h4 className="text-lg font-bold">
                   Congratulations, your audit report has been generated!
                 </h4>
-                {/* {reportUrl && (
+                {reportUrl && (
                   <Link
-                    href={`${bookingNumber}/reports`}
-                    // target="_blank"
+                    href={reportUrl}
+                    target="_blank"
                     className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
                   >
                     Click here to view the report
                   </Link>
-                )} */}
+                )}
               </div>
             )}
 

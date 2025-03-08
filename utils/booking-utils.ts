@@ -1,5 +1,5 @@
-import { Booking } from "@/types/admin"
-import { BOOKING_STAGES } from "@/constants/booking-stages"
+import type { Booking } from "@/types/admin"
+import { BOOKING_STAGES, STAGE_LABELS } from "@/constants/booking-stages"
 import { format } from "date-fns"
 
 // Helper function to get stage index
@@ -25,3 +25,25 @@ export const calculateProgressPercentage = (booking: Booking) => {
 export const formatDate = (dateString: string) => {
   return format(new Date(dateString), "MMM dd, yyyy h:mm a")
 }
+
+// Get step status for booking progress
+export const getStepStatus = (currentStage: string) => {
+  return BOOKING_STAGES.map((stage) => {
+    const currentStageIndex = BOOKING_STAGES.indexOf(currentStage)
+    const stageIndex = BOOKING_STAGES.indexOf(stage)
+
+    let status: "completed" | "current" | "upcoming" | "cancelled" = "upcoming"
+
+    if (stageIndex < currentStageIndex) {
+      status = "completed"
+    } else if (stageIndex === currentStageIndex) {
+      status = "current"
+    }
+
+    return {
+      label: STAGE_LABELS[stage],
+      status,
+    }
+  })
+}
+

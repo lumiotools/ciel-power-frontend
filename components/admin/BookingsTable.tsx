@@ -1,26 +1,19 @@
-import { ChevronRight } from 'lucide-react'
+"use client"
+
+import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Switch } from "@/components/ui/switch"
-import { Booking } from "@/types/admin"
+import type { Booking } from "@/types/admin"
 import { STAGE_LABELS } from "@/constants/booking-stages"
 import { formatDate } from "@/utils/booking-utils"
+import Link from "next/link"
 
 interface BookingsTableProps {
   bookings: Booking[]
-  reportStatuses: Record<string, boolean>
-  onToggleReportStatus: (bookingNumber: string) => void
-  onViewDetails: (booking: Booking) => void
   isLoading: boolean
 }
 
-export function BookingsTable({ 
-  bookings, 
-  reportStatuses, 
-  onToggleReportStatus, 
-  onViewDetails,
-  isLoading 
-}: BookingsTableProps) {
+export function BookingsTable({ bookings, isLoading }: BookingsTableProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -29,23 +22,46 @@ export function BookingsTable({
     )
   }
 
+  if (bookings.length === 0) {
+    return (
+      <div className="bg-gray-50 rounded-lg p-8">
+        <div className="flex flex-col items-center justify-center h-48 text-center">
+          <div className="bg-gray-100 rounded-full p-4 mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-10 w-10 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">No bookings found</h3>
+          <p className="text-gray-500 max-w-md">
+            There are currently no bookings in the system. New bookings will appear here once they are created.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden p-4">
+    <div className="rounded-lg overflow-hidden border border-gray-200">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableHead>Booking Number</TableHead>
-            <TableHead>Client Name</TableHead>
-            <TableHead>Service</TableHead>
-            <TableHead>Date & Time</TableHead>
-            <TableHead>Current Stage</TableHead>
-            <TableHead>Report Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="font-semibold">Booking Number</TableHead>
+            <TableHead className="font-semibold">Client Name</TableHead>
+            <TableHead className="font-semibold">Service</TableHead>
+            <TableHead className="font-semibold">Date & Time</TableHead>
+            <TableHead className="font-semibold">Current Stage</TableHead>
+            <TableHead className="font-semibold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {bookings.map((booking) => (
-            <TableRow key={booking.bookingNumber} className="cursor-pointer hover:bg-gray-50">
+            <TableRow key={booking.bookingNumber} className="hover:bg-gray-50">
               <TableCell className="font-medium">{booking.bookingNumber}</TableCell>
               <TableCell>{booking.title}</TableCell>
               <TableCell>{booking.serviceName}</TableCell>
@@ -56,20 +72,15 @@ export function BookingsTable({
                 </span>
               </TableCell>
               <TableCell>
-                <Switch
-                  checked={reportStatuses[booking.bookingNumber]}
-                  onCheckedChange={() => onToggleReportStatus(booking.bookingNumber)}
-                  className="data-[state=checked]:bg-[#5cb85c]"
-                />
-              </TableCell>
-              <TableCell>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onViewDetails(booking)}
+                  asChild
                   className="text-[#5cb85c] hover:text-[#4a9d4a] hover:bg-green-50"
                 >
-                  View Details <ChevronRight className="ml-1 h-4 w-4" />
+                  <Link href={`/admin/${booking.bookingNumber}`}>
+                    View Details <ChevronRight className="ml-1 h-4 w-4" />
+                  </Link>
                 </Button>
               </TableCell>
             </TableRow>
@@ -79,3 +90,4 @@ export function BookingsTable({
     </div>
   )
 }
+

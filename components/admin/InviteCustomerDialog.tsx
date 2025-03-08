@@ -1,11 +1,13 @@
-import { Check } from 'lucide-react'
+"use client"
+import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Booking } from "@/types/admin"
+import type { Booking, NutshellLead } from "@/types/admin"
 import { STAGE_LABELS } from "@/constants/booking-stages"
 import { formatDate } from "@/utils/booking-utils"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 interface InviteCustomerDialogProps {
   isOpen: boolean
@@ -20,9 +22,15 @@ interface InviteCustomerDialogProps {
   onNutshellLeadNameChange: (value: string) => void
   isSearchingLead: boolean
   onSearchLead: () => void
-  leadFound: boolean
+  foundLeads: NutshellLead[]
+  selectedLead: NutshellLead | null
+  onSelectLead: (lead: NutshellLead) => void
   onInviteCustomer: () => void
   onReset: () => void
+  bookingError: string | null
+  leadError: string | null
+  hasSearchedLead: boolean
+  isInviting: boolean
 }
 
 export function InviteCustomerDialog({
@@ -38,10 +46,18 @@ export function InviteCustomerDialog({
   onNutshellLeadNameChange,
   isSearchingLead,
   onSearchLead,
-  leadFound,
+  foundLeads,
+  selectedLead,
+  onSelectLead,
   onInviteCustomer,
-  onReset
+  onReset,
+  bookingError,
+  leadError,
+  hasSearchedLead,
+  isInviting,
 }: InviteCustomerDialogProps) {
+  const canInvite = searchedBooking && (nutshellLeadFound || selectedLead)
+
   return (
     <Dialog
       open={isOpen}
@@ -65,12 +81,20 @@ export function InviteCustomerDialog({
                   value={bookeoNumber}
                   onChange={(e) => onBookeoNumberChange(e.target.value)}
                   placeholder="Enter booking number"
-                  disabled={isSearchingBooking}
+                  disabled={isSearchingBooking || isInviting}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !isSearchingBooking && bookeoNumber.trim()) {
+                      e.preventDefault()
+                      onSearchBooking()
+                    }
+                  }}
+                  className="h-9 py-1" // Adjusted height to match button
                 />
                 <Button
                   onClick={onSearchBooking}
-                  disabled={!bookeoNumber.trim() || isSearchingBooking}
+                  disabled={!bookeoNumber.trim() || isSearchingBooking || isInviting}
                   className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
+                  size="sm"
                 >
                   {isSearchingBooking ? (
                     <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
@@ -88,13 +112,16 @@ export function InviteCustomerDialog({
                   {searchedBooking.title} - {searchedBooking.serviceName}
                 </p>
                 <p className="text-xs text-green-600 mt-1">{formatDate(searchedBooking.startTime)}</p>
-                <p className="text-xs text-green-600 mt-1">
-                  Stage: {STAGE_LABELS[searchedBooking.currentStage]}
-                </p>
+                {searchedBooking.currentStage && (
+                  <p className="text-xs text-green-600 mt-1">Stage: {STAGE_LABELS[searchedBooking.currentStage]}</p>
+                )}
+                {searchedBooking.auditor && (
+                  <p className="text-xs text-green-600 mt-1">Auditor: {searchedBooking.auditor}</p>
+                )}
               </div>
-            ) : bookeoNumber && !isSearchingBooking ? (
+            ) : bookingError ? (
               <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-700">No booking found with this number.</p>
+                <p className="text-sm text-red-700">{bookingError}</p>
               </div>
             ) : null}
 
@@ -122,12 +149,20 @@ export function InviteCustomerDialog({
                           value={nutshellLeadName}
                           onChange={(e) => onNutshellLeadNameChange(e.target.value)}
                           placeholder="Enter lead name"
-                          disabled={isSearchingLead}
+                          disabled={isSearchingLead || isInviting}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !isSearchingLead && nutshellLeadName.trim()) {
+                              e.preventDefault()
+                              onSearchLead()
+                            }
+                          }}
+                          className="h-9 py-1" // Adjusted height to match button
                         />
                         <Button
                           onClick={onSearchLead}
-                          disabled={!nutshellLeadName.trim() || isSearchingLead}
+                          disabled={!nutshellLeadName.trim() || isSearchingLead || isInviting}
                           className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
+                          size="sm"
                         >
                           {isSearchingLead ? (
                             <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
@@ -138,20 +173,43 @@ export function InviteCustomerDialog({
                       </div>
                     </div>
 
-                    {nutshellLeadName && !isSearchingLead && (
-                      <div
-                        className={`p-3 ${leadFound ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"} rounded-md`}
-                      >
-                        <p className={`text-sm ${leadFound ? "text-green-700" : "text-red-700"}`}>
-                          {leadFound ? (
-                            <>
-                              <Check className="inline-block h-4 w-4 mr-1" />
-                              Lead found: {nutshellLeadName}
-                            </>
-                          ) : (
-                            "No lead found with this name."
-                          )}
+                    {foundLeads.length > 0 && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-700 mb-2">
+                          <Check className="inline-block h-4 w-4 mr-1" />
+                          {foundLeads.length} lead{foundLeads.length !== 1 ? "s" : ""} found. Please select one:
                         </p>
+
+                        <div className="max-h-40 overflow-y-auto pr-2">
+                          <RadioGroup
+                            value={selectedLead?.id.toString()}
+                            onValueChange={(value) => {
+                              const lead = foundLeads.find((l) => l.id.toString() === value)
+                              if (lead) onSelectLead(lead)
+                            }}
+                            disabled={isInviting}
+                          >
+                            {foundLeads.map((lead) => (
+                              <div key={lead.id} className="flex items-center space-x-2 py-1">
+                                <RadioGroupItem
+                                  value={lead.id.toString()}
+                                  id={`lead-${lead.id}`}
+                                  disabled={isInviting}
+                                />
+                                <Label htmlFor={`lead-${lead.id}`} className="text-sm cursor-pointer">
+                                  {lead.name}{" "}
+                                  <span className="text-xs text-gray-500">({formatDate(lead.createdTime)})</span>
+                                </Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </div>
+                      </div>
+                    )}
+
+                    {hasSearchedLead && leadError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-700">{leadError}</p>
                       </div>
                     )}
                   </div>
@@ -161,12 +219,19 @@ export function InviteCustomerDialog({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isInviting}>
               Cancel
             </Button>
-            {((searchedBooking && nutshellLeadFound) || (searchedBooking && leadFound)) && (
-              <Button onClick={onInviteCustomer} className="bg-[#5cb85c] hover:bg-[#4a9d4a]">
-                Invite Customer to Portal
+            {canInvite && (
+              <Button onClick={onInviteCustomer} className="bg-[#5cb85c] hover:bg-[#4a9d4a]" disabled={isInviting}>
+                {isInviting ? (
+                  <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
+                    Inviting...
+                  </>
+                ) : (
+                  "Invite Customer to Portal"
+                )}
               </Button>
             )}
           </div>
@@ -175,3 +240,4 @@ export function InviteCustomerDialog({
     </Dialog>
   )
 }
+
