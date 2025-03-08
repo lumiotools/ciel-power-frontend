@@ -7,6 +7,8 @@ import { BookingsTable } from "@/components/admin/BookingsTable"
 import { InviteCustomerDialog } from "@/components/admin/InviteCustomerDialog"
 import type { Booking, BookingResponse, NutshellLead } from "@/types/admin"
 import { toast } from "sonner"
+import { Settings } from "lucide-react"
+import Link from "next/link"
 
 export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -244,6 +246,12 @@ export default function AdminPage() {
                 className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
               >
                 Invite Customer
+              </Button>
+              <Button asChild variant="outline" className="border-gray-300">
+                <Link href="/admin/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Link>
               </Button>
             </div>
           </div>
