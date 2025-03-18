@@ -165,7 +165,7 @@ export default function AdminPage() {
       const requestBody = {
         bookeoBookingNumber: searchedBooking.bookingNumber,
         nutshellLeadId: nutshellLeadFound
-          ? searchedBooking.customerId // If lead was found with booking, use the customer ID
+          ? selectedLead?.id.toString()  // If lead was found with booking, use the customer ID
           : selectedLead?.id.toString(), // Otherwise use the selected lead ID
       }
 
