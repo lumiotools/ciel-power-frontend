@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit2, Check, X } from "lucide-react";
+import { Edit2, Check, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -28,6 +28,20 @@ interface KneewallData {
   currentValue: number;
   maxValue: number;
   image: string;
+}
+
+// New interface for the data coming from reportData
+interface InsulationItemData {
+  condition: string;
+  material: string;
+  name: string;
+  rValue: number;
+}
+
+interface KneewallAssessmentProps {
+  data?: InsulationItemData;
+  isAdmin?: boolean;
+  onUpdate?: (updatedItem: InsulationItemData) => void;
 }
 
 const GaugeChart: React.FC<GaugeChartProps> = ({
@@ -112,6 +126,10 @@ const EditableField = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
+
   const handleSave = () => {
     onSave(editValue);
     setIsEditing(false);
@@ -185,7 +203,7 @@ const ImageUpload = ({
   image: string;
   onImageChange: (newImage: string) => void;
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,7 +220,7 @@ const ImageUpload = ({
   return (
     <div className="relative">
       <img
-        src={image}
+        src={image || "/placeholder.svg"}
         alt="Insulation inspection"
         className="w-full h-64 object-cover rounded-lg mt-4"
       />
@@ -241,9 +259,9 @@ const ImageUpload = ({
   );
 };
 
-export function KneewallAssessment() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [kneewallData, setKneewallData] = useState<KneewallData[]>([
+export function KneewallAssessment({ data, isAdmin = false, onUpdate }: KneewallAssessmentProps) {
+  // Default data to use if no report data is provided
+  const defaultKneewallData: KneewallData[] = [
     {
       title: "Your Home's Kneewall Flat Insulation",
       material: '3-4" Cellulose',
@@ -264,47 +282,72 @@ export function KneewallAssessment() {
       maxValue: 13,
       image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png",
     },
-  ]);
+  ];
+  
+  // Process the provided data into the format expected by our component
+  const processedKneewallData = (): KneewallData[] => {
+    if (!data) return defaultKneewallData;
+    
+    // Create single kneewall data item from report data
+    const kneewallItem: KneewallData = {
+      title: data.name || "Your Kneewall Insulation",
+      material: data.material || "Not specified",
+      condition: data.condition || "Not assessed",
+      rValue: `R${data.rValue}`,
+      recommendation: data.name?.toLowerCase().includes('flat') ? "R60" : "R13", // Default recommendations based on type
+      currentValue: data.rValue,
+      maxValue: data.name?.toLowerCase().includes('flat') ? 60 : 13,
+      image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png", // Default image
+    };
+    
+    // If we have data for a single kneewall, return it as a single item array
+    // Otherwise, return the default data
+    return [kneewallItem];
+  };
 
-  const [animateCharts, setAnimateCharts] = useState(
-    kneewallData.map(() => false)
-  );
+  const [kneewallData, setKneewallData] = useState<KneewallData[]>(processedKneewallData());
+  const [animateCharts, setAnimateCharts] = useState<boolean[]>([]);
 
-  const chartRefs = useRef(
-    kneewallData.map(() => React.createRef<HTMLDivElement>())
-  );
+  // Update data when the report data changes
+  useEffect(() => {
+    setKneewallData(processedKneewallData());
+    setAnimateCharts(new Array(processedKneewallData().length).fill(false));
+  }, [data]);
 
   useEffect(() => {
-    // Check if 'admin' exists in the URL
-    const isAdminUrl = window.location.href.includes("admin");
-    setIsAdmin(isAdminUrl);
-
-    const observers = chartRefs.current.map((ref, index) => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setAnimateCharts((prev) => {
-              const newState = [...prev];
-              newState[index] = true;
-              return newState;
+    // Use Intersection Observer with element IDs instead of refs
+    const observers: IntersectionObserver[] = [];
+    
+    kneewallData.forEach((_, index) => {
+      const chartId = `kneewall-chart-${index}`;
+      const chartElement = document.getElementById(chartId);
+      
+      if (chartElement) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                setAnimateCharts(prev => {
+                  const newState = [...prev];
+                  newState[index] = true;
+                  return newState;
+                });
+                observer.unobserve(chartElement);
+              }
             });
-            observer.unobserve(entry.target);
-          }
-        },
-        { threshold: 0.5 }
-      );
-
-      if (ref.current) {
-        observer.observe(ref.current);
+          },
+          { threshold: 0.5 }
+        );
+        
+        observer.observe(chartElement);
+        observers.push(observer);
       }
-
-      return observer;
     });
-
+    
     return () => {
-      observers.forEach((observer) => observer.disconnect());
+      observers.forEach(observer => observer.disconnect());
     };
-  }, []);
+  }, [kneewallData]);
 
   const updateKneewallData = (
     index: number,
@@ -320,7 +363,30 @@ export function KneewallAssessment() {
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
+          
+          // Send update to parent if available
+          if (onUpdate && data) {
+            const updatedItem: InsulationItemData = {
+              ...data,
+              rValue: numericValue
+            };
+            onUpdate(updatedItem);
+          }
         }
+      } else if (field === "material" && onUpdate && data) {
+        // Send update to parent if available
+        const updatedItem: InsulationItemData = {
+          ...data,
+          material: value
+        };
+        onUpdate(updatedItem);
+      } else if (field === "condition" && onUpdate && data) {
+        // Send update to parent if available
+        const updatedItem: InsulationItemData = {
+          ...data,
+          condition: value
+        };
+        onUpdate(updatedItem);
       }
 
       return newData;
@@ -337,8 +403,8 @@ export function KneewallAssessment() {
           transition={{ delay: index * 0.2 }}
         >
           <Card>
-            <CardHeader className="bg-green-50 dark:bg-green-900/50">
-              <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
+            <CardHeader className="bg-teal-50 dark:bg-teal-900/20">
+              <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">
                 {data.title}
               </CardTitle>
             </CardHeader>
@@ -346,7 +412,7 @@ export function KneewallAssessment() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="relative">
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-lime-500 px-4 py-1 rounded-full text-sm">
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-teal-100 text-teal-500 px-4 py-1 rounded-full text-sm">
                       Current Status
                     </div>
                     {isAdmin ? (
@@ -358,7 +424,7 @@ export function KneewallAssessment() {
                       />
                     ) : (
                       <img
-                        src={data.image}
+                        src={data.image || "/placeholder.svg"}
                         alt="Insulation inspection"
                         className="w-full h-64 object-cover rounded-lg mt-4"
                       />
@@ -434,8 +500,8 @@ export function KneewallAssessment() {
                 </div>
                 <div className="space-y-6">
                   <div
-                    ref={chartRefs.current[index]}
-                    className="relative bg-[#f0fdf4] dark:bg-green-900/20 rounded-lg p-6"
+                    id={`kneewall-chart-${index}`} 
+                    className="relative bg-[#f0fdfa] dark:bg-teal-900/20 rounded-lg p-6"
                   >
                     <div
                       className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 opacity-5 rounded-lg"
@@ -443,21 +509,21 @@ export function KneewallAssessment() {
                         mixBlendMode: "overlay",
                       }}
                     />
-                    <h3 className="relative text-2xl font-semibold text-lime-500 dark:text-green-300 mb-6">
+                    <h3 className="relative text-2xl font-semibold text-teal-600 dark:text-teal-300 mb-6">
                       Current Performance
                     </h3>
                     <GaugeChart
                       value={data.currentValue}
                       maxValue={data.maxValue}
                       label={`kneewall-${index}`}
-                      animate={animateCharts[index]}
+                      animate={animateCharts[index] || false}
                     />
                     <div className="mt-8 grid grid-cols-2 gap-8">
                       <div>
                         <p className="text-base text-gray-600 dark:text-gray-400">
                           Current R-Value
                         </p>
-                        <p className="text-3xl font-bold text-[#16a34a] dark:text-green-400">
+                        <p className="text-3xl font-bold text-[#0d9488] dark:text-teal-400">
                           {data.rValue}
                         </p>
                       </div>

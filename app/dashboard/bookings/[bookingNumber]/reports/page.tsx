@@ -5,7 +5,7 @@ import { CoolingContent } from "@/components/report/CoolingContent";
 import { HeatingContent } from "@/components/report/HeatingContent";
 import { InsulationContent } from "@/components/report/InsulationContent";
 import { motion } from "framer-motion";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, use } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Info,
@@ -22,24 +22,138 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import { HouseSystem } from "@/components/report/HouseSystem";
+import { toast } from "sonner";
 
-const ReportPage = () => {
+// Define interfaces for specific data types
+interface AirLeakageData {
+  parameter: string;
+  title: string;
+  value: string;
+}
+
+interface InsulationItem {
+  condition: string;
+  material: string;
+  name: string;
+  rValue: number;
+}
+
+interface InsulationData {
+  data: InsulationItem[];
+  missingDataZones: string[];
+  missingZones: string[];
+  title: string;
+}
+
+interface HeatingCoolingItem {
+  condition: string;
+  name: string;
+  parameter: string;
+  type: string;
+  value: number | string;
+  year?: number;
+}
+
+interface HeatingCoolingData {
+  data: HeatingCoolingItem[];
+  title: string;
+}
+
+interface WaterHeaterData {
+  data: HeatingCoolingItem[];
+  title: string;
+}
+
+// Define the type for reportData
+interface ReportData {
+  airLeakage?: AirLeakageData;
+  insulation?: InsulationData;
+  heatingAndCooling?: HeatingCoolingData;
+  waterHeater?: WaterHeaterData;
+  [key: string]: any;
+}
+
+const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) => {
+  // Unwrap the params Promise using React.use()
+  const unwrappedParams = use(params);
+  const bookingNumber = unwrappedParams.bookingNumber;
+
   const [activeSubMenu, setActiveSubMenu] = useState("air-leakage");
   const [overview, setOverview] = useState(true);
+  const [reportUrl, setReportUrl] = useState("");
+  const [reportData, setReportData] = useState<ReportData>({});
+  const [reportStatus, setReportStatus] = useState(false);
+  const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  // const sliderRef = useRef(null);
 
-  // const scrollLeft = () => {
-  //   if (sliderRef.current) {
-  //     sliderRef.current.scrollBy({ left: -400, behavior: 'smooth' });
-  //   }
-  // };
+  useEffect(() => {
+    // Fetch report data when component mounts
+    if (bookingNumber) {
+      fetchReportDetails();
+    }
+  }, [bookingNumber]);
 
-  // const scrollRight = () => {
-  //   if (sliderRef.current) {
-  //     sliderRef.current.scrollBy({ left: 400, behavior: 'smooth' });
-  //   }
-  // };
+  const fetchReportDetails = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/user/bookings/${bookingNumber}/report`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to fetch report details");
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setReportData(data.data.reportData || {});
+        setReportUrl(data.data.reportUrl || "");
+        setReportStatus(data.data.displayReport || false);
+      } else {
+        toast.error(data.message || "Failed to fetch report details");
+      }
+    } catch (error) {
+      console.error("Error fetching report details:", error);
+      toast.error("An error occurred while fetching report details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter heating and cooling items from heatingAndCooling data
+  const getHeatingData = () => {
+    if (!reportData.heatingAndCooling?.data) return { data: [], title: "Heating Systems" };
+    
+    const heatingItems = reportData.heatingAndCooling.data.filter(
+      item => item.name.toLowerCase().includes('furnace') || 
+              item.name.toLowerCase().includes('boiler') || 
+              item.name.toLowerCase().includes('heat')
+    );
+    
+    const waterHeaterItems = reportData.waterHeater?.data || [];
+    
+    return {
+      data: [...heatingItems, ...waterHeaterItems],
+      title: "Heating & Water Heating Systems"
+    };
+  };
+  
+  const getCoolingData = () => {
+    if (!reportData.heatingAndCooling?.data) return { data: [], title: "Cooling Systems" };
+    
+    const coolingItems = reportData.heatingAndCooling.data.filter(
+      item => item.name.toLowerCase().includes('a/c') || 
+              item.name.toLowerCase().includes('air condition') || 
+              item.name.toLowerCase().includes('cooling') ||
+              item.name.toLowerCase().includes('heat pump')
+    );
+    
+    return {
+      data: coolingItems,
+      title: "Cooling Systems"
+    };
+  };
 
   const howItWorksSteps = [
     {
@@ -85,15 +199,15 @@ const ReportPage = () => {
   const renderContent = () => {
     switch (activeSubMenu) {
       case "air-leakage":
-        return <AirLeakageContent />;
+        return <AirLeakageContent data={reportData.airLeakage} />;
       case "insulation":
-        return <InsulationContent />;
+        return <InsulationContent data={reportData.insulation} />;
       case "heating":
-        return <HeatingContent />;
+        return <HeatingContent data={getHeatingData()} />;
       case "cooling":
-        return <CoolingContent />;
+        return <CoolingContent data={getCoolingData()} />;
       default:
-        return <AirLeakageContent />;
+        return <AirLeakageContent data={reportData.airLeakage} />;
     }
   };
 
@@ -118,6 +232,17 @@ const ReportPage = () => {
     }, 100);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f5f9f0]">
+        <main className="container mx-auto px-6 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5cb85c]"></div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return overview ? (
     <div className="container mx-auto p-4">
@@ -369,7 +494,7 @@ const ReportPage = () => {
         {/* Call to Action Button */}
         <div className="text-center">
           <button
-             onClick={handleScrollToTop}
+            onClick={handleScrollToTop}
             className="bg-lime-500 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors duration-200 font-medium"
           >
             View Detailed Reports
