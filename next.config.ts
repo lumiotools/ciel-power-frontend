@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   rewrites: async () => [
     {
       source: "/api/:path*", // Match any request starting with /api
-      destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`, // Rewrite to /:path*
+      destination: `${process.env.API_BASE_URL}/:path*`, // Rewrite to /:path*
     },
   ],
 };
