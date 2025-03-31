@@ -4,9 +4,17 @@ const nextConfig: NextConfig = {
   /* config options here */
   rewrites: async () => [
     {
-      source: "/api/:path*", // Match any request starting with /api
-      destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`, // Rewrite to /:path*
+      source: '/api/auth/:path*',
+      destination: 'http://127.0.0.1:8000/auth/:path*',
     },
+    {
+      source: '/api/admin/:path*',
+      destination: 'http://127.0.0.1:8000/admin/:path*',
+    },
+    {
+      source: '/api/user/:path*',
+      destination: 'http://127.0.0.1:8000/user/:path*',
+    }
   ],
 };
 
