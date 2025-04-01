@@ -1,15 +1,6 @@
-'use client'
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+'use server';
+import { permanentRedirect } from "next/navigation";
 
-export default function Home() {
-  const router  = useRouter();
-  useEffect(()=>{
-    router.push('/login');
-  },[]);
-  return (
-    <>
-      
-    </>
-  );
+export default async function Home() {
+  permanentRedirect("/login");
 }

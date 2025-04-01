@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
@@ -7,17 +6,20 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Wind, Home, ArrowUp, ArrowDown, Info, Pencil } from "lucide-react";
-// import { Chatbot } from "./Chatbot";
 
-export function AirLeakageContent() {
-  const [isAdmin, setIsAdmin] = useState(false);
+interface AirLeakageData {
+  parameter: string;
+  title: string;
+  value: string;
+}
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsAdmin(window.location.href.includes("admin"));
-    }
-  }, []);
+interface AirLeakageContentProps {
+  data?: AirLeakageData;
+  isAdmin?: boolean;
+  onUpdateValue?: (newValue: string) => void;
+}
 
+export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirLeakageContentProps) {
   const airLeakagePoints = [
     { id: 1, label: "Air Barrier and Thermal Barrier Alignment" },
     { id: 2, label: "Attic Air Sealing" },
@@ -46,30 +48,35 @@ export function AirLeakageContent() {
     transition: { duration: 0.5 },
   };
 
+  // Function to handle value updates
+  const handleUpdateValue = (newValue: string) => {
+    if (isAdmin && onUpdateValue) {
+      onUpdateValue(newValue);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Introduction Section */}
       <motion.div {...fadeInUp}>
         <Card>
-          <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
-              BPI Approach to Air Sealing
+          <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+            <CardTitle className="text-2xl text-blue-700 dark:text-blue-200">
+              {data?.title || "BPI Approach to Air Sealing"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <p className="text-gray-700 dark:text-gray-300">
-              The air sealing Ciel Power, LLC performs is a BPI approach. First,
-              the attic top plates and penetration are sealed. Next, the
-              attached garage is sealed from the living space. Then, the
-              basement sill plate and penetrations are sealed. Finally, the
-              exterior of the home around windows, baseboards, and doors are
+              The air sealing Ciel Power, LLC performs is a BPI approach. First, the attic top plates and penetration
+              are sealed. Next, the attached garage is sealed from the living space. Then, the basement sill plate and
+              penetrations are sealed. Finally, the exterior of the home around windows, baseboards, and doors are
               sealed.
             </p>
-            <div className="flex items-center space-x-2 text-lime-500 dark:text-green-400">
+            <div className="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
               <Info className="h-5 w-5" />
               <span className="font-medium">
-                A 1/16th inch unsealed crack around a window lets in as much
-                cold air as leaving the window open 1/2 inch.
+                A 1/16th inch unsealed crack around a window lets in as much cold air as leaving the window open 1/2
+                inch.
               </span>
             </div>
           </CardContent>
@@ -79,8 +86,8 @@ export function AirLeakageContent() {
       {/* Air Flow Rates Section */}
       <motion.div {...fadeInUp}>
         <Card>
-          <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
+          <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+            <CardTitle className="text-2xl text-blue-700 dark:text-blue-200">
               Understanding Air Flow Rates
             </CardTitle>
           </CardHeader>
@@ -88,20 +95,14 @@ export function AirLeakageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <p className="text-gray-700 dark:text-gray-300">
-                  35% of the air in your home should exhaust each hour to
-                  maintain healthy ventilation. Airflow rates above these levels
-                  create excessive strain on heating & cooling systems.
+                  35% of the air in your home should exhaust each hour to maintain healthy ventilation. Airflow rates
+                  above these levels create excessive strain on heating & cooling systems.
                 </p>
                 <div className="flex items-center space-x-4">
                   <div className="w-32">
-                    <Progress
-                      value={35}
-                      className="h-2 bg-green-100 dark:bg-green-700"
-                    />
+                    <Progress value={35} className="h-2 bg-blue-100 dark:bg-blue-700" />
                   </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Recommended: 35%
-                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Recommended: 35%</span>
                 </div>
               </div>
               <div className="relative h-48">
@@ -113,10 +114,10 @@ export function AirLeakageContent() {
                   }}
                   transition={{
                     duration: 2,
-                    repeat: Number.POSITIVE_INFINITY,
+                    repeat: Infinity,
                   }}
                 >
-                  <Wind className="h-24 w-24 text-green-500 opacity-50" />
+                  <Wind className="h-24 w-24 text-blue-400 opacity-50" />
                 </motion.div>
               </div>
             </div>
@@ -127,8 +128,8 @@ export function AirLeakageContent() {
       {/* Air Changes Per Hour Section */}
       <motion.div {...fadeInUp}>
         <Card>
-          <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
+          <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+            <CardTitle className="text-2xl text-blue-700 dark:text-blue-200">
               Your Home&apos;s Air Changes Per Hour (ACH)
             </CardTitle>
           </CardHeader>
@@ -136,16 +137,16 @@ export function AirLeakageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <div className="space-y-4">
-                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Your Results
-                  </p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Results</p>
                   <div className="flex items-center space-x-4">
-                    <InPlaceEdit initialValue="0.95" isAdmin={isAdmin} />
+                    <InPlaceEdit 
+                      initialValue={data?.value || "0.00"} 
+                      isAdmin={isAdmin} 
+                      onUpdate={handleUpdateValue}
+                    />
                     <div className="text-sm text-gray-600">ACH</div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    BPI recommends the Air Changes per Hour be 0.35
-                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">BPI recommends the Air Changes per Hour be 0.35</p>
                 </div>
               </div>
               <div className="relative h-48">
@@ -156,7 +157,7 @@ export function AirLeakageContent() {
                   }}
                   transition={{
                     duration: 20,
-                    repeat: Number.POSITIVE_INFINITY,
+                    repeat: Infinity,
                     ease: "linear",
                   }}
                 >
@@ -164,7 +165,7 @@ export function AirLeakageContent() {
                     <div className="relative w-32 h-32">
                       <ArrowUp className="absolute top-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-red-500" />
 
-                      <ArrowDown className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-green-500" />
+                      <ArrowDown className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-8 w-8 text-blue-500" />
 
                       <Home className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 h-16 w-16 text-gray-400" />
                     </div>
@@ -179,10 +180,8 @@ export function AirLeakageContent() {
       {/* Common Air Leak Points */}
       <motion.div {...fadeInUp}>
         <Card>
-          <CardHeader className="bg-green-50 dark:bg-green-900/50">
-            <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
-              Common Air Leak Points
-            </CardTitle>
+          <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+            <CardTitle className="text-2xl text-blue-700 dark:text-blue-200">Common Air Leak Points</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -194,29 +193,12 @@ export function AirLeakageContent() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  id={`6v76oh_${index}`}
                 >
-                  <div
-                    className="flex items-center space-x-3"
-                    id={`17fjqk_${index}`}
-                  >
-                    <div
-                      className="flex-shrink-0 w-8 h-8 rounded-full bg-lime-100 dark:bg-green-900 flex items-center justify-center"
-                      id={`b46dud_${index}`}
-                    >
-                      <span
-                        className="text-lime-600 dark:text-green-400 font-medium"
-                        id={`9c0odf_${index}`}
-                      >
-                        {point.id}
-                      </span>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">{point.id}</span>
                     </div>
-                    <span
-                      className="text-sm text-gray-700 dark:text-gray-300"
-                      id={`msjkjr_${index}`}
-                    >
-                      {point.label}
-                    </span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{point.label}</span>
                   </div>
                 </motion.div>
               ))}
@@ -224,9 +206,6 @@ export function AirLeakageContent() {
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* Chatbot */}
-      {/* <Chatbot activeMenu="air-leakage" /> */}
     </div>
   );
 }
@@ -234,12 +213,17 @@ export function AirLeakageContent() {
 interface InPlaceEditProps {
   initialValue: string;
   isAdmin: boolean;
+  onUpdate: (value: string) => void;
 }
 
-function InPlaceEdit({ initialValue, isAdmin }: InPlaceEditProps) {
+function InPlaceEdit({ initialValue, isAdmin, onUpdate }: InPlaceEditProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -255,11 +239,17 @@ function InPlaceEdit({ initialValue, isAdmin }: InPlaceEditProps) {
 
   const handleBlur = () => {
     setIsEditing(false);
+    if (value !== initialValue) {
+      onUpdate(value);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setIsEditing(false);
+      if (value !== initialValue) {
+        onUpdate(value);
+      }
     }
   };
 
@@ -272,16 +262,13 @@ function InPlaceEdit({ initialValue, isAdmin }: InPlaceEditProps) {
         onChange={(e) => setValue(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className="text-4xl font-bold text-lime-500 bg-transparent border-b border-lime-500 outline-none"
+        className="text-4xl font-bold text-blue-700 bg-transparent border-b border-blue-700 outline-none"
       />
     );
   }
 
   return (
-    <div
-      className="text-4xl font-bold text-lime-500 flex items-center cursor-pointer"
-      onClick={handleClick}
-    >
+    <div className="text-4xl font-bold text-blue-700 flex items-center cursor-pointer" onClick={handleClick}>
       {value}
       {isAdmin && <Pencil className="ml-2 h-5 w-5 text-gray-400" />}
     </div>

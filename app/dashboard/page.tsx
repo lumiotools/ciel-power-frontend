@@ -12,6 +12,8 @@ import { Clock, AlertCircle, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ChatBot } from "@/components/modal/ChatBot";
 import Link from "next/link";
+import { FAQDetails, FAQQuestions } from "./_comp/utils";
+import Image from "next/image";
 
 // interface Service {
 //   id: string;
@@ -92,6 +94,29 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   // const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+  //usestate condition for dropdown
+
+  const [openDropdown, setOpenDropdown] = useState<boolean[]>(
+    Array(FAQDetails.length).fill(false)
+  );
+
+  const [faqOpen, setFaqOpen] = useState<boolean[]>(
+    Array(FAQQuestions.length).fill(false)
+  );
+
+  const toggleDropdown = (index: number) => {
+    setOpenDropdown((prev) =>
+      prev.map((item, i) => (i === index ? !item : item))
+    );
+    if (index === FAQDetails.length - 1) {
+      setFaqOpen((prev) => prev.map(() => false));
+    }
+  };
+
+  const toggleFaqQuestion = (index: number) => {
+    setFaqOpen((prev) => prev.map((item, i) => (i === index ? !item : item)));
+  };
 
   const { userDetails } = useContext(AUTH_CONTEXT);
 
@@ -463,6 +488,45 @@ export default function DashboardPage() {
             )}
           </section>
 
+          {/* faq section */}
+          <div className=" mt-10 flex flex-col gap-4 rounded-lg ">
+            {FAQDetails.map((faq) => (
+              <div key={faq.id} className="border-[1.5px] rounded-lg">
+                <div
+                  className={`flex justify-between  bg-light-green  cursor-pointer px-2`}
+                  onClick={() => toggleDropdown(faq.id)}
+                >
+                  <div className=" flex gap-2 items-center py-2 rounded-lg ">
+                    <LogoContainer logo={faq.logo} />
+                    <div>
+                      <p className=" text-deep-green text-xl font-semibold">
+                        {faq.title}
+                      </p>
+                      <p className=" text-xs">{faq.description}</p>
+                    </div>
+                  </div>
+                  <Image
+                    src={"/dashboard/arrow-down.svg"}
+                    width={20}
+                    height={20}
+                    alt="arrow"
+                    className={`${
+                      openDropdown[faq.id] === true ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+                {openDropdown[faq.id] && (
+                  <CardData
+                    index={faq.id}
+                    faqOpen={faqOpen}
+                    toggleFaqQuestion={toggleFaqQuestion}
+                  />
+                )}
+              </div>
+            ))}
+            <div></div>
+          </div>
+
           <ChatBot />
 
           {/* FAQs Section */}
@@ -474,3 +538,401 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+interface CardDataProps {
+  index: number;
+  faqOpen: boolean[];
+  toggleFaqQuestion: (index: number) => void;
+}
+
+const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
+  switch (index) {
+    case 0:
+      return (
+        <div className=" flex flex-col gap-3 py-3 px-10 items-center justify-center text-center">
+          <div className=" bg-light-green border-[1.5px]  rounded-full p-1.5 w-fit">
+            <p className="text-deep-green text-sm">
+              Thanks for booking Energy Audit!{" "}
+            </p>
+          </div>
+          <p className=" text-2xl font-bold">
+            What to Expect During Your Home Energy Audit
+          </p>
+          <p className=" text-sm">
+            Discover the Power of Energy Efficiency with a Ciel Home Energy
+            Audit.
+          </p>
+          <p>
+            <span className=" text-2xl text-deep-green">“</span> The first step
+            to accessing NJ’s utility programs for <br /> energy-efficient home
+            upgrades. <span className=" text-2xl text-deep-green">”</span>{" "}
+          </p>
+          <div className="aspect-video min-w-[70%]">
+            <iframe
+              className="w-full h-full rounded-lg shadow-lg"
+              src="https://www.youtube.com/embed/FH0hdanGxkM"
+              title="Energy Audit Overview"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      );
+    case 1:
+      return (
+        <div className=" flex flex-col gap-3 p-3">
+          <div className=" w-full flex gap-2 ">
+            <div className="w-[60%] border rounded-xl p-2 relative shadow-lg">
+              <div
+                className="absolute  left-[5.2%] top-[12%] bottom-[5%] w-0.5 bg-green-500/30"
+                style={{ zIndex: 0 }}
+              ></div>
+              <div
+                className=" flex gap-2 items-center z-50"
+                style={{ zIndex: 50 }}
+              >
+                <LogoContainer
+                  logo={"/dashboard/Frame.svg"}
+                  className={"z-50"}
+                />
+                <div>
+                  <p className=" text-xl">On-Site Application</p>
+                  <p className=" text-xs">
+                    BPI auditor will evaluate home energy performance.
+                  </p>
+                </div>
+              </div>
+              <ul className=" text-xs pl-4 pt-4 flex flex-col gap-3">
+                <li className=" flex gap-2 items-center">
+                  <Circle />
+                  <p>
+                    <span className="font-bold"> Gather details</span> on
+                    insulation, construction specifications, and heating,
+                    cooling, & hot water systems.
+                  </p>
+                </li>
+                <li className=" flex gap-2 items-center">
+                  <Circle />
+                  <p>
+                    Perform a{" "}
+                    <span className="font-bold">blower door test</span> to
+                    assess air tightness and use infrared cameras to locate air
+                    leaks.
+                  </p>
+                </li>
+                <li className=" flex gap-2 items-center">
+                  <Circle />
+                  <p>
+                    Conduct{" "}
+                    <span className="font-bold">safety inspections</span> to
+                    identify hazards such as gas leaks, carbon monoxide, mold,
+                    and asbestos
+                  </p>
+                </li>
+              </ul>
+            </div>
+            <div className=" w-[40%] border rounded-xl p-2 shadow-lg">
+              <div className=" flex gap-2">
+                <LogoContainer logo={"/dashboard/analysis.svg"} />
+                <p className=" text-xl">Engineering Analysis</p>
+              </div>
+              <p className=" text-xs">
+                After the inspection, the data collected will be used to create
+                a virtual model of your home.
+              </p>
+              <div className="flex flex-col gap-3 p-3 ">
+                <div className="relative bg-light-green border border-green-300 border-opacity-40 rounded-xl p-3">
+                  <p className=" text-sm">
+                    {" "}
+                    Projects <span className="font-bold">
+                      energy savings
+                    </span>{" "}
+                    from recommended improvements
+                  </p>
+                  {/* <div className=""> */}
+                  <Image
+                    src={"/dashboard/Bulb.svg"}
+                    width={30}
+                    height={30}
+                    alt="logo"
+                    className="absolute -top-3 -left-1 rounded-full"
+                  />
+                </div>
+                <div className="relative bg-light-green border border-green-300 border-opacity-40 rounded-xl p-3">
+                  <p className=" text-sm">
+                    {" "}
+                    Identifies{" "}
+                    <span className="font-bold">
+                      utility incentives
+                    </span> and <span className="font-bold">tax credits</span>{" "}
+                    available to you (up to 30% of costs)
+                  </p>
+                  {/* <div className=""> */}
+                  <Image
+                    src={"/dashboard/coin.svg"}
+                    width={30}
+                    height={30}
+                    alt="logo"
+                    className="absolute -top-3 -left-1 rounded-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className=" p-3 border shadow-md rounded-xl flex gap-2">
+            <Image
+              src={"/dashboard/report.svg"}
+              alt="report"
+              width={281}
+              height={276}
+            />
+            <div className=" ">
+              <p className=" text-xl font-bold  ">Your Final Report</p>
+              <p className=" text-xs text-gray-400 ">
+                Within a few days of the visit, you will receive a detailed
+                report including:
+              </p>
+              <p>
+                A certified auditor, accredited by the Building Performance
+                Institute (BPI), will visit your home to assess its energy
+                performance.
+              </p>
+              <ul className=" text-xs pl-4 pt-4 flex flex-col gap-3">
+                <li className=" flex gap-2 items-center">
+                  <SimpleCircle />
+                  <p>
+                    <span className="font-bold"> Gather details</span> on
+                    insulation, construction specifications, and heating,
+                    cooling, & hot water systems.
+                  </p>
+                </li>
+                <li className=" flex gap-2 items-center">
+                  <SimpleCircle />
+                  <p>
+                    Perform a{" "}
+                    <span className="font-bold">blower door test</span> to
+                    assess air tightness and use infrared cameras to locate air
+                    leaks.
+                  </p>
+                </li>
+                <li className=" flex gap-2 items-center">
+                  <SimpleCircle />
+                  <p>
+                    Conduct{" "}
+                    <span className="font-bold">safety inspections</span> to
+                    identify hazards such as gas leaks, carbon monoxide, mold,
+                    and asbestos
+                  </p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+    case 2:
+      return (
+        <div className=" flex flex-col gap-3 p-3">
+          <div className="flex flex-col gap-3 border border-gray-300 p-3 rounded-md">
+            <div className=" flex gap-2">
+              <LogoContainer logo={"/dashboard/home.svg"} />
+              <div>
+                <p className=" text-xl">Provide Home access</p>
+                <p className=" text-xs">
+                  Ensure key areas of your home are accessible for inspection:
+                </p>
+              </div>
+            </div>
+            <div className=" flex gap-7">
+              <Image
+                src={"/dashboard/image.svg"}
+                width={209}
+                height={200}
+                alt="image"
+                className="rounded-md"
+              />
+              <Image
+                src={"/dashboard/image1.svg"}
+                width={209}
+                height={200}
+                alt="image"
+                className="rounded-md"
+              />
+              <Image
+                src={"/dashboard/image2.svg"}
+                width={209}
+                height={200}
+                alt="image"
+                className="rounded-md"
+              />
+              <Image
+                src={"/dashboard/image3.svg"}
+                width={209}
+                height={200}
+                alt="image"
+                className="rounded-md"
+              />
+            </div>
+          </div>
+          <div className="flex  gap-3 border border-gray-300 p-3 w-full rounded-md">
+            <div className=" w-1/2 flex flex-col gap-2">
+              <div className=" flex gap-2">
+                <LogoContainer logo="/dashboard/info.svg" />
+                <div>
+                  <p className=" text-xl">Utility Information</p>
+                  <p className=" text-xs text-gray-400">
+                    Upload recent utility bills before audit.
+                  </p>
+                </div>
+              </div>
+              <ul className=" flex flex-col gap-2">
+                <li className=" flex gap-2 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-deep-green rounded"></div>
+                  <div className=" pl-4">
+                    <p className="text-sm font-bold">
+                      Upload Bills Before Audit
+                    </p>
+                    <p className=" text-gray text-xs">
+                      Upload your most recent gas and electric utility
+                      bills through the portal before your audit.
+                    </p>
+                  </div>
+                </li>
+                <li className=" flex gap-2 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-deep-green rounded"></div>
+                  <div className=" pl-4">
+                    <p className="text-sm font-bold">Accurate Audit Report</p>
+                    <p className=" text-gray text-xs">
+                      Ensures precise report generation by verifying energy
+                      usage and system performance.
+                    </p>
+                  </div>
+                </li>
+                <li className=" flex gap-2 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-deep-green rounded"></div>
+                  <div className=" pl-4">
+                    <p className="text-sm font-bold">Incentives & Savings</p>
+                    <p className=" text-gray text-xs">
+                      Identifies eligible incentives and cost-saving
+                      opportunities to optimize energy efficiency.
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div className=" w-1/2 flex flex-col gap-2">
+              <div className=" flex gap-2">
+                <LogoContainer logo="/dashboard/paw.svg" />
+                <div>
+                  <p className=" text-xl">Secure Pets</p>
+                  <p className=" text-xs text-gray-400">
+                    Keeping Pets Safe & Ensuring a Smooth Audit
+                  </p>
+                </div>
+              </div>
+              <ul className=" flex flex-col gap-2">
+                <li className=" flex gap-2 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-deep-green rounded"></div>
+                  <div className=" pl-4">
+                    <p className="text-sm font-bold">Pet Safety During Audit</p>
+                    <p className=" text-gray text-xs">
+                      If you have pets, consider keeping them in a safe space to
+                      ensure the technician can work without interruptions
+                    </p>
+                  </div>
+                </li>
+                <li className=" flex gap-2 ">
+                  <LogoContainer logo="/dashboard/man.svg" />
+                  <div>
+                    <p className=" text-xl">Plan for someone to be home</p>
+                    <p className=" text-xs text-gray-400">
+                      Ensure Access & Discuss Concerns
+                    </p>
+                  </div>
+                </li>
+                <li className=" flex gap-2 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-deep-green rounded"></div>
+                  <div className=" pl-4">
+                    <p className="text-sm font-bold">
+                      Upload Bills Before Audit
+                    </p>
+                    <p className=" text-gray text-xs">
+                      It&apos;s helpful for someone to be present to provide
+                      access and discuss any concerns or observations about your
+                      home.
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+    case 3:
+      return (
+        <div className=" flex flex-col gap-3 p-3 border rounded-md m-3">
+          {FAQQuestions.map((item) => (
+            <div key={item.id} className="">
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => toggleFaqQuestion(item.id)}
+              >
+                <div className=" flex gap-2 items-center">
+                  <div className="w-8 h-8 flex justify-center items-center p-2 flex-shrink-0 bg-medium-green rounded-full">
+                    <p className="">{item.id + 1}</p>
+                  </div>
+                  <p>{item.title}</p>
+                </div>
+                <Image
+                  src={"/dashboard/arrow-down.svg"}
+                  width={20}
+                  height={20}
+                  alt="arrow"
+                  className={`${
+                    (faqOpen[item.id] === true) === true
+                      ? "rotate-180"
+                      : " -rotate-90"
+                  }`}
+                />
+              </div>
+              {faqOpen[item.id] === true && (
+                <p className=" py-3 text-gray">{item.description}</p>
+              )}
+              <hr className="w-full h-[0.5px] bg-gray mt-2" />
+            </div>
+          ))}
+        </div>
+      );
+  }
+};
+
+const LogoContainer = ({
+  logo,
+  className,
+}: {
+  logo: string;
+  className?: string;
+}) => {
+  return (
+    <div className=" p-2 border rounded-lg flex justify-center items-center gap-2 bg-white">
+      <Image
+        src={logo}
+        width={24}
+        height={24}
+        alt="logo"
+        className={className}
+      />
+    </div>
+  );
+};
+
+const Circle = () => {
+  return (
+    <div className="min-w-3 min-h-3 flex-shrink-0 border-2  bg-deep-green rounded-full ring-3"></div>
+  );
+};
+
+const SimpleCircle = () => {
+  return (
+    <div className="min-w-2 min-h-2 flex-shrink-0 border-2  bg-black rounded-full"></div>
+  );
+};
