@@ -11,8 +11,8 @@ import { AUTH_CONTEXT } from "@/providers/auth";
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: "/dashboard.svg" },
-  { name: "Audit Info", href: "/dashboard/expect", icon: "/peopleIcon.svg" },
-  {name: "View Report" , href: "/dashboard/bookings/2559502143682185/reports", icon: '/file.svg'},
+  // { name: "Audit Info", href: "/dashboard/expect", icon: "/peopleIcon.svg" },
+  // {name: "View Report" , href: "/dashboard/bookings/2559502143682185/reports", icon: '/file.svg'},
   // { name: "Proposals", href: "/dashboard/expect", icon: "/handIcon.svg" },
 ];
 
