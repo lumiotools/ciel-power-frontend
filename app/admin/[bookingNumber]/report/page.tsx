@@ -7,7 +7,7 @@ import { InsulationContent } from "@/components/report/InsulationContent";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { motion } from "framer-motion";
-import React, { useRef, useState, useEffect, use } from "react";
+import React, { useRef, useState, useEffect, use, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Info,
@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { HouseSystem } from "@/components/report/HouseSystem";
 import { toast } from "sonner";
+
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -79,7 +80,11 @@ interface ReportData {
 
 const REPORT_DATA_KEY = "report_data";
 
-const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) => {
+const ReportPage = ({
+  params,
+}: {
+  params: Promise<{ bookingNumber: string }>;
+}) => {
   // Unwrap the params Promise using React.use()
   const unwrappedParams = use(params);
   const bookingNumber = unwrappedParams.bookingNumber;
@@ -92,6 +97,35 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [imgOfUser, SetImageOfUser] = useState([]);
+
+  useEffect( () => {
+    const fetchData=async()=>{
+      try {
+        //  = await fetchImages({ userid: bookingNumber });
+
+         const imagesOfUser = await fetch(
+          `/api/admin/bookings/${bookingNumber}/pictures`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            cache:"default",
+            next: { revalidate: 3600 }, // Revalidate every 3600 seconds        
+          }
+        );
+        const data = await imagesOfUser.json();
+        console.log("Fetched images:", data);
+        SetImageOfUser(data?.data?.pictures);
+        console.log("imagesOfUser", imagesOfUser);
+      } catch (error) {
+        console.log("Error fetching images:", error);
+        toast.error("Failed to fetch images");
+      }
+    }
+    fetchData();
+  }, [bookingNumber]);
 
   // Check if admin
   useEffect(() => {
@@ -103,7 +137,9 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
   useEffect(() => {
     // Admin users can load from localStorage, otherwise always fetch fresh
     if (isAdmin) {
-      const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+      const savedData = localStorage.getItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`
+      );
       if (savedData) {
         try {
           const parsedData = JSON.parse(savedData);
@@ -129,7 +165,9 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
   const fetchReportDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report`);
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/report`
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -150,7 +188,10 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
         // Save to localStorage only for admin users
         if (isAdmin) {
           try {
-            localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(fetchedReportData));
+            localStorage.setItem(
+              `${REPORT_DATA_KEY}_${bookingNumber}`,
+              JSON.stringify(fetchedReportData)
+            );
             console.log("Saved initial report data to localStorage");
           } catch (e) {
             console.error("Error saving report data to localStorage:", e);
@@ -165,7 +206,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // Update functions for each section
   const updateAirLeakage = (newValue: string) => {
@@ -175,27 +216,30 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
     const currentAirLeakage = reportData.airLeakage || {
       parameter: "",
       title: "",
-      value: ""
+      value: "",
     };
 
     // Create a complete AirLeakageData object
     const updatedAirLeakage: AirLeakageData = {
       parameter: currentAirLeakage.parameter,
       title: currentAirLeakage.title,
-      value: newValue
+      value: newValue,
     };
 
     // Update the state with the properly typed object
     const newData: ReportData = {
       ...reportData,
-      airLeakage: updatedAirLeakage
+      airLeakage: updatedAirLeakage,
     };
 
     setReportData(newData);
 
     // Save to localStorage
     try {
-      localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(newData));
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(newData)
+      );
     } catch (e) {
       console.error("Error saving updated report data to localStorage:", e);
     }
@@ -205,7 +249,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
     if (!isAdmin || !reportData.insulation?.data) return;
 
     const newData = [...reportData.insulation.data];
-    const index = newData.findIndex(item => item.name === updatedItem.name);
+    const index = newData.findIndex((item) => item.name === updatedItem.name);
 
     if (index !== -1) {
       newData[index] = updatedItem;
@@ -214,15 +258,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
         ...reportData,
         insulation: {
           ...reportData.insulation,
-          data: newData
-        }
+          data: newData,
+        },
       };
 
       setReportData(updatedReportData);
 
       // Save to localStorage
       try {
-        localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedReportData));
+        localStorage.setItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+          JSON.stringify(updatedReportData)
+        );
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -233,16 +280,17 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
     if (!isAdmin || !reportData.heatingAndCooling?.data) return;
 
     // Check if it's a heating item or water heater
-    const isHeatingItem = updatedItem.name.toLowerCase().includes('furnace') ||
-      updatedItem.name.toLowerCase().includes('boiler') ||
-      updatedItem.name.toLowerCase().includes('heat');
+    const isHeatingItem =
+      updatedItem.name.toLowerCase().includes("furnace") ||
+      updatedItem.name.toLowerCase().includes("boiler") ||
+      updatedItem.name.toLowerCase().includes("heat");
 
     if (isHeatingItem) {
       // Update in heatingAndCooling data
       const newHeatingData = [...reportData.heatingAndCooling.data];
-      const index = newHeatingData.findIndex(item =>
-        item.name === updatedItem.name &&
-        item.type === updatedItem.type
+      const index = newHeatingData.findIndex(
+        (item) =>
+          item.name === updatedItem.name && item.type === updatedItem.type
       );
 
       if (index !== -1) {
@@ -252,15 +300,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
           ...reportData,
           heatingAndCooling: {
             ...reportData.heatingAndCooling,
-            data: newHeatingData
-          }
+            data: newHeatingData,
+          },
         };
 
         setReportData(updatedReportData);
 
         // Save to localStorage
         try {
-          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedReportData));
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(updatedReportData)
+          );
         } catch (e) {
           console.error("Error saving heating data to localStorage:", e);
         }
@@ -268,9 +319,9 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
     } else if (reportData.waterHeater?.data) {
       // Update in waterHeater data
       const newWaterHeaterData = [...reportData.waterHeater.data];
-      const index = newWaterHeaterData.findIndex(item =>
-        item.name === updatedItem.name &&
-        item.type === updatedItem.type
+      const index = newWaterHeaterData.findIndex(
+        (item) =>
+          item.name === updatedItem.name && item.type === updatedItem.type
       );
 
       if (index !== -1) {
@@ -280,15 +331,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
           ...reportData,
           waterHeater: {
             ...reportData.waterHeater,
-            data: newWaterHeaterData
-          }
+            data: newWaterHeaterData,
+          },
         };
 
         setReportData(updatedReportData);
 
         // Save to localStorage
         try {
-          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedReportData));
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(updatedReportData)
+          );
         } catch (e) {
           console.error("Error saving water heater data to localStorage:", e);
         }
@@ -300,9 +354,8 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
     if (!isAdmin || !reportData.heatingAndCooling?.data) return;
 
     const newData = [...reportData.heatingAndCooling.data];
-    const index = newData.findIndex(item =>
-      item.name === updatedItem.name &&
-      item.type === updatedItem.type
+    const index = newData.findIndex(
+      (item) => item.name === updatedItem.name && item.type === updatedItem.type
     );
 
     if (index !== -1) {
@@ -312,15 +365,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
         ...reportData,
         heatingAndCooling: {
           ...reportData.heatingAndCooling,
-          data: newData
-        }
+          data: newData,
+        },
       };
 
       setReportData(updatedReportData);
 
       // Save to localStorage
       try {
-        localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedReportData));
+        localStorage.setItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+          JSON.stringify(updatedReportData)
+        );
       } catch (e) {
         console.error("Error saving cooling data to localStorage:", e);
       }
@@ -334,7 +390,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
     // Update health safety section
     const healthSafetyIndex = newSummaryData.findIndex(
-      section => section.name === "Basic Health and Safety"
+      (section) => section.name === "Basic Health and Safety"
     );
 
     if (healthSafetyIndex !== -1 && newConcerns.healthSafety) {
@@ -343,7 +399,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
     // Update combustion section
     const combustionIndex = newSummaryData.findIndex(
-      section => section.name === "Combustion Testing"
+      (section) => section.name === "Combustion Testing"
     );
 
     if (combustionIndex !== -1 && newConcerns.combustion) {
@@ -354,15 +410,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
       ...reportData,
       summaryOfConcerns: {
         ...reportData.summaryOfConcerns,
-        data: newSummaryData
-      }
+        data: newSummaryData,
+      },
     };
 
     setReportData(updatedReportData);
 
     // Save to localStorage
     try {
-      localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedReportData));
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
     } catch (e) {
       console.error("Error saving concerns to localStorage:", e);
     }
@@ -375,15 +434,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
       ...reportData,
       solutionsAndRecommendations: {
         ...reportData.solutionsAndRecommendations,
-        recommendations: newRecommendations
-      }
+        recommendations: newRecommendations,
+      },
     };
 
     setReportData(updatedReportData);
 
     // Save to localStorage
     try {
-      localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedReportData));
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
     } catch (e) {
       console.error("Error saving recommendations to localStorage:", e);
     }
@@ -399,7 +461,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   const howItWorksSteps = [
@@ -445,35 +507,39 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
   // Filter heating and cooling items from heatingAndCooling data
   const getHeatingData = () => {
-    if (!reportData.heatingAndCooling?.data) return { data: [], title: "Heating Systems" };
+    if (!reportData.heatingAndCooling?.data)
+      return { data: [], title: "Heating Systems" };
 
     const heatingItems = reportData.heatingAndCooling.data.filter(
-      item => item.name.toLowerCase().includes('furnace') ||
-        item.name.toLowerCase().includes('boiler') ||
-        item.name.toLowerCase().includes('heat')
+      (item) =>
+        item.name.toLowerCase().includes("furnace") ||
+        item.name.toLowerCase().includes("boiler") ||
+        item.name.toLowerCase().includes("heat")
     );
 
     const waterHeaterItems = reportData.waterHeater?.data || [];
 
     return {
       data: [...heatingItems, ...waterHeaterItems],
-      title: "Heating & Water Heating Systems"
+      title: "Heating & Water Heating Systems",
     };
   };
 
   const getCoolingData = () => {
-    if (!reportData.heatingAndCooling?.data) return { data: [], title: "Cooling Systems" };
+    if (!reportData.heatingAndCooling?.data)
+      return { data: [], title: "Cooling Systems" };
 
     const coolingItems = reportData.heatingAndCooling.data.filter(
-      item => item.name.toLowerCase().includes('a/c') ||
-        item.name.toLowerCase().includes('air condition') ||
-        item.name.toLowerCase().includes('cooling') ||
-        item.name.toLowerCase().includes('heat pump')
+      (item) =>
+        item.name.toLowerCase().includes("a/c") ||
+        item.name.toLowerCase().includes("air condition") ||
+        item.name.toLowerCase().includes("cooling") ||
+        item.name.toLowerCase().includes("heat pump")
     );
 
     return {
       data: coolingItems,
-      title: "Cooling Systems"
+      title: "Cooling Systems",
     };
   };
 
@@ -491,6 +557,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
         return (
           <InsulationContent
             data={reportData.insulation}
+            driveImages={imgOfUser}
             isAdmin={isAdmin}
             onUpdateItem={updateInsulationItem}
           />
@@ -636,18 +703,21 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
       <div className="bg-white rounded-b-lg shadow-md">
         <div className="flex border-b border-gray-200">
-          {["air-leakage", "insulation", "heating", "cooling", "summary"].map((tab) => (
-            <button
-              key={tab}
-              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
-                ? "border-b-2 border-lime-500 text-lime-500"
-                : "text-gray-600 hover:text-lime-500"
+          {["air-leakage", "insulation", "heating", "cooling", "summary"].map(
+            (tab) => (
+              <button
+                key={tab}
+                className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
+                  activeSubMenu === tab
+                    ? "border-b-2 border-lime-500 text-lime-500"
+                    : "text-gray-600 hover:text-lime-500"
                 }`}
-              onClick={() => setActiveSubMenu(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
-            </button>
-          ))}
+                onClick={() => setActiveSubMenu(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
+              </button>
+            )
+          )}
         </div>
 
         <div className="p-6">{renderContent()}</div>

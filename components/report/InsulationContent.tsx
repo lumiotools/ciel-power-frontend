@@ -33,6 +33,7 @@ interface InsulationContentProps {
   data?: InsulationData;
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: InsulationDataItem) => void;
+  driveImages?: string[];
 }
 
 // Helper function to find the best matching item for a specific component type
@@ -99,7 +100,7 @@ const findBestMatchingItem = (data: InsulationDataItem[] | undefined, type: stri
   return undefined;
 };
 
-export function InsulationContent({ data, isAdmin = false, onUpdateItem }: InsulationContentProps) {
+export function InsulationContent({ data, isAdmin = false, onUpdateItem,driveImages }: InsulationContentProps) {
   // Define the standard components we want to show
   const standardTypes = ['kneewall', 'exterior wall', 'crawlspace', 'rim joist', 'overhang'];
   
@@ -147,6 +148,7 @@ export function InsulationContent({ data, isAdmin = false, onUpdateItem }: Insul
         data={findBestMatchingItem(data?.data, 'kneewall')} 
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
+        driveImages={driveImages}
       /> 
       <ExteriorWallAssessment 
         data={findBestMatchingItem(data?.data, 'exterior wall')} 
