@@ -366,7 +366,7 @@ export default function DashboardPage() {
 
           {/* Your Bookings Section */}
           <div className="flex justify-between items-center mt-5">
-            <h2 className="text-2xl font-medium">Your Bookings</h2>
+            <h2 className="text-2xl font-medium">Your Home Energy Audit</h2>
           </div>
 
           <section
@@ -584,11 +584,13 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
           <div className=" w-full flex gap-2 ">
             <div className="w-[60%] border rounded-xl p-2 relative shadow-lg">
               <div
-                className="absolute  left-[5.2%] top-[12%] bottom-[5%] w-0.5 bg-green-500/30"
+                className="absolute  left-[29px] top-[12%] bottom-[5%] w-0.5 bg-green-500/30"
                 style={{ zIndex: 0 }}
               ></div>
+
+             
               <div
-                className=" flex gap-2 items-center z-50"
+                className="relative flex gap-2 items-center z-50"
                 style={{ zIndex: 50 }}
               >
                 <LogoContainer

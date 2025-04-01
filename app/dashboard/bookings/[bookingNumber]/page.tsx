@@ -215,6 +215,7 @@ const BookingDetailsPage = () => {
           setBooking(data.data.booking);
           setCustomerDetails(data.data.customer);
           console.log("youtube videos", data.data.youtubeVideos);
+          // console.log("youtube", data.data.youtubeVideos);
           setYoutubeSuggestions(data.data.youtubeVideos);
           setBlogs(data.data.blogs);
           setFollowUpScheduleDetails(data.data.followUpScheduleDetails);
@@ -535,9 +536,9 @@ const BookingDetailsPage = () => {
             )}
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
-          <div className="space-y-6">
+          {/* <div className="space-y-6"> */}
             {/* Payment Details Card */}
-            <Card className="p-6 bg-[#F0F8E6] shadow-md">
+            {/* <Card className="p-6 bg-[#F0F8E6] shadow-md">
               <h4 className="mb-4 text-lg font-medium">Payment details</h4>
               <div className="mb-4 flex justify-between">
                 <span className="text-muted-foreground">Payment Status</span>
@@ -548,7 +549,7 @@ const BookingDetailsPage = () => {
                 <span className="font-medium text-green-600">
                   ${booking.price.totalGross.amount}
                 </span>
-              </div>
+              </div> */}
               {/* <Button
                 variant="outline"
                 className="w-full bg-[#96C93D] hover:bg-[#85b234]"
@@ -556,31 +557,31 @@ const BookingDetailsPage = () => {
                 {/* <Download className="mr-2 size-4" /> *
                 Download Invoice
               </Button> */}
-            </Card>
+            {/* </Card> */}
 
             {/* Auditor Card */}
-            <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px]">
-              <h4 className="mb-4 text-lg font-medium">
+            {/* <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px]"> */}
+              {/* <h4 className="mb-4 text-lg font-medium">
                 Your Assigned Auditor
-              </h4>
-              <div className="mb-4 flex flex-col items-center">
-                <div className="mb-4 overflow-hidden rounded-lg">
+              </h4> */}
+              {/* <div className="mb-4 flex flex-col items-center"> */}
+                {/* <div className="mb-4 overflow-hidden rounded-lg"> */}
                   {/* Auditor avatar or placeholder image */}
-                  <img
+                  {/* <img
                     src="https://st2.depositphotos.com/9998432/48284/v/450/depositphotos_482842120-stock-illustration-default-avatar-photo-placeholder-grey.jpg"
                     alt="Auditor"
                     width={120}
                     height={120}
                     className="object-cover rounded-full"
-                  />
-                </div>
-                <h5 className="font-medium">{booking.auditor}</h5>
-              </div>
-              <Button className="w-full bg-[#96C93D] hover:bg-[#85b234]">
+                  /> */}
+                {/* </div> */}
+                {/* <h5 className="font-medium">{booking.auditor}</h5> */}
+              {/* </div> */}
+              {/* <Button className="w-full bg-[#96C93D] hover:bg-[#85b234]">
                 Track Professional
-              </Button>
-            </Card>
-          </div>
+              </Button> */}
+            {/* </Card> */}
+          {/* </div> */}
         </div>
 
         {/* ========== ADDITIONAL SECTIONS BELOW ========== */}
@@ -639,3 +640,15 @@ const BookingDetailsPage = () => {
 };
 
 export default BookingDetailsPage;
+
+
+const filterYoutubeSuggestions = (youtubeSuggestions)=>{
+  const today= new Date();
+  const oneYearAgo = new Date(today.setFullYear(today.getFullYear() - 1));
+  const filteredSuggestions = youtubeSuggestions.filter((content) => {
+    const contentDate = new Date(content.creationTime);
+    return contentDate >= oneYearAgo && contentDate <= today;
+  }
+  );   
+  return filteredSuggestions;
+}
