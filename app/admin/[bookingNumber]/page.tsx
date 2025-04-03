@@ -20,8 +20,9 @@ interface BookingDetailsResponse {
   data: {
     booking: Booking
     report: {
-      reportUrl: string
-      display: boolean
+      reportUrl: string,
+      reportData: object,
+      displayReport: boolean
     } | null
   }
 }
@@ -35,6 +36,7 @@ export default function BookingDetailsPage({ params }: { params: Promise<{ booki
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [reportUrl, setReportUrl] = useState("")
+  const [reportData, setReportData] = useState({})
   const [reportStatus, setReportStatus] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -58,12 +60,14 @@ export default function BookingDetailsPage({ params }: { params: Promise<{ booki
 
       if (data.success) {
         setBooking(data.data.booking)
-
         // Handle report data if available
+        console.log(data.data.report)
         if (data.data.report) {
+          setReportData(data.data.report.reportData || {})
           setReportUrl(data.data.report.reportUrl || "")
-          setReportStatus(data.data.report.display || false)
+          setReportStatus(data.data.report.displayReport || false)
         } else {
+          setReportData({})
           setReportUrl("")
           setReportStatus(false)
         }

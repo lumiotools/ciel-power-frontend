@@ -1,70 +1,73 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit2, Check, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { motion } from "framer-motion"
+import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Edit2, Check, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface EditableFieldProps {
-  value: string;
-  onSave: (value: string) => void;
-  type: "text" | "select" | "number";
-  options?: string[];
-  min?: number;
-  max?: number;
+  value: string
+  onSave: (value: string) => void
+  type: "text" | "select" | "number"
+  options?: string[]
+  min?: number
+  max?: number
 }
 
 interface WallData {
-  material: string;
-  condition: string;
-  rValue: number;
-  recommendedValue: number;
-  maxValue: number;
-  efficiency: number;
-  images: string[];
+  material: string
+  condition: string
+  rValue: number
+  recommendedValue: number
+  maxValue: number
+  efficiency: number
+  images: string[]
 }
 
-const EditableField: React.FC<EditableFieldProps> = ({
-  value,
-  onSave,
-  type,
-  options = [],
-  min,
-  max,
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+// New interface for the data coming from reportData
+interface InsulationItemData {
+  condition: string;
+  material: string;
+  name: string;
+  rValue: number;
+}
+
+interface ExteriorWallAssessmentProps {
+  data?: InsulationItemData;
+  isAdmin?: boolean;
+  onUpdate?: (updatedItem: InsulationItemData) => void;
+}
+
+const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, options = [], min, max }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState(value)
+
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
 
   const handleSave = () => {
-    onSave(editValue);
-    setIsEditing(false);
-  };
+    onSave(editValue)
+    setIsEditing(false)
+  }
 
   const handleCancel = () => {
-    setEditValue(value);
-    setIsEditing(false);
-  };
+    setEditValue(value)
+    setIsEditing(false)
+  }
 
   if (!isEditing) {
     return (
       <div className="flex items-center gap-2">
         <span>{value}</span>
-        <button
-          onClick={() => setIsEditing(true)}
-          className="p-1 hover:bg-gray-100 rounded"
-        >
+        <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-gray-100 rounded">
           <Edit2 className="w-4 h-4" />
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -79,16 +82,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button
-            onClick={handleSave}
-            className="p-1 hover:bg-green-100 rounded text-green-600"
-          >
+          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
             <Check className="w-4 h-4" />
           </button>
-          <button
-            onClick={handleCancel}
-            className="p-1 hover:bg-red-100 rounded text-red-600"
-          >
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -97,9 +94,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <Select
             value={editValue}
             onValueChange={(value) => {
-              setEditValue(value);
-              onSave(value);
-              setIsEditing(false);
+              setEditValue(value)
+              onSave(value)
+              setIsEditing(false)
             }}
           >
             <SelectTrigger className="w-32">
@@ -113,10 +110,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
               ))}
             </SelectContent>
           </Select>
-          <button
-            onClick={handleCancel}
-            className="p-1 hover:bg-red-100 rounded text-red-600"
-          >
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -128,97 +122,76 @@ const EditableField: React.FC<EditableFieldProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button
-            onClick={handleSave}
-            className="p-1 hover:bg-green-100 rounded text-green-600"
-          >
+          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
             <Check className="w-4 h-4" />
           </button>
-          <button
-            onClick={handleCancel}
-            className="p-1 hover:bg-red-100 rounded text-red-600"
-          >
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 const ImageUpload: React.FC<{
-  src: string;
-  label: string;
-  onImageChange: (newImage: string) => void;
+  src: string
+  label: string
+  onImageChange: (newImage: string) => void
 }> = ({ src, label, onImageChange }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isEditing, setIsEditing] = useState(false)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0]
     if (file) {
       // Here you would typically upload the file to your server
       // For now, we'll just create a local URL
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
-      setIsEditing(false);
+      const imageUrl = URL.createObjectURL(file)
+      onImageChange(imageUrl)
+      setIsEditing(false)
     }
-  };
+  }
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="relative aspect-square rounded-lg overflow-hidden"
-    >
-      <img src={src} alt={label} className="w-full h-full object-cover" />
+    <motion.div whileHover={{ scale: 1.05 }} className="relative aspect-square rounded-lg overflow-hidden">
+      <img src={src || "/placeholder.svg"} alt={label} className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
       <div className="absolute bottom-2 left-2 text-white text-sm">{label}</div>
       {isEditing && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-4 rounded">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
-            />
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             <button
               onClick={() => fileInputRef.current?.click()}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
               Choose New Image
             </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
-            >
+            <button onClick={() => setIsEditing(false)} className="ml-2 px-4 py-2 rounded border hover:bg-gray-100">
               Cancel
             </button>
           </div>
         </div>
       )}
-      <button
-        onClick={() => setIsEditing(true)}
-        className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg"
-      >
+      <button onClick={() => setIsEditing(true)} className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg">
         <Edit2 className="w-4 h-4" />
       </button>
     </motion.div>
-  );
-};
-
-interface FieldItem {
-  label: string;
-  value: string;
-  field: keyof WallData;
-  type: "text" | "select" | "number";
-  options?: string[];
+  )
 }
 
-export function ExteriorWallAssessment() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [wallData, setWallData] = useState<WallData>({
+interface FieldItem {
+  label: string
+  value: string
+  field: keyof WallData
+  type: "text" | "select" | "number"
+  options?: string[]
+}
+
+export function ExteriorWallAssessment({ data, isAdmin = false, onUpdate }: ExteriorWallAssessmentProps) {  
+  // Default data to use if no report data is provided
+  const defaultWallData: WallData = {
     material: "None",
     condition: "N/A",
     rValue: 0,
@@ -229,35 +202,75 @@ export function ExteriorWallAssessment() {
       "https://i.postimg.cc/tJYRBb1L/Screenshot-2024-11-25-033358.png",
       "https://i.postimg.cc/T2D35d6D/Screenshot-2024-11-25-033443.png",
     ],
-  });
+  }
+  
+  // Process the provided data into the format expected by our component
+  const processWallData = (): WallData => {
+    if (!data) return defaultWallData;
+    
+    // Create wall data from report data
+    return {
+      material: data.material || "None",
+      condition: data.condition || "N/A",
+      rValue: data.rValue || 0,
+      recommendedValue: 13, // Standard recommendation
+      maxValue: 20,         // Standard max value for scale
+      efficiency: data.rValue ? Math.round((data.rValue / 13) * 100) : 0,
+      images: [
+        "https://i.postimg.cc/tJYRBb1L/Screenshot-2024-11-25-033358.png",
+        "https://i.postimg.cc/T2D35d6D/Screenshot-2024-11-25-033443.png",
+      ],
+    };
+  };
+  
+  const [wallData, setWallData] = useState<WallData>(processWallData())
 
   useEffect(() => {
-    // Check if 'admin' exists in the URL
-    const isAdminUrl = window.location.href.includes("admin");
-    setIsAdmin(isAdminUrl);
-  }, []);
+    // Update wall data if report data changes
+    setWallData(processWallData());
+  }, [data]);
 
-  const updateWallData = (
-    field: keyof WallData,
-    value: string | number | string[]
-  ) => {
-    setWallData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const updateWallData = (field: keyof WallData, value: string | number | string[]) => {
+    setWallData((prev) => {
+      const newData = { ...prev, [field]: value };
+      
+      if (field === "rValue") {
+        const numericValue = typeof value === "number" ? value : Number.parseInt(value.toString().replace("R", ""));
+        if (!isNaN(numericValue)) {
+          newData.rValue = numericValue;
+          newData.efficiency = Math.round((numericValue / prev.recommendedValue) * 100);
+          
+          // Notify parent component if provided
+          if (onUpdate && data) {
+            onUpdate({
+              ...data,
+              rValue: numericValue
+            });
+          }
+        }
+      } else if ((field === "material" || field === "condition") && onUpdate && data) {
+        // For material and condition updates, notify parent
+        onUpdate({
+          ...data,
+          [field]: value as string
+        });
+      }
+      
+      return newData;
+    });
+  }
 
   const updateImage = (index: number, newImage: string) => {
-    const newImages = [...wallData.images];
-    newImages[index] = newImage;
-    updateWallData("images", newImages);
-  };
+    const newImages = [...wallData.images]
+    newImages[index] = newImage
+    updateWallData("images", newImages)
+  }
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
-        <CardHeader className="bg-green-50 dark:bg-green-900/50">
-          <CardTitle className="text-2xl text-lime-500 dark:text-green-200">
+        <CardHeader className="bg-teal-50 dark:bg-teal-900/20">
+          <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">
             Your Home&apos;s Exterior Wall Insulation
           </CardTitle>
         </CardHeader>
@@ -296,24 +309,16 @@ export function ExteriorWallAssessment() {
                 ).map((item, index) => (
                   <Card key={index}>
                     <CardContent className="p-4">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {item.label}
-                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{item.label}</div>
                       <div className="font-medium mt-1 text-gray-900 dark:text-gray-100">
                         {isAdmin ? (
                           <EditableField
                             value={item.value}
                             onSave={(value) => {
-                              if (
-                                item.field === "rValue" ||
-                                item.field === "recommendedValue"
-                              ) {
-                                updateWallData(
-                                  item.field,
-                                  parseInt(value.replace("R", ""))
-                                );
+                              if (item.field === "rValue" || item.field === "recommendedValue") {
+                                updateWallData(item.field, Number.parseInt(value.replace("R", "")))
                               } else {
-                                updateWallData(item.field, value);
+                                updateWallData(item.field, value)
                               }
                             }}
                             type={item.type}
@@ -331,22 +336,17 @@ export function ExteriorWallAssessment() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Current Efficiency
-                    </span>
+                    <span className="text-gray-600 dark:text-gray-400">Current Efficiency</span>
                     <span className="text-gray-900 dark:text-gray-100">
                       {isAdmin ? (
                         <EditableField
-                          value={`${Math.round(
-                            (wallData.rValue / wallData.recommendedValue) * 100
-                          )}`}
+                          value={`${Math.round((wallData.rValue / wallData.recommendedValue) * 100)}`}
                           onSave={(value) => {
-                            const efficiency = parseInt(value);
+                            const efficiency = Number.parseInt(value)
                             if (!isNaN(efficiency)) {
-                              const newRValue =
-                                (efficiency * wallData.recommendedValue) / 100;
-                              updateWallData("rValue", newRValue);
-                              updateWallData("efficiency", efficiency);
+                              const newRValue = (efficiency * wallData.recommendedValue) / 100
+                              updateWallData("rValue", newRValue)
+                              updateWallData("efficiency", efficiency)
                             }
                           }}
                           type="number"
@@ -354,27 +354,23 @@ export function ExteriorWallAssessment() {
                           max={100}
                         />
                       ) : (
-                        `${Math.round(
-                          (wallData.rValue / wallData.recommendedValue) * 100
-                        )}%`
+                        `${Math.round((wallData.rValue / wallData.recommendedValue) * 100)}%`
                       )}
                     </span>
                   </div>
                   <Progress
                     value={(wallData.rValue / wallData.maxValue) * 100}
-                    className="h-2 bg-green-200 dark:bg-green-700"
+                    className="h-2 bg-teal-100 dark:bg-teal-700"
                   />
                 </CardContent>
               </Card>
 
-              <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
+              <Card className="bg-teal-50 dark:bg-teal-900/30 border-teal-200 dark:border-teal-700">
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-lime-500 dark:text-green-200">
-                    BPI Recommendation
-                  </h3>
+                  <h3 className="font-semibold mb-2 text-teal-600 dark:text-teal-300">BPI Recommendation</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    BPI recommends Exterior Walls be insulated to R
-                    {wallData.recommendedValue} for optimal energy efficiency.
+                    BPI recommends Exterior Walls be insulated to R{wallData.recommendedValue} for optimal energy
+                    efficiency.
                   </p>
                 </CardContent>
               </Card>
@@ -386,7 +382,7 @@ export function ExteriorWallAssessment() {
                   isAdmin ? (
                     <ImageUpload
                       key={index}
-                      src={src}
+                      src={src || "/placeholder.svg"}
                       label={index === 0 ? "Thermal Image" : "Regular Image"}
                       onImageChange={(newImage) => updateImage(index, newImage)}
                     />
@@ -397,7 +393,7 @@ export function ExteriorWallAssessment() {
                       className="relative aspect-square rounded-lg overflow-hidden"
                     >
                       <img
-                        src={src}
+                        src={src || "/placeholder.svg"}
                         alt={`Image ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -406,20 +402,32 @@ export function ExteriorWallAssessment() {
                         {index === 0 ? "Thermal Image" : "Regular Image"}
                       </div>
                     </motion.div>
-                  )
+                  ),
                 )}
               </div>
 
               <Card>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
-                    Analysis
-                  </h3>
+                  <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Analysis</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Thermal imaging reveals significant heat loss through the
-                    exterior walls, indicating insufficient insulation. The
-                    current R-value of R{wallData.rValue} is well below the
-                    recommended R{wallData.recommendedValue} standard.
+                    {wallData.rValue < 10 ? (
+                      <>
+                        Thermal imaging reveals significant heat loss through the exterior walls, indicating insufficient
+                        insulation. The current R-value of R{wallData.rValue} is well below the recommended R
+                        {wallData.recommendedValue} standard.
+                      </>
+                    ) : wallData.rValue < wallData.recommendedValue ? (
+                      <>
+                        The walls have some insulation with an R-value of R{wallData.rValue}, but it falls short of the
+                        recommended R{wallData.recommendedValue} standard. Upgrading would improve energy efficiency.
+                      </>
+                    ) : (
+                      <>
+                        Your exterior walls are well insulated with an R-value of R{wallData.rValue}, meeting or exceeding
+                        the recommended R{wallData.recommendedValue} standard. This contributes to a well-insulated and
+                        energy-efficient home.
+                      </>
+                    )}
                   </p>
                 </CardContent>
               </Card>
@@ -428,5 +436,5 @@ export function ExteriorWallAssessment() {
         </CardContent>
       </Card>
     </motion.div>
-  );
+  )
 }
