@@ -5,6 +5,7 @@ import { CoolingContent } from "@/components/report/CoolingContent";
 import { HeatingContent } from "@/components/report/HeatingContent";
 import { InsulationContent } from "@/components/report/InsulationContent";
 import { ReportSummary } from "@/components/report/ReportSummary";
+import { FutureUpgradesAndCertificates } from "@/components/report/FutureUpgradesAndCertificates";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { motion } from "framer-motion";
 import React, { useRef, useState, useEffect, use } from "react";
@@ -121,7 +122,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
         fetchReportDetails();
       }
     } else if (bookingNumber) {
-      // Customer users always fetch fresh data
+    // Customer users always fetch fresh data
       fetchReportDetails();
     }
   }, [bookingNumber, isAdmin]);
@@ -140,6 +141,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
       const data = await response.json();
 
       if (data.success) {
+        console.log("Fetched report data:", data.data);
         const fetchedReportData = data.data.reportData || {};
 
         // Save to state
@@ -520,6 +522,8 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
             onUpdateRecommendations={updateRecommendations}
           />
         );
+      case "future solutions and certifications":
+        return <FutureUpgradesAndCertificates />;
       default:
         return (
           <AirLeakageContent
@@ -636,7 +640,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
       <div className="bg-white rounded-b-lg shadow-md">
         <div className="flex border-b border-gray-200">
-          {["air-leakage", "insulation", "heating", "cooling", "summary"].map((tab) => (
+          {["air-leakage", "insulation", "heating", "cooling", "summary", "future solutions and certifications"].map((tab) => (
             <button
               key={tab}
               className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
@@ -645,13 +649,16 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
                 }`}
               onClick={() => setActiveSubMenu(tab)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
+              {["air-leakage", "insulation", "heating", "cooling"].includes(tab)
+                ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
+                : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
 
         <div className="p-6">{renderContent()}</div>
       </div>
+
     </div>
   );
 };

@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, use } from "react";
 import { AlertTriangle, Fan, Leaf, Home, ArrowUp, Thermometer, DollarSign, Shield, Activity, Pencil, Check, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { Save } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { set } from "date-fns";
+import { toast } from "sonner";
 
 // Define interfaces for data types
 interface ConcernItem {
@@ -17,10 +21,9 @@ interface ConcernItem {
 interface Recommendation {
   title: string;
   location: string;
-  insulation_details: string;
-  specific_steps: string;
+  insulation_details?: string;
+  specific_steps?: string;
   benefit: string;
-  progress?: number;
   [key: string]: any;
 }
 
@@ -43,7 +46,7 @@ interface ReportSummaryProps {
 }
 
 interface InPlaceEditProps {
-  initialValue: string;
+  initialValue?: string;
   isAdmin: boolean;
   onUpdate: (value: string) => void;
   multiline?: boolean;
@@ -58,11 +61,10 @@ interface InPlaceEditNumberProps {
   max?: number;
 }
 
-// In-place editing component for text
-const InPlaceEdit: React.FC<InPlaceEditProps> = ({ 
-  initialValue, 
-  isAdmin, 
-  onUpdate, 
+const InPlaceEdit: React.FC<InPlaceEditProps> = ({
+  initialValue,
+  isAdmin,
+  onUpdate,
   multiline = false,
   placeholder = "Enter text"
 }) => {
@@ -86,50 +88,66 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     }
   };
 
-  const handleBlur = () => {
+  const handleSave = () => {
     setIsEditing(false);
     if (value !== initialValue) {
       onUpdate(value);
     }
   };
 
+  const handleCancel = () => {
+    setValue(initialValue || "");
+    setIsEditing(false);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!multiline && e.key === "Enter") {
-      setIsEditing(false);
-      if (value !== initialValue) {
-        onUpdate(value);
-      }
+      handleSave();
     }
   };
 
   if (isEditing) {
-    return multiline ? (
-      <textarea
-        ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
-        rows={4}
-      />
-    ) : (
-      <input
-        ref={inputRef as React.RefObject<HTMLInputElement>}
-        type="text"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
-      />
+    return (
+      <div className="flex items-center gap-2">
+        {multiline ? (
+          <textarea
+            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={placeholder}
+            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+            rows={4}
+          />
+        ) : (
+          <input
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+          />
+        )}
+        <button
+          onClick={handleSave}
+          className="p-1 hover:bg-green-100 rounded text-green-600 transition-colors"
+        >
+          <Check className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleCancel}
+          className="p-1 hover:bg-red-100 rounded text-red-600 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
     );
   }
 
   return (
-    <div 
-      className={`${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''} ${!value ? 'text-gray-400 italic' : ''}`} 
+    <div
+      className={`${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''} ${!value ? 'text-gray-400 italic' : ''}`}
       onClick={handleClick}
     >
       {value || (!isAdmin ? "No content" : placeholder)}
@@ -141,9 +159,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 };
 
 // In-place editing component for numbers
-const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({ 
-  initialValue, 
-  isAdmin, 
+const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
+  initialValue,
+  isAdmin,
   onUpdate,
   min = 0,
   max = 100
@@ -201,8 +219,8 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   }
 
   return (
-    <div 
-      className={`font-medium ${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''}`} 
+    <div
+      className={`font-medium ${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''}`}
       onClick={handleClick}
     >
       {value}%
@@ -217,44 +235,43 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  
+
   // Process concerns data
   useEffect(() => {
     if (!data?.summaryOfConcerns?.data) return;
-    
+
     try {
       const healthSafety = data.summaryOfConcerns.data.find(
         section => section.name === "Basic Health and Safety"
       )?.data || [];
-      
+
       const combustion = data.summaryOfConcerns.data.find(
         section => section.name === "Combustion Testing"
       )?.data || [];
-      
+
       // Filter for flagged items with concerns
-      const flaggedHealthSafety = healthSafety.filter(item => 
+      const flaggedHealthSafety = healthSafety.filter(item =>
         item && item.flag && item.concern
       );
-      
-      const flaggedCombustion = combustion.filter(item => 
+
+      const flaggedCombustion = combustion.filter(item =>
         item && item.flag && item.concern && item.concern !== "Testing required"
       );
-      
+
       setConcerns([...flaggedHealthSafety, ...flaggedCombustion]);
     } catch (error) {
       console.error("Error processing concerns data:", error);
       setConcerns([]);
     }
   }, [data?.summaryOfConcerns]);
-  
+
   // Process recommendations data
   useEffect(() => {
     if (!data?.solutionsAndRecommendations?.recommendations) return;
-    
+
     try {
       const recs = data.solutionsAndRecommendations.recommendations.map(rec => ({
-        ...rec,
-        progress: rec.progress || 50 // Default progress if not specified
+        ...rec
       }));
       setRecommendations(recs);
     } catch (error) {
@@ -262,11 +279,11 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       setRecommendations([]);
     }
   }, [data?.solutionsAndRecommendations]);
-  
+
   // Concern functions
   const getIconForConcern = (name?: string) => {
     if (!name) return AlertTriangle;
-    
+
     const nameLower = name.toLowerCase();
     if (nameLower.includes('vent') || nameLower.includes('fan') || nameLower.includes('dryer')) {
       return Fan;
@@ -278,7 +295,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       return AlertTriangle;
     }
   };
-  
+
   const updateConcern = (index: number, field: keyof ConcernItem, value: string | boolean) => {
     setConcerns(prev => {
       const newConcerns = [...prev];
@@ -288,95 +305,95 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
           [field]: value
         };
       }
-      
+
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item => 
-          !item.name.toLowerCase().includes('combustion') && 
+        const healthSafety = newConcerns.filter(item =>
+          !item.name.toLowerCase().includes('combustion') &&
           !item.name.toLowerCase().includes('gas')
         );
-        
-        const combustion = newConcerns.filter(item => 
-          item.name.toLowerCase().includes('combustion') || 
+
+        const combustion = newConcerns.filter(item =>
+          item.name.toLowerCase().includes('combustion') ||
           item.name.toLowerCase().includes('gas')
         );
-        
+
         onUpdateConcerns({
           healthSafety,
           combustion
         });
       }
-      
+
       return newConcerns;
     });
   };
-  
+
   const addConcern = () => {
     setConcerns(prev => {
       const newConcerns = [
-        ...prev,
         {
           name: "New Concern",
           concern: "Description of the new concern",
           flag: true
-        }
+        },
+        ...prev
       ];
-      
+
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item => 
-          !item.name.toLowerCase().includes('combustion') && 
+        const healthSafety = newConcerns.filter(item =>
+          !item.name.toLowerCase().includes('combustion') &&
           !item.name.toLowerCase().includes('gas')
         );
-        
-        const combustion = newConcerns.filter(item => 
-          item.name.toLowerCase().includes('combustion') || 
+
+        const combustion = newConcerns.filter(item =>
+          item.name.toLowerCase().includes('combustion') ||
           item.name.toLowerCase().includes('gas')
         );
-        
+
         onUpdateConcerns({
           healthSafety,
           combustion
         });
       }
-      
+
       return newConcerns;
     });
   };
-  
+
   const deleteConcern = (index: number) => {
     setConcerns(prev => {
       const newConcerns = prev.filter((_, i) => i !== index);
-      
+
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item => 
-          !item.name.toLowerCase().includes('combustion') && 
+        const healthSafety = newConcerns.filter(item =>
+          !item.name.toLowerCase().includes('combustion') &&
           !item.name.toLowerCase().includes('gas')
         );
-        
-        const combustion = newConcerns.filter(item => 
-          item.name.toLowerCase().includes('combustion') || 
+
+        const combustion = newConcerns.filter(item =>
+          item.name.toLowerCase().includes('combustion') ||
           item.name.toLowerCase().includes('gas')
         );
-        
+
         onUpdateConcerns({
           healthSafety,
           combustion
         });
       }
-      
+
       return newConcerns;
     });
   };
-  
+
   // Recommendation functions
   const getIconForRecommendation = (title?: string) => {
     if (!title) return Home;
-    
+
     const titleLower = title.toLowerCase();
     if (titleLower.includes('air') || titleLower.includes('seal')) {
       return Fan;
@@ -392,7 +409,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       return Leaf;
     }
   };
-  
+
   const updateRecommendation = (index: number, field: keyof Recommendation, value: string | number) => {
     setRecommendations(prev => {
       const newRecommendations = [...prev];
@@ -402,54 +419,126 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
           [field]: value
         };
       }
-      
+
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
-      
+
       return newRecommendations;
     });
   };
-  
+
   const addRecommendation = () => {
     setRecommendations(prev => {
       const newRecommendations = [
         ...prev,
         {
           title: "New Recommendation",
-          location: "Location description",
-          insulation_details: "Insulation details",
-          specific_steps: "Implementation steps",
-          benefit: "Benefits description",
-          progress: 0
+          location: "",
+          insulation_details: "",
+          specific_steps: "",
+          benefit: "",
         }
       ];
-      
+
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
-      
-      return newRecommendations;
-    });
-  };
-  
-  const deleteRecommendation = (index: number) => {
-    setRecommendations(prev => {
-      const newRecommendations = prev.filter((_, i) => i !== index);
-      
-      // If onUpdateRecommendations callback is provided, call it with the updated data
-      if (onUpdateRecommendations) {
-        onUpdateRecommendations(newRecommendations);
-      }
-      
+
       return newRecommendations;
     });
   };
 
+  const deleteRecommendation = (index: number) => {
+    setRecommendations(prev => {
+      const newRecommendations = prev.filter((_, i) => i !== index);
+
+      // If onUpdateRecommendations callback is provided, call it with the updated data
+      if (onUpdateRecommendations) {
+        onUpdateRecommendations(newRecommendations);
+      }
+
+      return newRecommendations;
+    });
+  };
+
+  // const router = useRouter();
+  const pathname = usePathname();
+  const match = pathname.match(/\/admin\/(\d+)\/report/);
+  const bookingNumber = match?.[1];
+
+  // const { bookingNumber } = router.query;
+
+  const onSubmit = async () => {
+    const REPORT_DATA_KEY = "report_data";
+    let updatedReportData;
+    
+    try {
+      const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+      // console.log("Data from localStorage:", data);
+
+      if (!data) {
+        console.error("No data found in localStorage for the given booking number.");
+        toast.error("No data found in localStorage for the given booking number.");
+        return;
+      }
+
+      updatedReportData = JSON.parse(data);
+      updatedReportData = {
+        reportData: updatedReportData,
+        displayReport: true,
+        reportUrl: ""
+      };
+
+      console.log("Saved summary data to local storage", updatedReportData)
+    } catch (e) {
+      console.error("Error parsing data from localStorage:", e);
+      toast.error("Error parsing data from localStorage.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedReportData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to save report data.");
+        return;
+      }
+
+      const data = await response.json();
+      toast.success("Report data saved successfully.");
+      console.log("Report data saved successfully:", data);
+    } catch (e) {
+      console.error("Error saving report data:", e);
+      toast.error("Failed to save report data.");
+    }
+  }
+
+
   return (
     <div className="space-y-8">
+      {isAdmin && (
+        <div className="top-4 flex justify-end">
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition-colors"
+            onClick={() => onSubmit()}
+          >
+            <Save size={18} />
+            Save Changes
+          </button>
+        </div>
+      )}
       {/* Summary of Concerns Section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <Card className="border-orange-100">
@@ -459,9 +548,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                 <AlertTriangle className="h-6 w-6" />
                 Summary of Concerns
               </CardTitle>
-              
+
               {isAdmin && (
-                <button 
+                <button
                   onClick={addConcern}
                   className="px-3 py-1 bg-orange-100 text-orange-600 rounded hover:bg-orange-200 text-sm font-medium transition-colors"
                   type="button"
@@ -516,7 +605,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                               />
                               Flagged for attention
                             </label>
-                            <button 
+                            <button
                               onClick={() => deleteConcern(index)}
                               className="text-red-500 hover:text-red-700 px-2 py-1 text-xs rounded hover:bg-red-50 flex items-center gap-1 transition-colors"
                               type="button"
@@ -548,7 +637,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                       No significant health, safety, or combustion issues were found during the assessment.
                     </p>
                     {isAdmin && (
-                      <button 
+                      <button
                         onClick={addConcern}
                         className="mt-4 px-4 py-2 bg-orange-100 text-orange-600 rounded hover:bg-orange-200 text-sm font-medium transition-colors"
                         type="button"
@@ -577,9 +666,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                 <Leaf className="h-6 w-6" />
                 Solutions & Recommended Upgrades
               </CardTitle>
-              
+
               {isAdmin && (
-                <button 
+                <button
                   onClick={addRecommendation}
                   className="px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 text-sm font-medium transition-colors"
                   type="button"
@@ -593,8 +682,8 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
             {recommendations.length > 0 ? (
               recommendations.map((recommendation, index) => {
                 const RecommendationIcon = getIconForRecommendation(recommendation.title);
-                const progress = recommendation.progress !== undefined ? recommendation.progress : 50;
-                
+                const progress = recommendation.progress !== undefined ? recommendation.progress : 0;
+
                 return (
                   <motion.div
                     key={`recommendation-${index}`}
@@ -618,7 +707,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             />
                           </h3>
                           {isAdmin && (
-                            <button 
+                            <button
                               onClick={() => deleteRecommendation(index)}
                               className="text-red-500 hover:text-red-700 px-2 py-1 text-xs rounded hover:bg-red-50 flex items-center gap-1 transition-colors"
                               type="button"
@@ -628,7 +717,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             </button>
                           )}
                         </div>
-                        
+
                         <div className="space-y-3 my-3">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Location:</p>
@@ -646,7 +735,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                               isAdmin={isAdmin}
                               onUpdate={(value) => updateRecommendation(index, "insulation_details", value)}
                               multiline={true}
-                              placeholder="Enter details"
+                              placeholder="Enter insulation details if applicable"
                             />
                           </div>
                           <div>
@@ -656,7 +745,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                               isAdmin={isAdmin}
                               onUpdate={(value) => updateRecommendation(index, "specific_steps", value)}
                               multiline={true}
-                              placeholder="Enter implementation steps"
+                              placeholder="Enter implementation steps if applicable"
                             />
                           </div>
                           <div>
@@ -669,8 +758,8 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             />
                           </div>
                         </div>
-                        
-                        <div className="flex items-center justify-between mt-4">
+
+                        {/* <div className="flex items-center justify-between mt-4">
                           <span className="text-sm text-gray-600">Implementation Progress</span>
                           {isAdmin ? (
                             <InPlaceEditNumber
@@ -689,7 +778,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out" 
                             style={{ width: `${progress}%` }}
                           ></div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </motion.div>
@@ -712,7 +801,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                       No recommendations or solutions have been added yet.
                     </p>
                     {isAdmin && (
-                      <button 
+                      <button
                         onClick={addRecommendation}
                         className="mt-4 px-4 py-2 bg-green-100 text-green-600 rounded hover:bg-green-200 text-sm font-medium transition-colors"
                         type="button"
@@ -794,7 +883,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                 </div>
                 <span className="font-medium text-green-600">$5,000.00</span>
               </div>
-              </motion.div>
+            </motion.div>
 
             {/* Remaining Balance */}
             <motion.div
