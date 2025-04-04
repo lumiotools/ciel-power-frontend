@@ -37,7 +37,7 @@ export function Benefits() {
                   </div>
                   <h3 className="text-xl font-semibold text-teal-600 dark:text-teal-300">Improved Durability</h3>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 flex-grow">
+                <div className="text-gray-600 dark:text-gray-300 flex-grow">
                   When insulation is properly installed, the potential for condensation that can lead to the decay of
                   building materials is reduced, helping to improve the durability of your home.
                   <div className="mt-4">
@@ -47,7 +47,7 @@ export function Benefits() {
                     </div>
                     <Progress value={35} className="h-2 bg-teal-100 dark:bg-teal-700" />
                   </div>
-                </p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -61,7 +61,7 @@ export function Benefits() {
                   </div>
                   <h3 className="text-xl font-semibold text-teal-600 dark:text-teal-300">Lower Utility Bills</h3>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300">
+                <div className="text-gray-600 dark:text-gray-300">
                   As much as half of the energy used in your home goes to heating and cooling. By preventing heat loss
                   in the winter and heat gain in the summer.
                   <div className="mt-4">
@@ -71,7 +71,7 @@ export function Benefits() {
                     </div>
                     <Progress value={50} className="h-2 bg-teal-100 dark:bg-teal-700" />
                   </div>
-                </p>
+                </div>
               </CardContent>
             </Card>
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit2, Check, X } from 'lucide-react';
+import { Edit2, Check, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image";
+// import { Close } from "@radix-ui/react-dialog";
+import { IoMdClose } from "react-icons/io";
 
 interface GaugeChartProps {
   value: number;
@@ -36,12 +39,14 @@ interface InsulationItemData {
   material: string;
   name: string;
   rValue: number;
+  image: string;
 }
 
 interface KneewallAssessmentProps {
   data?: InsulationItemData;
   isAdmin?: boolean;
   onUpdate?: (updatedItem: InsulationItemData) => void;
+  driveImages?: string[];
 }
 
 const GaugeChart: React.FC<GaugeChartProps> = ({
@@ -199,12 +204,15 @@ const EditableField = ({
 const ImageUpload = ({
   image,
   onImageChange,
+  driveImages,
 }: {
   image: string;
   onImageChange: (newImage: string) => void;
+  driveImages?: string[];
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  // const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -213,18 +221,34 @@ const ImageUpload = ({
       // For now, we'll just create a local URL
       const imageUrl = URL.createObjectURL(file);
       onImageChange(imageUrl);
-      setIsEditing(false);
+      setIsModalOpen(false);
+    }
+  };
+
+  const [imageSelected, setImageSelected] = useState<string>([]);
+  const handleImageSelect = (image: string) => {
+    console.log("Selected image:", image);
+    setImageSelected(image);
+  };
+
+  
+  const handleSave = () => {
+    if (imageSelected) {
+      onImageChange(imageSelected);
+      setIsModalOpen(false); // Close the modal after saving
     }
   };
 
   return (
     <div className="relative">
-      <img
-        src={image || "/placeholder.svg"}
+      <Image
+        src={imageSelected?.thumbnailLink ?? image ?? "/placeholder.svg"}
         alt="Insulation inspection"
         className="w-full h-64 object-cover rounded-lg mt-4"
+        width={400}
+        height={256}
       />
-      {isEditing && (
+      {/* {isEditing && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg mt-4">
           <div className="bg-white p-4 rounded">
             <input
@@ -235,7 +259,8 @@ const ImageUpload = ({
               className="hidden"
             />
             <button
-              onClick={() => fileInputRef.current?.click()}
+              // onClick={() => fileInputRef.current?.click()}
+              onClick={() => setIsModalOpen(true)}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
               Choose New Image
@@ -248,18 +273,99 @@ const ImageUpload = ({
             </button>
           </div>
         </div>
-      )}
+      )} */}
       <button
-        onClick={() => setIsEditing(true)}
+        onClick={() => setIsModalOpen(true)}
         className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
       >
         <Edit2 className="w-4 h-4" />
       </button>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
+          <div className=" max-h-[80vh] max-w-[70vw] overflow-y-auto bg-white">
+            <div>
+              {driveImages && (
+                <div className="grid grid-cols-3 gap-4 mb-4 p-3 rounded-lg">
+                  {driveImages.map((img, index) => (
+                    console.log("Drive Image is working:", imageSelected?.id === img?.id),
+                    <div
+                      key={index}
+                      className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
+                    >
+                      <Image
+                        src={img?.thumbnailLink}
+                        alt={`Drive Image ${index + 1}`}
+                        width={60}
+                        height={60}
+                        className={`w-full h-full object-cover ${imageSelected?.id === img?.id ? "ring-2 ring-blue-500 border-2 border-red-400" : ""}`}
+                        onClick={() => handleImageSelect(img)}
+                      />
+                      {/* <button
+                        onClick={() => onImageChange(img)}
+                        className="absolute bottom-2 right-2 bg-blue-500 text-white px-2 py-1 rounded"
+                      >
+                        Select
+                      </button> */}
+                    </div>
+                  ))}
+                  </div>
+              )}
+            </div>
+            <div className="bg-white p-4 rounded">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                // onClick={() => setIsModalOpen(true)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Choose New Image
+              </button>
+              {/* <button
+                onClick={() => setIsModalOpen(false)}
+                className="ml-2 px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
+              >
+                Cancel
+              </button> */}
+            </div>
+            <div className="flex justify-end gap-2 mb-4">
+              <button
+                onClick={handleSave}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+          {/* <Close
+            onClick={() => setIsModalOpen(false)}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            size={24}
+          /> */}
+          <IoMdClose size={24} className=" absolute top-3 right-3" onClick={()=>setIsModalOpen(false)}/>
+        </div>
+      )}
     </div>
   );
 };
 
-export function KneewallAssessment({ data, isAdmin = false, onUpdate }: KneewallAssessmentProps) {
+export function KneewallAssessment({
+  data,
+  isAdmin = false,
+  onUpdate,
+  driveImages,
+}: KneewallAssessmentProps) {
   // Default data to use if no report data is provided
   const defaultKneewallData: KneewallData[] = [
     {
@@ -283,29 +389,31 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
       image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png",
     },
   ];
-  
+
   // Process the provided data into the format expected by our component
   const processedKneewallData = (): KneewallData[] => {
     if (!data) return defaultKneewallData;
-    
+
     // Create single kneewall data item from report data
     const kneewallItem: KneewallData = {
       title: data.name || "Your Kneewall Insulation",
       material: data.material || "Not specified",
       condition: data.condition || "Not assessed",
       rValue: `R${data.rValue}`,
-      recommendation: data.name?.toLowerCase().includes('flat') ? "R60" : "R13", // Default recommendations based on type
+      recommendation: data.name?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
       currentValue: data.rValue,
-      maxValue: data.name?.toLowerCase().includes('flat') ? 60 : 13,
+      maxValue: data.name?.toLowerCase().includes("flat") ? 60 : 13,
       image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png", // Default image
     };
-    
+
     // If we have data for a single kneewall, return it as a single item array
     // Otherwise, return the default data
     return [kneewallItem];
   };
 
-  const [kneewallData, setKneewallData] = useState<KneewallData[]>(processedKneewallData());
+  const [kneewallData, setKneewallData] = useState<KneewallData[]>(
+    processedKneewallData()
+  );
   const [animateCharts, setAnimateCharts] = useState<boolean[]>([]);
 
   // Update data when the report data changes
@@ -317,17 +425,17 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
   useEffect(() => {
     // Use Intersection Observer with element IDs instead of refs
     const observers: IntersectionObserver[] = [];
-    
+
     kneewallData.forEach((_, index) => {
       const chartId = `kneewall-chart-${index}`;
       const chartElement = document.getElementById(chartId);
-      
+
       if (chartElement) {
         const observer = new IntersectionObserver(
           (entries) => {
-            entries.forEach(entry => {
+            entries.forEach((entry) => {
               if (entry.isIntersecting) {
-                setAnimateCharts(prev => {
+                setAnimateCharts((prev) => {
                   const newState = [...prev];
                   newState[index] = true;
                   return newState;
@@ -338,14 +446,14 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
           },
           { threshold: 0.5 }
         );
-        
+
         observer.observe(chartElement);
         observers.push(observer);
       }
     });
-    
+
     return () => {
-      observers.forEach(observer => observer.disconnect());
+      observers.forEach((observer) => observer.disconnect());
     };
   }, [kneewallData]);
 
@@ -363,12 +471,12 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
-          
+
           // Send update to parent if available
           if (onUpdate && data) {
             const updatedItem: InsulationItemData = {
               ...data,
-              rValue: numericValue
+              rValue: numericValue,
             };
             onUpdate(updatedItem);
           }
@@ -377,14 +485,21 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
         // Send update to parent if available
         const updatedItem: InsulationItemData = {
           ...data,
-          material: value
+          material: value,
         };
         onUpdate(updatedItem);
       } else if (field === "condition" && onUpdate && data) {
         // Send update to parent if available
         const updatedItem: InsulationItemData = {
           ...data,
-          condition: value
+          condition: value,
+        };
+        onUpdate(updatedItem);
+      } else if (field === "image" && onUpdate && data) {
+        // Send update to parent if available
+        const updatedItem: InsulationItemData = {
+          ...data,
+          image: value,
         };
         onUpdate(updatedItem);
       }
@@ -418,15 +533,18 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
                     {isAdmin ? (
                       <ImageUpload
                         image={data.image}
+                        driveImages={driveImages}
                         onImageChange={(newImage) =>
                           updateKneewallData(index, "image", newImage)
                         }
                       />
                     ) : (
-                      <img
+                      <Image
                         src={data.image || "/placeholder.svg"}
                         alt="Insulation inspection"
                         className="w-full h-64 object-cover rounded-lg mt-4"
+                        width={400}
+                        height={256}
                       />
                     )}
                   </div>
@@ -500,7 +618,7 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate }: Kneewall
                 </div>
                 <div className="space-y-6">
                   <div
-                    id={`kneewall-chart-${index}`} 
+                    id={`kneewall-chart-${index}`}
                     className="relative bg-[#f0fdfa] dark:bg-teal-900/20 rounded-lg p-6"
                   >
                     <div
