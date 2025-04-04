@@ -5,6 +5,7 @@ import { CoolingContent } from "@/components/report/CoolingContent";
 import { HeatingContent } from "@/components/report/HeatingContent";
 import { InsulationContent } from "@/components/report/InsulationContent";
 import { ReportSummary } from "@/components/report/ReportSummary";
+import { FutureUpgradesAndCertificates } from "@/components/report/FutureUpgradesAndCertificates";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { motion } from "framer-motion";
 import React, { useRef, useState, useEffect, use, useCallback } from "react";
@@ -157,7 +158,7 @@ const ReportPage = ({
         fetchReportDetails();
       }
     } else if (bookingNumber) {
-      // Customer users always fetch fresh data
+    // Customer users always fetch fresh data
       fetchReportDetails();
     }
   }, [bookingNumber, isAdmin]);
@@ -178,6 +179,7 @@ const ReportPage = ({
       const data = await response.json();
 
       if (data.success) {
+        console.log("Fetched report data:", data.data);
         const fetchedReportData = data.data.reportData || {};
 
         // Save to state
@@ -587,6 +589,8 @@ const ReportPage = ({
             onUpdateRecommendations={updateRecommendations}
           />
         );
+      case "future solutions and certifications":
+        return <FutureUpgradesAndCertificates />;
       default:
         return (
           <AirLeakageContent
@@ -703,25 +707,25 @@ const ReportPage = ({
 
       <div className="bg-white rounded-b-lg shadow-md">
         <div className="flex border-b border-gray-200">
-          {["air-leakage", "insulation", "heating", "cooling", "summary"].map(
-            (tab) => (
-              <button
-                key={tab}
-                className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                  activeSubMenu === tab
-                    ? "border-b-2 border-lime-500 text-lime-500"
-                    : "text-gray-600 hover:text-lime-500"
+          {["air-leakage", "insulation", "heating", "cooling", "summary", "future solutions and certifications"].map((tab) => (
+            <button
+              key={tab}
+              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
+                ? "border-b-2 border-lime-500 text-lime-500"
+                : "text-gray-600 hover:text-lime-500"
                 }`}
-                onClick={() => setActiveSubMenu(tab)}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
-              </button>
-            )
-          )}
+              onClick={() => setActiveSubMenu(tab)}
+            >
+              {["air-leakage", "insulation", "heating", "cooling"].includes(tab)
+                ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
+                : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
         <div className="p-6">{renderContent()}</div>
       </div>
+
     </div>
   );
 };

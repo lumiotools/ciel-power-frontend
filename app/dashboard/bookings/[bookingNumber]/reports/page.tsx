@@ -4,6 +4,8 @@ import { AirLeakageContent } from "@/components/report/AirLeakageContent";
 import { CoolingContent } from "@/components/report/CoolingContent";
 import { HeatingContent } from "@/components/report/HeatingContent";
 import { InsulationContent } from "@/components/report/InsulationContent";
+import { ReportSummary } from "@/components/report/ReportSummary";
+import { FutureUpgradesAndCertificates } from "@/components/report/FutureUpgradesAndCertificates";
 import { motion } from "framer-motion";
 import React, { useRef, useState, useEffect, use } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -206,6 +208,10 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
         return <HeatingContent data={getHeatingData()} />;
       case "cooling":
         return <CoolingContent data={getCoolingData()} />;
+      case "summary":
+        return <ReportSummary data={reportData} />;
+      case "future solutions and certifications":
+        return <FutureUpgradesAndCertificates />;
       default:
         return <AirLeakageContent data={reportData.airLeakage} />;
     }
@@ -515,17 +521,18 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
       <div className="bg-white rounded-b-lg shadow-md">
         <div className="flex border-b border-gray-200">
-          {["air-leakage", "insulation", "heating", "cooling"].map((tab) => (
+          {["air-leakage", "insulation", "heating", "cooling", "summary", "future solutions and certifications"].map((tab) => (
             <button
               key={tab}
-              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                activeSubMenu === tab
-                  ? "border-b-2 border-lime-500 text-lime-500"
-                  : "text-gray-600 hover:text-lime-500"
-              }`}
+              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
+                ? "border-b-2 border-lime-500 text-lime-500"
+                : "text-gray-600 hover:text-lime-500"
+                }`}
               onClick={() => setActiveSubMenu(tab)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
+              {["air-leakage", "insulation", "heating", "cooling"].includes(tab)
+                ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
+                : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
