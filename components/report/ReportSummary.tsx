@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ProjectCosts } from "@/components/report/ProjectCosts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { set } from "date-fns";
 import { toast } from "sonner";
@@ -27,6 +28,21 @@ interface Recommendation {
   [key: string]: any;
 }
 
+// Replace the existing FinancialData interface with this:
+interface FinancialItem {
+  title: string;
+  amount: string;
+}
+
+// New Financial Data interface that matches ProjectCosts
+interface FinancialData {
+  title: string;
+  data: FinancialItem[];
+  monthlyPayment: string;
+  financingPeriodYears: number;
+}
+
+
 interface ReportSummaryProps {
   data?: {
     summaryOfConcerns?: {
@@ -38,11 +54,13 @@ interface ReportSummaryProps {
     solutionsAndRecommendations?: {
       recommendations: Recommendation[];
     };
+    financialSummary?: FinancialData;
     [key: string]: any;
   };
   isAdmin?: boolean;
   onUpdateConcerns?: (concerns: any) => void;
   onUpdateRecommendations?: (recommendations: any[]) => void;
+  onUpdateFinancials?: (financials: any) => void;
 }
 
 interface InPlaceEditProps {
@@ -231,7 +249,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations }: ReportSummaryProps) {
+export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials }: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -464,6 +482,14 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     });
   };
 
+  const updateFinancials = (financials: FinancialData): void => {
+    // Update the financials in reportData
+    if (onUpdateFinancials) {
+      onUpdateFinancials(financials);
+    }
+  };
+
+
   // const router = useRouter();
   const pathname = usePathname();
   const match = pathname.match(/\/admin\/(\d+)\/report/);
@@ -474,7 +500,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
   const onSubmit = async () => {
     const REPORT_DATA_KEY = "report_data";
     let updatedReportData;
-    
+
     try {
       const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
       // console.log("Data from localStorage:", data);
@@ -500,6 +526,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
 
     try {
+      console.log("Saving report data:", updatedReportData);
       const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`,
         {
           method: "PUT",
@@ -818,7 +845,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       </motion.div>
 
       {/* Project Costs Section */}
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.9 }}
@@ -832,130 +859,140 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
           </CardHeader>
           <CardContent className="p-6 space-y-4 bg-green-50/50">
             {/* Total Project Costs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.0 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">Total Project Costs</h3>
-                </div>
-                <span className="font-medium text-gray-900">$21,748.00</span>
-              </div>
-            </motion.div>
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.0 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Total Project Costs</h3>
+          </div>
+          <span className="font-medium text-gray-900">$21,748.00</span>
+        </div>
+      </motion.div> */}
 
-            {/* Audit Refund */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.1 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">Audit Refund</h3>
-                </div>
-                <span className="font-medium text-gray-900">$99.00</span>
-              </div>
-            </motion.div>
-
-            {/* NJ HPwES Cash Back Incentive */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.2 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">NJ HPwES Cash Back Incentive</h3>
-                </div>
-                <span className="font-medium text-green-600">$5,000.00</span>
-              </div>
-            </motion.div>
-
-            {/* Remaining Balance */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.3 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">Remaining Balance</h3>
-                </div>
-                <span className="font-medium text-gray-900">$16,649.00</span>
-              </div>
-            </motion.div>
-
-            {/* Amount Eligible for NJ HPwES Financing */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.4 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-700">Amount Eligible for NJ HPwES Financing</h3>
-                    <p className="text-xs text-gray-500">*if qualified by financing company (0% Interest Rate)</p>
-                  </div>
-                </div>
-                <span className="font-medium text-gray-900">$15,000.00</span>
-              </div>
-            </motion.div>
-
-            {/* Remaining Out of Pocket Expenses */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.5 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">Remaining Out of Pocket Expenses</h3>
-                </div>
-                <span className="font-medium text-green-600">$1,649.00</span>
-              </div>
-            </motion.div>
-
-            {/* Monthly Payment */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.6 }}
-              className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
-            >
-              <h3 className="text-gray-700 font-medium mb-2">Total Monthly Payment</h3>
-              <p className="text-green-600 text-2xl font-bold">$125.00/month</p>
-              <p className="text-xs text-gray-500">*Over a 10 year period</p>
-            </motion.div>
-          </CardContent>
-        </Card>
+      {/* Audit Refund */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.1 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Audit Refund</h3>
+          </div>
+          <span className="font-medium text-gray-900">$99.00</span>
+        </div>
       </motion.div>
-    </div>
+
+      {/* NJ HPwES Cash Back Incentive */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.2 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">NJ HPwES Cash Back Incentive</h3>
+          </div>
+          <span className="font-medium text-green-600">$5,000.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Remaining Balance */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.3 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Remaining Balance</h3>
+          </div>
+          <span className="font-medium text-gray-900">$16,649.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Amount Eligible for NJ HPwES Financing */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.4 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-700">Amount Eligible for NJ HPwES Financing</h3>
+              <p className="text-xs text-gray-500">*if qualified by financing company (0% Interest Rate)</p>
+            </div>
+          </div>
+          <span className="font-medium text-gray-900">$15,000.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Remaining Out of Pocket Expenses */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.5 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Remaining Out of Pocket Expenses</h3>
+          </div>
+          <span className="font-medium text-green-600">$1,649.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Monthly Payment */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.6 }}
+        className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
+      >
+        <h3 className="text-gray-700 font-medium mb-2">Total Monthly Payment</h3>
+        <p className="text-green-600 text-2xl font-bold">$125.00/month</p>
+        <p className="text-xs text-gray-500">*Over a 10 year period</p>
+      </motion.div>
+    </CardContent>
+        </Card >
+      </motion.div > */ }
+
+      <ProjectCosts
+        data={{
+          financialSummary: data?.financialSummary
+        }}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber || ""}
+        onUpdateFinancials={updateFinancials}
+      />
+
+    </div >
   );
 }

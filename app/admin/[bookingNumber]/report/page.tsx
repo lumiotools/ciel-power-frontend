@@ -68,6 +68,19 @@ interface WaterHeaterData {
   title: string;
 }
 
+// Replace the existing FinancialData interface with the same one as in ReportSummary
+interface FinancialItem {
+  title: string;
+  amount: string;
+}
+
+interface FinancialData {
+  title: string;
+  data: FinancialItem[];
+  monthlyPayment: string;
+  financingPeriodYears: number;
+}
+
 // Define the type for reportData
 interface ReportData {
   airLeakage?: AirLeakageData;
@@ -76,6 +89,7 @@ interface ReportData {
   waterHeater?: WaterHeaterData;
   summaryOfConcerns?: any;
   solutionsAndRecommendations?: any;
+  financialSummary?: FinancialData;
   [key: string]: any;
 }
 
@@ -453,6 +467,28 @@ const ReportPage = ({
     }
   };
 
+  const updateFinancials = (newFinancials: FinancialData) => {
+    if (!isAdmin) return;
+  
+    const updatedReportData = {
+      ...reportData,
+      financialSummary: newFinancials
+    };
+  
+    setReportData(updatedReportData);
+  
+    // Save to localStorage
+    try {
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
+    } catch (e) {
+      console.error("Error saving financials to localStorage:", e);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f5f9f0]">
@@ -587,6 +623,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateConcerns={updateConcerns}
             onUpdateRecommendations={updateRecommendations}
+            onUpdateFinancials={updateFinancials}
           />
         );
       case "future solutions and certifications":
