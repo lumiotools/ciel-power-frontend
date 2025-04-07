@@ -36,7 +36,7 @@ export default function BookingDetailsPage({ params }: { params: Promise<{ booki
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [reportUrl, setReportUrl] = useState("")
-  const [reportData, setReportData] = useState({})
+  const [reportData, setReportData] = useState<Object | null>({})
   const [reportStatus, setReportStatus] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -86,16 +86,28 @@ export default function BookingDetailsPage({ params }: { params: Promise<{ booki
 
   const handleSaveChanges = async () => {
     setIsSaving(true)
+
+    if (reportUrl !== "") {
+      setReportData(null)
+    } else {
+      setReportData(JSON.parse(localStorage.getItem(`report_data_${bookingNumber}`) || "{}"))
+    }
+
     try {
+      const updatedReportData = {
+        reportUrl: reportUrl,
+        reportData: reportData,
+        displayReport: reportStatus,
+      }
+
+      console.log("Updated Report Data:", updatedReportData)
+
       const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          reportUrl: reportUrl,
-          displayReport: reportStatus,
-        }),
+        body: JSON.stringify(updatedReportData),
       })
 
       const data = await response.json()
