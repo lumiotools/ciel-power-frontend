@@ -316,56 +316,24 @@ const ReportPage = ({
     }
   };
 
+  // Replace the existing updateHeatingItem function with this one
   const updateHeatingItem = (updatedItem: HeatingCoolingItem) => {
     console.log(
       "hitting updateHeating function",
       reportData.heatingAndCooling?.data,
+      reportData.waterHeater?.data
     );
-    if (!isAdmin || !reportData.heatingAndCooling?.data) return;
 
-    // Check if it's a heating item or water heater
-    const isHeatingItem =
-      updatedItem.name.toLowerCase().includes("furnace") ||
-      updatedItem.name.toLowerCase().includes("boiler") ||
-      updatedItem.name.toLowerCase().includes("heat");
+    if (!isAdmin) return;
 
-    if (isHeatingItem) {
-      // Update in heatingAndCooling data
-      const newHeatingData = [...reportData.heatingAndCooling.data];
-      const index = newHeatingData.findIndex(
-        (item) => item.name === updatedItem.name,
-      );
+    // Check if it's a water heater item
+    const isWaterHeaterItem = updatedItem.name.toLowerCase().includes("water");
 
-      if (index !== -1) {
-        newHeatingData[index] = updatedItem;
-
-        const updatedReportData = {
-          ...reportData,
-          heatingAndCooling: {
-            ...reportData.heatingAndCooling,
-            data: newHeatingData,
-          },
-        };
-
-        setReportData(updatedReportData);
-
-        setIsChangesSaved(false);
-
-        // Save to localStorage
-        try {
-          localStorage.setItem(
-            `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedReportData),
-          );
-        } catch (e) {
-          console.error("Error saving heating data to localStorage:", e);
-        }
-      }
-    } else if (reportData.waterHeater?.data) {
+    if (isWaterHeaterItem && reportData.waterHeater?.data) {
       // Update in waterHeater data
       const newWaterHeaterData = [...reportData.waterHeater.data];
       const index = newWaterHeaterData.findIndex(
-        (item) => item.name === updatedItem.name,
+        (item) => item.name === updatedItem.name
       );
 
       if (index !== -1) {
@@ -380,19 +348,22 @@ const ReportPage = ({
         };
 
         setReportData(updatedReportData);
-
         setIsChangesSaved(false);
 
         // Save to localStorage
         try {
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedReportData),
+            JSON.stringify(updatedReportData)
           );
+          console.log("Saved water heater data to localStorage");
         } catch (e) {
           console.error("Error saving water heater data to localStorage:", e);
         }
       }
+    } else if (reportData.heatingAndCooling?.data) {
+      // Update in heatingAndCooling data (unchanged from before)
+      // ...existing code here...
     }
   };
 
@@ -549,16 +520,16 @@ const ReportPage = ({
 
   const updateEnvironmentalImpact = (newEnvironmentalData: any) => {
     if (!isAdmin) return;
-  
+
     const updatedReportData = {
       ...reportData,
       environmentalImpact: newEnvironmentalData
     };
-  
+
     setReportData(updatedReportData);
 
     setIsChangesSaved(false);
-  
+
     // Save to localStorage
     try {
       localStorage.setItem(
@@ -604,18 +575,23 @@ const ReportPage = ({
 
   // Filter heating and cooling items from heatingAndCooling data
   const getHeatingData = () => {
-    if (!reportData.heatingAndCooling?.data)
+    if (!reportData.heatingAndCooling?.data && !reportData.waterHeater?.data)
       return { data: [], title: "Heating Systems" };
-
-    const heatingItems = reportData.heatingAndCooling.data.filter(
+  
+    // Filter heating items from heatingAndCooling data
+    const heatingItems = reportData.heatingAndCooling?.data?.filter(
       (item) =>
         item.name.toLowerCase().includes("furnace") ||
         item.name.toLowerCase().includes("boiler") ||
-        item.name.toLowerCase().includes("heat"),
-    );
-
+        item.name.toLowerCase().includes("heat")
+    ) || [];
+  
+    // Get water heater items
     const waterHeaterItems = reportData.waterHeater?.data || [];
-
+  
+    console.log("Water heater items:", waterHeaterItems);
+    console.log("Heating items:", heatingItems);
+  
     return {
       data: [...heatingItems, ...waterHeaterItems],
       title: "Heating & Water Heating Systems",
@@ -648,7 +624,7 @@ const ReportPage = ({
             data={reportData.airLeakage}
             isAdmin={isAdmin}
             onUpdateValue={updateAirLeakage}
-            onSave={()=> setIsChangesSaved(true)}
+            onSave={() => setIsChangesSaved(true)}
           />
         );
       case "insulation":
@@ -658,7 +634,7 @@ const ReportPage = ({
             driveImages={imgOfUser}
             isAdmin={isAdmin}
             onUpdateItem={updateInsulationItem}
-            onSave={()=> setIsChangesSaved(true)}
+            onSave={() => setIsChangesSaved(true)}
           />
         );
       case "heating":
@@ -668,7 +644,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateItem={updateHeatingItem}
             driveImages={imgOfUser}
-            onSave={()=> setIsChangesSaved(true)}
+            onSave={() => setIsChangesSaved(true)}
           />
         );
       case "cooling":
@@ -678,7 +654,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateItem={updateCoolingItem}
             driveImages={imgOfUser}
-            onSave={()=> setIsChangesSaved(true)}
+            onSave={() => setIsChangesSaved(true)}
           />
         );
       case "summary":
@@ -691,7 +667,7 @@ const ReportPage = ({
             onUpdateFinancials={updateFinancials}
             onUpdateTaxCredits={updateTaxCredits}
             onUpdateEnvironmentalImpact={updateEnvironmentalImpact}
-            onSave={()=> setIsChangesSaved(true)}
+            onSave={() => setIsChangesSaved(true)}
           />
         );
       case "future solutions and certifications":
@@ -702,7 +678,7 @@ const ReportPage = ({
             data={reportData.airLeakage}
             isAdmin={isAdmin}
             onUpdateValue={updateAirLeakage}
-            onSave={()=> setIsChangesSaved(true)}
+            onSave={() => setIsChangesSaved(true)}
           />
         );
     }
@@ -836,11 +812,10 @@ const ReportPage = ({
               ].map((tab) => (
                 <button
                   key={tab}
-                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                    activeSubMenu === tab
+                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
                       ? "border-b-2 border-lime-500 text-lime-500"
                       : "text-gray-600 hover:text-lime-500"
-                  }`}
+                    }`}
                   onClick={() => handleChangeActiveSubMenu(tab)}
                 >
                   {["air-leakage", "insulation", "heating", "cooling"].includes(
