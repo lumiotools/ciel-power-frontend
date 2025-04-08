@@ -19,9 +19,6 @@ const BookingContractPage = () => {
         const response = await fetch(
           `/api/user/bookings/${bookingNumber}/contract`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch sign URL");
-        }
         const data = await response.json();
         if (!data.success) {
           throw new Error(data.detail || "Failed to fetch sign URL");
