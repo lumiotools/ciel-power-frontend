@@ -21,6 +21,8 @@ import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ProjectCosts } from "@/components/report/ProjectCosts";
+import { FederalTaxCredits } from "@/components/report/TaxCredits";
+import { EnvironmentalImpact } from "@/components/report/EnvironmentalImpact";
 import {
   Select,
   SelectContent,
@@ -39,12 +41,10 @@ interface ConcernItem {
   [key: string]: any;
 }
 
+// Updated Recommendation interface with only title and benefits
 interface Recommendation {
   title: string;
-  location: string;
-  insulation_details?: string;
-  specific_steps?: string;
-  benefit: string;
+  benefits: string;
   [key: string]: any;
 }
 
@@ -70,16 +70,36 @@ interface ReportSummaryProps {
         data: ConcernItem[];
       }>;
     };
+    // Updated solutionsAndRecommendations structure
     solutionsAndRecommendations?: {
-      recommendations: Recommendation[];
+      title: string;
+      data: Recommendation[];
     };
     financialSummary?: FinancialData;
+    federalTaxCredits?: {
+      title: string;
+      data: Array<{
+        title: string;
+        amount: string;
+        note?: string;
+      }>;
+    };
+    environmentalImpact?: {
+      title: string;
+      currentFootprint: { value: string; unit: string };
+      projectedSavings: { value: string; unit: string };
+      projectedFootprint: { value: string; unit: string };
+      totalReduction: { value: string; unit: string };
+    };
     [key: string]: any;
   };
   isAdmin?: boolean;
   onUpdateConcerns?: (concerns: any) => void;
-  onUpdateRecommendations?: (recommendations: any[]) => void;
+  onUpdateRecommendations?: (recommendations: any) => void;
   onUpdateFinancials?: (financials: any) => void;
+  onUpdateTaxCredits?: (taxCredits: any) => void;
+  onUpdateEnvironmentalImpact?: (environmentalData: any) => void;
+  onSave: () => void;
 }
 
 interface InPlaceEditProps {
@@ -198,10 +218,6 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   );
 };
 
-// In-place editing component for numbers
-// const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
-//   initialValue,
-//   isAdmin,
 const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   initialValue,
   isAdmin,
@@ -274,13 +290,16 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export const ReportSummary = ({
+export function ReportSummary({
   data,
   isAdmin = false,
   onUpdateConcerns,
   onUpdateRecommendations,
   onUpdateFinancials,
-}: ReportSummaryProps) => {
+  onUpdateTaxCredits,
+  onUpdateEnvironmentalImpact,
+  onSave,
+}: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -320,16 +339,17 @@ export const ReportSummary = ({
     }
   }, [data?.summaryOfConcerns]);
 
-  // Process recommendations data
+  // Process recommendations data - Updated for new format
   useEffect(() => {
+    if (!data?.solutionsAndRecommendations?.data) return;
+
     if (!data?.solutionsAndRecommendations?.recommendations) return;
 
     try {
-      const recs = data.solutionsAndRecommendations.recommendations.map(
-        (rec) => ({
-          ...rec,
-        }),
-      );
+      // Use the new data structure with title and benefits only
+      const recs = data.solutionsAndRecommendations.data.map((rec) => ({
+        ...rec,
+      }));
       setRecommendations(recs);
     } catch (error) {
       console.error("Error processing recommendations data:", error);
@@ -484,6 +504,7 @@ export const ReportSummary = ({
     }
   };
 
+  // Updated to only handle title and benefits
   const updateRecommendation = (
     index: number,
     field: keyof Recommendation,
@@ -507,17 +528,15 @@ export const ReportSummary = ({
     });
   };
 
+  // Updated to add a new recommendation with only title and benefits
   const addRecommendation = () => {
     setRecommendations((prev) => {
       const newRecommendations = [
-        ...prev,
         {
           title: "New Recommendation",
-          location: "",
-          insulation_details: "",
-          specific_steps: "",
-          benefit: "",
+          benefits: "Benefits of this recommendation",
         },
+        ...prev,
       ];
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
@@ -546,6 +565,20 @@ export const ReportSummary = ({
     // Update the financials in reportData
     if (onUpdateFinancials) {
       onUpdateFinancials(financials);
+    }
+  };
+
+  const updateTaxCredits = (taxCreditsData: any) => {
+    // If onUpdateTaxCredits callback is provided, call it with the updated data
+    if (onUpdateTaxCredits) {
+      onUpdateTaxCredits(taxCreditsData);
+    }
+  };
+
+  const updateEnvironmentalImpact = (environmentalData: any) => {
+    // If onUpdateEnvironmentalImpact callback is provided, call it with the updated data
+    if (onUpdateEnvironmentalImpact) {
+      onUpdateEnvironmentalImpact(environmentalData);
     }
   };
 
@@ -608,8 +641,9 @@ export const ReportSummary = ({
       }
 
       const data = await response.json();
-      toast.success("Report data saved successfully.");
+      toast.success("Data submitted successfully!");
       console.log("Report data saved successfully:", data);
+      onSave();
     } catch (e) {
       console.error("Error saving report data:", e);
       toast.error("Failed to save report data.");
@@ -621,11 +655,10 @@ export const ReportSummary = ({
       {isAdmin && (
         <div className="top-4 flex justify-end">
           <button
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition-colors"
-            onClick={() => onSubmit()}
+            onClick={onSubmit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
           >
-            <Save size={18} />
-            Save Changes
+            Save
           </button>
         </div>
       )}
@@ -756,7 +789,7 @@ export const ReportSummary = ({
         </Card>
       </motion.div>
 
-      {/* Solutions & Recommended Upgrades Section */}
+      {/* Solutions & Recommended Upgrades Section - UPDATED FOR NEW FORMAT */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -787,10 +820,6 @@ export const ReportSummary = ({
                 const RecommendationIcon = getIconForRecommendation(
                   recommendation.title,
                 );
-                const progress =
-                  recommendation.progress !== undefined
-                    ? recommendation.progress
-                    : 0;
 
                 return (
                   <motion.div
@@ -834,90 +863,19 @@ export const ReportSummary = ({
                         <div className="space-y-3 my-3">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">
-                              Location:
-                            </p>
-                            <InPlaceEdit
-                              initialValue={recommendation.location}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(index, "location", value)
-                              }
-                              placeholder="Enter location"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">
-                              Details:
-                            </p>
-                            <InPlaceEdit
-                              initialValue={recommendation.insulation_details}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(
-                                  index,
-                                  "insulation_details",
-                                  value,
-                                )
-                              }
-                              multiline={true}
-                              placeholder="Enter insulation details if applicable"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Steps:</p>
-                            <InPlaceEdit
-                              initialValue={recommendation.specific_steps}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(
-                                  index,
-                                  "specific_steps",
-                                  value,
-                                )
-                              }
-                              multiline={true}
-                              placeholder="Enter implementation steps if applicable"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">
                               Benefits:
                             </p>
                             <InPlaceEdit
-                              initialValue={recommendation.benefit}
+                              initialValue={recommendation.benefits}
                               isAdmin={isAdmin}
                               onUpdate={(value) =>
-                                updateRecommendation(index, "benefit", value)
+                                updateRecommendation(index, "benefits", value)
                               }
+                              multiline={true}
                               placeholder="Enter benefits"
                             />
                           </div>
                         </div>
-
-                        {/* <div className="flex items-center justify-between mt-4">
-                          <span className="text-sm text-gray-600">Implementation Progress</span>
-                          {isAdmin ? (
-                            <InPlaceEditNumber
-                              initialValue={progress}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(index, "progress", value)
-                              }
-                              min={0}
-                              max={100}
-                            />
-                          ) : (
-                            <span className="text-sm font-medium text-green-600">
-                              {progress}%
-                            </span>
-                          )}
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
-                            style={{ width: `${progress}%` }}
-                          ></div>
-                        </div> */}
                       </div>
                     </div>
                   </motion.div>
@@ -966,6 +924,24 @@ export const ReportSummary = ({
         bookingNumber={bookingNumber || ""}
         onUpdateFinancials={updateFinancials}
       />
+
+      {/* Federal Tax Credits Section */}
+      <FederalTaxCredits
+        data={data?.federalTaxCredits}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber}
+        reportData={data}
+        onUpdate={updateTaxCredits}
+      />
+
+      {/* Environmental Impact Section */}
+      <EnvironmentalImpact
+        data={data?.environmentalImpact}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber}
+        reportData={data}
+        onUpdate={updateEnvironmentalImpact}
+      />
     </div>
   );
-};
+}

@@ -17,8 +17,6 @@ export const ImageUpload = ({
     (img) => img.id == image,
   )?.thumbnailLink;
 
-  
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   // const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -38,8 +36,6 @@ export const ImageUpload = ({
   const handleImageSelect = (image: driveImages) => {
     setImageSelected(image);
   };
-
-  
 
   const handleSave = () => {
     if (imageSelected) {

@@ -20,6 +20,31 @@ export interface Booking {
   auditor?: string;
 }
 
+export interface ContractDetails {
+  id: string;
+  name: string;
+  status: string;
+  displayContract: boolean;
+  customerRecipient: string;
+  cielPowerRepresentativeRecipient: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContractDoc {
+  id: string;
+  name: string;
+  status: string;
+  createdAt: string;
+  updateAt: string;
+}
+
+export interface Recipient {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface BookingResponse {
   success: boolean;
   message: string;
@@ -61,5 +86,13 @@ export interface LeadSearchResponse {
   message: string;
   data: {
     leads: NutshellLead[];
+  };
+}
+
+export interface RecipientsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    recipients: Recipient[];
   };
 }

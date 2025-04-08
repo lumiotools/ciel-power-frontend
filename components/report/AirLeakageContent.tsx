@@ -28,12 +28,14 @@ interface AirLeakageContentProps {
   data?: AirLeakageData;
   isAdmin?: boolean;
   onUpdateValue?: (newValue: string) => void;
+  onSave: () => void;
 }
 
 export function AirLeakageContent({
   data,
   isAdmin = false,
   onUpdateValue,
+  onSave,
 }: AirLeakageContentProps) {
   const airLeakagePoints = [
     { id: 1, label: "Air Barrier and Thermal Barrier Alignment" },
@@ -127,6 +129,7 @@ export function AirLeakageContent({
 
       await response.json();
       toast.success("Data submitted successfully!");
+      onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
     }

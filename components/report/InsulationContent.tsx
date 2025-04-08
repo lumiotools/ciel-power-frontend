@@ -36,6 +36,7 @@ interface InsulationContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: InsulationDataItem) => void;
   driveImages?: string[];
+  onSave: () => void;
 }
 
 // Helper function to find the best matching item for a specific component type
@@ -127,6 +128,7 @@ export function InsulationContent({
   isAdmin = false,
   onUpdateItem,
   driveImages,
+  onSave,
 }: InsulationContentProps) {
   console.log("InsulationContent data:", data);
 
@@ -220,6 +222,7 @@ export function InsulationContent({
       const data = await response.json();
       toast.success("Data submitted successfully!");
       console.log("Data submitted successfully:", data);
+      onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
     }

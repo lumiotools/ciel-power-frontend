@@ -54,6 +54,7 @@ interface ApiResponse {
     reportUrl?: string | null;
     newFollowUpScheduleUrl: string;
     followUpScheduleDetails: FollowUpDetals;
+    isContractCreated: boolean;
     youtubeVideos: YouTubeVideo[];
     blogs: BlogPost[];
   };
@@ -138,6 +139,8 @@ const BookingDetailsPage = () => {
     string | null
   >(null);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [isContractCreated, setIsContractCreated] = useState<boolean>(false);
+
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
@@ -202,13 +205,7 @@ const BookingDetailsPage = () => {
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
-        const response = await fetch(`/api/user/bookings/${bookingNumber}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+        const response = await fetch(`/api/user/bookings/${bookingNumber}`);
 
         const data: ApiResponse = await response.json();
         if (data.success) {
@@ -222,6 +219,7 @@ const BookingDetailsPage = () => {
           setCurrentStage(data.data.currentStage);
           setNewFollowUpScheduleLink(data.data.newFollowUpScheduleUrl || null);
           setReportUrl(data.data.reportUrl || null);
+          setIsContractCreated(data.data.isContractCreated);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -533,6 +531,23 @@ const BookingDetailsPage = () => {
                   </div>
                 </div>
               )
+            )}
+
+            {/* Contract Details */}
+            {isContractCreated && (
+              <div className="mt-6">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-lg font-bold">
+                    Your Contract has been created
+                  </h4>
+                  <Link
+                    href={`/dashboard/bookings/${bookingNumber}/contract`}
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
+                  >
+                    View Now
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
