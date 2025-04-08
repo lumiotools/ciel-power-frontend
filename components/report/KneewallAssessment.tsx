@@ -43,7 +43,7 @@ interface InsulationItemData {
 }
 
 interface KneewallAssessmentProps {
-  data?: InsulationItemData;
+  data?: InsulationItemData | null;
   isAdmin?: boolean;
   onUpdate?: (updatedItem: InsulationItemData) => void;
   driveImages?: string[];
@@ -231,10 +231,9 @@ const ImageUpload = ({
     setImageSelected(image);
   };
 
-  
   const handleSave = () => {
     if (imageSelected) {
-      onImageChange(imageSelected);
+      onImageChange(imageSelected?.id);
       setIsModalOpen(false); // Close the modal after saving
     }
   };
@@ -287,7 +286,6 @@ const ImageUpload = ({
               {driveImages && (
                 <div className="grid grid-cols-3 gap-4 mb-4 p-3 rounded-lg">
                   {driveImages.map((img, index) => (
-                    console.log("Drive Image is working:", imageSelected?.id === img?.id),
                     <div
                       key={index}
                       className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
@@ -297,7 +295,11 @@ const ImageUpload = ({
                         alt={`Drive Image ${index + 1}`}
                         width={60}
                         height={60}
-                        className={`w-full h-full object-cover ${imageSelected?.id === img?.id ? "ring-2 ring-blue-500 border-2 border-red-400" : ""}`}
+                        className={`w-full h-full object-cover ${
+                          imageSelected?.id === img?.id
+                            ? "ring-2 ring-blue-500 border-2 border-red-400"
+                            : ""
+                        }`}
                         onClick={() => handleImageSelect(img)}
                       />
                       {/* <button
@@ -308,7 +310,7 @@ const ImageUpload = ({
                       </button> */}
                     </div>
                   ))}
-                  </div>
+                </div>
               )}
             </div>
             <div className="bg-white p-4 rounded">
@@ -353,7 +355,11 @@ const ImageUpload = ({
             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
             size={24}
           /> */}
-          <IoMdClose size={24} className=" absolute top-3 right-3" onClick={()=>setIsModalOpen(false)}/>
+          <IoMdClose
+            size={24}
+            className=" absolute top-3 right-3"
+            onClick={() => setIsModalOpen(false)}
+          />
         </div>
       )}
     </div>
@@ -412,7 +418,7 @@ export function KneewallAssessment({
   };
 
   const [kneewallData, setKneewallData] = useState<KneewallData[]>(
-    processedKneewallData()
+    processedKneewallData(),
   );
   const [animateCharts, setAnimateCharts] = useState<boolean[]>([]);
 
@@ -444,7 +450,7 @@ export function KneewallAssessment({
               }
             });
           },
-          { threshold: 0.5 }
+          { threshold: 0.5 },
         );
 
         observer.observe(chartElement);
@@ -460,8 +466,10 @@ export function KneewallAssessment({
   const updateKneewallData = (
     index: number,
     field: keyof KneewallData,
-    value: string
+    value: string,
   ) => {
+    console.log("Updating kneewall data:", index, field, value);
+    console.log("Current kneewall data and function:", data, onUpdate);
     setKneewallData((prev) => {
       const newData = [...prev];
       newData[index] = { ...newData[index], [field]: value };
@@ -481,28 +489,33 @@ export function KneewallAssessment({
             onUpdate(updatedItem);
           }
         }
-      } else if (field === "material" && onUpdate && data) {
+      } else if (field === "material" && onUpdate) {
         // Send update to parent if available
         const updatedItem: InsulationItemData = {
           ...data,
           material: value,
         };
         onUpdate(updatedItem);
-      } else if (field === "condition" && onUpdate && data) {
+      } else if (field === "condition" && onUpdate) {
         // Send update to parent if available
         const updatedItem: InsulationItemData = {
           ...data,
           condition: value,
         };
         onUpdate(updatedItem);
-      } else if (field === "image" && onUpdate && data) {
+      } else if (field === "image" && onUpdate) {
+        //removed data , because when data is not available we will create a new
         // Send update to parent if available
         const updatedItem: InsulationItemData = {
           ...data,
           image: value,
         };
+        console.log("Updated image:started");
         onUpdate(updatedItem);
+        console.log("Updated image:done sucessfully");
       }
+
+      console.log("Updated kneewall data:", newData);
 
       return newData;
     });

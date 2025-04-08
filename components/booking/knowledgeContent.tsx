@@ -4,7 +4,6 @@ import { Separator } from "@/components/ui/separator";
 import { Globe, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 
-
 interface YouTubeVideo {
   videoId: string;
   title: string;
@@ -15,9 +14,10 @@ interface YouTubeVideo {
 interface KnowledgeContentProps {
   youtubeSuggestions: YouTubeVideo[]; // You pass the array of YouTubeVideo objects
 }
-const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions }) => {
+const KnowledgeContent: React.FC<KnowledgeContentProps> = ({
+  youtubeSuggestions,
+}) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-
 
   const handlePlayClick = (videoId: string) => {
     const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
@@ -48,10 +48,20 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
           </h3>
           {youtubeSuggestions.length > 0 && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => scroll("left")}
+                className="rounded-full"
+              >
                 <ChevronLeft className="w-6 h-6 text-gray-600" />
               </Button>
-              <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => scroll("right")}
+                className="rounded-full"
+              >
                 <ChevronRight className="w-6 h-6 text-gray-600" />
               </Button>
             </div>
@@ -60,55 +70,49 @@ const KnowledgeContent: React.FC<KnowledgeContentProps> = ({ youtubeSuggestions 
         <Separator />
       </CardHeader>
       <CardContent className="relative">
-        {
-          youtubeSuggestions.length === 0 ? (
-            <div className="flex justify-center items-center text-gray-500 text-sm">
-              No related videos found.
-            </div>
-          ) : (
-            <div
-              className="overflow-hidden"
-              ref={scrollContainerRef}
-            >
-              <div className="flex gap-5 min-w-full pb-1 ">
-                {youtubeSuggestions.map((content) => (
-                  <div key={content.videoId} className="flex-none w-72">
-                    <div className="group relative">
-                      {/* Thumbnail Container */}
-                      <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden ">
-                        <img
-                          src={content.thumbnail}
-                          alt={content.title}
-                          className="w-full h-full object-cover"
-                        />
-                        {/* Play Button Overlay */}
-                        <div
-                          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30"
-                          onClick={() => handlePlayClick(content.videoId)} // Open YouTube video
-                        >
-                          <div className="bg-white rounded-full p-3 cursor-pointer">
-                            <Play className="w-6 h-6 text-red-600" />
-                          </div>
+        {youtubeSuggestions.length === 0 ? (
+          <div className="flex justify-center items-center text-gray-500 text-sm">
+            No related videos found.
+          </div>
+        ) : (
+          <div className="overflow-hidden" ref={scrollContainerRef}>
+            <div className="flex gap-5 min-w-full pb-1 ">
+              {youtubeSuggestions.map((content) => (
+                <div key={content.videoId} className="flex-none w-72">
+                  <div className="group relative">
+                    {/* Thumbnail Container */}
+                    <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden ">
+                      <img
+                        src={content.thumbnail}
+                        alt={content.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Play Button Overlay */}
+                      <div
+                        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30"
+                        onClick={() => handlePlayClick(content.videoId)} // Open YouTube video
+                      >
+                        <div className="bg-white rounded-full p-3 cursor-pointer">
+                          <Play className="w-6 h-6 text-red-600" />
                         </div>
                       </div>
+                    </div>
 
-                      {/* Content Text */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-900 line-clamp-1">
-                          {content.title}
-                        </h4>
-                        <p className="text-sm text-gray-500 line-clamp-2">
-                          {content.description}
-                        </p>
-                      </div>
+                    {/* Content Text */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-900 line-clamp-1">
+                        {content.title}
+                      </h4>
+                      <p className="text-sm text-gray-500 line-clamp-2">
+                        {content.description}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )
-        }
-
+          </div>
+        )}
       </CardContent>
     </Card>
   );

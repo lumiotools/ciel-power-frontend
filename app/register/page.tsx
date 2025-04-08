@@ -60,7 +60,7 @@
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
 //         credentials: "include",
-//         body: JSON.stringify({ 
+//         body: JSON.stringify({
 //           code,
 //           redirect_uri: `${window.location.origin}/signup`
 //         }),
@@ -269,10 +269,9 @@
 //   )
 // }
 
-
-import { Suspense } from "react"
-import SignUpForm from "./signup-form"
-import { Loader2 } from "lucide-react"
+import { Suspense } from "react";
+import SignUpForm from "./signup-form";
+import { Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
   return (
@@ -288,6 +287,5 @@ export default function SignUpPage() {
     >
       <SignUpForm />
     </Suspense>
-  )
+  );
 }
-

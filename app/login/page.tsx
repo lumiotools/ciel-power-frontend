@@ -47,7 +47,7 @@
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
 //         credentials: "include",
-//         body: JSON.stringify({ 
+//         body: JSON.stringify({
 //           code,
 //           redirect_uri: `${window.location.origin}/login`
 //         }),
@@ -240,9 +240,9 @@
 //   );
 // }
 
-import { Suspense } from "react"
-import LoginForm from "@/app/login/login-form"
-import { Loader2 } from "lucide-react"
+import { Suspense } from "react";
+import LoginForm from "@/app/login/login-form";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   return (
@@ -258,5 +258,5 @@ export default function LoginPage() {
     >
       <LoginForm />
     </Suspense>
-  )
+  );
 }

@@ -81,8 +81,8 @@ const getStepStatus = (currentStage: string) => {
       stepsSequence.findIndex((s) => s.key === currentStage) > index
         ? "completed"
         : stepsSequence.findIndex((s) => s.key === currentStage) === index
-        ? "current"
-        : "upcoming";
+          ? "current"
+          : "upcoming";
     return { label: step.label, status };
   });
 };
@@ -98,16 +98,16 @@ export default function DashboardPage() {
   //usestate condition for dropdown
 
   const [openDropdown, setOpenDropdown] = useState<boolean[]>(
-    Array(FAQDetails.length).fill(false)
+    Array(FAQDetails.length).fill(false),
   );
 
   const [faqOpen, setFaqOpen] = useState<boolean[]>(
-    Array(FAQQuestions.length).fill(false)
+    Array(FAQQuestions.length).fill(false),
   );
 
   const toggleDropdown = (index: number) => {
     setOpenDropdown((prev) =>
-      prev.map((item, i) => (i === index ? !item : item))
+      prev.map((item, i) => (i === index ? !item : item)),
     );
     if (index === FAQDetails.length - 1) {
       setFaqOpen((prev) => prev.map(() => false));
@@ -415,7 +415,7 @@ export default function DashboardPage() {
 
                   <BookingProgress
                     steps={getStepStatus(
-                      booking.currentStage || "bookingCreated"
+                      booking.currentStage || "bookingCreated",
                     )}
                   />
 
@@ -588,7 +588,6 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
                 style={{ zIndex: 0 }}
               ></div>
 
-             
               <div
                 className="relative flex gap-2 items-center z-50"
                 style={{ zIndex: 50 }}

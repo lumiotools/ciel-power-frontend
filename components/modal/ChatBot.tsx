@@ -1,49 +1,49 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { MessageCircle, Send, X, HelpCircle } from "lucide-react"
-import ReactMarkdown from "react-markdown"
-import { cn } from "@/lib/utils"
-import { motion } from "framer-motion"
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Send, X, HelpCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 type Message = {
-  role: "user" | "assistant"
-  content: string
-  timestamp: string
-}
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+};
 
 type ExampleQuestion = {
-  title: string
-  description: string
-  icon: string
-}
+  title: string;
+  description: string;
+  icon: string;
+};
 
 export function ChatBot() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [showWelcome, setShowWelcome] = useState(true)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [inputValue, setInputValue] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const chatEndRef = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setShowWelcome(true)
-  }, [])
+    setShowWelcome(true);
+  }, []);
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages]) // Make sure the scroll happens when messages update
+    scrollToBottom();
+  }, [messages]); // Make sure the scroll happens when messages update
 
   const scrollToBottom = () => {
     if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" })
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }
+  };
 
   const getExampleQuestions = (): ExampleQuestion[] => {
     return [
@@ -67,62 +67,65 @@ export function ChatBot() {
         description: "What financing options are available?",
         icon: "🏦",
       },
-    ]
-  }
+    ];
+  };
 
   const handleSend = async (inputValue: string) => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim()) return;
 
     const newMessage: Message = {
       role: "user",
       content: inputValue,
       timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
-    }
+    };
 
-    setMessages((prevMessages) => [...prevMessages, newMessage])
-    setInputValue("")
-    setIsTyping(true)
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    setInputValue("");
+    setIsTyping(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chatbot/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/chatbot/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: inputValue }),
         },
-        body: JSON.stringify({ message: inputValue }),
-      })
+      );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json()
-      console.log("Response data:", data.response)
+      const data = await response.json();
+      console.log("Response data:", data.response);
 
       const aiMessage: Message = {
         role: "assistant",
         content: data.response || "Sorry, I couldn't process that request.",
         timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
-      }
+      };
 
-      setMessages((prevMessages) => [...prevMessages, aiMessage])
+      setMessages((prevMessages) => [...prevMessages, aiMessage]);
     } catch (error) {
-      console.error("Error in API call:", error)
+      console.error("Error in API call:", error);
       const errorMessage: Message = {
         role: "assistant",
         content: "Sorry, there was an error processing your request.",
         timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
-      }
-      setMessages((prevMessages) => [...prevMessages, errorMessage])
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
-      scrollToBottom()
-      setIsTyping(false)
+      scrollToBottom();
+      setIsTyping(false);
     }
-  }
+  };
 
   const handleQuestionClick = (question: ExampleQuestion) => {
-    handleSend(question.description)
-  }
+    handleSend(question.description);
+  };
 
   return (
     <>
@@ -155,7 +158,12 @@ export function ChatBot() {
                 <p className="text-sm text-muted-foreground">Online</p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsOpen(false)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -178,9 +186,13 @@ export function ChatBot() {
                       <div className="flex flex-col h-full">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-xl">{question.icon}</span>
-                          <h3 className="font-medium text-gray-900">{question.title}</h3>
+                          <h3 className="font-medium text-gray-900">
+                            {question.title}
+                          </h3>
                         </div>
-                        <p className="text-sm text-gray-600 leading-relaxed flex-grow">{question.description}</p>
+                        <p className="text-sm text-gray-600 leading-relaxed flex-grow">
+                          {question.description}
+                        </p>
                       </div>
                     </motion.div>
                   ))}
@@ -188,7 +200,10 @@ export function ChatBot() {
               </>
             ) : (
               messages.map((message, index) => (
-                <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}>
+                <div
+                  key={index}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}
+                >
                   <div
                     className={`flex items-start gap-2 max-w-[75%] ${
                       message.role === "user" ? "flex-row-reverse" : "flex-row"
@@ -196,13 +211,22 @@ export function ChatBot() {
                   >
                     <div
                       className={`rounded-lg p-3 ${
-                        message.role === "user" ? "bg-lime-500 text-xs sm:text-sm text-primary-foreground" : "bg-muted text-xs sm:text-sm"
+                        message.role === "user"
+                          ? "bg-lime-500 text-xs sm:text-sm text-primary-foreground"
+                          : "bg-muted text-xs sm:text-sm"
                       }`}
                     >
-                      <ReactMarkdown className={cn("prose-sm", message.role === "user" ? "prose-invert" : "prose")}>
+                      <ReactMarkdown
+                        className={cn(
+                          "prose-sm",
+                          message.role === "user" ? "prose-invert" : "prose",
+                        )}
+                      >
                         {message.content}
                       </ReactMarkdown>
-                      <p className="text-[10px] opacity-70 mt-1">{message.timestamp}</p>
+                      <p className="text-[10px] opacity-70 mt-1">
+                        {message.timestamp}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -229,7 +253,11 @@ export function ChatBot() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSend(inputValue)}
               />
-              <Button size="icon" className="bg-lime-500 hover:bg-lime-600" onClick={() => handleSend(inputValue)}>
+              <Button
+                size="icon"
+                className="bg-lime-500 hover:bg-lime-600"
+                onClick={() => handleSend(inputValue)}
+              >
                 <Send className="h-5 w-5" />
               </Button>
             </div>
@@ -237,5 +265,5 @@ export function ChatBot() {
         </div>
       </div>
     </>
-  )
+  );
 }

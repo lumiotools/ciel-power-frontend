@@ -1,5 +1,5 @@
-"use client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function SeasonalPerformance() {
   return (
@@ -8,7 +8,9 @@ export function SeasonalPerformance() {
         {" "}
         {/* Adjusted height to match Technical Aspects */}
         <CardHeader className="bg-teal-50 dark:bg-teal-900/20">
-          <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">Seasonal Performance</CardTitle>
+          <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">
+            Seasonal Performance
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6 flex-grow flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center">
@@ -21,6 +23,5 @@ export function SeasonalPerformance() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
