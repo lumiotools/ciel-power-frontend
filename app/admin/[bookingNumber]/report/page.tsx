@@ -18,9 +18,12 @@ import {
   DollarSign,
   Leaf,
   Percent,
+  ArrowLeft,
 } from "lucide-react";
 
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -103,10 +106,29 @@ const ReportPage = ({
   const [reportUrl, setReportUrl] = useState("");
   const [reportData, setReportData] = useState<ReportData>({});
   const [reportStatus, setReportStatus] = useState(false);
+  const [isChangesSaved, setIsChangesSaved] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [imgOfUser, SetImageOfUser] = useState([]);
+
+  const router = useRouter();
+
+  const handleNavigateBack = () => {
+    if (!isChangesSaved) {
+      toast.error("Please save the changes before going back.");
+    } else {
+      router.replace(`/admin/${bookingNumber}`);
+    }
+  };
+
+  const handleChangeActiveSubMenu = (menu: string) => {
+    if (!isChangesSaved) {
+      toast.error("Please save the changes before switching the tab.");
+    } else {
+      setActiveSubMenu(menu);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -244,6 +266,8 @@ const ReportPage = ({
 
     setReportData(newData);
 
+    setIsChangesSaved(false);
+
     // Save to localStorage
     try {
       localStorage.setItem(
@@ -276,6 +300,8 @@ const ReportPage = ({
       };
 
       setReportData(updatedReportData);
+
+      setIsChangesSaved(false);
 
       // Save to localStorage
       try {
@@ -323,6 +349,8 @@ const ReportPage = ({
 
         setReportData(updatedReportData);
 
+        setIsChangesSaved(false);
+
         // Save to localStorage
         try {
           localStorage.setItem(
@@ -352,6 +380,8 @@ const ReportPage = ({
         };
 
         setReportData(updatedReportData);
+
+        setIsChangesSaved(false);
 
         // Save to localStorage
         try {
@@ -384,6 +414,8 @@ const ReportPage = ({
       };
 
       setReportData(updatedReportData);
+
+      setIsChangesSaved(false);
 
       // Save to localStorage
       try {
@@ -430,6 +462,8 @@ const ReportPage = ({
 
     setReportData(updatedReportData);
 
+    setIsChangesSaved(false);
+
     // Save to localStorage
     try {
       localStorage.setItem(
@@ -454,6 +488,8 @@ const ReportPage = ({
 
     setReportData(updatedReportData);
 
+    setIsChangesSaved(false);
+
     // Save to localStorage
     try {
       localStorage.setItem(
@@ -474,6 +510,8 @@ const ReportPage = ({
     };
 
     setReportData(updatedReportData);
+
+    setIsChangesSaved(false);
 
     // Save to localStorage
     try {
@@ -496,6 +534,8 @@ const ReportPage = ({
 
     setReportData(updatedReportData);
 
+    setIsChangesSaved(false);
+
     // Save to localStorage
     try {
       localStorage.setItem(
@@ -516,6 +556,8 @@ const ReportPage = ({
     };
   
     setReportData(updatedReportData);
+
+    setIsChangesSaved(false);
   
     // Save to localStorage
     try {
@@ -606,6 +648,7 @@ const ReportPage = ({
             data={reportData.airLeakage}
             isAdmin={isAdmin}
             onUpdateValue={updateAirLeakage}
+            onSave={()=> setIsChangesSaved(true)}
           />
         );
       case "insulation":
@@ -615,6 +658,7 @@ const ReportPage = ({
             driveImages={imgOfUser}
             isAdmin={isAdmin}
             onUpdateItem={updateInsulationItem}
+            onSave={()=> setIsChangesSaved(true)}
           />
         );
       case "heating":
@@ -624,6 +668,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateItem={updateHeatingItem}
             driveImages={imgOfUser}
+            onSave={()=> setIsChangesSaved(true)}
           />
         );
       case "cooling":
@@ -633,6 +678,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateItem={updateCoolingItem}
             driveImages={imgOfUser}
+            onSave={()=> setIsChangesSaved(true)}
           />
         );
       case "summary":
@@ -645,6 +691,7 @@ const ReportPage = ({
             onUpdateFinancials={updateFinancials}
             onUpdateTaxCredits={updateTaxCredits}
             onUpdateEnvironmentalImpact={updateEnvironmentalImpact}
+            onSave={()=> setIsChangesSaved(true)}
           />
         );
       case "future solutions and certifications":
@@ -655,6 +702,7 @@ const ReportPage = ({
             data={reportData.airLeakage}
             isAdmin={isAdmin}
             onUpdateValue={updateAirLeakage}
+            onSave={()=> setIsChangesSaved(true)}
           />
         );
     }
@@ -672,125 +720,142 @@ const ReportPage = ({
       });
 
       // Also scroll the specific ref if it exists
-      if (scrollRef.current) {
-        scrollRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
+      // if (scrollRef.current) {
+      //   scrollRef.current.scrollIntoView({
+      //     behavior: "smooth",
+      //     block: "start",
+      //   });
+      // }
     }, 100);
   };
 
-  return overview ? (
-    <div className="container mx-auto p-4">
-      <div className="space-y-12">
-        {/* Section 1 - About Ciel Power */}
-        <Card className="overflow-hidden">
-          <CardHeader className="bg-green-50 dark:bg-lime-500/50 pb-6">
-            <CardTitle className="text-2xl text-black dark:text-lime-200">
-              About Ciel Power
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8 space-y-8">
-            <div className="space-y-6 text-gray-600 dark:text-gray-300">
-              <p className="leading-relaxed">
-                We are a participating contractor in the New Jersey Home
-                Performance with Energy Star Program and a Building Performance
-                Institute Goldstar Contractor.
-              </p>
-              <p className="leading-relaxed">
-                Today&apos;s new home buyers expect energy efficiency to be part
-                of the package. What if your home was built before today&apos;s
-                energy-efficiency standards?
-              </p>
-              <p className="leading-relaxed">
-                From insulation to high-efficiency air-conditioning, heating,
-                and hot water systems, our products and services deliver
-                today&apos;s energy-efficiency solutions to yesterday&apos;s
-                homes for a more comfortable and affordable homeownership
-                experience.
-              </p>
+  return (
+    <div>
+      {isAdmin && <AdminHeader />}
+      <div className="container mx-auto px-6 pt-6 flex justify-between items-center">
+        <Button
+          variant="ghost"
+          onClick={handleNavigateBack}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Booking Details
+        </Button>
+      </div>
+      {overview ? (
+        <div className="container mx-auto p-4">
+          <div className="space-y-12">
+            {/* Section 1 - About Ciel Power */}
+            <Card className="overflow-hidden">
+              <CardHeader className="bg-green-50 dark:bg-lime-500/50 pb-6">
+                <CardTitle className="text-2xl text-black dark:text-lime-200">
+                  About Ciel Power
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 space-y-8">
+                <div className="space-y-6 text-gray-600 dark:text-gray-300">
+                  <p className="leading-relaxed">
+                    We are a participating contractor in the New Jersey Home
+                    Performance with Energy Star Program and a Building
+                    Performance Institute Goldstar Contractor.
+                  </p>
+                  <p className="leading-relaxed">
+                    Today&apos;s new home buyers expect energy efficiency to be
+                    part of the package. What if your home was built before
+                    today&apos;s energy-efficiency standards?
+                  </p>
+                  <p className="leading-relaxed">
+                    From insulation to high-efficiency air-conditioning,
+                    heating, and hot water systems, our products and services
+                    deliver today&apos;s energy-efficiency solutions to
+                    yesterday&apos;s homes for a more comfortable and affordable
+                    homeownership experience.
+                  </p>
+                </div>
+
+                {/* How it Works Section */}
+                <div className="pt-6">
+                  <h3 className="text-2xl font-semibold mb-8 text-black dark:text-lime-200">
+                    How it Works
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {howItWorksSteps.map((step, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className="p-6 bg-green-50 dark:bg-lime-500/50 rounded-xl flex flex-col items-center text-center"
+                      >
+                        <div className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center mb-6">
+                          <step.icon className="h-8 w-8 text-lime-500" />
+                        </div>
+                        <h4 className="text-xl font-semibold text-black dark:text-lime-200 mb-4">
+                          {step.title}
+                        </h4>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          {step.description}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Additional sections omitted for brevity */}
+
+            {/* Call to Action Button */}
+            <div className="text-center">
+              <button
+                onClick={handleScrollToTop}
+                className="bg-lime-500 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors duration-200 font-medium"
+              >
+                View Detailed Reports
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="container mx-auto p-4" ref={scrollRef}>
+          <div className="bg-gradient-to-r from-lime-400 to-lime-400 py-4 px-6 rounded-t-lg shadow-md">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-white">Reports</h1>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-b-lg shadow-md">
+            <div className="flex border-b border-gray-200">
+              {[
+                "air-leakage",
+                "insulation",
+                "heating",
+                "cooling",
+                "summary",
+                "future solutions and certifications",
+              ].map((tab) => (
+                <button
+                  key={tab}
+                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
+                    activeSubMenu === tab
+                      ? "border-b-2 border-lime-500 text-lime-500"
+                      : "text-gray-600 hover:text-lime-500"
+                  }`}
+                  onClick={() => handleChangeActiveSubMenu(tab)}
+                >
+                  {["air-leakage", "insulation", "heating", "cooling"].includes(
+                    tab
+                  )
+                    ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
+                    : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
             </div>
 
-            {/* How it Works Section */}
-            <div className="pt-6">
-              <h3 className="text-2xl font-semibold mb-8 text-black dark:text-lime-200">
-                How it Works
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {howItWorksSteps.map((step, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="p-6 bg-green-50 dark:bg-lime-500/50 rounded-xl flex flex-col items-center text-center"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center mb-6">
-                      <step.icon className="h-8 w-8 text-lime-500" />
-                    </div>
-                    <h4 className="text-xl font-semibold text-black dark:text-lime-200 mb-4">
-                      {step.title}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {step.description}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Additional sections omitted for brevity */}
-
-        {/* Call to Action Button */}
-        <div className="text-center">
-          <button
-            onClick={handleScrollToTop}
-            className="bg-lime-500 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors duration-200 font-medium"
-          >
-            View Detailed Reports
-          </button>
+            <div className="p-6">{renderContent()}</div>
+          </div>
         </div>
-      </div>
-    </div>
-  ) : (
-    <div className="container mx-auto p-4" ref={scrollRef}>
-      <div className="bg-gradient-to-r from-lime-400 to-lime-400 py-4 px-6 rounded-t-lg shadow-md">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-white">Reports</h1>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-b-lg shadow-md">
-        <div className="flex border-b border-gray-200">
-          {[
-            "air-leakage",
-            "insulation",
-            "heating",
-            "cooling",
-            "summary",
-            "future solutions and certifications",
-          ].map((tab) => (
-            <button
-              key={tab}
-              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                activeSubMenu === tab
-                  ? "border-b-2 border-lime-500 text-lime-500"
-                  : "text-gray-600 hover:text-lime-500"
-              }`}
-              onClick={() => setActiveSubMenu(tab)}
-            >
-              {["air-leakage", "insulation", "heating", "cooling"].includes(tab)
-                ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
-                : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        <div className="p-6">{renderContent()}</div>
-      </div>
+      )}
     </div>
   );
 };

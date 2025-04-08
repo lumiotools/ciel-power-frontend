@@ -80,6 +80,7 @@ interface ReportSummaryProps {
   onUpdateFinancials?: (financials: any) => void;
   onUpdateTaxCredits?: (taxCredits: any) => void;
   onUpdateEnvironmentalImpact?: (environmentalData: any) => void;
+  onSave: () => void;
 }
 
 interface InPlaceEditProps {
@@ -269,7 +270,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials, onUpdateTaxCredits, onUpdateEnvironmentalImpact }: ReportSummaryProps) {
+export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials, onUpdateTaxCredits, onUpdateEnvironmentalImpact, onSave }: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -608,6 +609,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       const data = await response.json();
       toast.success("Report data saved successfully.");
       console.log("Report data saved successfully:", data);
+      onSave()
     } catch (e) {
       console.error("Error saving report data:", e);
       toast.error("Failed to save report data.");
