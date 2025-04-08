@@ -43,10 +43,8 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
   className,
 }) => {
   return (
-    <div
-      className={cn("relative w-full mt-4", className)}
-    >
-       <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
+    <div className={cn("relative w-full mt-4", className)}>
+      <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
         <div className="flex flex-nowrap items-center">
           {steps.map((step, index) => (
             <div key={step.label} className="flex items-center flex-none">
@@ -60,7 +58,9 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
                 <div
                   className={cn(
                     "h-[2px] w-8 sm:w-12 md:w-16",
-                    step.status === "completed" ? "bg-[#5ea502]" : "bg-[#d1d5db]"
+                    step.status === "completed"
+                      ? "bg-[#5ea502]"
+                      : "bg-[#d1d5db]",
                   )}
                   aria-hidden="true"
                 />

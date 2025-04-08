@@ -1,132 +1,144 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { AdminHeader } from "@/components/admin/AdminHeader"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Plus, Trash2, Save, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft, Plus, Trash2, Save, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Consultant {
-  id: string
-  name: string
-  followUpBookingUrl: string
+  id: string;
+  name: string;
+  followUpBookingUrl: string;
 }
 
 interface Settings {
-  googleDriveServiceAccountEmail: string
-  googleDriveSharedFolderUrl: string
+  googleDriveServiceAccountEmail: string;
+  googleDriveSharedFolderUrl: string;
 }
 
 export default function SettingsPage() {
-  const router = useRouter()
-  const [loadingSettings, setLoadingSettings] = useState(true)
-  const [loadingConsultants, setLoadingConsultants] = useState(true)
-  const [savingDriveFolder, setSavingDriveFolder] = useState(false)
+  const router = useRouter();
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [loadingConsultants, setLoadingConsultants] = useState(true);
+  const [savingDriveFolder, setSavingDriveFolder] = useState(false);
   const [settings, setSettings] = useState<Settings>({
     googleDriveServiceAccountEmail: "",
     googleDriveSharedFolderUrl: "",
-  })
-  const [consultants, setConsultants] = useState<Consultant[]>([])
-  const [newConsultant, setNewConsultant] = useState<{ name: string; followUpBookingUrl: string }>({
+  });
+  const [consultants, setConsultants] = useState<Consultant[]>([]);
+  const [newConsultant, setNewConsultant] = useState<{
+    name: string;
+    followUpBookingUrl: string;
+  }>({
     name: "",
     followUpBookingUrl: "",
-  })
-  const [addingConsultant, setAddingConsultant] = useState(false)
+  });
+  const [addingConsultant, setAddingConsultant] = useState(false);
 
   useEffect(() => {
-    fetchSettings()
-    fetchConsultants()
-  }, [])
+    fetchSettings();
+    fetchConsultants();
+  }, []);
 
   const fetchSettings = async () => {
-    setLoadingSettings(true)
+    setLoadingSettings(true);
     try {
-      const response = await fetch("/api/admin/settings")
+      const response = await fetch("/api/admin/settings");
 
       if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.detail || "Failed to fetch settings")
-        return
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to fetch settings");
+        return;
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setSettings(data.data)
+        setSettings(data.data);
       } else {
-        toast.error(data.message || "Failed to fetch settings")
+        toast.error(data.message || "Failed to fetch settings");
       }
     } catch (error) {
-      console.error("Error fetching settings:", error)
-      toast.error("An error occurred while fetching settings")
+      console.error("Error fetching settings:", error);
+      toast.error("An error occurred while fetching settings");
     } finally {
-      setLoadingSettings(false)
+      setLoadingSettings(false);
     }
-  }
+  };
 
   const fetchConsultants = async () => {
-    setLoadingConsultants(true)
+    setLoadingConsultants(true);
     try {
-      const response = await fetch("/api/admin/consultants")
+      const response = await fetch("/api/admin/consultants");
 
       if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.detail || "Failed to fetch consultants")
-        return
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to fetch consultants");
+        return;
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setConsultants(data.data || [])
+        setConsultants(data.data || []);
       } else {
-        toast.error(data.message || "Failed to fetch consultants")
+        toast.error(data.message || "Failed to fetch consultants");
       }
     } catch (error) {
-      console.error("Error fetching consultants:", error)
-      toast.error("An error occurred while fetching consultants")
+      console.error("Error fetching consultants:", error);
+      toast.error("An error occurred while fetching consultants");
     } finally {
-      setLoadingConsultants(false)
+      setLoadingConsultants(false);
     }
-  }
+  };
 
   const updateDriveFolder = async () => {
-    setSavingDriveFolder(true)
+    setSavingDriveFolder(true);
     try {
       const response = await fetch(
         `/api/admin/settings/driveSharedFolderUrl?folder_url=${encodeURIComponent(settings.googleDriveSharedFolderUrl)}`,
         {
           method: "PUT",
         },
-      )
+      );
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        toast.success("Google Drive folder updated successfully")
-        setSettings(data.data)
+        toast.success("Google Drive folder updated successfully");
+        setSettings(data.data);
       } else {
-        toast.error(data.message || "Failed to update Google Drive folder")
+        toast.error(data.message || "Failed to update Google Drive folder");
       }
     } catch (error) {
-      console.error("Error updating Google Drive folder:", error)
-      toast.error("An error occurred while updating Google Drive folder")
+      console.error("Error updating Google Drive folder:", error);
+      toast.error("An error occurred while updating Google Drive folder");
     } finally {
-      setSavingDriveFolder(false)
+      setSavingDriveFolder(false);
     }
-  }
+  };
 
   const addConsultant = async () => {
-    if (!newConsultant.name.trim() || !newConsultant.followUpBookingUrl.trim()) {
-      toast.error("Consultant name and booking URL are required")
-      return
+    if (
+      !newConsultant.name.trim() ||
+      !newConsultant.followUpBookingUrl.trim()
+    ) {
+      toast.error("Consultant name and booking URL are required");
+      return;
     }
 
-    setAddingConsultant(true)
+    setAddingConsultant(true);
     try {
       const response = await fetch("/api/admin/consultants", {
         method: "POST",
@@ -134,29 +146,32 @@ export default function SettingsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newConsultant),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        toast.success("Consultant added successfully")
-        setConsultants([...consultants, data.data])
-        setNewConsultant({ name: "", followUpBookingUrl: "" })
+        toast.success("Consultant added successfully");
+        setConsultants([...consultants, data.data]);
+        setNewConsultant({ name: "", followUpBookingUrl: "" });
       } else {
-        toast.error(data.message || "Failed to add consultant")
+        toast.error(data.message || "Failed to add consultant");
       }
     } catch (error) {
-      console.error("Error adding consultant:", error)
-      toast.error("An error occurred while adding consultant")
+      console.error("Error adding consultant:", error);
+      toast.error("An error occurred while adding consultant");
     } finally {
-      setAddingConsultant(false)
+      setAddingConsultant(false);
     }
-  }
+  };
 
-  const updateConsultant = async (id: string, updatedData: { name: string; followUpBookingUrl: string }) => {
+  const updateConsultant = async (
+    id: string,
+    updatedData: { name: string; followUpBookingUrl: string },
+  ) => {
     if (!updatedData.name.trim() || !updatedData.followUpBookingUrl.trim()) {
-      toast.error("Consultant name and booking URL are required")
-      return
+      toast.error("Consultant name and booking URL are required");
+      return;
     }
 
     try {
@@ -166,54 +181,63 @@ export default function SettingsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedData),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        toast.success("Consultant updated successfully")
-        setConsultants(consultants.map((c) => (c.id === id ? data.data : c)))
+        toast.success("Consultant updated successfully");
+        setConsultants(consultants.map((c) => (c.id === id ? data.data : c)));
       } else {
-        toast.error(data.message || "Failed to update consultant")
+        toast.error(data.message || "Failed to update consultant");
       }
     } catch (error) {
-      console.error("Error updating consultant:", error)
-      toast.error("An error occurred while updating consultant")
+      console.error("Error updating consultant:", error);
+      toast.error("An error occurred while updating consultant");
     }
-  }
+  };
 
   const deleteConsultant = async (id: string) => {
     try {
       const response = await fetch(`/api/admin/consultants/${id}`, {
         method: "DELETE",
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        toast.success("Consultant deleted successfully")
-        setConsultants(consultants.filter((c) => c.id !== id))
+        toast.success("Consultant deleted successfully");
+        setConsultants(consultants.filter((c) => c.id !== id));
       } else {
-        toast.error(data.message || "Failed to delete consultant")
+        toast.error(data.message || "Failed to delete consultant");
       }
     } catch (error) {
-      console.error("Error deleting consultant:", error)
-      toast.error("An error occurred while deleting consultant")
+      console.error("Error deleting consultant:", error);
+      toast.error("An error occurred while deleting consultant");
     }
-  }
+  };
 
-  const handleConsultantChange = (id: string, field: "name" | "followUpBookingUrl", value: string) => {
+  const handleConsultantChange = (
+    id: string,
+    field: "name" | "followUpBookingUrl",
+    value: string,
+  ) => {
     setConsultants((prev) =>
-      prev.map((consultant) => (consultant.id === id ? { ...consultant, [field]: value } : consultant)),
-    )
-  }
+      prev.map((consultant) =>
+        consultant.id === id ? { ...consultant, [field]: value } : consultant,
+      ),
+    );
+  };
 
-  const handleNewConsultantChange = (field: "name" | "followUpBookingUrl", value: string) => {
+  const handleNewConsultantChange = (
+    field: "name" | "followUpBookingUrl",
+    value: string,
+  ) => {
     setNewConsultant((prev) => ({
       ...prev,
       [field]: value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-[#f5f9f0]">
@@ -236,7 +260,10 @@ export default function SettingsPage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Google Drive Integration</CardTitle>
-            <CardDescription>Configure the Google Drive folder where customer files will be stored</CardDescription>
+            <CardDescription>
+              Configure the Google Drive folder where customer files will be
+              stored
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {loadingSettings ? (
@@ -247,8 +274,8 @@ export default function SettingsPage() {
               <>
                 <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4">
                   <p className="text-amber-800 text-sm">
-                    <strong>Important:</strong> Please give edit access to the service email address below for your
-                    Google Drive folder.
+                    <strong>Important:</strong> Please give edit access to the
+                    service email address below for your Google Drive folder.
                   </p>
                 </div>
 
@@ -260,22 +287,34 @@ export default function SettingsPage() {
                     readOnly
                     className="bg-gray-50 h-10"
                   />
-                  <p className="text-xs text-gray-500">This email needs edit access to your Google Drive folder</p>
+                  <p className="text-xs text-gray-500">
+                    This email needs edit access to your Google Drive folder
+                  </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="googleDriveFolder">Google Drive Folder URL</Label>
+                  <Label htmlFor="googleDriveFolder">
+                    Google Drive Folder URL
+                  </Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="googleDriveFolder"
                       value={settings.googleDriveSharedFolderUrl}
-                      onChange={(e) => setSettings({ ...settings, googleDriveSharedFolderUrl: e.target.value })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          googleDriveSharedFolderUrl: e.target.value,
+                        })
+                      }
                       placeholder="Enter Google Drive folder URL"
                       className="flex-1 h-10"
                     />
                     <Button
                       onClick={updateDriveFolder}
-                      disabled={savingDriveFolder || !settings.googleDriveSharedFolderUrl.trim()}
+                      disabled={
+                        savingDriveFolder ||
+                        !settings.googleDriveSharedFolderUrl.trim()
+                      }
                       className="bg-[#5cb85c] hover:bg-[#4a9d4a] h-10"
                     >
                       {savingDriveFolder ? (
@@ -292,7 +331,8 @@ export default function SettingsPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Enter the URL of the Google Drive folder where customer files will be stored
+                    Enter the URL of the Google Drive folder where customer
+                    files will be stored
                   </p>
                 </div>
               </>
@@ -304,7 +344,9 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Consultants Management</CardTitle>
-            <CardDescription>Manage your consultants and their booking URLs</CardDescription>
+            <CardDescription>
+              Manage your consultants and their booking URLs
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {loadingConsultants ? (
@@ -316,7 +358,9 @@ export default function SettingsPage() {
                 {/* Existing Consultants */}
                 {consultants.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium mb-4">Existing Consultants</h3>
+                    <h3 className="text-sm font-medium mb-4">
+                      Existing Consultants
+                    </h3>
                     {consultants.map((consultant, index) => (
                       <div
                         key={consultant.id}
@@ -324,7 +368,10 @@ export default function SettingsPage() {
                       >
                         <div className="col-span-5">
                           {index === 0 && (
-                            <Label htmlFor={`consultant-name-${consultant.id}`} className="mb-2 block">
+                            <Label
+                              htmlFor={`consultant-name-${consultant.id}`}
+                              className="mb-2 block"
+                            >
                               Consultant Name
                             </Label>
                           )}
@@ -332,7 +379,13 @@ export default function SettingsPage() {
                             <Input
                               id={`consultant-name-${consultant.id}`}
                               value={consultant.name}
-                              onChange={(e) => handleConsultantChange(consultant.id, "name", e.target.value)}
+                              onChange={(e) =>
+                                handleConsultantChange(
+                                  consultant.id,
+                                  "name",
+                                  e.target.value,
+                                )
+                              }
                               placeholder="Consultant name"
                               className="h-full"
                             />
@@ -340,7 +393,10 @@ export default function SettingsPage() {
                         </div>
                         <div className="col-span-5">
                           {index === 0 && (
-                            <Label htmlFor={`consultant-url-${consultant.id}`} className="mb-2 block">
+                            <Label
+                              htmlFor={`consultant-url-${consultant.id}`}
+                              className="mb-2 block"
+                            >
                               Booking URL
                             </Label>
                           )}
@@ -349,7 +405,11 @@ export default function SettingsPage() {
                               id={`consultant-url-${consultant.id}`}
                               value={consultant.followUpBookingUrl}
                               onChange={(e) =>
-                                handleConsultantChange(consultant.id, "followUpBookingUrl", e.target.value)
+                                handleConsultantChange(
+                                  consultant.id,
+                                  "followUpBookingUrl",
+                                  e.target.value,
+                                )
                               }
                               placeholder="https://example.com/booking"
                               className="h-full"
@@ -357,7 +417,12 @@ export default function SettingsPage() {
                           </div>
                         </div>
                         <div className="col-span-2">
-                          {index === 0 && <div className="mb-0.5 block h-5" aria-hidden="true" />}
+                          {index === 0 && (
+                            <div
+                              className="mb-0.5 block h-5"
+                              aria-hidden="true"
+                            />
+                          )}
                           <div className="flex justify-end gap-2 h-10">
                             <Button
                               type="button"
@@ -365,7 +430,8 @@ export default function SettingsPage() {
                               onClick={() =>
                                 updateConsultant(consultant.id, {
                                   name: consultant.name,
-                                  followUpBookingUrl: consultant.followUpBookingUrl,
+                                  followUpBookingUrl:
+                                    consultant.followUpBookingUrl,
                                 })
                               }
                               className="h-full text-[#5cb85c] border-[#5cb85c] hover:bg-[#5cb85c]/10"
@@ -389,23 +455,32 @@ export default function SettingsPage() {
                   </div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-6 text-center">
-                    <p className="text-gray-500">No consultants found. Add your first consultant below.</p>
+                    <p className="text-gray-500">
+                      No consultants found. Add your first consultant below.
+                    </p>
                   </div>
                 )}
 
                 {/* Add New Consultant */}
                 <div className="pt-6 border-t">
-                  <h3 className="text-sm font-medium mb-4">Add New Consultant</h3>
+                  <h3 className="text-sm font-medium mb-4">
+                    Add New Consultant
+                  </h3>
                   <div className="grid grid-cols-12 gap-4 items-start">
                     <div className="col-span-5">
-                      <Label htmlFor="new-consultant-name" className="mb-2 block">
+                      <Label
+                        htmlFor="new-consultant-name"
+                        className="mb-2 block"
+                      >
                         Consultant Name
                       </Label>
                       <div className="h-10">
                         <Input
                           id="new-consultant-name"
                           value={newConsultant.name}
-                          onChange={(e) => handleNewConsultantChange("name", e.target.value)}
+                          onChange={(e) =>
+                            handleNewConsultantChange("name", e.target.value)
+                          }
                           placeholder="Enter consultant name"
                           className="h-full"
                           disabled={addingConsultant}
@@ -413,14 +488,22 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div className="col-span-5">
-                      <Label htmlFor="new-consultant-url" className="mb-2 block">
+                      <Label
+                        htmlFor="new-consultant-url"
+                        className="mb-2 block"
+                      >
                         Booking URL
                       </Label>
                       <div className="h-10">
                         <Input
                           id="new-consultant-url"
                           value={newConsultant.followUpBookingUrl}
-                          onChange={(e) => handleNewConsultantChange("followUpBookingUrl", e.target.value)}
+                          onChange={(e) =>
+                            handleNewConsultantChange(
+                              "followUpBookingUrl",
+                              e.target.value,
+                            )
+                          }
                           placeholder="https://nut.sh/ell/schedule-booking/..."
                           className="h-full"
                           disabled={addingConsultant}
@@ -434,7 +517,9 @@ export default function SettingsPage() {
                         onClick={addConsultant}
                         className="bg-[#5cb85c] hover:bg-[#4a9d4a] w-full h-10"
                         disabled={
-                          addingConsultant || !newConsultant.name.trim() || !newConsultant.followUpBookingUrl.trim()
+                          addingConsultant ||
+                          !newConsultant.name.trim() ||
+                          !newConsultant.followUpBookingUrl.trim()
                         }
                       >
                         {addingConsultant ? (
@@ -458,6 +543,5 @@ export default function SettingsPage() {
         </Card>
       </main>
     </div>
-  )
+  );
 }
-

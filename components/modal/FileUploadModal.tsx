@@ -34,7 +34,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     const filteredFiles = selectedFiles.filter((file) => {
       if (file.size > MAX_SIZE_MB * 1024 * 1024) {
         alert(
-          `"${file.name}" exceeds the ${MAX_SIZE_MB}MB size limit and will not be uploaded.`
+          `"${file.name}" exceeds the ${MAX_SIZE_MB}MB size limit and will not be uploaded.`,
         );
         return false;
       }
@@ -98,7 +98,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
       const data = await response.json();
       console.log(data);
@@ -135,11 +135,12 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 Upload Utility Bills
               </CardTitle>
               <Button
-                onClick={onClose} size={'icon'} variant="outline"
+                onClick={onClose}
+                size={"icon"}
+                variant="outline"
                 className="text-gray-500 hover:text-gray-700 bg-transparent"
               >
                 <XCircle className="w-6 h-6" />
-                
               </Button>
             </div>
           </CardHeader>
@@ -203,7 +204,8 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                       </p>
                     </div>
                     <Button
-                    size={'icon'} variant="outline"
+                      size={"icon"}
+                      variant="outline"
                       onClick={() => handleFileRemove(index)}
                       className="text-red-500 hover:text-red-600 bg-transparent "
                     >
@@ -217,7 +219,10 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
             {/* Upload Button */}
             {files.length > 0 && !uploading && (
               <div className="mt-4">
-                <Button onClick={handleUpload} className="rounded-full bg-[#96C93D] hover:bg-[#85b234]">
+                <Button
+                  onClick={handleUpload}
+                  className="rounded-full bg-[#96C93D] hover:bg-[#85b234]"
+                >
                   Upload Files
                 </Button>
               </div>

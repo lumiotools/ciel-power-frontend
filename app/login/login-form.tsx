@@ -39,7 +39,7 @@ export default function LoginForm() {
     }
     if (emailToken) {
       const validEmail = decodeURIComponent(
-        Buffer.from(emailToken || "", "hex").toString("utf8")
+        Buffer.from(emailToken || "", "hex").toString("utf8"),
       );
       setEmail(validEmail);
     }
@@ -72,7 +72,7 @@ export default function LoginForm() {
     } catch (error) {
       console.log("Error", error as Error);
       setError(
-        "An error occurred during Google login. Please try again later."
+        "An error occurred during Google login. Please try again later.",
       );
       router.replace(pathname);
     } finally {

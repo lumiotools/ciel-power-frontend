@@ -28,9 +28,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className}  antialiased`}>
         <AuthProvider>
-          <Toaster/>
+          <Toaster />
           {children}
-          </AuthProvider>
+        </AuthProvider>
       </body>
     </html>
   );

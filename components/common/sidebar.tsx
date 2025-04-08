@@ -56,7 +56,7 @@ export function Sidebar() {
                 "flex items-center w-full justify-start rounded-full text-white text-sm font-medium p-6",
                 pathname === item.href
                   ? "bg-gradient-to-r from-[#99CD55] to-[#76BC1C] text-white hover:text-white"
-                  : "hover:bg-lime-500 hover:text-white"
+                  : "hover:bg-lime-500 hover:text-white",
               )}
             >
               <Link href={item.href}>

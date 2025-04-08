@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 // import { usePathname } from "next/navigation"
-import { Bell, Calendar, Globe, LoaderCircle, Menu, Plus, Search } from "lucide-react";
+import {
+  Bell,
+  Calendar,
+  Globe,
+  LoaderCircle,
+  Menu,
+  Plus,
+  Search,
+} from "lucide-react";
 
 // import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button";
@@ -18,7 +26,13 @@ import { Input } from "@/components/ui/input";
 import { useContext, useState } from "react";
 import { AUTH_CONTEXT } from "@/providers/auth";
 import { usePathname, useRouter } from "next/navigation";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const sidebarItems = [
   { name: "My Bookings", href: "/dashboard/bookings", icon: Calendar },
@@ -26,13 +40,12 @@ const sidebarItems = [
   { name: "What to Expect", href: "/dashboard/expect", icon: Globe },
 ];
 
-
 export function Navbar() {
   // const pathname = usePathname()
 
   const { isLoading, isLoggedIn, logoutUser } = useContext(AUTH_CONTEXT);
   const router = useRouter();
-  const pathname = usePathname(); 
+  const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -158,7 +171,7 @@ export function Navbar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={() => setIsSheetOpen(false)} 
+                    onClick={() => setIsSheetOpen(false)}
                     className={`flex items-center space-x-3 p-2 rounded-md ${
                       pathname === item.href
                         ? "bg-gray-100 text-gray-900"

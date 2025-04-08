@@ -1,4 +1,3 @@
-
 export const getUserDetails = async () => {
   const response = await fetch(`/api/auth/user-details`, {
     method: "GET",
