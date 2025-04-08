@@ -52,6 +52,7 @@ interface CoolingContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
   driveImages?: driveImages[];
+  onSave: () => void;
 }
 
 // interface ImageUploadProps {
@@ -709,6 +710,7 @@ export function CoolingContent({
   isAdmin = false,
   onUpdateItem,
   driveImages,
+  onSave,
 }: CoolingContentProps) {
   const params = useParams();
 
@@ -783,6 +785,7 @@ export function CoolingContent({
       const data = await response.json();
       toast.success("Data submitted successfully!");
       console.log("Data submitted successfully:", data);
+      onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
     }

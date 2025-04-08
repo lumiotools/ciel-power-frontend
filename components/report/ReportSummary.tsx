@@ -1,33 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  AlertTriangle,
-  Fan,
-  Leaf,
-  Home,
-  ArrowUp,
-  Thermometer,
-  DollarSign,
-  Shield,
-  Activity,
-  Pencil,
-  Check,
-  X,
-  Trash2,
-} from "lucide-react";
+import { AlertTriangle, Fan, Leaf, Home, ArrowUp, Thermometer, DollarSign, Shield, Activity, Pencil, Check, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ProjectCosts } from "@/components/report/ProjectCosts";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FederalTaxCredits } from "@/components/report/TaxCredits";
+import { EnvironmentalImpact } from "@/components/report/EnvironmentalImpact";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { set } from "date-fns";
 import { toast } from "sonner";
 
@@ -39,12 +21,10 @@ interface ConcernItem {
   [key: string]: any;
 }
 
+// Updated Recommendation interface with only title and benefits
 interface Recommendation {
   title: string;
-  location: string;
-  insulation_details?: string;
-  specific_steps?: string;
-  benefit: string;
+  benefits: string;
   [key: string]: any;
 }
 
@@ -62,7 +42,6 @@ interface FinancialData {
   financingPeriodYears: number;
 }
 
-
 interface ReportSummaryProps {
   data?: {
     summaryOfConcerns?: {
@@ -71,16 +50,36 @@ interface ReportSummaryProps {
         data: ConcernItem[];
       }>;
     };
+    // Updated solutionsAndRecommendations structure
     solutionsAndRecommendations?: {
-      recommendations: Recommendation[];
+      title: string;
+      data: Recommendation[];
     };
     financialSummary?: FinancialData;
+    federalTaxCredits?: {
+      title: string;
+      data: Array<{
+        title: string;
+        amount: string;
+        note?: string;
+      }>;
+    };
+    environmentalImpact?: {
+      title: string;
+      currentFootprint: { value: string; unit: string };
+      projectedSavings: { value: string; unit: string };
+      projectedFootprint: { value: string; unit: string };
+      totalReduction: { value: string; unit: string };
+    };
     [key: string]: any;
   };
   isAdmin?: boolean;
   onUpdateConcerns?: (concerns: any) => void;
-  onUpdateRecommendations?: (recommendations: any[]) => void;
+  onUpdateRecommendations?: (recommendations: any) => void;
   onUpdateFinancials?: (financials: any) => void;
+  onUpdateTaxCredits?: (taxCredits: any) => void;
+  onUpdateEnvironmentalImpact?: (environmentalData: any) => void;
+  onSave: () => void;
 }
 
 interface InPlaceEditProps {
@@ -197,10 +196,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   );
 };
 
-// In-place editing component for numbers
-const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
-  initialValue,
-  isAdmin,
+
 const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   initialValue,
   isAdmin,
@@ -273,12 +269,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({
-  data,
-  isAdmin = false,
-  onUpdateConcerns,
-  onUpdateRecommendations, onUpdateFinancials,
-}: ReportSummaryProps) {
+export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials, onUpdateTaxCredits, onUpdateEnvironmentalImpact, onSave }: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -316,13 +307,13 @@ export function ReportSummary({
   }, [data?.summaryOfConcerns]);
 
 
-  // Process recommendations data
+  // Process recommendations data - Updated for new format
   useEffect(() => {
-    if (!data?.solutionsAndRecommendations?.recommendations) return;
-
+    if (!data?.solutionsAndRecommendations?.data) return;
 
     try {
-      const recs = data.solutionsAndRecommendations.recommendations.map(rec => ({
+      // Use the new data structure with title and benefits only
+      const recs = data.solutionsAndRecommendations.data.map(rec => ({
         ...rec
       }));
       setRecommendations(recs);
@@ -479,6 +470,7 @@ export function ReportSummary({
     }
   };
 
+  // Updated to only handle title and benefits
   const updateRecommendation = (index: number, field: keyof Recommendation, value: string | number) => {
     setRecommendations(prev => {
       const newRecommendations = [...prev];
@@ -489,42 +481,34 @@ export function ReportSummary({
         };
       }
 
-
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
-
       return newRecommendations;
     });
   };
 
-
+  // Updated to add a new recommendation with only title and benefits
   const addRecommendation = () => {
     setRecommendations((prev) => {
       const newRecommendations = [
-        ...prev,
         {
           title: "New Recommendation",
-          location: "",
-          insulation_details: "",
-          specific_steps: "",
-          benefit: "",
-        }
+          benefits: "Benefits of this recommendation"
+        },
+        ...prev
       ];
-
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
-
       return newRecommendations;
     });
   };
-
 
   const deleteRecommendation = (index: number) => {
     setRecommendations((prev) => {
@@ -534,7 +518,6 @@ export function ReportSummary({
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
-
 
       return newRecommendations;
     });
@@ -547,6 +530,19 @@ export function ReportSummary({
     }
   };
 
+  const updateTaxCredits = (taxCreditsData: any) => {
+    // If onUpdateTaxCredits callback is provided, call it with the updated data
+    if (onUpdateTaxCredits) {
+      onUpdateTaxCredits(taxCreditsData);
+    }
+  };
+
+  const updateEnvironmentalImpact = (environmentalData: any) => {
+    // If onUpdateEnvironmentalImpact callback is provided, call it with the updated data
+    if (onUpdateEnvironmentalImpact) {
+      onUpdateEnvironmentalImpact(environmentalData);
+    }
+  };
 
   // const router = useRouter();
   const pathname = usePathname();
@@ -602,8 +598,9 @@ export function ReportSummary({
       }
 
       const data = await response.json();
-      toast.success("Report data saved successfully.");
+      toast.success("Data submitted successfully!");
       console.log("Report data saved successfully:", data);
+      onSave()
     } catch (e) {
       console.error("Error saving report data:", e);
       toast.error("Failed to save report data.");
@@ -616,11 +613,10 @@ export function ReportSummary({
       {isAdmin && (
         <div className="top-4 flex justify-end">
           <button
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition-colors"
-            onClick={() => onSubmit()}
+            onClick={onSubmit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
           >
-            <Save size={18} />
-            Save Changes
+            Save
           </button>
         </div>
       )}
@@ -751,7 +747,7 @@ export function ReportSummary({
         </Card>
       </motion.div>
 
-      {/* Solutions & Recommended Upgrades Section */}
+      {/* Solutions & Recommended Upgrades Section - UPDATED FOR NEW FORMAT */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -780,8 +776,7 @@ export function ReportSummary({
             {recommendations.length > 0 ? (
               recommendations.map((recommendation, index) => {
                 const RecommendationIcon = getIconForRecommendation(recommendation.title);
-                const progress = recommendation.progress !== undefined ? recommendation.progress : 0;
-
+                
                 return (
                   <motion.div
                     key={`recommendation-${index}`}
@@ -811,7 +806,6 @@ export function ReportSummary({
                           </h3>
                           {isAdmin && (
                             <button
-                            <button
                               onClick={() => deleteRecommendation(index)}
                               className="text-red-500 hover:text-red-700 px-2 py-1 text-xs rounded hover:bg-red-50 flex items-center gap-1 transition-colors"
                               type="button"
@@ -825,90 +819,19 @@ export function ReportSummary({
                         <div className="space-y-3 my-3">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">
-                              Location:
-                            </p>
-                            <InPlaceEdit
-                              initialValue={recommendation.location}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(index, "location", value)
-                              }
-                              placeholder="Enter location"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">
-                              Details:
-                            </p>
-                            <InPlaceEdit
-                              initialValue={recommendation.insulation_details}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(
-                                  index,
-                                  "insulation_details",
-                                  value,
-                                )
-                              }
-                              multiline={true}
-                              placeholder="Enter insulation details if applicable"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Steps:</p>
-                            <InPlaceEdit
-                              initialValue={recommendation.specific_steps}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(
-                                  index,
-                                  "specific_steps",
-                                  value,
-                                )
-                              }
-                              multiline={true}
-                              placeholder="Enter implementation steps if applicable"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">
                               Benefits:
                             </p>
                             <InPlaceEdit
-                              initialValue={recommendation.benefit}
+                              initialValue={recommendation.benefits}
                               isAdmin={isAdmin}
                               onUpdate={(value) =>
-                                updateRecommendation(index, "benefit", value)
+                                updateRecommendation(index, "benefits", value)
                               }
+                              multiline={true}
                               placeholder="Enter benefits"
                             />
                           </div>
                         </div>
-
-                        {/* <div className="flex items-center justify-between mt-4">
-                          <span className="text-sm text-gray-600">Implementation Progress</span>
-                          {isAdmin ? (
-                            <InPlaceEditNumber
-                              initialValue={progress}
-                              isAdmin={isAdmin}
-                              onUpdate={(value) =>
-                                updateRecommendation(index, "progress", value)
-                              }
-                              min={0}
-                              max={100}
-                            />
-                          ) : (
-                            <span className="text-sm font-medium text-green-600">
-                              {progress}%
-                            </span>
-                          )}
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
-                            style={{ width: `${progress}%` }}
-                          ></div>
-                        </div> */}
                       </div>
                     </div>
                   </motion.div>
@@ -949,146 +872,6 @@ export function ReportSummary({
         </Card>
       </motion.div>
 
-      {/* Project Costs Section */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.9 }}
-      >
-        <Card className="border-green-100">
-          <CardHeader className="bg-green-50 dark:bg-green-900/20">
-            <CardTitle className="text-2xl text-green-600 dark:text-green-200 flex items-center gap-2">
-              <DollarSign className="h-6 w-6" />
-              Project Costs & Incentives
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4 bg-green-50/50">
-            {/* Total Project Costs */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.0 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Total Project Costs</h3>
-          </div>
-          <span className="font-medium text-gray-900">$21,748.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Audit Refund */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.1 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Audit Refund</h3>
-          </div>
-          <span className="font-medium text-gray-900">$99.00</span>
-        </div>
-      </motion.div>
-
-      {/* NJ HPwES Cash Back Incentive */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.2 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">NJ HPwES Cash Back Incentive</h3>
-          </div>
-          <span className="font-medium text-green-600">$5,000.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Remaining Balance */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.3 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Remaining Balance</h3>
-          </div>
-          <span className="font-medium text-gray-900">$16,649.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Amount Eligible for NJ HPwES Financing */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.4 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-700">Amount Eligible for NJ HPwES Financing</h3>
-              <p className="text-xs text-gray-500">*if qualified by financing company (0% Interest Rate)</p>
-            </div>
-          </div>
-          <span className="font-medium text-gray-900">$15,000.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Remaining Out of Pocket Expenses */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.5 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Remaining Out of Pocket Expenses</h3>
-          </div>
-          <span className="font-medium text-green-600">$1,649.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Monthly Payment */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.6 }}
-        className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
-      >
-        <h3 className="text-gray-700 font-medium mb-2">Total Monthly Payment</h3>
-        <p className="text-green-600 text-2xl font-bold">$125.00/month</p>
-        <p className="text-xs text-gray-500">*Over a 10 year period</p>
-      </motion.div>
-    </CardContent>
-        </Card >
-      </motion.div > */ }
-
       <ProjectCosts
         data={{
           financialSummary: data?.financialSummary
@@ -1098,6 +881,23 @@ export function ReportSummary({
         onUpdateFinancials={updateFinancials}
       />
 
+      {/* Federal Tax Credits Section */}
+      <FederalTaxCredits
+        data={data?.federalTaxCredits}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber}
+        reportData={data}
+        onUpdate={updateTaxCredits}
+      />
+
+      {/* Environmental Impact Section */}
+      <EnvironmentalImpact
+        data={data?.environmentalImpact}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber}
+        reportData={data}
+        onUpdate={updateEnvironmentalImpact}
+      />
     </div >
   );
 }

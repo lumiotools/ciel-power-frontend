@@ -63,6 +63,7 @@ interface HeatingContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
   driveImages?: driveImages[];
+  onSave: () => void;
 }
 
 interface PerformanceCardProps {
@@ -808,6 +809,7 @@ export function HeatingContent({
   isAdmin = false,
   onUpdateItem,
   driveImages,
+  onSave,
 }: HeatingContentProps) {
   const params = useParams();
 
@@ -886,6 +888,7 @@ export function HeatingContent({
       const data = await response.json();
       toast.success("Data submitted successfully!");
       console.log("Data submitted successfully:", data);
+      onSave()
     } catch (error) {
       console.error("Error submitting data:", error);
     }
