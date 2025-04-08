@@ -62,7 +62,6 @@ interface FinancialData {
   financingPeriodYears: number;
 }
 
-
 interface ReportSummaryProps {
   data?: {
     summaryOfConcerns?: {
@@ -139,7 +138,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (!multiline && e.key === "Enter") {
       handleSave();
     }
@@ -198,9 +199,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 };
 
 // In-place editing component for numbers
-const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
-  initialValue,
-  isAdmin,
+// const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
+//   initialValue,
+//   isAdmin,
 const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   initialValue,
   isAdmin,
@@ -273,40 +274,44 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({
+export const ReportSummary = ({
   data,
   isAdmin = false,
   onUpdateConcerns,
-  onUpdateRecommendations, onUpdateFinancials,
-}: ReportSummaryProps) {
+  onUpdateRecommendations,
+  onUpdateFinancials,
+}: ReportSummaryProps) => {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-
 
   // Process concerns data
   useEffect(() => {
     if (!data?.summaryOfConcerns?.data) return;
 
-
     try {
-      const healthSafety = data.summaryOfConcerns.data.find(
-        section => section.name === "Basic Health and Safety"
-      )?.data || [];
+      const healthSafety =
+        data.summaryOfConcerns.data.find(
+          (section) => section.name === "Basic Health and Safety",
+        )?.data || [];
 
-      const combustion = data.summaryOfConcerns.data.find(
-        section => section.name === "Combustion Testing"
-      )?.data || [];
+      const combustion =
+        data.summaryOfConcerns.data.find(
+          (section) => section.name === "Combustion Testing",
+        )?.data || [];
 
       // Filter for flagged items with concerns
-      const flaggedHealthSafety = healthSafety.filter(item =>
-        item && item.flag && item.concern
+      const flaggedHealthSafety = healthSafety.filter(
+        (item) => item && item.flag && item.concern,
       );
 
-      const flaggedCombustion = combustion.filter(item =>
-        item && item.flag && item.concern && item.concern !== "Testing required"
+      const flaggedCombustion = combustion.filter(
+        (item) =>
+          item &&
+          item.flag &&
+          item.concern &&
+          item.concern !== "Testing required",
       );
-
 
       setConcerns([...flaggedHealthSafety, ...flaggedCombustion]);
     } catch (error) {
@@ -315,16 +320,16 @@ export function ReportSummary({
     }
   }, [data?.summaryOfConcerns]);
 
-
   // Process recommendations data
   useEffect(() => {
     if (!data?.solutionsAndRecommendations?.recommendations) return;
 
-
     try {
-      const recs = data.solutionsAndRecommendations.recommendations.map(rec => ({
-        ...rec
-      }));
+      const recs = data.solutionsAndRecommendations.recommendations.map(
+        (rec) => ({
+          ...rec,
+        }),
+      );
       setRecommendations(recs);
     } catch (error) {
       console.error("Error processing recommendations data:", error);
@@ -332,11 +337,9 @@ export function ReportSummary({
     }
   }, [data?.solutionsAndRecommendations]);
 
-
   // Concern functions
   const getIconForConcern = (name?: string) => {
     if (!name) return AlertTriangle;
-
 
     const nameLower = name.toLowerCase();
     if (
@@ -354,8 +357,12 @@ export function ReportSummary({
     }
   };
 
-  const updateConcern = (index: number, field: keyof ConcernItem, value: string | boolean) => {
-    setConcerns(prev => {
+  const updateConcern = (
+    index: number,
+    field: keyof ConcernItem,
+    value: string | boolean,
+  ) => {
+    setConcerns((prev) => {
       const newConcerns = [...prev];
       if (newConcerns[index]) {
         newConcerns[index] = {
@@ -364,20 +371,20 @@ export function ReportSummary({
         };
       }
 
-
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item =>
-          !item.name.toLowerCase().includes('combustion') &&
-          !item.name.toLowerCase().includes('gas')
+        const healthSafety = newConcerns.filter(
+          (item) =>
+            !item.name.toLowerCase().includes("combustion") &&
+            !item.name.toLowerCase().includes("gas"),
         );
 
-        const combustion = newConcerns.filter(item =>
-          item.name.toLowerCase().includes('combustion') ||
-          item.name.toLowerCase().includes('gas')
+        const combustion = newConcerns.filter(
+          (item) =>
+            item.name.toLowerCase().includes("combustion") ||
+            item.name.toLowerCase().includes("gas"),
         );
-
 
         onUpdateConcerns({
           healthSafety,
@@ -385,11 +392,9 @@ export function ReportSummary({
         });
       }
 
-
       return newConcerns;
     });
   };
-
 
   const addConcern = () => {
     setConcerns((prev) => {
@@ -397,24 +402,25 @@ export function ReportSummary({
         {
           name: "New Concern",
           concern: "Description of the new concern",
-          flag: true
+          flag: true,
         },
-        ...prev
+        ...prev,
       ];
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item =>
-          !item.name.toLowerCase().includes('combustion') &&
-          !item.name.toLowerCase().includes('gas')
+        const healthSafety = newConcerns.filter(
+          (item) =>
+            !item.name.toLowerCase().includes("combustion") &&
+            !item.name.toLowerCase().includes("gas"),
         );
 
-        const combustion = newConcerns.filter(item =>
-          item.name.toLowerCase().includes('combustion') ||
-          item.name.toLowerCase().includes('gas')
+        const combustion = newConcerns.filter(
+          (item) =>
+            item.name.toLowerCase().includes("combustion") ||
+            item.name.toLowerCase().includes("gas"),
         );
-
 
         onUpdateConcerns({
           healthSafety,
@@ -422,28 +428,27 @@ export function ReportSummary({
         });
       }
 
-
       return newConcerns;
     });
   };
-
 
   const deleteConcern = (index: number) => {
     setConcerns((prev) => {
       const newConcerns = prev.filter((_, i) => i !== index);
 
-
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item =>
-          !item.name.toLowerCase().includes('combustion') &&
-          !item.name.toLowerCase().includes('gas')
+        const healthSafety = newConcerns.filter(
+          (item) =>
+            !item.name.toLowerCase().includes("combustion") &&
+            !item.name.toLowerCase().includes("gas"),
         );
 
-        const combustion = newConcerns.filter(item =>
-          item.name.toLowerCase().includes('combustion') ||
-          item.name.toLowerCase().includes('gas')
+        const combustion = newConcerns.filter(
+          (item) =>
+            item.name.toLowerCase().includes("combustion") ||
+            item.name.toLowerCase().includes("gas"),
         );
 
         onUpdateConcerns({
@@ -479,8 +484,12 @@ export function ReportSummary({
     }
   };
 
-  const updateRecommendation = (index: number, field: keyof Recommendation, value: string | number) => {
-    setRecommendations(prev => {
+  const updateRecommendation = (
+    index: number,
+    field: keyof Recommendation,
+    value: string | number,
+  ) => {
+    setRecommendations((prev) => {
       const newRecommendations = [...prev];
       if (newRecommendations[index]) {
         newRecommendations[index] = {
@@ -489,17 +498,14 @@ export function ReportSummary({
         };
       }
 
-
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
-
       return newRecommendations;
     });
   };
-
 
   const addRecommendation = () => {
     setRecommendations((prev) => {
@@ -511,20 +517,17 @@ export function ReportSummary({
           insulation_details: "",
           specific_steps: "",
           benefit: "",
-        }
+        },
       ];
-
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
-
       return newRecommendations;
     });
   };
-
 
   const deleteRecommendation = (index: number) => {
     setRecommendations((prev) => {
@@ -534,7 +537,6 @@ export function ReportSummary({
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
-
 
       return newRecommendations;
     });
@@ -546,7 +548,6 @@ export function ReportSummary({
       onUpdateFinancials(financials);
     }
   };
-
 
   // const router = useRouter();
   const pathname = usePathname();
@@ -564,8 +565,12 @@ export function ReportSummary({
       // console.log("Data from localStorage:", data);
 
       if (!data) {
-        console.error("No data found in localStorage for the given booking number.");
-        toast.error("No data found in localStorage for the given booking number.");
+        console.error(
+          "No data found in localStorage for the given booking number.",
+        );
+        toast.error(
+          "No data found in localStorage for the given booking number.",
+        );
         return;
       }
 
@@ -573,10 +578,10 @@ export function ReportSummary({
       updatedReportData = {
         reportData: updatedReportData,
         displayReport: true,
-        reportUrl: ""
+        reportUrl: "",
       };
 
-      console.log("Saved summary data to local storage", updatedReportData)
+      console.log("Saved summary data to local storage", updatedReportData);
     } catch (e) {
       console.error("Error parsing data from localStorage:", e);
       toast.error("Error parsing data from localStorage.");
@@ -585,14 +590,15 @@ export function ReportSummary({
 
     try {
       console.log("Saving report data:", updatedReportData);
-      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`,
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/report/update`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(updatedReportData),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -608,8 +614,7 @@ export function ReportSummary({
       console.error("Error saving report data:", e);
       toast.error("Failed to save report data.");
     }
-  }
-
+  };
 
   return (
     <div className="space-y-8">
@@ -779,8 +784,13 @@ export function ReportSummary({
           <CardContent className="p-6 space-y-4 bg-green-50/50">
             {recommendations.length > 0 ? (
               recommendations.map((recommendation, index) => {
-                const RecommendationIcon = getIconForRecommendation(recommendation.title);
-                const progress = recommendation.progress !== undefined ? recommendation.progress : 0;
+                const RecommendationIcon = getIconForRecommendation(
+                  recommendation.title,
+                );
+                const progress =
+                  recommendation.progress !== undefined
+                    ? recommendation.progress
+                    : 0;
 
                 return (
                   <motion.div
@@ -810,7 +820,6 @@ export function ReportSummary({
                             />
                           </h3>
                           {isAdmin && (
-                            <button
                             <button
                               onClick={() => deleteRecommendation(index)}
                               className="text-red-500 hover:text-red-700 px-2 py-1 text-xs rounded hover:bg-red-50 flex items-center gap-1 transition-colors"
@@ -949,155 +958,14 @@ export function ReportSummary({
         </Card>
       </motion.div>
 
-      {/* Project Costs Section */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.9 }}
-      >
-        <Card className="border-green-100">
-          <CardHeader className="bg-green-50 dark:bg-green-900/20">
-            <CardTitle className="text-2xl text-green-600 dark:text-green-200 flex items-center gap-2">
-              <DollarSign className="h-6 w-6" />
-              Project Costs & Incentives
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4 bg-green-50/50">
-            {/* Total Project Costs */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.0 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Total Project Costs</h3>
-          </div>
-          <span className="font-medium text-gray-900">$21,748.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Audit Refund */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.1 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Audit Refund</h3>
-          </div>
-          <span className="font-medium text-gray-900">$99.00</span>
-        </div>
-      </motion.div>
-
-      {/* NJ HPwES Cash Back Incentive */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.2 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">NJ HPwES Cash Back Incentive</h3>
-          </div>
-          <span className="font-medium text-green-600">$5,000.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Remaining Balance */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.3 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Remaining Balance</h3>
-          </div>
-          <span className="font-medium text-gray-900">$16,649.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Amount Eligible for NJ HPwES Financing */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.4 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-700">Amount Eligible for NJ HPwES Financing</h3>
-              <p className="text-xs text-gray-500">*if qualified by financing company (0% Interest Rate)</p>
-            </div>
-          </div>
-          <span className="font-medium text-gray-900">$15,000.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Remaining Out of Pocket Expenses */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.5 }}
-        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-md">
-              <DollarSign className="text-green-600" size={20} />
-            </div>
-            <h3 className="font-medium text-gray-700">Remaining Out of Pocket Expenses</h3>
-          </div>
-          <span className="font-medium text-green-600">$1,649.00</span>
-        </div>
-      </motion.div> */}
-
-      {/* Monthly Payment */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.6 }}
-        className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
-      >
-        <h3 className="text-gray-700 font-medium mb-2">Total Monthly Payment</h3>
-        <p className="text-green-600 text-2xl font-bold">$125.00/month</p>
-        <p className="text-xs text-gray-500">*Over a 10 year period</p>
-      </motion.div>
-    </CardContent>
-        </Card >
-      </motion.div > */ }
-
       <ProjectCosts
         data={{
-          financialSummary: data?.financialSummary
+          financialSummary: data?.financialSummary,
         }}
         isAdmin={isAdmin}
         bookingNumber={bookingNumber || ""}
         onUpdateFinancials={updateFinancials}
       />
-
-    </div >
+    </div>
   );
-}
+};
