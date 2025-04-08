@@ -486,6 +486,49 @@ const ReportPage = ({
     }
   };
 
+  const updateTaxCredits = (newTaxCredits: any) => {
+    if (!isAdmin) return;
+
+    const updatedReportData = {
+      ...reportData,
+      federalTaxCredits: newTaxCredits
+    };
+
+    setReportData(updatedReportData);
+
+    // Save to localStorage
+    try {
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
+    } catch (e) {
+      console.error("Error saving tax credits to localStorage:", e);
+    }
+  };
+
+  const updateEnvironmentalImpact = (newEnvironmentalData: any) => {
+    if (!isAdmin) return;
+  
+    const updatedReportData = {
+      ...reportData,
+      environmentalImpact: newEnvironmentalData
+    };
+  
+    setReportData(updatedReportData);
+  
+    // Save to localStorage
+    try {
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
+    } catch (e) {
+      console.error("Error saving environmental impact data to localStorage:", e);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f5f9f0]">
@@ -600,6 +643,8 @@ const ReportPage = ({
             onUpdateConcerns={updateConcerns}
             onUpdateRecommendations={updateRecommendations}
             onUpdateFinancials={updateFinancials}
+            onUpdateTaxCredits={updateTaxCredits}
+            onUpdateEnvironmentalImpact={updateEnvironmentalImpact}
           />
         );
       case "future solutions and certifications":
