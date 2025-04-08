@@ -1,26 +1,30 @@
 export const FAQDetails = [
   {
     id: 0,
-    title: "What to expect?",
-    description: "View the Pre-Audit Info, get to know how it works",
+    title: "What You'll Gain from your Audit",
+    description:
+      "Comfotable, savings, and peace of mind - your audit is the first step towards a better home.",
     logo: "/dashboard/Frame.svg",
   },
   {
     id: 1,
     title: "What Happens During the Audit",
-    description: "Learn about inspections, analysis & results",
+    description:
+      "We’re here to help, not to disrupt — here’s how we’ll move through your home and what we’ll be looking for.",
     logo: "/dashboard/UsersThree.svg",
   },
   {
     id: 2,
-    title: "How to prepare?",
-    description: "Review the checklist, ensure your home is ready",
+    title: "How To Prepare",
+    description:
+      "We’ll come prepared — this is simply to keep you in the loop and avoid surprises.",
     logo: "/dashboard/GoChecklist.svg",
   },
   {
     id: 3,
     title: "Frequently Asked Questions(FAQ)",
-    description: "Get clarity on audits, costs, and results",
+    description:
+      "Have questions? You’re not alone — here are answers to the things most homeowners want to know.",
     logo: "/dashboard/FaQuestion.svg",
   },
 ];

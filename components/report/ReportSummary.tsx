@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { Save } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ProjectCosts } from "@/components/report/ProjectCosts";
 import {
   Select,
   SelectContent,
@@ -25,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { set } from "date-fns";
+import { toast } from "sonner";
 
 // Define interfaces for data types
 interface ConcernItem {
@@ -37,12 +42,26 @@ interface ConcernItem {
 interface Recommendation {
   title: string;
   location: string;
-  insulation_details: string;
-  specific_steps: string;
+  insulation_details?: string;
+  specific_steps?: string;
   benefit: string;
-  progress?: number;
   [key: string]: any;
 }
+
+// Replace the existing FinancialData interface with this:
+interface FinancialItem {
+  title: string;
+  amount: string;
+}
+
+// New Financial Data interface that matches ProjectCosts
+interface FinancialData {
+  title: string;
+  data: FinancialItem[];
+  monthlyPayment: string;
+  financingPeriodYears: number;
+}
+
 
 interface ReportSummaryProps {
   data?: {
@@ -55,15 +74,17 @@ interface ReportSummaryProps {
     solutionsAndRecommendations?: {
       recommendations: Recommendation[];
     };
+    financialSummary?: FinancialData;
     [key: string]: any;
   };
   isAdmin?: boolean;
   onUpdateConcerns?: (concerns: any) => void;
   onUpdateRecommendations?: (recommendations: any[]) => void;
+  onUpdateFinancials?: (financials: any) => void;
 }
 
 interface InPlaceEditProps {
-  initialValue: string;
+  initialValue?: string;
   isAdmin: boolean;
   onUpdate: (value: string) => void;
   multiline?: boolean;
@@ -106,46 +127,60 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     }
   };
 
-  const handleBlur = () => {
+  const handleSave = () => {
     setIsEditing(false);
     if (value !== initialValue) {
       onUpdate(value);
     }
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleCancel = () => {
+    setValue(initialValue || "");
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!multiline && e.key === "Enter") {
-      setIsEditing(false);
-      if (value !== initialValue) {
-        onUpdate(value);
-      }
+      handleSave();
     }
   };
 
   if (isEditing) {
-    return multiline ? (
-      <textarea
-        ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
-        rows={4}
-      />
-    ) : (
-      <input
-        ref={inputRef as React.RefObject<HTMLInputElement>}
-        type="text"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
-      />
+    return (
+      <div className="flex items-center gap-2">
+        {multiline ? (
+          <textarea
+            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={placeholder}
+            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+            rows={4}
+          />
+        ) : (
+          <input
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+          />
+        )}
+        <button
+          onClick={handleSave}
+          className="p-1 hover:bg-green-100 rounded text-green-600 transition-colors"
+        >
+          <Check className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleCancel}
+          className="p-1 hover:bg-red-100 rounded text-red-600 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
     );
   }
 
@@ -163,6 +198,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 };
 
 // In-place editing component for numbers
+const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
+  initialValue,
+  isAdmin,
 const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   initialValue,
   isAdmin,
@@ -239,39 +277,36 @@ export function ReportSummary({
   data,
   isAdmin = false,
   onUpdateConcerns,
-  onUpdateRecommendations,
+  onUpdateRecommendations, onUpdateFinancials,
 }: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
+
   // Process concerns data
   useEffect(() => {
     if (!data?.summaryOfConcerns?.data) return;
 
-    try {
-      const healthSafety =
-        data.summaryOfConcerns.data.find(
-          (section) => section.name === "Basic Health and Safety",
-        )?.data || [];
 
-      const combustion =
-        data.summaryOfConcerns.data.find(
-          (section) => section.name === "Combustion Testing",
-        )?.data || [];
+    try {
+      const healthSafety = data.summaryOfConcerns.data.find(
+        section => section.name === "Basic Health and Safety"
+      )?.data || [];
+
+      const combustion = data.summaryOfConcerns.data.find(
+        section => section.name === "Combustion Testing"
+      )?.data || [];
 
       // Filter for flagged items with concerns
-      const flaggedHealthSafety = healthSafety.filter(
-        (item) => item && item.flag && item.concern,
+      const flaggedHealthSafety = healthSafety.filter(item =>
+        item && item.flag && item.concern
       );
 
-      const flaggedCombustion = combustion.filter(
-        (item) =>
-          item &&
-          item.flag &&
-          item.concern &&
-          item.concern !== "Testing required",
+      const flaggedCombustion = combustion.filter(item =>
+        item && item.flag && item.concern && item.concern !== "Testing required"
       );
+
 
       setConcerns([...flaggedHealthSafety, ...flaggedCombustion]);
     } catch (error) {
@@ -280,17 +315,16 @@ export function ReportSummary({
     }
   }, [data?.summaryOfConcerns]);
 
+
   // Process recommendations data
   useEffect(() => {
     if (!data?.solutionsAndRecommendations?.recommendations) return;
 
+
     try {
-      const recs = data.solutionsAndRecommendations.recommendations.map(
-        (rec) => ({
-          ...rec,
-          progress: rec.progress || 50, // Default progress if not specified
-        }),
-      );
+      const recs = data.solutionsAndRecommendations.recommendations.map(rec => ({
+        ...rec
+      }));
       setRecommendations(recs);
     } catch (error) {
       console.error("Error processing recommendations data:", error);
@@ -298,9 +332,11 @@ export function ReportSummary({
     }
   }, [data?.solutionsAndRecommendations]);
 
+
   // Concern functions
   const getIconForConcern = (name?: string) => {
     if (!name) return AlertTriangle;
+
 
     const nameLower = name.toLowerCase();
     if (
@@ -318,12 +354,8 @@ export function ReportSummary({
     }
   };
 
-  const updateConcern = (
-    index: number,
-    field: keyof ConcernItem,
-    value: string | boolean,
-  ) => {
-    setConcerns((prev) => {
+  const updateConcern = (index: number, field: keyof ConcernItem, value: string | boolean) => {
+    setConcerns(prev => {
       const newConcerns = [...prev];
       if (newConcerns[index]) {
         newConcerns[index] = {
@@ -332,20 +364,20 @@ export function ReportSummary({
         };
       }
 
+
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(
-          (item) =>
-            !item.name.toLowerCase().includes("combustion") &&
-            !item.name.toLowerCase().includes("gas"),
+        const healthSafety = newConcerns.filter(item =>
+          !item.name.toLowerCase().includes('combustion') &&
+          !item.name.toLowerCase().includes('gas')
         );
 
-        const combustion = newConcerns.filter(
-          (item) =>
-            item.name.toLowerCase().includes("combustion") ||
-            item.name.toLowerCase().includes("gas"),
+        const combustion = newConcerns.filter(item =>
+          item.name.toLowerCase().includes('combustion') ||
+          item.name.toLowerCase().includes('gas')
         );
+
 
         onUpdateConcerns({
           healthSafety,
@@ -353,35 +385,36 @@ export function ReportSummary({
         });
       }
 
+
       return newConcerns;
     });
   };
 
+
   const addConcern = () => {
     setConcerns((prev) => {
       const newConcerns = [
-        ...prev,
         {
           name: "New Concern",
           concern: "Description of the new concern",
-          flag: true,
+          flag: true
         },
+        ...prev
       ];
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(
-          (item) =>
-            !item.name.toLowerCase().includes("combustion") &&
-            !item.name.toLowerCase().includes("gas"),
+        const healthSafety = newConcerns.filter(item =>
+          !item.name.toLowerCase().includes('combustion') &&
+          !item.name.toLowerCase().includes('gas')
         );
 
-        const combustion = newConcerns.filter(
-          (item) =>
-            item.name.toLowerCase().includes("combustion") ||
-            item.name.toLowerCase().includes("gas"),
+        const combustion = newConcerns.filter(item =>
+          item.name.toLowerCase().includes('combustion') ||
+          item.name.toLowerCase().includes('gas')
         );
+
 
         onUpdateConcerns({
           healthSafety,
@@ -389,27 +422,28 @@ export function ReportSummary({
         });
       }
 
+
       return newConcerns;
     });
   };
+
 
   const deleteConcern = (index: number) => {
     setConcerns((prev) => {
       const newConcerns = prev.filter((_, i) => i !== index);
 
+
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(
-          (item) =>
-            !item.name.toLowerCase().includes("combustion") &&
-            !item.name.toLowerCase().includes("gas"),
+        const healthSafety = newConcerns.filter(item =>
+          !item.name.toLowerCase().includes('combustion') &&
+          !item.name.toLowerCase().includes('gas')
         );
 
-        const combustion = newConcerns.filter(
-          (item) =>
-            item.name.toLowerCase().includes("combustion") ||
-            item.name.toLowerCase().includes("gas"),
+        const combustion = newConcerns.filter(item =>
+          item.name.toLowerCase().includes('combustion') ||
+          item.name.toLowerCase().includes('gas')
         );
 
         onUpdateConcerns({
@@ -445,12 +479,8 @@ export function ReportSummary({
     }
   };
 
-  const updateRecommendation = (
-    index: number,
-    field: keyof Recommendation,
-    value: string | number,
-  ) => {
-    setRecommendations((prev) => {
+  const updateRecommendation = (index: number, field: keyof Recommendation, value: string | number) => {
+    setRecommendations(prev => {
       const newRecommendations = [...prev];
       if (newRecommendations[index]) {
         newRecommendations[index] = {
@@ -459,14 +489,17 @@ export function ReportSummary({
         };
       }
 
+
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
+
       return newRecommendations;
     });
   };
+
 
   const addRecommendation = () => {
     setRecommendations((prev) => {
@@ -474,22 +507,24 @@ export function ReportSummary({
         ...prev,
         {
           title: "New Recommendation",
-          location: "Location description",
-          insulation_details: "Insulation details",
-          specific_steps: "Implementation steps",
-          benefit: "Benefits description",
-          progress: 0,
-        },
+          location: "",
+          insulation_details: "",
+          specific_steps: "",
+          benefit: "",
+        }
       ];
+
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
+
       return newRecommendations;
     });
   };
+
 
   const deleteRecommendation = (index: number) => {
     setRecommendations((prev) => {
@@ -500,12 +535,95 @@ export function ReportSummary({
         onUpdateRecommendations(newRecommendations);
       }
 
+
       return newRecommendations;
     });
   };
 
+  const updateFinancials = (financials: FinancialData): void => {
+    // Update the financials in reportData
+    if (onUpdateFinancials) {
+      onUpdateFinancials(financials);
+    }
+  };
+
+
+  // const router = useRouter();
+  const pathname = usePathname();
+  const match = pathname.match(/\/admin\/(\d+)\/report/);
+  const bookingNumber = match?.[1];
+
+  // const { bookingNumber } = router.query;
+
+  const onSubmit = async () => {
+    const REPORT_DATA_KEY = "report_data";
+    let updatedReportData;
+
+    try {
+      const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+      // console.log("Data from localStorage:", data);
+
+      if (!data) {
+        console.error("No data found in localStorage for the given booking number.");
+        toast.error("No data found in localStorage for the given booking number.");
+        return;
+      }
+
+      updatedReportData = JSON.parse(data);
+      updatedReportData = {
+        reportData: updatedReportData,
+        displayReport: true,
+        reportUrl: ""
+      };
+
+      console.log("Saved summary data to local storage", updatedReportData)
+    } catch (e) {
+      console.error("Error parsing data from localStorage:", e);
+      toast.error("Error parsing data from localStorage.");
+      return;
+    }
+
+    try {
+      console.log("Saving report data:", updatedReportData);
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedReportData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to save report data.");
+        return;
+      }
+
+      const data = await response.json();
+      toast.success("Report data saved successfully.");
+      console.log("Report data saved successfully:", data);
+    } catch (e) {
+      console.error("Error saving report data:", e);
+      toast.error("Failed to save report data.");
+    }
+  }
+
+
   return (
     <div className="space-y-8">
+      {isAdmin && (
+        <div className="top-4 flex justify-end">
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition-colors"
+            onClick={() => onSubmit()}
+          >
+            <Save size={18} />
+            Save Changes
+          </button>
+        </div>
+      )}
       {/* Summary of Concerns Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -661,13 +779,8 @@ export function ReportSummary({
           <CardContent className="p-6 space-y-4 bg-green-50/50">
             {recommendations.length > 0 ? (
               recommendations.map((recommendation, index) => {
-                const RecommendationIcon = getIconForRecommendation(
-                  recommendation.title,
-                );
-                const progress =
-                  recommendation.progress !== undefined
-                    ? recommendation.progress
-                    : 50;
+                const RecommendationIcon = getIconForRecommendation(recommendation.title);
+                const progress = recommendation.progress !== undefined ? recommendation.progress : 0;
 
                 return (
                   <motion.div
@@ -697,6 +810,7 @@ export function ReportSummary({
                             />
                           </h3>
                           {isAdmin && (
+                            <button
                             <button
                               onClick={() => deleteRecommendation(index)}
                               className="text-red-500 hover:text-red-700 px-2 py-1 text-xs rounded hover:bg-red-50 flex items-center gap-1 transition-colors"
@@ -737,7 +851,7 @@ export function ReportSummary({
                                 )
                               }
                               multiline={true}
-                              placeholder="Enter details"
+                              placeholder="Enter insulation details if applicable"
                             />
                           </div>
                           <div>
@@ -753,7 +867,7 @@ export function ReportSummary({
                                 )
                               }
                               multiline={true}
-                              placeholder="Enter implementation steps"
+                              placeholder="Enter implementation steps if applicable"
                             />
                           </div>
                           <div>
@@ -771,10 +885,8 @@ export function ReportSummary({
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-4">
-                          <span className="text-sm text-gray-600">
-                            Implementation Progress
-                          </span>
+                        {/* <div className="flex items-center justify-between mt-4">
+                          <span className="text-sm text-gray-600">Implementation Progress</span>
                           {isAdmin ? (
                             <InPlaceEditNumber
                               initialValue={progress}
@@ -796,7 +908,7 @@ export function ReportSummary({
                             className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{ width: `${progress}%` }}
                           ></div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </motion.div>
@@ -838,7 +950,7 @@ export function ReportSummary({
       </motion.div>
 
       {/* Project Costs Section */}
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.9 }}
@@ -852,144 +964,140 @@ export function ReportSummary({
           </CardHeader>
           <CardContent className="p-6 space-y-4 bg-green-50/50">
             {/* Total Project Costs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.0 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">
-                    Total Project Costs
-                  </h3>
-                </div>
-                <span className="font-medium text-gray-900">$21,748.00</span>
-              </div>
-            </motion.div>
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.0 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Total Project Costs</h3>
+          </div>
+          <span className="font-medium text-gray-900">$21,748.00</span>
+        </div>
+      </motion.div> */}
 
-            {/* Audit Refund */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.1 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">Audit Refund</h3>
-                </div>
-                <span className="font-medium text-gray-900">$99.00</span>
-              </div>
-            </motion.div>
-
-            {/* NJ HPwES Cash Back Incentive */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.2 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">
-                    NJ HPwES Cash Back Incentive
-                  </h3>
-                </div>
-                <span className="font-medium text-green-600">$5,000.00</span>
-              </div>
-            </motion.div>
-
-            {/* Remaining Balance */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.3 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">
-                    Remaining Balance
-                  </h3>
-                </div>
-                <span className="font-medium text-gray-900">$16,649.00</span>
-              </div>
-            </motion.div>
-
-            {/* Amount Eligible for NJ HPwES Financing */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.4 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-700">
-                      Amount Eligible for NJ HPwES Financing
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      *if qualified by financing company (0% Interest Rate)
-                    </p>
-                  </div>
-                </div>
-                <span className="font-medium text-gray-900">$15,000.00</span>
-              </div>
-            </motion.div>
-
-            {/* Remaining Out of Pocket Expenses */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.5 }}
-              className="bg-white rounded-lg p-4 mb-3 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-md">
-                    <DollarSign className="text-green-600" size={20} />
-                  </div>
-                  <h3 className="font-medium text-gray-700">
-                    Remaining Out of Pocket Expenses
-                  </h3>
-                </div>
-                <span className="font-medium text-green-600">$1,649.00</span>
-              </div>
-            </motion.div>
-
-            {/* Monthly Payment */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.6 }}
-              className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
-            >
-              <h3 className="text-gray-700 font-medium mb-2">
-                Total Monthly Payment
-              </h3>
-              <p className="text-green-600 text-2xl font-bold">$125.00/month</p>
-              <p className="text-xs text-gray-500">*Over a 10 year period</p>
-            </motion.div>
-          </CardContent>
-        </Card>
+      {/* Audit Refund */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.1 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Audit Refund</h3>
+          </div>
+          <span className="font-medium text-gray-900">$99.00</span>
+        </div>
       </motion.div>
-    </div>
+
+      {/* NJ HPwES Cash Back Incentive */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.2 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">NJ HPwES Cash Back Incentive</h3>
+          </div>
+          <span className="font-medium text-green-600">$5,000.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Remaining Balance */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.3 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Remaining Balance</h3>
+          </div>
+          <span className="font-medium text-gray-900">$16,649.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Amount Eligible for NJ HPwES Financing */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.4 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-700">Amount Eligible for NJ HPwES Financing</h3>
+              <p className="text-xs text-gray-500">*if qualified by financing company (0% Interest Rate)</p>
+            </div>
+          </div>
+          <span className="font-medium text-gray-900">$15,000.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Remaining Out of Pocket Expenses */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.5 }}
+        className="bg-white rounded-lg p-4 mb-3 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-md">
+              <DollarSign className="text-green-600" size={20} />
+            </div>
+            <h3 className="font-medium text-gray-700">Remaining Out of Pocket Expenses</h3>
+          </div>
+          <span className="font-medium text-green-600">$1,649.00</span>
+        </div>
+      </motion.div> */}
+
+      {/* Monthly Payment */}
+      {/* <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.6 }}
+        className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
+      >
+        <h3 className="text-gray-700 font-medium mb-2">Total Monthly Payment</h3>
+        <p className="text-green-600 text-2xl font-bold">$125.00/month</p>
+        <p className="text-xs text-gray-500">*Over a 10 year period</p>
+      </motion.div>
+    </CardContent>
+        </Card >
+      </motion.div > */ }
+
+      <ProjectCosts
+        data={{
+          financialSummary: data?.financialSummary
+        }}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber || ""}
+        onUpdateFinancials={updateFinancials}
+      />
+
+    </div >
   );
 }

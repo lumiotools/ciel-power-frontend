@@ -365,8 +365,37 @@ export default function DashboardPage() {
           </div> */}
 
           {/* Your Bookings Section */}
-          <div className="flex justify-between items-center mt-5">
-            <h2 className="text-2xl font-medium">Your Home Energy Audit</h2>
+          <div className="mt-5">
+            <h2 className="text-2xl font-medium text-left">
+              Your Home Energy Audit Details
+            </h2>
+          </div>
+
+          <div
+            className="mt-3 mb-4 text-gray-700"
+            style={{
+              fontFamily: "Poppins",
+              fontWeight: 400,
+              fontSize: "14px",
+              lineHeight: "150%",
+              letterSpacing: "0%",
+              color: "#545454",
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <p className="mb-3 text-left">
+              We're preparing for an in-home visit to evaluate how your home
+              uses energy. Your Ciel Home Energy Auditor will collect important
+              details to help us understand how your home is performing — here's
+              what to expect and how to prepare.
+            </p>
+            <p className="text-left">
+              Once we've gathered all the information from your home visit,
+              we'll get to work on your personalized energy report — it'll be
+              ready for you a few days after the visit. To complete the report,
+              we'll also need a copy of your most recent energy bill.
+            </p>
           </div>
 
           <section
@@ -489,42 +518,67 @@ export default function DashboardPage() {
           </section>
 
           {/* faq section */}
-          <div className=" mt-10 flex flex-col gap-4 rounded-lg ">
-            {FAQDetails.map((faq) => (
-              <div key={faq.id} className="border-[1.5px] rounded-lg">
+          <div className="bg-gray-100 p-6">
+            <div className="mt-10">
+              {FAQDetails.map((faq) => (
                 <div
-                  className={`flex justify-between  bg-light-green  cursor-pointer px-2`}
-                  onClick={() => toggleDropdown(faq.id)}
+                  key={faq.id}
+                  className="mb-4 border border-[#B7E2C7] rounded-lg overflow-hidden"
                 >
-                  <div className=" flex gap-2 items-center py-2 rounded-lg ">
-                    <LogoContainer logo={faq.logo} />
-                    <div>
-                      <p className=" text-deep-green text-xl font-semibold">
-                        {faq.title}
-                      </p>
-                      <p className=" text-xs">{faq.description}</p>
+                  <button
+                    onClick={() => toggleDropdown(faq.id)}
+                    className="w-full flex items-center justify-between p-4 bg-[#F9FCF6] hover:bg-[#F0F8E6] transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white rounded-lg border border-[#B7E2C7]">
+                        <img
+                          src={faq.logo || "/placeholder.svg"}
+                          alt={faq.title}
+                          className="w-6 h-6"
+                        />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="text-[#4D7C32] text-lg font-medium">
+                          {faq.title}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {faq.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <Image
-                    src={"/dashboard/arrow-down.svg"}
-                    width={20}
-                    height={20}
-                    alt="arrow"
-                    className={`${
-                      openDropdown[faq.id] === true ? "rotate-180" : ""
-                    }`}
-                  />
+                    <div
+                      className={`transform transition-transform duration-200 ${openDropdown[faq.id] ? "rotate-180" : ""}`}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5 7.5L10 12.5L15 7.5"
+                          stroke="#4D7C32"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </button>
+
+                  {openDropdown[faq.id] && (
+                    <div className="p-4 bg-white border-t border-[#B7E2C7]">
+                      <CardData
+                        index={faq.id}
+                        faqOpen={faqOpen}
+                        toggleFaqQuestion={toggleFaqQuestion}
+                      />
+                    </div>
+                  )}
                 </div>
-                {openDropdown[faq.id] && (
-                  <CardData
-                    index={faq.id}
-                    faqOpen={faqOpen}
-                    toggleFaqQuestion={toggleFaqQuestion}
-                  />
-                )}
-              </div>
-            ))}
-            <div></div>
+              ))}
+            </div>
           </div>
 
           <ChatBot />
@@ -549,23 +603,23 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
   switch (index) {
     case 0:
       return (
-        <div className=" flex flex-col gap-3 py-3 px-10 items-center justify-center text-center">
-          <div className=" bg-light-green border-[1.5px]  rounded-full p-1.5 w-fit">
+        <div className="flex flex-col gap-3 py-3 px-10 items-center justify-center text-center">
+          <div className="bg-light-green border-[1.5px] rounded-full p-1.5 w-fit">
             <p className="text-deep-green text-sm">
               Thanks for booking Energy Audit!{" "}
             </p>
           </div>
-          <p className=" text-2xl font-bold">
+          <p className="text-2xl font-bold">
             What to Expect During Your Home Energy Audit
           </p>
-          <p className=" text-sm">
+          <p className="text-sm">
             Discover the Power of Energy Efficiency with a Ciel Home Energy
             Audit.
           </p>
           <p>
-            <span className=" text-2xl text-deep-green">“</span> The first step
-            to accessing NJ’s utility programs for <br /> energy-efficient home
-            upgrades. <span className=" text-2xl text-deep-green">”</span>{" "}
+            <span className="text-2xl text-deep-green">"</span> The first step
+            to accessing NJ's utility programs for <br /> energy-efficient home
+            upgrades. <span className="text-2xl text-deep-green">"</span>{" "}
           </p>
           <div className="aspect-video min-w-[70%]">
             <iframe
@@ -575,6 +629,107 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
+          </div>
+
+          {/* Added content from the image */}
+          <div className="max-w-3xl mx-auto mt-10 text-left">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              What You'll Gain from Your Audit Comfort, savings, and peace of
+              mind — your audit is the first step toward a better home.
+            </h2>
+
+            <p className="text-gray-600 my-4">
+              A Home Energy Audit is about more than energy use — it's about how
+              your home supports your everyday life. We take a deeper look at
+              the things that can affect your comfort, your health, and your
+              monthly expenses. It's not just about finding problems. It's about
+              finding solutions that work for you.
+            </p>
+
+            <p className="text-gray-600 my-4">
+              We understand that your home is more than just walls and systems —
+              it's where you and your family rest, breathe, and recharge.
+              Through the audit, we uncover opportunities to help your home feel
+              better, function better, and cost less to run.
+            </p>
+
+            <h3 className="text-xl font-bold text-gray-800 mt-8 mb-4">
+              Generous Incentives and Financing
+            </h3>
+
+            <p className="text-gray-600 mb-2">
+              Thanks to support from New Jersey's Clean Energy Program and the
+              federal government, many homeowners are eligible for substantial
+              financial benefits, including:
+            </p>
+            <ul className="list-disc pl-8 text-gray-600 mb-4">
+              <li>Up to $6,000 in cash-back incentives</li>
+              <li>
+                Up to $25,000 in zero-interest financing for up to 10 years
+              </li>
+              <li>Federal tax credits</li>
+            </ul>
+
+            <p className="text-gray-600 mb-2">
+              These benefits help reduce the cost of improvements such as:
+            </p>
+            <ul className="list-disc pl-8 text-gray-600 mb-4">
+              <li>Insulation and air sealing</li>
+              <li>Heating and cooling system upgrades</li>
+              <li>High-efficiency water heaters</li>
+              <li>Ventilation systems</li>
+            </ul>
+
+            <p className="text-gray-600 mb-6">
+              We'll help you understand what you qualify for — and how to take
+              full advantage of these programs.
+            </p>
+
+            <h3 className="text-xl font-bold text-gray-800 mt-8 mb-4">
+              A Healthier, More Comfortable Living Space
+            </h3>
+
+            <p className="text-gray-600 mb-4">
+              Your audit isn't just about improving efficiency — it's also a
+              step toward improving how you feel at home. We assess how well
+              your home manages airflow, temperature, and moisture, which are
+              all connected to your daily comfort and long-term health.
+            </p>
+
+            <p className="text-gray-600 mb-2">
+              With the right upgrades, you may experience:
+            </p>
+            <ul className="list-disc pl-8 text-gray-600 mb-4">
+              <li>
+                Fewer allergens and pollutants circulating through your air
+              </li>
+              <li>
+                More stable and comfortable temperatures, season to season
+              </li>
+              <li>Lower risk of mold and moisture buildup</li>
+              <li>A quieter, calmer home environment</li>
+            </ul>
+
+            <p className="text-gray-600 mb-6">
+              We understand that even small changes can make a big difference.
+              Whether it's helping you sleep more soundly or making your home
+              feel more balanced and breathable, we're here to guide you toward
+              solutions that fit your lifestyle.
+            </p>
+
+            <h3 className="text-xl font-bold text-gray-800 mt-8 mb-4">
+              Personalized, Practical Recommendations
+            </h3>
+
+            <p className="text-gray-600 mb-4">
+              After your home visit, your personalized results will be added to
+              your customer portal. You'll be able to log in anytime to explore
+              insights about your home's energy use, review suggested
+              improvements, and track available incentives. Everything is
+              organized in one place — clear, simple, and tailored to your home.
+              No dense reports, just useful information you can act on when
+              you're ready.
+            </p>
           </div>
         </div>
       );
@@ -888,11 +1043,7 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
                   width={20}
                   height={20}
                   alt="arrow"
-                  className={`${
-                    (faqOpen[item.id] === true) === true
-                      ? "rotate-180"
-                      : " -rotate-90"
-                  }`}
+                  className={`${(faqOpen[item.id] === true) === true ? "rotate-180" : " -rotate-90"}`}
                 />
               </div>
               {faqOpen[item.id] === true && (
@@ -916,7 +1067,7 @@ const LogoContainer = ({
   return (
     <div className=" p-2 border rounded-lg flex justify-center items-center gap-2 bg-white">
       <Image
-        src={logo}
+        src={logo || "/placeholder.svg"}
         width={24}
         height={24}
         alt="logo"

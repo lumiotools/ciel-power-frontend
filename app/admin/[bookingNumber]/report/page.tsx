@@ -5,6 +5,7 @@ import { CoolingContent } from "@/components/report/CoolingContent";
 import { HeatingContent } from "@/components/report/HeatingContent";
 import { InsulationContent } from "@/components/report/InsulationContent";
 import { ReportSummary } from "@/components/report/ReportSummary";
+import { FutureUpgradesAndCertificates } from "@/components/report/FutureUpgradesAndCertificates";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { motion } from "framer-motion";
 import React, { useRef, useState, useEffect, use } from "react";
@@ -61,6 +62,19 @@ interface WaterHeaterData {
   title: string;
 }
 
+// Replace the existing FinancialData interface with the same one as in ReportSummary
+interface FinancialItem {
+  title: string;
+  amount: string;
+}
+
+interface FinancialData {
+  title: string;
+  data: FinancialItem[];
+  monthlyPayment: string;
+  financingPeriodYears: number;
+}
+
 // Define the type for reportData
 interface ReportData {
   airLeakage?: AirLeakageData;
@@ -69,6 +83,7 @@ interface ReportData {
   waterHeater?: WaterHeaterData;
   summaryOfConcerns?: any;
   solutionsAndRecommendations?: any;
+  financialSummary?: FinancialData;
   [key: string]: any;
 }
 
@@ -171,9 +186,7 @@ const ReportPage = ({
       const data = await response.json();
 
       if (data.success) {
-        console.log("Fetched report data:", data.data);
         const fetchedReportData = data.data.reportData || {};
-        console.log("reportData", fetchedReportData);
 
         // Save to state
         setReportData(fetchedReportData);
@@ -452,6 +465,27 @@ const ReportPage = ({
     }
   };
 
+  const updateFinancials = (newFinancials: FinancialData) => {
+    if (!isAdmin) return;
+
+    const updatedReportData = {
+      ...reportData,
+      financialSummary: newFinancials,
+    };
+
+    setReportData(updatedReportData);
+
+    // Save to localStorage
+    try {
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData),
+      );
+    } catch (e) {
+      console.error("Error saving financials to localStorage:", e);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f5f9f0]">
@@ -565,8 +599,11 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateConcerns={updateConcerns}
             onUpdateRecommendations={updateRecommendations}
+            onUpdateFinancials={updateFinancials}
           />
         );
+      case "future solutions and certifications":
+        return <FutureUpgradesAndCertificates />;
       default:
         return (
           <AirLeakageContent
@@ -683,21 +720,28 @@ const ReportPage = ({
 
       <div className="bg-white rounded-b-lg shadow-md">
         <div className="flex border-b border-gray-200">
-          {["air-leakage", "insulation", "heating", "cooling", "summary"].map(
-            (tab) => (
-              <button
-                key={tab}
-                className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                  activeSubMenu === tab
-                    ? "border-b-2 border-lime-500 text-lime-500"
-                    : "text-gray-600 hover:text-lime-500"
-                }`}
-                onClick={() => setActiveSubMenu(tab)}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
-              </button>
-            ),
-          )}
+          {[
+            "air-leakage",
+            "insulation",
+            "heating",
+            "cooling",
+            "summary",
+            "future solutions and certifications",
+          ].map((tab) => (
+            <button
+              key={tab}
+              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
+                activeSubMenu === tab
+                  ? "border-b-2 border-lime-500 text-lime-500"
+                  : "text-gray-600 hover:text-lime-500"
+              }`}
+              onClick={() => setActiveSubMenu(tab)}
+            >
+              {["air-leakage", "insulation", "heating", "cooling"].includes(tab)
+                ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
+                : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
         <div className="p-6">{renderContent()}</div>
