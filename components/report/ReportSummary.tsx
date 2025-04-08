@@ -620,11 +620,10 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       {isAdmin && (
         <div className="top-4 flex justify-end">
           <button
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition-colors"
-            onClick={() => onSubmit()}
+            onClick={onSubmit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
           >
-            <Save size={18} />
-            Save Changes
+            Save
           </button>
         </div>
       )}
