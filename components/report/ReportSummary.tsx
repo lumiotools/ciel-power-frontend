@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef, use } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AlertTriangle, Fan, Leaf, Home, ArrowUp, Thermometer, DollarSign, Shield, Activity, Pencil, Check, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ProjectCosts } from "@/components/report/ProjectCosts";
+import { FederalTaxCredits } from "@/components/report/TaxCredits";
+import { EnvironmentalImpact } from "@/components/report/EnvironmentalImpact";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { set } from "date-fns";
 import { toast } from "sonner";
@@ -55,12 +57,29 @@ interface ReportSummaryProps {
       recommendations: Recommendation[];
     };
     financialSummary?: FinancialData;
+    federalTaxCredits?: {
+      title: string;
+      data: Array<{
+        title: string;
+        amount: string;
+        note?: string;
+      }>;
+    };
+    environmentalImpact?: {
+      title: string;
+      currentFootprint: { value: string; unit: string };
+      projectedSavings: { value: string; unit: string };
+      projectedFootprint: { value: string; unit: string };
+      totalReduction: { value: string; unit: string };
+    };
     [key: string]: any;
   };
   isAdmin?: boolean;
   onUpdateConcerns?: (concerns: any) => void;
   onUpdateRecommendations?: (recommendations: any[]) => void;
   onUpdateFinancials?: (financials: any) => void;
+  onUpdateTaxCredits?: (taxCredits: any) => void;
+  onUpdateEnvironmentalImpact?: (environmentalData: any) => void;
 }
 
 interface InPlaceEditProps {
@@ -249,7 +268,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials }: ReportSummaryProps) {
+export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials, onUpdateTaxCredits, onUpdateEnvironmentalImpact }: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -489,6 +508,19 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
   };
 
+  const updateTaxCredits = (taxCreditsData: any) => {
+    // If onUpdateTaxCredits callback is provided, call it with the updated data
+    if (onUpdateTaxCredits) {
+      onUpdateTaxCredits(taxCreditsData);
+    }
+  };
+
+  const updateEnvironmentalImpact = (environmentalData: any) => {
+    // If onUpdateEnvironmentalImpact callback is provided, call it with the updated data
+    if (onUpdateEnvironmentalImpact) {
+      onUpdateEnvironmentalImpact(environmentalData);
+    }
+  };
 
   // const router = useRouter();
   const pathname = usePathname();
@@ -993,6 +1025,23 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         onUpdateFinancials={updateFinancials}
       />
 
+      {/* Federal Tax Credits Section */}
+      <FederalTaxCredits
+        data={data?.federalTaxCredits}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber}
+        reportData={data}
+        onUpdate={updateTaxCredits}
+      />
+
+      {/* Environmental Impact Section */}
+      <EnvironmentalImpact
+        data={data?.environmentalImpact}
+        isAdmin={isAdmin}
+        bookingNumber={bookingNumber}
+        reportData={data}
+        onUpdate={updateEnvironmentalImpact}
+      />
     </div >
   );
 }

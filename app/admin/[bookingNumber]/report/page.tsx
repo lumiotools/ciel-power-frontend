@@ -114,19 +114,19 @@ const ReportPage = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [imgOfUser, SetImageOfUser] = useState([]);
 
-  useEffect( () => {
-    const fetchData=async()=>{
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         //  = await fetchImages({ userid: bookingNumber });
 
-         const imagesOfUser = await fetch(
+        const imagesOfUser = await fetch(
           `/api/admin/bookings/${bookingNumber}/pictures`,
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
-            cache:"default",
+            cache: "default",
             next: { revalidate: 3600 }, // Revalidate every 3600 seconds        
           }
         );
@@ -172,7 +172,7 @@ const ReportPage = ({
         fetchReportDetails();
       }
     } else if (bookingNumber) {
-    // Customer users always fetch fresh data
+      // Customer users always fetch fresh data
       fetchReportDetails();
     }
   }, [bookingNumber, isAdmin]);
@@ -469,10 +469,52 @@ const ReportPage = ({
 
   const updateFinancials = (newFinancials: FinancialData) => {
     if (!isAdmin) return;
-  
+
     const updatedReportData = {
       ...reportData,
       financialSummary: newFinancials
+    };
+
+    setReportData(updatedReportData);
+
+    // Save to localStorage
+    try {
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
+    } catch (e) {
+      console.error("Error saving financials to localStorage:", e);
+    }
+  };
+
+  const updateTaxCredits = (newTaxCredits: any) => {
+    if (!isAdmin) return;
+
+    const updatedReportData = {
+      ...reportData,
+      federalTaxCredits: newTaxCredits
+    };
+
+    setReportData(updatedReportData);
+
+    // Save to localStorage
+    try {
+      localStorage.setItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+        JSON.stringify(updatedReportData)
+      );
+    } catch (e) {
+      console.error("Error saving tax credits to localStorage:", e);
+    }
+  };
+
+  const updateEnvironmentalImpact = (newEnvironmentalData: any) => {
+    if (!isAdmin) return;
+  
+    const updatedReportData = {
+      ...reportData,
+      environmentalImpact: newEnvironmentalData
     };
   
     setReportData(updatedReportData);
@@ -484,7 +526,7 @@ const ReportPage = ({
         JSON.stringify(updatedReportData)
       );
     } catch (e) {
-      console.error("Error saving financials to localStorage:", e);
+      console.error("Error saving environmental impact data to localStorage:", e);
     }
   };
 
@@ -624,6 +666,8 @@ const ReportPage = ({
             onUpdateConcerns={updateConcerns}
             onUpdateRecommendations={updateRecommendations}
             onUpdateFinancials={updateFinancials}
+            onUpdateTaxCredits={updateTaxCredits}
+            onUpdateEnvironmentalImpact={updateEnvironmentalImpact}
           />
         );
       case "future solutions and certifications":
