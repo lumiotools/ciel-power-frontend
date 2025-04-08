@@ -79,9 +79,12 @@ interface SystemDetailsProps {
   type: string;
   condition: string;
   year?: number;
+  value: number | string;
+  parameterName: string;
   onUpdateType: (value: string) => void;
   onUpdateCondition: (value: string) => void;
   onUpdateYear?: (value: number) => void;
+  onUpdateValue: (value: number | string) => void;
 }
 
 interface HeatingSystemCardProps {
@@ -103,38 +106,70 @@ interface InPlaceEditProps {
 interface EditableAFUEProps {
   value: number;
   onChange: (value: number) => void;
+  label?: string;
 }
 
-// NEW COMPONENT: Dedicated component for editable AFUE values
-const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
+// Enhanced EditableAFUE component with better UI and validation
+const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange, label = "%" }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Keep local state in sync with props
   useEffect(() => {
     setEditValue(value);
   }, [value]);
 
+  // Auto-focus the input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
   const handleSave = () => {
-    onChange(Number(editValue));
-    setIsEditing(false);
+    // Ensure we have a valid number
+    const numValue = Number(editValue);
+    if (!isNaN(numValue)) {
+      onChange(numValue);
+      setIsEditing(false);
+    } else {
+      // Reset to original value if invalid input
+      setEditValue(value);
+      setIsEditing(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setEditValue(value);
+      setIsEditing(false);
+    }
   };
 
   if (isEditing) {
     return (
       <div className="flex items-center gap-2">
         <input
+          ref={inputRef}
           type="number"
           value={editValue}
           onChange={(e) => setEditValue(Number(e.target.value))}
-          className="border rounded px-2 py-1 w-20"
+          onKeyDown={handleKeyDown}
+          onBlur={handleSave}
+          className="border border-amber-300 rounded px-2 py-1 w-20 focus:outline-none focus:ring-2 focus:ring-amber-500"
           min={0}
           max={100}
-          autoFocus
+          step="0.1"
         />
+        <span className="text-gray-500">{label}</span>
         <button
           onClick={handleSave}
-          className="p-1 bg-green-100 hover:bg-green-200 rounded text-green-600"
+          className="p-1 bg-green-100 hover:bg-green-200 rounded text-green-600 transition-colors"
+          title="Save"
         >
           <Check className="w-4 h-4" />
         </button>
@@ -143,7 +178,8 @@ const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
             setEditValue(value);
             setIsEditing(false);
           }}
-          className="p-1 bg-red-100 hover:bg-red-200 rounded text-red-600"
+          className="p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 transition-colors"
+          title="Cancel"
         >
           <X className="w-4 h-4" />
         </button>
@@ -152,15 +188,16 @@ const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <p className="text-2xl font-bold text-[#b45309] dark:text-amber-400">
-        {value}%
+    <div className="flex items-center gap-2 group">
+      <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
+        {value}{label}
       </p>
       <button
         onClick={() => setIsEditing(true)}
-        className="p-1 hover:bg-gray-100 rounded"
+        className="p-1 opacity-0 group-hover:opacity-100 hover:bg-amber-100 rounded transition-all"
+        title="Edit value"
       >
-        <Pencil className="w-4 h-4" />
+        <Pencil className="w-4 h-4 text-amber-600" />
       </button>
     </div>
   );
@@ -346,7 +383,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   );
 };
 
-// MODIFIED: Simplified PerformanceCard component that uses the dedicated EditableAFUE component
+// MODIFIED: PerformanceCard using EditableAFUE component
 const PerformanceCard: React.FC<PerformanceCardProps> = ({
   isAdmin,
   value,
@@ -362,7 +399,7 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({
       {isAdmin ? (
         <EditableAFUE value={value} onChange={onUpdate} />
       ) : (
-        <p className="text-2xl font-bold text-[#b45309] dark:text-amber-400">
+        <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
           {value}%
         </p>
       )}
@@ -371,14 +408,14 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({
       <p className="text-base text-gray-600 dark:text-gray-400">
         BPI Recommends
       </p>
-      <p className="text-2xl font-bold text-[#65a30d] dark:text-green-400">
+      <p className="text-2xl font-bold text-green-700 dark:text-green-400">
         {recommended}%
       </p>
     </div>
   </div>
 );
 
-// Original InPlaceEdit component - unchanged
+// Original InPlaceEdit component
 const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   initialValue,
   isAdmin,
@@ -412,7 +449,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       setIsEditing(false);
       if (value !== initialValue) {
@@ -447,15 +484,18 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   );
 };
 
-// Original SystemDetails component - unchanged
+// Enhanced SystemDetails component with AFUE/UEF value as part of the details
 const SystemDetails: React.FC<SystemDetailsProps> = ({
   isAdmin,
   type,
   condition,
   year,
+  value,
+  parameterName,
   onUpdateType,
   onUpdateCondition,
   onUpdateYear,
+  onUpdateValue
 }) => (
   <div className="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800 rounded-lg p-4">
     <div>
@@ -479,8 +519,20 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
         <p className="font-medium">{condition}</p>
       )}
     </div>
+    {/* Add AFUE/UEF value to system details */}
+    <div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{parameterName}</p>
+      {isAdmin ? (
+        <EditableAFUE 
+          value={typeof value === 'number' ? value : 0} 
+          onChange={onUpdateValue}
+        />
+      ) : (
+        <p className="font-medium">{typeof value === 'number' ? `${value}%` : value}</p>
+      )}
+    </div>
     {year && (
-      <div className="col-span-2">
+      <div>
         <p className="text-sm text-gray-600 dark:text-gray-400">Year</p>
         {isAdmin && onUpdateYear ? (
           <EditableField
@@ -498,7 +550,7 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
   </div>
 );
 
-// MODIFIED: HeatingSystemCard with direct isAdmin prop passing
+// MODIFIED: HeatingSystemCard with enhanced SystemDetails component
 const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   item,
   index,
@@ -519,6 +571,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   const [animate, setAnimate] = useState(false);
   const itemRef = useRef(null);
 
+  // Set up intersection observer for animation
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -530,7 +583,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
       entries: IntersectionObserverEntry[],
       observer: IntersectionObserver,
     ) => {
-      entries.forEach((entry: IntersectionObserverEntry) => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           setAnimate(true);
           observer.unobserve(entry.target);
@@ -550,19 +603,22 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
     };
   }, []);
 
-  interface SystemData {
-    type: string;
-    condition: string;
-    value: number | string;
-    parameterName: string;
-    year?: number;
-    image: string;
-  }
+  // Update state when props change
+  useEffect(() => {
+    setSystemData({
+      type: item.type || "null",
+      condition: item.condition || "null",
+      value: typeof item.value === "number" ? item.value : 0,
+      parameterName: item.parameter || "null",
+      year: item.year,
+      image: item?.image,
+    });
+  }, [item]);
 
   // Update local state and propagate changes to parent component
   const updateSystemData = (
-    field: keyof SystemData,
-    value: string | number,
+    field: keyof typeof systemData,
+    value: any,
   ) => {
     const updatedData = {
       ...systemData,
@@ -575,17 +631,21 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
     if (onUpdateItem) {
       const updatedItem = {
         ...item,
-        type: field === "type" ? (value as string) : item.type,
-        condition: field === "condition" ? (value as string) : item.condition,
+        type: field === "type" ? value : item.type,
+        condition: field === "condition" ? value : item.condition,
         value: field === "value" ? value : item.value,
-        parameter:
-          field === "parameterName" ? (value as string) : item.parameter,
-        year: field === "year" ? (value as number) : item.year,
-        image: field === "image" ? (value as string) : item.image,
+        parameter: field === "parameterName" ? value : item.parameter,
+        year: field === "year" ? value : item.year,
+        image: field === "image" ? value : item.image,
       };
 
       onUpdateItem(updatedItem);
     }
+  };
+
+  // Helper function to determine if we should show a numeric gauge chart
+  const shouldShowGaugeChart = () => {
+    return typeof systemData.value === "number" && systemData.value > 0;
   };
 
   const renderValue = () => {
@@ -595,6 +655,30 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
       return "N/A";
     } else {
       return systemData.value;
+    }
+  };
+
+  // Determine if this is a water heater based on name
+  const isWaterHeater = item.name.toLowerCase().includes("water");
+  
+  // Get description text based on item type
+  const getDescriptionText = () => {
+    if (isWaterHeater) {
+      return shouldShowGaugeChart() 
+        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
+            systemData.value < recommendedValue
+              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+              : `This is an efficient unit that meets or exceeds recommended standards.`
+          }`
+        : `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
+    } else {
+      return shouldShowGaugeChart()
+        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
+            systemData.value < recommendedValue
+              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+              : `This is an efficient unit that meets or exceeds recommended standards.`
+          }`
+        : `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     }
   };
 
@@ -626,12 +710,6 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
               isAdmin={Boolean(isAdmin && onUpdateItem)}
               onUpdate={(newValue) => {
                 updateSystemData("parameterName", newValue);
-                if (onUpdateItem) {
-                  onUpdateItem({
-                    ...item,
-                    parameter: newValue,
-                  });
-                }
               }}
             />
             Rating
@@ -653,11 +731,12 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                 <h3 className="relative text-2xl font-semibold text-amber-600 dark:text-amber-300 mb-6">
                   Current Performance
                 </h3>
-                {typeof systemData.value === "number" ? (
+                
+                {shouldShowGaugeChart() ? (
                   <GaugeChart
-                    value={systemData.value}
+                    value={systemData.value as number}
                     maxValue={100}
-                    label={`${item.name}-${index}`}
+                    label={`${item.name.split(" ").join("-")}-${index}`}
                     animate={animate}
                   />
                 ) : (
@@ -669,18 +748,10 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                         onUpdate={(newValue) => {
                           const numValue = Number(newValue);
                           const isNumeric = !isNaN(numValue);
-
                           updateSystemData(
                             "value",
                             isNumeric ? numValue : newValue,
                           );
-
-                          if (onUpdateItem) {
-                            onUpdateItem({
-                              ...item,
-                              value: isNumeric ? numValue : newValue,
-                            });
-                          }
                         }}
                       />
                     ) : (
@@ -690,21 +761,15 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                     )}
                   </div>
                 )}
-                {typeof systemData.value === "number" && (
+                
+                {shouldShowGaugeChart() && (
                   <PerformanceCard
-                    isAdmin={isAdmin} // MODIFIED: Pass isAdmin directly
-                    value={systemData.value}
+                    isAdmin={isAdmin}
+                    value={systemData.value as number}
                     recommended={recommendedValue}
                     label={systemData.parameterName}
                     onUpdate={(value) => {
                       updateSystemData("value", value);
-
-                      if (onUpdateItem) {
-                        onUpdateItem({
-                          ...item,
-                          value: value,
-                        });
-                      }
                     }}
                   />
                 )}
@@ -719,77 +784,56 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                   </h3>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {typeof systemData.value === "number" ? (
-                    <>
-                      This {item.name.toLowerCase()} has a{" "}
-                      {systemData.parameterName} rating of {systemData.value}%.
-                      {systemData.value < recommendedValue
-                        ? ` Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-                        : ` This is an efficient unit that meets or exceeds recommended standards.`}
-                    </>
-                  ) : (
-                    `This ${item.name.toLowerCase()} does not have a specified ${
-                      systemData.parameterName
-                    } rating.`
-                  )}
+                  {getDescriptionText()}
                 </p>
+                
+                {/* Use enhanced SystemDetails component that includes the AFUE/UEF value */}
                 <SystemDetails
                   isAdmin={Boolean(isAdmin && onUpdateItem)}
                   type={systemData.type}
                   condition={systemData.condition}
                   year={systemData.year}
+                  value={systemData.value}
+                  parameterName={systemData.parameterName}
                   onUpdateType={(value) => {
                     updateSystemData("type", value);
-                    if (onUpdateItem) {
-                      onUpdateItem({
-                        ...item,
-                        type: value,
-                      });
-                    }
                   }}
                   onUpdateCondition={(value) => {
                     updateSystemData("condition", value);
-                    if (onUpdateItem) {
-                      onUpdateItem({
-                        ...item,
-                        condition: value,
-                      });
-                    }
                   }}
                   onUpdateYear={(value) => {
                     updateSystemData("year", value);
-                    if (onUpdateItem) {
-                      onUpdateItem({
-                        ...item,
-                        year: value,
-                      });
-                    }
+                  }}
+                  onUpdateValue={(value) => {
+                    updateSystemData("value", value);
                   }}
                 />
+                
                 {isAdmin && onUpdateItem ? (
-                  <ImageUpload
-                    image={systemData.image ?? ""}
-                    onImageChange={(newImage) =>
-                      updateSystemData("image", newImage)
-                    }
-                    driveImages={driveImages}
-                  />
-                ) : (
+                  <div className="mt-4">
+                    <ImageUpload
+                      image={systemData.image ?? ""}
+                      onImageChange={(newImage) =>
+                        updateSystemData("image", newImage)
+                      }
+                      driveImages={driveImages}
+                    />
+                  </div>
+                ) : systemData.image && (
                   <motion.div
-                    className="relative h-48 overflow-hidden rounded-lg"
+                    className="relative h-48 overflow-hidden rounded-lg mt-4"
                     whileHover={{ scale: 1.02 }}
                   >
                     <Image
                       src={systemData.image ?? ""}
-                      alt="Air Conditioning Unit"
+                      alt={`${item.name} Image`}
                       className="object-cover w-full h-full"
                       width={500}
                       height={500}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                       <p className="text-white text-sm">
-                        Example of a {systemData.type || "central"} air
-                        conditioning unit
+                        {item.name} - {systemData.type || "standard"} unit
                       </p>
                     </div>
                   </motion.div>
@@ -803,7 +847,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   );
 };
 
-// HeatingContent component with direct isAdmin prop passing
+// HeatingContent component with the ability to save data
 export function HeatingContent({
   data,
   isAdmin = false,
@@ -812,7 +856,6 @@ export function HeatingContent({
   onSave,
 }: HeatingContentProps) {
   const params = useParams();
-
   const bookingNumber = params.bookingNumber;
 
   const fadeInUp = {
@@ -821,53 +864,45 @@ export function HeatingContent({
     transition: { duration: 0.5 },
   };
 
-  // Group heating items from heatingAndCooling and water heaters
-  const heatingItems =
-    data?.data?.filter(
-      (item) =>
-        item.name.toLowerCase().includes("furnace") ||
-        item.name.toLowerCase().includes("boiler") ||
-        item.name.toLowerCase().includes("heat") ||
-        item.name.toLowerCase().includes("water"),
-    ) || [];
-
-  console.log("Heating Items:", heatingItems);
+  // Ensure we have data to work with
+  const heatingItems = data?.data || [];
+  
+  console.log("HeatingContent received data:", data);
+  console.log("Heating items to render:", heatingItems);
 
   // Function to handle updates to heating items
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
-    console.log("Updated Item in HeatingContent:", updatedItem);
-    console.log("isAdmin in HeatingContent:", isAdmin);
     if (isAdmin && onUpdateItem) {
+      console.log("Updating item in HeatingContent:", updatedItem);
       onUpdateItem(updatedItem);
     }
   };
 
-  const onSumit = async () => {
+  const handleSave = async () => {
     const REPORT_DATA_KEY = "report_data";
     let updatedReportData;
     try {
       const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
-      console.log("Data from localStorage:", data);
-
       if (!data) {
-        console.error("No insulation data found in localStorage");
+        toast.error("No data found in localStorage");
         return;
       }
-      // updatedReportData=data;
-      updatedReportData = JSON.parse(data, null, 2);
+      
+      updatedReportData = JSON.parse(data);
       updatedReportData = {
         reportData: updatedReportData,
         displayReport: true,
         reportUrl: "",
       };
-
-      console.log("Saved insulation data to localStorage");
+      
+      console.log("Data being saved:", updatedReportData);
     } catch (e) {
-      console.error("Error getting insulation data to localStorage:", e);
+      console.error("Error getting data from localStorage:", e);
+      toast.error("Error preparing data for submission");
+      return;
     }
 
     try {
-      console.log("Submitting data:", updatedReportData);
       const response = await fetch(
         `/api/admin/bookings/${bookingNumber}/report/update`,
         {
@@ -881,29 +916,31 @@ export function HeatingContent({
 
       if (!response.ok) {
         const errorData = await response.json();
-        toast.error(errorData.detail || "Failed to fetch report details");
+        toast.error(errorData.detail || "Failed to update report");
         return;
       }
 
-      const data = await response.json();
-      toast.success("Data submitted successfully!");
-      console.log("Data submitted successfully:", data);
-      onSave()
+      toast.success("Heating systems data saved successfully!");
+      onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
+      toast.error("An error occurred while saving the data");
     }
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end items-center">
-        <button
-          onClick={onSumit}
-          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
-        >
-          Save
-        </button>
-      </div>
+      {isAdmin && (
+        <div className="flex justify-end items-center">
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 rounded-full bg-green-500 text-white font-bold hover:bg-green-600 transition-colors"
+          >
+            Save
+          </button>
+        </div>
+      )}
+      
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
@@ -928,19 +965,25 @@ export function HeatingContent({
       </motion.div>
 
       {heatingItems.length > 0 ? (
-        heatingItems.map((item, index) => (
-          <HeatingSystemCard
-            key={`${item.name}-${index}`}
-            item={item}
-            index={index}
-            isAdmin={isAdmin} // MODIFIED: Pass isAdmin directly
-            recommendedValue={
-              item.name.toLowerCase().includes("water") ? 62 : 92
-            }
-            onUpdateItem={handleUpdateItem}
-            driveImages={driveImages}
-          />
-        ))
+        heatingItems.map((item, index) => {
+          // Determine appropriate recommended value based on item type
+          const isWaterHeater = item.name.toLowerCase().includes("water");
+          const recommendedValue = isWaterHeater ? 62 : 92;
+          
+          console.log(`Rendering item ${index}:`, item, "isWaterHeater:", isWaterHeater);
+          
+          return (
+            <HeatingSystemCard
+              key={`${item.name}-${index}`}
+              item={item}
+              index={index}
+              isAdmin={isAdmin}
+              recommendedValue={recommendedValue}
+              onUpdateItem={handleUpdateItem}
+              driveImages={driveImages}
+            />
+          );
+        })
       ) : (
         <motion.div {...fadeInUp}>
           <Card>
