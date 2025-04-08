@@ -196,9 +196,7 @@ export function HouseSystem() {
                     <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       {systems
                         .find((s) => s.id === activeSystem)
-                        ?.items?.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
+                        ?.items?.map((item, idx) => <li key={idx}>{item}</li>)}
                     </ul>
                   ) : (
                     <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">

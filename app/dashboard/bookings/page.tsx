@@ -142,7 +142,6 @@
 
 //   return (
 //     <div className="min-h-screen bg-gray-50">
-     
 
 //       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 //         <div className="space-y-4">
@@ -209,7 +208,7 @@
 // };
 
 // export default BookingsPage;
-'use client'
+"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -219,7 +218,6 @@ const AuditInfo = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
-
       {/* Message */}
       <h1 className="text-2xl font-semibold text-gray-800">
         No Audit Information Available

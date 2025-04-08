@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { motion } from "framer-motion"
+import type React from "react";
+import { motion } from "framer-motion";
 
 const FailedPayment: React.FC = () => {
   return (
@@ -46,7 +46,8 @@ const FailedPayment: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.7 }}
             className="text-gray-600 mb-6"
           >
-          re sorry, but there was an issue processing your payment. Please try again or contact support.
+            re sorry, but there was an issue processing your payment. Please try
+            again or contact support.
           </motion.p>
           {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -78,8 +79,7 @@ const FailedPayment: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FailedPayment
-
+export default FailedPayment;

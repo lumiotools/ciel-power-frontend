@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { motion } from "framer-motion"
+import type React from "react";
+import { motion } from "framer-motion";
 
 const SuccessPayment: React.FC = () => {
   return (
@@ -23,16 +23,25 @@ const SuccessPayment: React.FC = () => {
               animate={{ pathLength: 1 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              <motion.path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <motion.path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </motion.svg>
           </motion.div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">Payment Successful!</h2>
-          <p className="text-gray-600 mb-6">Thank you for your purchase. Your order has been processed successfully.</p>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+            Payment Successful!
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Thank you for your purchase. Your order has been processed
+            successfully.
+          </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SuccessPayment
-
+export default SuccessPayment;

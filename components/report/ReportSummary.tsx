@@ -1,13 +1,33 @@
 "use client";
 
-import React, { useState, useEffect, useRef, use } from "react";
-import { AlertTriangle, Fan, Leaf, Home, ArrowUp, Thermometer, DollarSign, Shield, Activity, Pencil, Check, X, Trash2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  AlertTriangle,
+  Fan,
+  Leaf,
+  Home,
+  ArrowUp,
+  Thermometer,
+  DollarSign,
+  Shield,
+  Activity,
+  Pencil,
+  Check,
+  X,
+  Trash2,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ProjectCosts } from "@/components/report/ProjectCosts";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { set } from "date-fns";
 import { toast } from "sonner";
 
@@ -79,12 +99,13 @@ interface InPlaceEditNumberProps {
   max?: number;
 }
 
+// In-place editing component for text
 const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   initialValue,
   isAdmin,
   onUpdate,
   multiline = false,
-  placeholder = "Enter text"
+  placeholder = "Enter text",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue || "");
@@ -165,7 +186,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 
   return (
     <div
-      className={`${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''} ${!value ? 'text-gray-400 italic' : ''}`}
+      className={`${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""} ${!value ? "text-gray-400 italic" : ""}`}
       onClick={handleClick}
     >
       {value || (!isAdmin ? "No content" : placeholder)}
@@ -180,9 +201,12 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   initialValue,
   isAdmin,
+const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
+  initialValue,
+  isAdmin,
   onUpdate,
   min = 0,
-  max = 100
+  max = 100,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
@@ -238,7 +262,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
 
   return (
     <div
-      className={`font-medium ${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''}`}
+      className={`font-medium ${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""}`}
       onClick={handleClick}
     >
       {value}%
@@ -249,14 +273,21 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials }: ReportSummaryProps) {
+export function ReportSummary({
+  data,
+  isAdmin = false,
+  onUpdateConcerns,
+  onUpdateRecommendations, onUpdateFinancials,
+}: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
+
   // Process concerns data
   useEffect(() => {
     if (!data?.summaryOfConcerns?.data) return;
+
 
     try {
       const healthSafety = data.summaryOfConcerns.data.find(
@@ -276,6 +307,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         item && item.flag && item.concern && item.concern !== "Testing required"
       );
 
+
       setConcerns([...flaggedHealthSafety, ...flaggedCombustion]);
     } catch (error) {
       console.error("Error processing concerns data:", error);
@@ -283,9 +315,11 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
   }, [data?.summaryOfConcerns]);
 
+
   // Process recommendations data
   useEffect(() => {
     if (!data?.solutionsAndRecommendations?.recommendations) return;
+
 
     try {
       const recs = data.solutionsAndRecommendations.recommendations.map(rec => ({
@@ -298,16 +332,22 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
   }, [data?.solutionsAndRecommendations]);
 
+
   // Concern functions
   const getIconForConcern = (name?: string) => {
     if (!name) return AlertTriangle;
 
+
     const nameLower = name.toLowerCase();
-    if (nameLower.includes('vent') || nameLower.includes('fan') || nameLower.includes('dryer')) {
+    if (
+      nameLower.includes("vent") ||
+      nameLower.includes("fan") ||
+      nameLower.includes("dryer")
+    ) {
       return Fan;
-    } else if (nameLower.includes('combustion') || nameLower.includes('gas')) {
+    } else if (nameLower.includes("combustion") || nameLower.includes("gas")) {
       return Activity;
-    } else if (nameLower.includes('water') || nameLower.includes('heating')) {
+    } else if (nameLower.includes("water") || nameLower.includes("heating")) {
       return Thermometer;
     } else {
       return AlertTriangle;
@@ -320,9 +360,10 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       if (newConcerns[index]) {
         newConcerns[index] = {
           ...newConcerns[index],
-          [field]: value
+          [field]: value,
         };
       }
+
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
@@ -337,18 +378,21 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
           item.name.toLowerCase().includes('gas')
         );
 
+
         onUpdateConcerns({
           healthSafety,
-          combustion
+          combustion,
         });
       }
+
 
       return newConcerns;
     });
   };
 
+
   const addConcern = () => {
-    setConcerns(prev => {
+    setConcerns((prev) => {
       const newConcerns = [
         {
           name: "New Concern",
@@ -371,19 +415,23 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
           item.name.toLowerCase().includes('gas')
         );
 
+
         onUpdateConcerns({
           healthSafety,
-          combustion
+          combustion,
         });
       }
+
 
       return newConcerns;
     });
   };
 
+
   const deleteConcern = (index: number) => {
-    setConcerns(prev => {
+    setConcerns((prev) => {
       const newConcerns = prev.filter((_, i) => i !== index);
+
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
@@ -400,7 +448,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
 
         onUpdateConcerns({
           healthSafety,
-          combustion
+          combustion,
         });
       }
 
@@ -413,15 +461,18 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     if (!title) return Home;
 
     const titleLower = title.toLowerCase();
-    if (titleLower.includes('air') || titleLower.includes('seal')) {
+    if (titleLower.includes("air") || titleLower.includes("seal")) {
       return Fan;
-    } else if (titleLower.includes('attic') || titleLower.includes('insulation')) {
+    } else if (
+      titleLower.includes("attic") ||
+      titleLower.includes("insulation")
+    ) {
       return Home;
-    } else if (titleLower.includes('hatch')) {
+    } else if (titleLower.includes("hatch")) {
       return ArrowUp;
-    } else if (titleLower.includes('rim') || titleLower.includes('joist')) {
+    } else if (titleLower.includes("rim") || titleLower.includes("joist")) {
       return Thermometer;
-    } else if (titleLower.includes('crawl') || titleLower.includes('space')) {
+    } else if (titleLower.includes("crawl") || titleLower.includes("space")) {
       return Home;
     } else {
       return Leaf;
@@ -434,21 +485,24 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       if (newRecommendations[index]) {
         newRecommendations[index] = {
           ...newRecommendations[index],
-          [field]: value
+          [field]: value,
         };
       }
+
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
+
       return newRecommendations;
     });
   };
 
+
   const addRecommendation = () => {
-    setRecommendations(prev => {
+    setRecommendations((prev) => {
       const newRecommendations = [
         ...prev,
         {
@@ -460,23 +514,27 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         }
       ];
 
+
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
 
+
       return newRecommendations;
     });
   };
 
+
   const deleteRecommendation = (index: number) => {
-    setRecommendations(prev => {
+    setRecommendations((prev) => {
       const newRecommendations = prev.filter((_, i) => i !== index);
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
       if (onUpdateRecommendations) {
         onUpdateRecommendations(newRecommendations);
       }
+
 
       return newRecommendations;
     });
@@ -567,7 +625,11 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         </div>
       )}
       {/* Summary of Concerns Section */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <Card className="border-orange-100">
           <CardHeader className="bg-orange-50 dark:bg-orange-900/20">
             <div className="flex justify-between items-center">
@@ -608,7 +670,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                           <InPlaceEdit
                             initialValue={concern.name}
                             isAdmin={isAdmin}
-                            onUpdate={(value) => updateConcern(index, "name", value)}
+                            onUpdate={(value) =>
+                              updateConcern(index, "name", value)
+                            }
                             placeholder="Enter concern title"
                           />
                         </div>
@@ -616,7 +680,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                           <InPlaceEdit
                             initialValue={concern.concern}
                             isAdmin={isAdmin}
-                            onUpdate={(value) => updateConcern(index, "concern", value)}
+                            onUpdate={(value) =>
+                              updateConcern(index, "concern", value)
+                            }
                             multiline={true}
                             placeholder="Enter concern description"
                           />
@@ -627,7 +693,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                               <input
                                 type="checkbox"
                                 checked={!!concern.flag}
-                                onChange={(e) => updateConcern(index, "flag", e.target.checked)}
+                                onChange={(e) =>
+                                  updateConcern(index, "flag", e.target.checked)
+                                }
                                 className="mr-2"
                               />
                               Flagged for attention
@@ -659,9 +727,12 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                     <Shield className="text-green-500" size={20} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-green-500">No Concerns Detected</h3>
+                    <h3 className="font-medium text-green-500">
+                      No Concerns Detected
+                    </h3>
                     <p className="text-gray-700 text-sm mt-1">
-                      No significant health, safety, or combustion issues were found during the assessment.
+                      No significant health, safety, or combustion issues were
+                      found during the assessment.
                     </p>
                     {isAdmin && (
                       <button
@@ -716,12 +787,15 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                     key={`recommendation-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 + (0.1 * index) }}
+                    transition={{ duration: 0.5, delay: 0.4 + 0.1 * index }}
                     className="bg-white rounded-lg p-4 mb-3 shadow-sm"
                   >
                     <div className="flex items-start gap-3">
                       <div className="bg-green-100 p-2 rounded-md">
-                        <RecommendationIcon className="text-green-600" size={20} />
+                        <RecommendationIcon
+                          className="text-green-600"
+                          size={20}
+                        />
                       </div>
                       <div className="w-full">
                         <div className="flex justify-between items-start">
@@ -729,11 +803,14 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             <InPlaceEdit
                               initialValue={recommendation.title}
                               isAdmin={isAdmin}
-                              onUpdate={(value) => updateRecommendation(index, "title", value)}
+                              onUpdate={(value) =>
+                                updateRecommendation(index, "title", value)
+                              }
                               placeholder="Enter recommendation title"
                             />
                           </h3>
                           {isAdmin && (
+                            <button
                             <button
                               onClick={() => deleteRecommendation(index)}
                               className="text-red-500 hover:text-red-700 px-2 py-1 text-xs rounded hover:bg-red-50 flex items-center gap-1 transition-colors"
@@ -747,20 +824,32 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
 
                         <div className="space-y-3 my-3">
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Location:</p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              Location:
+                            </p>
                             <InPlaceEdit
                               initialValue={recommendation.location}
                               isAdmin={isAdmin}
-                              onUpdate={(value) => updateRecommendation(index, "location", value)}
+                              onUpdate={(value) =>
+                                updateRecommendation(index, "location", value)
+                              }
                               placeholder="Enter location"
                             />
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Details:</p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              Details:
+                            </p>
                             <InPlaceEdit
                               initialValue={recommendation.insulation_details}
                               isAdmin={isAdmin}
-                              onUpdate={(value) => updateRecommendation(index, "insulation_details", value)}
+                              onUpdate={(value) =>
+                                updateRecommendation(
+                                  index,
+                                  "insulation_details",
+                                  value,
+                                )
+                              }
                               multiline={true}
                               placeholder="Enter insulation details if applicable"
                             />
@@ -770,17 +859,27 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             <InPlaceEdit
                               initialValue={recommendation.specific_steps}
                               isAdmin={isAdmin}
-                              onUpdate={(value) => updateRecommendation(index, "specific_steps", value)}
+                              onUpdate={(value) =>
+                                updateRecommendation(
+                                  index,
+                                  "specific_steps",
+                                  value,
+                                )
+                              }
                               multiline={true}
                               placeholder="Enter implementation steps if applicable"
                             />
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Benefits:</p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              Benefits:
+                            </p>
                             <InPlaceEdit
                               initialValue={recommendation.benefit}
                               isAdmin={isAdmin}
-                              onUpdate={(value) => updateRecommendation(index, "benefit", value)}
+                              onUpdate={(value) =>
+                                updateRecommendation(index, "benefit", value)
+                              }
                               placeholder="Enter benefits"
                             />
                           </div>
@@ -792,17 +891,21 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                             <InPlaceEditNumber
                               initialValue={progress}
                               isAdmin={isAdmin}
-                              onUpdate={(value) => updateRecommendation(index, "progress", value)}
+                              onUpdate={(value) =>
+                                updateRecommendation(index, "progress", value)
+                              }
                               min={0}
                               max={100}
                             />
                           ) : (
-                            <span className="text-sm font-medium text-green-600">{progress}%</span>
+                            <span className="text-sm font-medium text-green-600">
+                              {progress}%
+                            </span>
                           )}
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out" 
+                          <div
+                            className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{ width: `${progress}%` }}
                           ></div>
                         </div> */}
@@ -823,7 +926,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
                     <Leaf className="text-green-600" size={20} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-green-600">No Recommendations</h3>
+                    <h3 className="font-medium text-green-600">
+                      No Recommendations
+                    </h3>
                     <p className="text-gray-700 text-sm mt-1">
                       No recommendations or solutions have been added yet.
                     </p>

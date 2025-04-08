@@ -75,7 +75,11 @@ interface ReportData {
   [key: string]: any;
 }
 
-const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) => {
+const ReportPage = ({
+  params,
+}: {
+  params: Promise<{ bookingNumber: string }>;
+}) => {
   // Unwrap the params Promise using React.use()
   const unwrappedParams = use(params);
   const bookingNumber = unwrappedParams.bookingNumber;
@@ -98,7 +102,9 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
   const fetchReportDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/user/bookings/${bookingNumber}/report`);
+      const response = await fetch(
+        `/api/user/bookings/${bookingNumber}/report`,
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -107,7 +113,7 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setReportData(data.data.reportData || {});
         setReportUrl(data.data.reportUrl || "");
@@ -125,35 +131,39 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
   // Filter heating and cooling items from heatingAndCooling data
   const getHeatingData = () => {
-    if (!reportData.heatingAndCooling?.data) return { data: [], title: "Heating Systems" };
-    
+    if (!reportData.heatingAndCooling?.data)
+      return { data: [], title: "Heating Systems" };
+
     const heatingItems = reportData.heatingAndCooling.data.filter(
-      item => item.name.toLowerCase().includes('furnace') || 
-              item.name.toLowerCase().includes('boiler') || 
-              item.name.toLowerCase().includes('heat')
+      (item) =>
+        item.name.toLowerCase().includes("furnace") ||
+        item.name.toLowerCase().includes("boiler") ||
+        item.name.toLowerCase().includes("heat"),
     );
-    
+
     const waterHeaterItems = reportData.waterHeater?.data || [];
-    
+
     return {
       data: [...heatingItems, ...waterHeaterItems],
-      title: "Heating & Water Heating Systems"
+      title: "Heating & Water Heating Systems",
     };
   };
-  
+
   const getCoolingData = () => {
-    if (!reportData.heatingAndCooling?.data) return { data: [], title: "Cooling Systems" };
-    
+    if (!reportData.heatingAndCooling?.data)
+      return { data: [], title: "Cooling Systems" };
+
     const coolingItems = reportData.heatingAndCooling.data.filter(
-      item => item.name.toLowerCase().includes('a/c') || 
-              item.name.toLowerCase().includes('air condition') || 
-              item.name.toLowerCase().includes('cooling') ||
-              item.name.toLowerCase().includes('heat pump')
+      (item) =>
+        item.name.toLowerCase().includes("a/c") ||
+        item.name.toLowerCase().includes("air condition") ||
+        item.name.toLowerCase().includes("cooling") ||
+        item.name.toLowerCase().includes("heat pump"),
     );
-    
+
     return {
       data: coolingItems,
-      title: "Cooling Systems"
+      title: "Cooling Systems",
     };
   };
 
@@ -220,19 +230,19 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
   const handleScrollToTop = () => {
     // First update the state
     setOverview(false);
-    
+
     // Use setTimeout to ensure state has updated before scrolling
     setTimeout(() => {
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
-      
+
       // Also scroll the specific ref if it exists
       if (scrollRef.current) {
         scrollRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
+          behavior: "smooth",
+          block: "start",
         });
       }
     }, 100);
@@ -521,13 +531,21 @@ const ReportPage = ({ params }: { params: Promise<{ bookingNumber: string }> }) 
 
       <div className="bg-white rounded-b-lg shadow-md">
         <div className="flex border-b border-gray-200">
-          {["air-leakage", "insulation", "heating", "cooling", "summary", "future solutions and certifications"].map((tab) => (
+          {[
+            "air-leakage",
+            "insulation",
+            "heating",
+            "cooling",
+            "summary",
+            "future solutions and certifications",
+          ].map((tab) => (
             <button
               key={tab}
-              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
-                ? "border-b-2 border-lime-500 text-lime-500"
-                : "text-gray-600 hover:text-lime-500"
-                }`}
+              className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
+                activeSubMenu === tab
+                  ? "border-b-2 border-lime-500 text-lime-500"
+                  : "text-gray-600 hover:text-lime-500"
+              }`}
               onClick={() => setActiveSubMenu(tab)}
             >
               {["air-leakage", "insulation", "heating", "cooling"].includes(tab)

@@ -5,7 +5,18 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Wind, Home, ArrowUp, ArrowDown, Info, Pencil } from "lucide-react";
+import {
+  Wind,
+  Home,
+  ArrowUp,
+  ArrowDown,
+  Info,
+  Pencil,
+  Check,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useParams } from "next/navigation";
 
 interface AirLeakageData {
   parameter: string;
@@ -19,7 +30,11 @@ interface AirLeakageContentProps {
   onUpdateValue?: (newValue: string) => void;
 }
 
-export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirLeakageContentProps) {
+export function AirLeakageContent({
+  data,
+  isAdmin = false,
+  onUpdateValue,
+}: AirLeakageContentProps) {
   const airLeakagePoints = [
     { id: 1, label: "Air Barrier and Thermal Barrier Alignment" },
     { id: 2, label: "Attic Air Sealing" },
@@ -48,15 +63,85 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirL
     transition: { duration: 0.5 },
   };
 
-  // Function to handle value updates
-  const handleUpdateValue = (newValue: string) => {
-    if (isAdmin && onUpdateValue) {
-      onUpdateValue(newValue);
+  const [value, setValue] = useState<number>(parseFloat(data?.value || "0.00"));
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    setValue(parseFloat(data?.value || "0.00"));
+  }, [data?.value]);
+
+  const handleSave = () => {
+    if (onUpdateValue && isAdmin) {
+      onUpdateValue(value.toFixed(2)); // Save the updated value
+    }
+    setIsEditing(false); // Exit editing mode
+  };
+
+  const handleCancel = () => {
+    setValue(parseFloat(data?.value || "0.00")); // Reset to the initial value
+    setIsEditing(false); // Exit editing mode
+  };
+
+  const params = useParams();
+
+  const bookingNumber = params.bookingNumber;
+
+  const onSumit = async () => {
+    const REPORT_DATA_KEY = "report_data";
+    let updatedReportData;
+    try {
+      const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+
+      if (!data) {
+        console.error("No insulation data found in localStorage");
+        return;
+      }
+      // updatedReportData=data;
+      updatedReportData = JSON.parse(data, null, 2);
+      updatedReportData = {
+        reportData: updatedReportData,
+        displayReport: true,
+        reportUrl: "",
+      };
+    } catch (e) {
+      console.error("Error getting insulation data to localStorage:", e);
+    }
+
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/report/update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedReportData),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to fetch report details");
+        return;
+      }
+
+      await response.json();
+      toast.success("Data submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting data:", error);
     }
   };
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-end items-center">
+        <button
+          onClick={onSumit}
+          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
+        >
+          Save
+        </button>
+      </div>
       {/* Introduction Section */}
       <motion.div {...fadeInUp}>
         <Card>
@@ -67,16 +152,18 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirL
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <p className="text-gray-700 dark:text-gray-300">
-              The air sealing Ciel Power, LLC performs is a BPI approach. First, the attic top plates and penetration
-              are sealed. Next, the attached garage is sealed from the living space. Then, the basement sill plate and
-              penetrations are sealed. Finally, the exterior of the home around windows, baseboards, and doors are
+              The air sealing Ciel Power, LLC performs is a BPI approach. First,
+              the attic top plates and penetration are sealed. Next, the
+              attached garage is sealed from the living space. Then, the
+              basement sill plate and penetrations are sealed. Finally, the
+              exterior of the home around windows, baseboards, and doors are
               sealed.
             </p>
             <div className="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
               <Info className="h-5 w-5" />
               <span className="font-medium">
-                A 1/16th inch unsealed crack around a window lets in as much cold air as leaving the window open 1/2
-                inch.
+                A 1/16th inch unsealed crack around a window lets in as much
+                cold air as leaving the window open 1/2 inch.
               </span>
             </div>
           </CardContent>
@@ -95,14 +182,20 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirL
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <p className="text-gray-700 dark:text-gray-300">
-                  35% of the air in your home should exhaust each hour to maintain healthy ventilation. Airflow rates
-                  above these levels create excessive strain on heating & cooling systems.
+                  35% of the air in your home should exhaust each hour to
+                  maintain healthy ventilation. Airflow rates above these levels
+                  create excessive strain on heating & cooling systems.
                 </p>
                 <div className="flex items-center space-x-4">
                   <div className="w-32">
-                    <Progress value={35} className="h-2 bg-blue-100 dark:bg-blue-700" />
+                    <Progress
+                      value={35}
+                      className="h-2 bg-blue-100 dark:bg-blue-700"
+                    />
                   </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Recommended: 35%</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Recommended: 35%
+                  </span>
                 </div>
               </div>
               <div className="relative h-48">
@@ -137,16 +230,54 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirL
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <div className="space-y-4">
-                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Results</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Your Results
+                  </p>
                   <div className="flex items-center space-x-4">
-                    <InPlaceEdit 
-                      initialValue={data?.value || "0.00"} 
-                      isAdmin={isAdmin} 
-                      onUpdate={handleUpdateValue}
-                    />
+                    {isEditing ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={value}
+                          onChange={(e) => setValue(parseFloat(e.target.value))}
+                          className="border rounded px-2 py-1 w-20"
+                          min={0}
+                          max={100}
+                          autoFocus
+                        />
+                        <button
+                          onClick={handleSave}
+                          className="p-1 bg-green-100 hover:bg-green-200 rounded text-green-600"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          className="p-1 bg-red-100 hover:bg-red-200 rounded text-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <p className="text-4xl font-bold text-blue-700">
+                          {value.toFixed(2)}
+                        </p>
+                        {isAdmin && (
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="p-1 hover:bg-gray-100 rounded"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <div className="text-sm text-gray-600">ACH</div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">BPI recommends the Air Changes per Hour be 0.35</p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    BPI recommends the Air Changes per Hour be 0.35
+                  </p>
                 </div>
               </div>
               <div className="relative h-48">
@@ -181,7 +312,9 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirL
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
-            <CardTitle className="text-2xl text-blue-700 dark:text-blue-200">Common Air Leak Points</CardTitle>
+            <CardTitle className="text-2xl text-blue-700 dark:text-blue-200">
+              Common Air Leak Points
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -196,9 +329,13 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue }: AirL
                 >
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <span className="text-blue-600 dark:text-blue-400 font-medium">{point.id}</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">
+                        {point.id}
+                      </span>
                     </div>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{point.label}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {point.label}
+                    </span>
                   </div>
                 </motion.div>
               ))}
@@ -268,7 +405,10 @@ function InPlaceEdit({ initialValue, isAdmin, onUpdate }: InPlaceEditProps) {
   }
 
   return (
-    <div className="text-4xl font-bold text-blue-700 flex items-center cursor-pointer" onClick={handleClick}>
+    <div
+      className="text-4xl font-bold text-blue-700 flex items-center cursor-pointer"
+      onClick={handleClick}
+    >
       {value}
       {isAdmin && <Pencil className="ml-2 h-5 w-5 text-gray-400" />}
     </div>

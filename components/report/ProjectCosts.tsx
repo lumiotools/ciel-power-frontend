@@ -38,7 +38,7 @@ const InPlaceEditText: React.FC<InPlaceEditTextProps> = ({
   initialValue,
   isAdmin,
   onUpdate,
-  placeholder = "Enter text"
+  placeholder = "Enter text",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState<string>(initialValue || "");
@@ -85,7 +85,9 @@ const InPlaceEditText: React.FC<InPlaceEditTextProps> = ({
           ref={inputRef}
           type="text"
           value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setValue(e.target.value)
+          }
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-green-500"
@@ -108,7 +110,7 @@ const InPlaceEditText: React.FC<InPlaceEditTextProps> = ({
 
   return (
     <div
-      className={`font-medium ${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''}`}
+      className={`font-medium ${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""}`}
       onClick={handleClick}
     >
       {value || placeholder}
@@ -131,7 +133,7 @@ const InPlaceEditCurrency: React.FC<InPlaceEditCurrencyProps> = ({
   initialValue,
   isAdmin,
   onUpdate,
-  placeholder = "Enter amount"
+  placeholder = "Enter amount",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState<string>(initialValue || "0");
@@ -175,11 +177,11 @@ const InPlaceEditCurrency: React.FC<InPlaceEditCurrencyProps> = ({
     // Convert to number, format, then back to string
     const numericValue = parseFloat(amount);
     if (isNaN(numericValue)) return "$0.00";
-    
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
     }).format(numericValue);
   };
 
@@ -190,7 +192,9 @@ const InPlaceEditCurrency: React.FC<InPlaceEditCurrencyProps> = ({
           ref={inputRef}
           type="number"
           value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setValue(e.target.value)
+          }
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           step="0.01"
@@ -215,7 +219,7 @@ const InPlaceEditCurrency: React.FC<InPlaceEditCurrencyProps> = ({
 
   return (
     <div
-      className={`font-medium ${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''}`}
+      className={`font-medium ${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""}`}
       onClick={handleClick}
     >
       {formatCurrency(value)}
@@ -242,7 +246,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   onUpdate,
   min = 1,
   max = 30,
-  label = "years"
+  label = "years",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState<string>((initialValue || 10).toString());
@@ -289,7 +293,9 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
           ref={inputRef}
           type="number"
           value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setValue(e.target.value)
+          }
           onKeyDown={handleKeyDown}
           min={min}
           max={max}
@@ -313,7 +319,7 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
 
   return (
     <div
-      className={`font-medium ${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''}`}
+      className={`font-medium ${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""}`}
       onClick={handleClick}
     >
       {parseInt(value, 10) || 10} {label}
@@ -324,28 +330,33 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpdateFinancials }: ProjectCostsProps) {
+export function ProjectCosts({
+  data,
+  isAdmin = false,
+  bookingNumber = "",
+  onUpdateFinancials,
+}: ProjectCostsProps) {
   const REPORT_DATA_KEY = "report_data";
-  
+
   // Initial financial items suggestions
   const initialItems: FinancialItem[] = [
-    { title: 'Total Project Costs', amount: '0' },
-    { title: 'Audit Refund', amount: '0' },
-    { title: 'NJ HPwES Cash Back Incentive', amount: '0' },
-    { title: 'Remaining Balance', amount: '0' },
-    { title: 'Amount Eligible for NJ HPwES Financing', amount: '0' },
-    { title: 'Remaining Out of Pocket Expenses', amount: '0' },
+    { title: "Total Project Costs", amount: "0" },
+    { title: "Audit Refund", amount: "0" },
+    { title: "NJ HPwES Cash Back Incentive", amount: "0" },
+    { title: "Remaining Balance", amount: "0" },
+    { title: "Amount Eligible for NJ HPwES Financing", amount: "0" },
+    { title: "Remaining Out of Pocket Expenses", amount: "0" },
   ];
-  
+
   // Initialize financial data
   const [financialItems, setFinancialItems] = useState<FinancialItem[]>([]);
-  
+
   // Initialize financial summary data
   const [financialSummary, setFinancialSummary] = useState<FinancialData>({
-    title: 'Financial Summary',
+    title: "Financial Summary",
     data: [],
-    monthlyPayment: '0',
-    financingPeriodYears: 10
+    monthlyPayment: "0",
+    financingPeriodYears: 10,
   });
 
   // Load data from props if available
@@ -357,7 +368,9 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
     } else if (bookingNumber) {
       // If no data in props, try to load from localStorage
       try {
-        const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+        const savedData = localStorage.getItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+        );
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           if (parsedData.financialSummary) {
@@ -367,20 +380,20 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
             // If financialSummary doesn't exist in localStorage, use initial suggestions
             setFinancialItems(initialItems);
             setFinancialSummary({
-              title: 'Financial Summary',
+              title: "Financial Summary",
               data: initialItems,
-              monthlyPayment: '0',
-              financingPeriodYears: 10
+              monthlyPayment: "0",
+              financingPeriodYears: 10,
             });
           }
         } else {
           // If no data in localStorage, use initial suggestions
           setFinancialItems(initialItems);
           setFinancialSummary({
-            title: 'Financial Summary',
+            title: "Financial Summary",
             data: initialItems,
-            monthlyPayment: '0',
-            financingPeriodYears: 10
+            monthlyPayment: "0",
+            financingPeriodYears: 10,
           });
         }
       } catch (e) {
@@ -388,20 +401,20 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
         // Fallback to initial suggestions on error
         setFinancialItems(initialItems);
         setFinancialSummary({
-          title: 'Financial Summary',
+          title: "Financial Summary",
           data: initialItems,
-          monthlyPayment: '0',
-          financingPeriodYears: 10
+          monthlyPayment: "0",
+          financingPeriodYears: 10,
         });
       }
     } else {
       // No data and no bookingNumber, use initial suggestions
       setFinancialItems(initialItems);
       setFinancialSummary({
-        title: 'Financial Summary',
+        title: "Financial Summary",
         data: initialItems,
-        monthlyPayment: '0',
-        financingPeriodYears: 10
+        monthlyPayment: "0",
+        financingPeriodYears: 10,
       });
     }
   }, [data, bookingNumber]);
@@ -411,97 +424,105 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
     const newItems = [...financialItems];
     newItems[index] = {
       ...newItems[index],
-      title
+      title,
     };
-    
+
     updateFinancialSummary({
       ...financialSummary,
-      data: newItems
+      data: newItems,
     });
   };
-  
+
   // Update an item's amount
   const updateItemAmount = (index: number, amount: string) => {
     const newItems = [...financialItems];
     newItems[index] = {
       ...newItems[index],
-      amount
+      amount,
     };
-    
+
     updateFinancialSummary({
       ...financialSummary,
-      data: newItems
+      data: newItems,
     });
   };
-  
+
   // Update monthly payment
   const updateMonthlyPayment = (amount: string) => {
     updateFinancialSummary({
       ...financialSummary,
-      monthlyPayment: amount
+      monthlyPayment: amount,
     });
   };
-  
+
   // Update financing period years
   const updateFinancingPeriod = (years: number) => {
     updateFinancialSummary({
       ...financialSummary,
-      financingPeriodYears: years
+      financingPeriodYears: years,
     });
   };
-  
+
   // Add a new financial item
   const addFinancialItem = () => {
     const newItem: FinancialItem = {
-      title: 'New Item',
-      amount: '0'
+      title: "New Item",
+      amount: "0",
     };
-    
+
     const newItems = [...financialItems, newItem];
     updateFinancialSummary({
       ...financialSummary,
-      data: newItems
+      data: newItems,
     });
   };
-  
+
   // Delete a financial item
   const deleteFinancialItem = (index: number) => {
     const newItems = [...financialItems];
     newItems.splice(index, 1);
-    
+
     updateFinancialSummary({
       ...financialSummary,
-      data: newItems
+      data: newItems,
     });
   };
-  
+
   // Update the full financial summary and save to localStorage
   const updateFinancialSummary = (newFinancialSummary: FinancialData) => {
     setFinancialSummary(newFinancialSummary);
     setFinancialItems(newFinancialSummary.data);
-    
+
     // If callback provided, call it with updated data
     if (onUpdateFinancials) {
       onUpdateFinancials(newFinancialSummary);
     }
-    
+
     // Save to localStorage
     if (bookingNumber) {
       try {
-        const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+        const savedData = localStorage.getItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+        );
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           const updatedData = {
             ...parsedData,
-            financialSummary: newFinancialSummary
+            financialSummary: newFinancialSummary,
           };
-          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(updatedData));
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(updatedData),
+          );
         } else {
           // If no existing data, create new data structure
           const newData = {
-            financialSummary: newFinancialSummary
+            financialSummary: newFinancialSummary,
           };
-          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(newData));
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(newData),
+          );
         }
       } catch (e) {
         console.error("Error saving financial data:", e);
@@ -513,11 +534,11 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
     // Convert to number, format, then back to string
     const numericValue = parseFloat(amount);
     if (isNaN(numericValue)) return "$0.00";
-    
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
     }).format(numericValue);
   };
 
@@ -528,7 +549,7 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
         key={`item-${index}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.9 + (0.1 * index) }}
+        transition={{ duration: 0.5, delay: 0.9 + 0.1 * index }}
         className="bg-white rounded-lg p-4 mb-3 shadow-sm"
       >
         <div className="flex items-center justify-between">
@@ -544,8 +565,10 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
                   onUpdate={(title) => updateItemTitle(index, title)}
                 />
               </h3>
-              {item.title.toLowerCase().includes('financing') && (
-                <p className="text-xs text-gray-500">*if qualified by financing company (0% Interest Rate)</p>
+              {item.title.toLowerCase().includes("financing") && (
+                <p className="text-xs text-gray-500">
+                  *if qualified by financing company (0% Interest Rate)
+                </p>
               )}
             </div>
           </div>
@@ -578,7 +601,9 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
         transition={{ duration: 0.5, delay: 1.6 }}
         className="bg-green-100 rounded-lg p-4 text-center shadow-sm"
       >
-        <h3 className="text-gray-700 font-medium mb-2">Total Monthly Payment</h3>
+        <h3 className="text-gray-700 font-medium mb-2">
+          Total Monthly Payment
+        </h3>
         {isAdmin ? (
           <div className="flex justify-center items-center my-2">
             <InPlaceEditCurrency
@@ -586,10 +611,14 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
               isAdmin={isAdmin}
               onUpdate={updateMonthlyPayment}
             />
-            <span className="text-green-600 text-2xl font-bold ml-1">/month</span>
+            <span className="text-green-600 text-2xl font-bold ml-1">
+              /month
+            </span>
           </div>
         ) : (
-          <p className="text-green-600 text-2xl font-bold">{formatCurrency(financialSummary.monthlyPayment)}/month</p>
+          <p className="text-green-600 text-2xl font-bold">
+            {formatCurrency(financialSummary.monthlyPayment)}/month
+          </p>
         )}
         <div className="text-xs text-gray-500 mt-2 flex items-center justify-center">
           <span>*Over a </span>
@@ -605,7 +634,9 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
               />
             </span>
           ) : (
-            <span className="mx-1">{financialSummary.financingPeriodYears}</span>
+            <span className="mx-1">
+              {financialSummary.financingPeriodYears}
+            </span>
           )}
           <span> year period</span>
         </div>
@@ -626,7 +657,7 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
               <DollarSign className="h-6 w-6" />
               Project Costs & Incentives
             </CardTitle>
-            
+
             {isAdmin && (
               <button
                 onClick={addFinancialItem}
@@ -641,8 +672,10 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
         </CardHeader>
         <CardContent className="p-6 space-y-4 bg-green-50/50">
           {/* Render all financial items */}
-          {financialItems.map((item, index) => renderFinancialItem(item, index))}
-          
+          {financialItems.map((item, index) =>
+            renderFinancialItem(item, index),
+          )}
+
           {/* Render monthly payment at the bottom */}
           {renderMonthlyPayment()}
         </CardContent>

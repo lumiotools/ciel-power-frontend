@@ -38,7 +38,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   bookedSlot,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    initialDate
+    initialDate,
   );
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [isFetchingSlots, setIsFetchingSlots] = useState(false);
@@ -67,7 +67,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
             body: JSON.stringify({
               eventId: selectedSlot?.eventId,
             }),
-          }
+          },
         );
 
         const data = await response.json();
@@ -181,8 +181,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                       {slots.map((slot) => {
                         const isBookedSlot = Boolean(
                           bookedSlot &&
-                          slot.startTime === bookedSlot.startTime &&
-                          slot.endTime === bookedSlot.endTime
+                            slot.startTime === bookedSlot.startTime &&
+                            slot.endTime === bookedSlot.endTime,
                         );
 
                         return (
@@ -194,9 +194,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                                 : "outline"
                             }
                             className="text-xs"
-                           
                             onClick={() => setSelectedSlot(slot)}
-                            disabled={isBookedSlot} 
+                            disabled={isBookedSlot}
                           >
                             {formatTime(slot.startTime)} -{" "}
                             {formatTime(slot.endTime)}

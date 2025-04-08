@@ -1,26 +1,46 @@
-"use client"
+"use client";
 
-import React, { useRef, useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Thermometer, Flame, Droplets, Info, AlertCircle, Edit2, Check, X, Pencil } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import React, { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Thermometer,
+  Flame,
+  Info,
+  AlertCircle,
+  Edit2,
+  Check,
+  X,
+  Pencil,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { useParams } from "next/navigation";
+import { ImageUpload } from "./ImageUpload";
+import { driveImages } from "@/utils/image-utils";
+import Image from "next/image";
 
 // All interfaces remain the same
 interface GaugeChartProps {
-  value: number
-  maxValue: number
-  label: string
-  animate: boolean
+  value: number;
+  maxValue: number;
+  label: string;
+  animate: boolean;
 }
 
 interface EditableFieldProps {
-  value: string
-  onSave: (value: string) => void
-  type: "text" | "select" | "number"
-  options?: string[]
-  min?: number
-  max?: number
+  value: string;
+  onSave: (value: string) => void;
+  type: "text" | "select" | "number";
+  options?: string[];
+  min?: number;
+  max?: number;
 }
 
 interface HeatingCoolingItem {
@@ -30,6 +50,7 @@ interface HeatingCoolingItem {
   type: string;
   value: number | string;
   year?: number;
+  image?: string;
 }
 
 interface HeatingData {
@@ -41,32 +62,34 @@ interface HeatingContentProps {
   data?: HeatingData;
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
+  driveImages?: driveImages[];
 }
 
 interface PerformanceCardProps {
-  isAdmin: boolean
-  value: number
-  recommended: number
-  label: string
-  onUpdate: (value: number) => void
+  isAdmin: boolean;
+  value: number;
+  recommended: number;
+  label: string;
+  onUpdate: (value: number) => void;
 }
 
 interface SystemDetailsProps {
-  isAdmin: boolean
-  type: string
-  condition: string
-  year?: number
-  onUpdateType: (value: string) => void
-  onUpdateCondition: (value: string) => void
-  onUpdateYear?: (value: number) => void
+  isAdmin: boolean;
+  type: string;
+  condition: string;
+  year?: number;
+  onUpdateType: (value: string) => void;
+  onUpdateCondition: (value: string) => void;
+  onUpdateYear?: (value: number) => void;
 }
 
 interface HeatingSystemCardProps {
-  item: HeatingCoolingItem
-  index: number
-  isAdmin: boolean
-  recommendedValue?: number
-  onUpdateItem?: (updatedItem: HeatingCoolingItem) => void
+  item: HeatingCoolingItem;
+  index: number;
+  isAdmin: boolean;
+  recommendedValue?: number;
+  onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
+  driveImages?: driveImages[];
 }
 
 interface InPlaceEditProps {
@@ -85,17 +108,17 @@ interface EditableAFUEProps {
 const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
-  
+
   // Keep local state in sync with props
   useEffect(() => {
     setEditValue(value);
   }, [value]);
-  
+
   const handleSave = () => {
     onChange(Number(editValue));
     setIsEditing(false);
   };
-  
+
   if (isEditing) {
     return (
       <div className="flex items-center gap-2">
@@ -108,10 +131,13 @@ const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
           max={100}
           autoFocus
         />
-        <button onClick={handleSave} className="p-1 bg-green-100 hover:bg-green-200 rounded text-green-600">
+        <button
+          onClick={handleSave}
+          className="p-1 bg-green-100 hover:bg-green-200 rounded text-green-600"
+        >
           <Check className="w-4 h-4" />
         </button>
-        <button 
+        <button
           onClick={() => {
             setEditValue(value);
             setIsEditing(false);
@@ -123,11 +149,16 @@ const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="flex items-center gap-2">
-      <p className="text-2xl font-bold text-[#b45309] dark:text-amber-400">{value}%</p>
-      <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-gray-100 rounded">
+      <p className="text-2xl font-bold text-[#b45309] dark:text-amber-400">
+        {value}%
+      </p>
+      <button
+        onClick={() => setIsEditing(true)}
+        className="p-1 hover:bg-gray-100 rounded"
+      >
         <Pencil className="w-4 h-4" />
       </button>
     </div>
@@ -135,16 +166,33 @@ const EditableAFUE: React.FC<EditableAFUEProps> = ({ value, onChange }) => {
 };
 
 // Original GaugeChart component - unchanged
-const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate }) => {
-  const percentage = (value / maxValue) * 100
+const GaugeChart: React.FC<GaugeChartProps> = ({
+  value,
+  maxValue,
+  label,
+  animate,
+}) => {
+  const percentage = (value / maxValue) * 100;
 
   return (
     <div className="relative w-full max-w-[400px] mx-auto">
       <svg viewBox="-10 0 220 110" className="w-full">
-        <path d="M 0 110 A 100 100 0 0 1 200 110" fill="none" stroke="#f1f5f9" strokeWidth="16" strokeLinecap="round" />
+        <path
+          d="M 0 110 A 100 100 0 0 1 200 110"
+          fill="none"
+          stroke="#f1f5f9"
+          strokeWidth="16"
+          strokeLinecap="round"
+        />
 
         <defs>
-          <linearGradient id={`gauge-gradient-${label}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient
+            id={`gauge-gradient-${label}`}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor="#dc2626" />
             <stop offset="25%" stopColor="#ea580c" />
             <stop offset="50%" stopColor="#d97706" />
@@ -160,42 +208,62 @@ const GaugeChart: React.FC<GaugeChartProps> = ({ value, maxValue, label, animate
           strokeWidth="16"
           strokeLinecap="round"
           initial={{ strokeDasharray: "0, 314" }}
-          animate={animate ? { strokeDasharray: `${percentage * 3.14}, 314` } : { strokeDasharray: "0, 314" }}
+          animate={
+            animate
+              ? { strokeDasharray: `${percentage * 3.14}, 314` }
+              : { strokeDasharray: "0, 314" }
+          }
           transition={{ duration: 1, ease: "easeOut" }}
         />
 
-        <text x="100" y="95" textAnchor="middle" className="text-4xl font-bold" fill="currentColor">
+        <text
+          x="100"
+          y="95"
+          textAnchor="middle"
+          className="text-4xl font-bold"
+          fill="currentColor"
+        >
           {value}%
         </text>
       </svg>
     </div>
-  )
-}
+  );
+};
 
 // Original EditableField component - unchanged
-const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, options = [], min, max }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState(value)
+const EditableField: React.FC<EditableFieldProps> = ({
+  value,
+  onSave,
+  type,
+  options = [],
+  min,
+  max,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
 
   const handleSave = () => {
-    onSave(editValue)
-    setIsEditing(false)
-  }
+    onSave(editValue);
+    setIsEditing(false);
+  };
 
   const handleCancel = () => {
-    setEditValue(value)
-    setIsEditing(false)
-  }
+    setEditValue(value);
+    setIsEditing(false);
+  };
 
   if (!isEditing) {
     return (
       <div className="flex items-center gap-2">
         <span>{value}</span>
-        <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-gray-100 rounded">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="p-1 hover:bg-gray-100 rounded"
+        >
           <Edit2 className="w-4 h-4" />
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -210,10 +278,16 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
+          <button
+            onClick={handleSave}
+            className="p-1 hover:bg-green-100 rounded text-green-600"
+          >
             <Check className="w-4 h-4" />
           </button>
-          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -222,9 +296,9 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
           <Select
             value={editValue}
             onValueChange={(value) => {
-              setEditValue(value)
-              onSave(value)
-              setIsEditing(false)
+              setEditValue(value);
+              onSave(value);
+              setIsEditing(false);
             }}
           >
             <SelectTrigger className="w-32">
@@ -238,7 +312,10 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
               ))}
             </SelectContent>
           </Select>
-          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -250,38 +327,63 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
+          <button
+            onClick={handleSave}
+            className="p-1 hover:bg-green-100 rounded text-green-600"
+          >
             <Check className="w-4 h-4" />
           </button>
-          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 // MODIFIED: Simplified PerformanceCard component that uses the dedicated EditableAFUE component
-const PerformanceCard: React.FC<PerformanceCardProps> = ({ isAdmin, value, recommended, label, onUpdate }) => (
+const PerformanceCard: React.FC<PerformanceCardProps> = ({
+  isAdmin,
+  value,
+  recommended,
+  label,
+  onUpdate,
+}) => (
   <div className="mt-8 grid grid-cols-2 gap-8">
     <div>
-      <p className="text-base text-gray-600 dark:text-gray-400">Current {label}</p>
+      <p className="text-base text-gray-600 dark:text-gray-400">
+        Current {label}
+      </p>
       {isAdmin ? (
         <EditableAFUE value={value} onChange={onUpdate} />
       ) : (
-        <p className="text-2xl font-bold text-[#b45309] dark:text-amber-400">{value}%</p>
+        <p className="text-2xl font-bold text-[#b45309] dark:text-amber-400">
+          {value}%
+        </p>
       )}
     </div>
     <div>
-      <p className="text-base text-gray-600 dark:text-gray-400">BPI Recommends</p>
-      <p className="text-2xl font-bold text-[#65a30d] dark:text-green-400">{recommended}%</p>
+      <p className="text-base text-gray-600 dark:text-gray-400">
+        BPI Recommends
+      </p>
+      <p className="text-2xl font-bold text-[#65a30d] dark:text-green-400">
+        {recommended}%
+      </p>
     </div>
   </div>
 );
 
 // Original InPlaceEdit component - unchanged
-const InPlaceEdit: React.FC<InPlaceEditProps> = ({ initialValue, isAdmin, onUpdate, label = null }) => {
+const InPlaceEdit: React.FC<InPlaceEditProps> = ({
+  initialValue,
+  isAdmin,
+  onUpdate,
+  label = null,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -333,22 +435,26 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({ initialValue, isAdmin, onUpda
   }
 
   return (
-    <div className="text-2xl font-bold text-amber-700 flex items-center cursor-pointer" onClick={handleClick}>
-      {value}{label ? ` ${label}` : ''}
+    <div
+      className="text-2xl font-bold text-amber-700 flex items-center cursor-pointer"
+      onClick={handleClick}
+    >
+      {value}
+      {label ? ` ${label}` : ""}
       {isAdmin && <Pencil className="ml-2 h-5 w-5 text-gray-400" />}
     </div>
   );
-}
+};
 
 // Original SystemDetails component - unchanged
-const SystemDetails: React.FC<SystemDetailsProps> = ({ 
-  isAdmin, 
-  type, 
-  condition, 
-  year, 
-  onUpdateType, 
+const SystemDetails: React.FC<SystemDetailsProps> = ({
+  isAdmin,
+  type,
+  condition,
+  year,
+  onUpdateType,
   onUpdateCondition,
-  onUpdateYear 
+  onUpdateYear,
 }) => (
   <div className="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800 rounded-lg p-4">
     <div>
@@ -389,27 +495,29 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
       </div>
     )}
   </div>
-)
+);
 
 // MODIFIED: HeatingSystemCard with direct isAdmin prop passing
-const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({ 
-  item, 
-  index, 
-  isAdmin, 
+const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
+  item,
+  index,
+  isAdmin,
   recommendedValue = 92,
-  onUpdateItem
+  onUpdateItem,
+  driveImages,
 }) => {
   const [systemData, setSystemData] = useState({
-    type: item.type || "Atmospheric",
-    condition: item.condition || "Fair",
-    value: typeof item.value === 'number' ? item.value : 0,
-    parameterName: item.parameter || "AFUE",
-    year: item.year
+    type: item.type || "null",
+    condition: item.condition || "null",
+    value: typeof item.value === "number" ? item.value : 0,
+    parameterName: item.parameter || "null",
+    year: item.year,
+    image: item?.image,
   });
-  
+
   const [animate, setAnimate] = useState(false);
   const itemRef = useRef(null);
-  
+
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -417,7 +525,10 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
       threshold: 0.5,
     };
 
-    const observerCallback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+    const observerCallback = (
+      entries: IntersectionObserverEntry[],
+      observer: IntersectionObserver,
+    ) => {
       entries.forEach((entry: IntersectionObserverEntry) => {
         if (entry.isIntersecting) {
           setAnimate(true);
@@ -426,7 +537,10 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
       });
     };
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions,
+    );
 
     if (itemRef.current) observer.observe(itemRef.current);
 
@@ -441,34 +555,40 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
     value: number | string;
     parameterName: string;
     year?: number;
+    image: string;
   }
-  
+
   // Update local state and propagate changes to parent component
-  const updateSystemData = (field: keyof SystemData, value: string | number) => {
+  const updateSystemData = (
+    field: keyof SystemData,
+    value: string | number,
+  ) => {
     const updatedData = {
       ...systemData,
       [field]: value,
     };
-    
+
     setSystemData(updatedData);
-    
+
     // Only call onUpdateItem if it exists
     if (onUpdateItem) {
       const updatedItem = {
         ...item,
-        type: field === 'type' ? value as string : item.type,
-        condition: field === 'condition' ? value as string : item.condition,
-        value: field === 'value' ? value : item.value,
-        parameter: field === 'parameterName' ? value as string : item.parameter,
-        year: field === 'year' ? value as number : item.year
+        type: field === "type" ? (value as string) : item.type,
+        condition: field === "condition" ? (value as string) : item.condition,
+        value: field === "value" ? value : item.value,
+        parameter:
+          field === "parameterName" ? (value as string) : item.parameter,
+        year: field === "year" ? (value as number) : item.year,
+        image: field === "image" ? (value as string) : item.image,
       };
-      
+
       onUpdateItem(updatedItem);
     }
   };
 
   const renderValue = () => {
-    if (typeof systemData.value === 'number') {
+    if (typeof systemData.value === "number") {
       return systemData.value;
     } else if (systemData.value === "") {
       return "N/A";
@@ -494,12 +614,12 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                 if (onUpdateItem) {
                   onUpdateItem({
                     ...item,
-                    name: newValue
+                    name: newValue,
                   });
                 }
               }}
             />
-            - 
+            -
             <InPlaceEdit
               initialValue={systemData.parameterName}
               isAdmin={Boolean(isAdmin && onUpdateItem)}
@@ -508,7 +628,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                 if (onUpdateItem) {
                   onUpdateItem({
                     ...item,
-                    parameter: newValue
+                    parameter: newValue,
                   });
                 }
               }}
@@ -519,7 +639,10 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
         <CardContent className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
-              <div ref={itemRef} className="relative bg-[#fffbeb] dark:bg-amber-900/20 rounded-lg p-6">
+              <div
+                ref={itemRef}
+                className="relative bg-[#fffbeb] dark:bg-amber-900/20 rounded-lg p-6"
+              >
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-red-500 via-amber-500 to-green-500 opacity-5 rounded-lg"
                   style={{
@@ -529,8 +652,13 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                 <h3 className="relative text-2xl font-semibold text-amber-600 dark:text-amber-300 mb-6">
                   Current Performance
                 </h3>
-                {typeof systemData.value === 'number' ? (
-                  <GaugeChart value={systemData.value} maxValue={100} label={`${item.name}-${index}`} animate={animate} />
+                {typeof systemData.value === "number" ? (
+                  <GaugeChart
+                    value={systemData.value}
+                    maxValue={100}
+                    label={`${item.name}-${index}`}
+                    animate={animate}
+                  />
                 ) : (
                   <div className="flex justify-center items-center h-40">
                     {isAdmin && onUpdateItem ? (
@@ -540,35 +668,40 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                         onUpdate={(newValue) => {
                           const numValue = Number(newValue);
                           const isNumeric = !isNaN(numValue);
-                          
-                          updateSystemData("value", isNumeric ? numValue : newValue);
-                          
+
+                          updateSystemData(
+                            "value",
+                            isNumeric ? numValue : newValue,
+                          );
+
                           if (onUpdateItem) {
                             onUpdateItem({
                               ...item,
-                              value: isNumeric ? numValue : newValue
+                              value: isNumeric ? numValue : newValue,
                             });
                           }
                         }}
                       />
                     ) : (
-                      <p className="text-4xl font-bold text-amber-600">{renderValue()}</p>
+                      <p className="text-4xl font-bold text-amber-600">
+                        {renderValue()}
+                      </p>
                     )}
                   </div>
                 )}
-                {typeof systemData.value === 'number' && (
+                {typeof systemData.value === "number" && (
                   <PerformanceCard
-                    isAdmin={isAdmin} // MODIFIED: Pass isAdmin directly 
+                    isAdmin={isAdmin} // MODIFIED: Pass isAdmin directly
                     value={systemData.value}
                     recommended={recommendedValue}
                     label={systemData.parameterName}
                     onUpdate={(value) => {
                       updateSystemData("value", value);
-                      
+
                       if (onUpdateItem) {
                         onUpdateItem({
                           ...item,
-                          value: value
+                          value: value,
                         });
                       }
                     }}
@@ -585,17 +718,18 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                   </h3>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {typeof systemData.value === 'number' ? (
+                  {typeof systemData.value === "number" ? (
                     <>
-                      This {item.name.toLowerCase()} has a {systemData.parameterName} rating of {systemData.value}%.
-                      {systemData.value < recommendedValue ? (
-                        ` Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-                      ) : (
-                        ` This is an efficient unit that meets or exceeds recommended standards.`
-                      )}
+                      This {item.name.toLowerCase()} has a{" "}
+                      {systemData.parameterName} rating of {systemData.value}%.
+                      {systemData.value < recommendedValue
+                        ? ` Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+                        : ` This is an efficient unit that meets or exceeds recommended standards.`}
                     </>
                   ) : (
-                    `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`
+                    `This ${item.name.toLowerCase()} does not have a specified ${
+                      systemData.parameterName
+                    } rating.`
                   )}
                 </p>
                 <SystemDetails
@@ -608,7 +742,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                     if (onUpdateItem) {
                       onUpdateItem({
                         ...item,
-                        type: value
+                        type: value,
                       });
                     }
                   }}
@@ -617,7 +751,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                     if (onUpdateItem) {
                       onUpdateItem({
                         ...item,
-                        condition: value
+                        condition: value,
                       });
                     }
                   }}
@@ -626,11 +760,39 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                     if (onUpdateItem) {
                       onUpdateItem({
                         ...item,
-                        year: value
+                        year: value,
                       });
                     }
                   }}
                 />
+                {isAdmin && onUpdateItem ? (
+                  <ImageUpload
+                    image={systemData.image ?? ""}
+                    onImageChange={(newImage) =>
+                      updateSystemData("image", newImage)
+                    }
+                    driveImages={driveImages}
+                  />
+                ) : (
+                  <motion.div
+                    className="relative h-48 overflow-hidden rounded-lg"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <Image
+                      src={systemData.image ?? ""}
+                      alt="Air Conditioning Unit"
+                      className="object-cover w-full h-full"
+                      width={500}
+                      height={500}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                      <p className="text-white text-sm">
+                        Example of a {systemData.type || "central"} air
+                        conditioning unit
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
           </div>
@@ -641,7 +803,16 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
 };
 
 // HeatingContent component with direct isAdmin prop passing
-export function HeatingContent({ data, isAdmin = false, onUpdateItem }: HeatingContentProps) {
+export function HeatingContent({
+  data,
+  isAdmin = false,
+  onUpdateItem,
+  driveImages,
+}: HeatingContentProps) {
+  const params = useParams();
+
+  const bookingNumber = params.bookingNumber;
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -649,22 +820,87 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem }: HeatingC
   };
 
   // Group heating items from heatingAndCooling and water heaters
-  const heatingItems = data?.data?.filter(item => 
-    item.name.toLowerCase().includes('furnace') || 
-    item.name.toLowerCase().includes('boiler') || 
-    item.name.toLowerCase().includes('heat') ||
-    item.name.toLowerCase().includes('water')
-  ) || [];
+  const heatingItems =
+    data?.data?.filter(
+      (item) =>
+        item.name.toLowerCase().includes("furnace") ||
+        item.name.toLowerCase().includes("boiler") ||
+        item.name.toLowerCase().includes("heat") ||
+        item.name.toLowerCase().includes("water"),
+    ) || [];
+
+  console.log("Heating Items:", heatingItems);
 
   // Function to handle updates to heating items
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
+    console.log("Updated Item in HeatingContent:", updatedItem);
+    console.log("isAdmin in HeatingContent:", isAdmin);
     if (isAdmin && onUpdateItem) {
       onUpdateItem(updatedItem);
     }
   };
 
+  const onSumit = async () => {
+    const REPORT_DATA_KEY = "report_data";
+    let updatedReportData;
+    try {
+      const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+      console.log("Data from localStorage:", data);
+
+      if (!data) {
+        console.error("No insulation data found in localStorage");
+        return;
+      }
+      // updatedReportData=data;
+      updatedReportData = JSON.parse(data, null, 2);
+      updatedReportData = {
+        reportData: updatedReportData,
+        displayReport: true,
+        reportUrl: "",
+      };
+
+      console.log("Saved insulation data to localStorage");
+    } catch (e) {
+      console.error("Error getting insulation data to localStorage:", e);
+    }
+
+    try {
+      console.log("Submitting data:", updatedReportData);
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/report/update`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedReportData),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Failed to fetch report details");
+        return;
+      }
+
+      const data = await response.json();
+      toast.success("Data submitted successfully!");
+      console.log("Data submitted successfully:", data);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
+  };
+
   return (
     <div className="space-y-8">
+      <div className="flex justify-end items-center">
+        <button
+          onClick={onSumit}
+          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
+        >
+          Save
+        </button>
+      </div>
       <motion.div {...fadeInUp}>
         <Card>
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
@@ -677,9 +913,11 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem }: HeatingC
             <div className="flex items-start space-x-4 text-gray-600 dark:text-gray-300">
               <Info className="h-5 w-5 mt-1 flex-shrink-0 text-amber-600" />
               <p className="text-sm leading-relaxed">
-                Your home&apos;s heating systems are crucial for comfort and energy efficiency. We assess both your
-                furnace&apos;s AFUE (Annual Fuel Utilization Efficiency) and your water heater&apos;s UEF (Uniform
-                Energy Factor) to ensure optimal performance and identify potential savings opportunities.
+                Your home&apos;s heating systems are crucial for comfort and
+                energy efficiency. We assess both your furnace&apos;s AFUE
+                (Annual Fuel Utilization Efficiency) and your water
+                heater&apos;s UEF (Uniform Energy Factor) to ensure optimal
+                performance and identify potential savings opportunities.
               </p>
             </div>
           </CardContent>
@@ -688,13 +926,16 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem }: HeatingC
 
       {heatingItems.length > 0 ? (
         heatingItems.map((item, index) => (
-          <HeatingSystemCard 
+          <HeatingSystemCard
             key={`${item.name}-${index}`}
             item={item}
             index={index}
             isAdmin={isAdmin} // MODIFIED: Pass isAdmin directly
-            recommendedValue={item.name.toLowerCase().includes('water') ? 62 : 92}
+            recommendedValue={
+              item.name.toLowerCase().includes("water") ? 62 : 92
+            }
             onUpdateItem={handleUpdateItem}
+            driveImages={driveImages}
           />
         ))
       ) : (
