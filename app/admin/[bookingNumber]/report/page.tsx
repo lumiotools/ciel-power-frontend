@@ -321,7 +321,7 @@ const ReportPage = ({
     console.log(
       "hitting updateHeating function",
       reportData.heatingAndCooling?.data,
-      reportData.waterHeater?.data
+      reportData.waterHeater?.data,
     );
 
     if (!isAdmin) return;
@@ -333,7 +333,7 @@ const ReportPage = ({
       // Update in waterHeater data
       const newWaterHeaterData = [...reportData.waterHeater.data];
       const index = newWaterHeaterData.findIndex(
-        (item) => item.name === updatedItem.name
+        (item) => item.name === updatedItem.name,
       );
 
       if (index !== -1) {
@@ -354,7 +354,7 @@ const ReportPage = ({
         try {
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedReportData)
+            JSON.stringify(updatedReportData),
           );
           console.log("Saved water heater data to localStorage");
         } catch (e) {
@@ -500,7 +500,7 @@ const ReportPage = ({
 
     const updatedReportData = {
       ...reportData,
-      federalTaxCredits: newTaxCredits
+      federalTaxCredits: newTaxCredits,
     };
 
     setReportData(updatedReportData);
@@ -511,7 +511,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
       console.error("Error saving tax credits to localStorage:", e);
@@ -523,7 +523,7 @@ const ReportPage = ({
 
     const updatedReportData = {
       ...reportData,
-      environmentalImpact: newEnvironmentalData
+      environmentalImpact: newEnvironmentalData,
     };
 
     setReportData(updatedReportData);
@@ -534,13 +534,15 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
-      console.error("Error saving environmental impact data to localStorage:", e);
+      console.error(
+        "Error saving environmental impact data to localStorage:",
+        e,
+      );
     }
   };
-
 
   if (loading) {
     return (
@@ -577,21 +579,22 @@ const ReportPage = ({
   const getHeatingData = () => {
     if (!reportData.heatingAndCooling?.data && !reportData.waterHeater?.data)
       return { data: [], title: "Heating Systems" };
-  
+
     // Filter heating items from heatingAndCooling data
-    const heatingItems = reportData.heatingAndCooling?.data?.filter(
-      (item) =>
-        item.name.toLowerCase().includes("furnace") ||
-        item.name.toLowerCase().includes("boiler") ||
-        item.name.toLowerCase().includes("heat")
-    ) || [];
-  
+    const heatingItems =
+      reportData.heatingAndCooling?.data?.filter(
+        (item) =>
+          item.name.toLowerCase().includes("furnace") ||
+          item.name.toLowerCase().includes("boiler") ||
+          item.name.toLowerCase().includes("heat"),
+      ) || [];
+
     // Get water heater items
     const waterHeaterItems = reportData.waterHeater?.data || [];
-  
+
     console.log("Water heater items:", waterHeaterItems);
     console.log("Heating items:", heatingItems);
-  
+
     return {
       data: [...heatingItems, ...waterHeaterItems],
       title: "Heating & Water Heating Systems",
@@ -812,14 +815,15 @@ const ReportPage = ({
               ].map((tab) => (
                 <button
                   key={tab}
-                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
+                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
+                    activeSubMenu === tab
                       ? "border-b-2 border-lime-500 text-lime-500"
                       : "text-gray-600 hover:text-lime-500"
-                    }`}
+                  }`}
                   onClick={() => handleChangeActiveSubMenu(tab)}
                 >
                   {["air-leakage", "insulation", "heating", "cooling"].includes(
-                    tab
+                    tab,
                   )
                     ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
                     : tab.charAt(0).toUpperCase() + tab.slice(1)}

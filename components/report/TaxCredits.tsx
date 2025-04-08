@@ -43,7 +43,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   onUpdate,
   multiline = false,
   placeholder = "Enter text",
-  isAmount = false
+  isAmount = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue || "");
@@ -77,7 +77,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (!multiline && e.key === "Enter") {
       handleSave();
     }
@@ -88,11 +90,13 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
       <div className="flex items-center gap-2">
         {isAmount ? (
           <div className="flex items-center">
-            <span className="p-2 text-gray-700 bg-gray-200 border border-gray-300 rounded-l">$</span>
+            <span className="p-2 text-gray-700 bg-gray-200 border border-gray-300 rounded-l">
+              $
+            </span>
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               type="text"
-              value={value.replace(/^\$/, '')}
+              value={value.replace(/^\$/, "")}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="0"
@@ -137,13 +141,11 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 
   return (
     <div
-      className={`${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''} ${!value ? 'text-gray-400 italic' : ''}`}
+      className={`${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""} ${!value ? "text-gray-400 italic" : ""}`}
       onClick={handleClick}
     >
       {isAmount ? (
-        <span>
-          {value.startsWith('$') ? value : `$${value}`}
-        </span>
+        <span>{value.startsWith("$") ? value : `$${value}`}</span>
       ) : (
         value || (!isAdmin ? "No content" : placeholder)
       )}
@@ -154,13 +156,23 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   );
 };
 
-export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumber, reportData }: FederalTaxCreditsProps) {
+export function FederalTaxCredits({
+  data,
+  isAdmin = false,
+  onUpdate,
+  bookingNumber,
+  reportData,
+}: FederalTaxCreditsProps) {
   const [taxCredits, setTaxCredits] = useState<TaxCreditsData>({
     title: "Federal Tax Credits",
     data: [
       { title: "Insulation", amount: "0" },
-      { title: "Mechanical Equipment", amount: "0", note: "*after installing proposed upgrades" }
-    ]
+      {
+        title: "Mechanical Equipment",
+        amount: "0",
+        note: "*after installing proposed upgrades",
+      },
+    ],
   });
 
   const REPORT_DATA_KEY = "report_data";
@@ -171,7 +183,9 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
       setTaxCredits(data);
     } else if (bookingNumber) {
       // Try to load from localStorage if no data was passed
-      const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+      const savedData = localStorage.getItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+      );
       if (savedData) {
         try {
           const parsedData = JSON.parse(savedData);
@@ -185,14 +199,18 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
     }
   }, [data, bookingNumber]);
 
-  const updateTaxCreditItem = (index: number, field: keyof TaxCreditItem, value: string) => {
+  const updateTaxCreditItem = (
+    index: number,
+    field: keyof TaxCreditItem,
+    value: string,
+  ) => {
     if (!isAdmin) return;
 
     const newData = [...taxCredits.data];
     if (newData[index]) {
       // If this is an amount field, make sure it doesn't include a dollar sign
       if (field === "amount") {
-        value = value.replace(/^\$/, '');
+        value = value.replace(/^\$/, "");
         // If value is empty, set to "0"
         if (!value.trim()) {
           value = "0";
@@ -201,12 +219,12 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
 
       newData[index] = {
         ...newData[index],
-        [field]: value
+        [field]: value,
       };
 
       const updatedTaxCredits = {
         ...taxCredits,
-        data: newData
+        data: newData,
       };
 
       setTaxCredits(updatedTaxCredits);
@@ -214,17 +232,19 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
       // Save to localStorage if bookingNumber is available
       if (bookingNumber) {
         try {
-          const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+          const savedData = localStorage.getItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+          );
           if (savedData) {
             const parsedData = JSON.parse(savedData);
             const updatedData = {
               ...parsedData,
-              federalTaxCredits: updatedTaxCredits
+              federalTaxCredits: updatedTaxCredits,
             };
-            
+
             localStorage.setItem(
               `${REPORT_DATA_KEY}_${bookingNumber}`,
-              JSON.stringify(updatedData)
+              JSON.stringify(updatedData),
             );
             console.log("Saved tax credits data to localStorage");
           }
@@ -246,7 +266,7 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
     const newItem: TaxCreditItem = { title: "New Tax Credit", amount: "0" };
     const updatedTaxCredits = {
       ...taxCredits,
-      data: [...taxCredits.data, newItem]
+      data: [...taxCredits.data, newItem],
     };
 
     setTaxCredits(updatedTaxCredits);
@@ -254,17 +274,19 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
     // Save to localStorage if bookingNumber is available
     if (bookingNumber) {
       try {
-        const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+        const savedData = localStorage.getItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+        );
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           const updatedData = {
             ...parsedData,
-            federalTaxCredits: updatedTaxCredits
+            federalTaxCredits: updatedTaxCredits,
           };
-          
+
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedData)
+            JSON.stringify(updatedData),
           );
           console.log("Added new tax credit item to localStorage");
         }
@@ -285,7 +307,7 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
     const newData = taxCredits.data.filter((_, i) => i !== index);
     const updatedTaxCredits = {
       ...taxCredits,
-      data: newData
+      data: newData,
     };
 
     setTaxCredits(updatedTaxCredits);
@@ -293,17 +315,19 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
     // Save to localStorage if bookingNumber is available
     if (bookingNumber) {
       try {
-        const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+        const savedData = localStorage.getItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+        );
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           const updatedData = {
             ...parsedData,
-            federalTaxCredits: updatedTaxCredits
+            federalTaxCredits: updatedTaxCredits,
           };
-          
+
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedData)
+            JSON.stringify(updatedData),
           );
           console.log("Deleted tax credit item from localStorage");
         }
@@ -331,7 +355,7 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
               <Lightbulb className="h-6 w-6" />
               Federal Tax Credits
             </CardTitle>
-            
+
             {isAdmin && (
               <div className="flex space-x-2">
                 <button
@@ -351,18 +375,24 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
               Energy Efficient Home Improvement Federal Tax Credit
             </h3>
             <p className="text-gray-600 text-sm mb-6 italic">
-              If you make qualified energy-efficient improvements to your home after Jan. 1, 2023, you may qualify for a tax credit up to $3,200.
+              If you make qualified energy-efficient improvements to your home
+              after Jan. 1, 2023, you may qualify for a tax credit up to $3,200.
             </p>
 
             <div className="space-y-4">
               {taxCredits.data.map((item, index) => (
-                <div key={`tax-credit-${index}`} className="flex justify-between items-center py-2 border-b">
+                <div
+                  key={`tax-credit-${index}`}
+                  className="flex justify-between items-center py-2 border-b"
+                >
                   <div>
                     <div className="font-medium">
                       <InPlaceEdit
                         initialValue={item.title}
                         isAdmin={isAdmin}
-                        onUpdate={(value) => updateTaxCreditItem(index, "title", value)}
+                        onUpdate={(value) =>
+                          updateTaxCreditItem(index, "title", value)
+                        }
                         placeholder="Enter title"
                       />
                     </div>
@@ -371,7 +401,9 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
                         <InPlaceEdit
                           initialValue={item.note}
                           isAdmin={isAdmin}
-                          onUpdate={(value) => updateTaxCreditItem(index, "note", value)}
+                          onUpdate={(value) =>
+                            updateTaxCreditItem(index, "note", value)
+                          }
                           placeholder="Enter note"
                         />
                       </p>
@@ -382,7 +414,9 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
                       <InPlaceEdit
                         initialValue={item.amount}
                         isAdmin={isAdmin}
-                        onUpdate={(value) => updateTaxCreditItem(index, "amount", value)}
+                        onUpdate={(value) =>
+                          updateTaxCreditItem(index, "amount", value)
+                        }
                         placeholder="0"
                         isAmount={true}
                       />
@@ -406,7 +440,10 @@ export function FederalTaxCredits({ data, isAdmin = false, onUpdate, bookingNumb
                 How to claim the Energy Efficient Home Improvement Credit
               </h4>
               <p className="text-gray-600 text-sm">
-                File Form 5695, Residential Energy Credits Part II, with your tax return to claim the credit. You must claim the credit for the tax year when the property is installed, not merely purchased.
+                File Form 5695, Residential Energy Credits Part II, with your
+                tax return to claim the credit. You must claim the credit for
+                the tax year when the property is installed, not merely
+                purchased.
               </p>
             </div>
           </div>

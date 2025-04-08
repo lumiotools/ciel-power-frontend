@@ -1,7 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { AlertTriangle, Fan, Leaf, Home, ArrowUp, Thermometer, DollarSign, Shield, Activity, Pencil, Check, X, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Fan,
+  Leaf,
+  Home,
+  ArrowUp,
+  Thermometer,
+  DollarSign,
+  Shield,
+  Activity,
+  Pencil,
+  Check,
+  X,
+  Trash2,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
@@ -9,7 +23,13 @@ import { usePathname } from "next/navigation";
 import { ProjectCosts } from "@/components/report/ProjectCosts";
 import { FederalTaxCredits } from "@/components/report/TaxCredits";
 import { EnvironmentalImpact } from "@/components/report/EnvironmentalImpact";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { set } from "date-fns";
 import { toast } from "sonner";
 
@@ -138,7 +158,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (!multiline && e.key === "Enter") {
       handleSave();
     }
@@ -195,7 +217,6 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     </div>
   );
 };
-
 
 const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   initialValue,
@@ -269,35 +290,47 @@ const InPlaceEditNumber: React.FC<InPlaceEditNumberProps> = ({
   );
 };
 
-export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdateRecommendations, onUpdateFinancials, onUpdateTaxCredits, onUpdateEnvironmentalImpact, onSave }: ReportSummaryProps) {
+export function ReportSummary({
+  data,
+  isAdmin = false,
+  onUpdateConcerns,
+  onUpdateRecommendations,
+  onUpdateFinancials,
+  onUpdateTaxCredits,
+  onUpdateEnvironmentalImpact,
+  onSave,
+}: ReportSummaryProps) {
   // States
   const [concerns, setConcerns] = useState<ConcernItem[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-
 
   // Process concerns data
   useEffect(() => {
     if (!data?.summaryOfConcerns?.data) return;
 
-
     try {
-      const healthSafety = data.summaryOfConcerns.data.find(
-        section => section.name === "Basic Health and Safety"
-      )?.data || [];
+      const healthSafety =
+        data.summaryOfConcerns.data.find(
+          (section) => section.name === "Basic Health and Safety",
+        )?.data || [];
 
-      const combustion = data.summaryOfConcerns.data.find(
-        section => section.name === "Combustion Testing"
-      )?.data || [];
+      const combustion =
+        data.summaryOfConcerns.data.find(
+          (section) => section.name === "Combustion Testing",
+        )?.data || [];
 
       // Filter for flagged items with concerns
-      const flaggedHealthSafety = healthSafety.filter(item =>
-        item && item.flag && item.concern
+      const flaggedHealthSafety = healthSafety.filter(
+        (item) => item && item.flag && item.concern,
       );
 
-      const flaggedCombustion = combustion.filter(item =>
-        item && item.flag && item.concern && item.concern !== "Testing required"
+      const flaggedCombustion = combustion.filter(
+        (item) =>
+          item &&
+          item.flag &&
+          item.concern &&
+          item.concern !== "Testing required",
       );
-
 
       setConcerns([...flaggedHealthSafety, ...flaggedCombustion]);
     } catch (error) {
@@ -306,15 +339,16 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
   }, [data?.summaryOfConcerns]);
 
-
   // Process recommendations data - Updated for new format
   useEffect(() => {
     if (!data?.solutionsAndRecommendations?.data) return;
 
+    if (!data?.solutionsAndRecommendations?.recommendations) return;
+
     try {
       // Use the new data structure with title and benefits only
-      const recs = data.solutionsAndRecommendations.data.map(rec => ({
-        ...rec
+      const recs = data.solutionsAndRecommendations.data.map((rec) => ({
+        ...rec,
       }));
       setRecommendations(recs);
     } catch (error) {
@@ -323,11 +357,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
   }, [data?.solutionsAndRecommendations]);
 
-
   // Concern functions
   const getIconForConcern = (name?: string) => {
     if (!name) return AlertTriangle;
-
 
     const nameLower = name.toLowerCase();
     if (
@@ -345,8 +377,12 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
     }
   };
 
-  const updateConcern = (index: number, field: keyof ConcernItem, value: string | boolean) => {
-    setConcerns(prev => {
+  const updateConcern = (
+    index: number,
+    field: keyof ConcernItem,
+    value: string | boolean,
+  ) => {
+    setConcerns((prev) => {
       const newConcerns = [...prev];
       if (newConcerns[index]) {
         newConcerns[index] = {
@@ -355,20 +391,20 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         };
       }
 
-
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item =>
-          !item.name.toLowerCase().includes('combustion') &&
-          !item.name.toLowerCase().includes('gas')
+        const healthSafety = newConcerns.filter(
+          (item) =>
+            !item.name.toLowerCase().includes("combustion") &&
+            !item.name.toLowerCase().includes("gas"),
         );
 
-        const combustion = newConcerns.filter(item =>
-          item.name.toLowerCase().includes('combustion') ||
-          item.name.toLowerCase().includes('gas')
+        const combustion = newConcerns.filter(
+          (item) =>
+            item.name.toLowerCase().includes("combustion") ||
+            item.name.toLowerCase().includes("gas"),
         );
-
 
         onUpdateConcerns({
           healthSafety,
@@ -376,11 +412,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         });
       }
 
-
       return newConcerns;
     });
   };
-
 
   const addConcern = () => {
     setConcerns((prev) => {
@@ -388,24 +422,25 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         {
           name: "New Concern",
           concern: "Description of the new concern",
-          flag: true
+          flag: true,
         },
-        ...prev
+        ...prev,
       ];
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item =>
-          !item.name.toLowerCase().includes('combustion') &&
-          !item.name.toLowerCase().includes('gas')
+        const healthSafety = newConcerns.filter(
+          (item) =>
+            !item.name.toLowerCase().includes("combustion") &&
+            !item.name.toLowerCase().includes("gas"),
         );
 
-        const combustion = newConcerns.filter(item =>
-          item.name.toLowerCase().includes('combustion') ||
-          item.name.toLowerCase().includes('gas')
+        const combustion = newConcerns.filter(
+          (item) =>
+            item.name.toLowerCase().includes("combustion") ||
+            item.name.toLowerCase().includes("gas"),
         );
-
 
         onUpdateConcerns({
           healthSafety,
@@ -413,28 +448,27 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         });
       }
 
-
       return newConcerns;
     });
   };
-
 
   const deleteConcern = (index: number) => {
     setConcerns((prev) => {
       const newConcerns = prev.filter((_, i) => i !== index);
 
-
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
         // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(item =>
-          !item.name.toLowerCase().includes('combustion') &&
-          !item.name.toLowerCase().includes('gas')
+        const healthSafety = newConcerns.filter(
+          (item) =>
+            !item.name.toLowerCase().includes("combustion") &&
+            !item.name.toLowerCase().includes("gas"),
         );
 
-        const combustion = newConcerns.filter(item =>
-          item.name.toLowerCase().includes('combustion') ||
-          item.name.toLowerCase().includes('gas')
+        const combustion = newConcerns.filter(
+          (item) =>
+            item.name.toLowerCase().includes("combustion") ||
+            item.name.toLowerCase().includes("gas"),
         );
 
         onUpdateConcerns({
@@ -471,8 +505,12 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
   };
 
   // Updated to only handle title and benefits
-  const updateRecommendation = (index: number, field: keyof Recommendation, value: string | number) => {
-    setRecommendations(prev => {
+  const updateRecommendation = (
+    index: number,
+    field: keyof Recommendation,
+    value: string | number,
+  ) => {
+    setRecommendations((prev) => {
       const newRecommendations = [...prev];
       if (newRecommendations[index]) {
         newRecommendations[index] = {
@@ -496,9 +534,9 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       const newRecommendations = [
         {
           title: "New Recommendation",
-          benefits: "Benefits of this recommendation"
+          benefits: "Benefits of this recommendation",
         },
-        ...prev
+        ...prev,
       ];
 
       // If onUpdateRecommendations callback is provided, call it with the updated data
@@ -560,8 +598,12 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       // console.log("Data from localStorage:", data);
 
       if (!data) {
-        console.error("No data found in localStorage for the given booking number.");
-        toast.error("No data found in localStorage for the given booking number.");
+        console.error(
+          "No data found in localStorage for the given booking number.",
+        );
+        toast.error(
+          "No data found in localStorage for the given booking number.",
+        );
         return;
       }
 
@@ -569,10 +611,10 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       updatedReportData = {
         reportData: updatedReportData,
         displayReport: true,
-        reportUrl: ""
+        reportUrl: "",
       };
 
-      console.log("Saved summary data to local storage", updatedReportData)
+      console.log("Saved summary data to local storage", updatedReportData);
     } catch (e) {
       console.error("Error parsing data from localStorage:", e);
       toast.error("Error parsing data from localStorage.");
@@ -581,14 +623,15 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
 
     try {
       console.log("Saving report data:", updatedReportData);
-      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`,
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/report/update`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(updatedReportData),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -600,13 +643,12 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
       const data = await response.json();
       toast.success("Data submitted successfully!");
       console.log("Report data saved successfully:", data);
-      onSave()
+      onSave();
     } catch (e) {
       console.error("Error saving report data:", e);
       toast.error("Failed to save report data.");
     }
-  }
-
+  };
 
   return (
     <div className="space-y-8">
@@ -775,8 +817,10 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
           <CardContent className="p-6 space-y-4 bg-green-50/50">
             {recommendations.length > 0 ? (
               recommendations.map((recommendation, index) => {
-                const RecommendationIcon = getIconForRecommendation(recommendation.title);
-                
+                const RecommendationIcon = getIconForRecommendation(
+                  recommendation.title,
+                );
+
                 return (
                   <motion.div
                     key={`recommendation-${index}`}
@@ -874,7 +918,7 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
 
       <ProjectCosts
         data={{
-          financialSummary: data?.financialSummary
+          financialSummary: data?.financialSummary,
         }}
         isAdmin={isAdmin}
         bookingNumber={bookingNumber || ""}
@@ -898,6 +942,6 @@ export function ReportSummary({ data, isAdmin = false, onUpdateConcerns, onUpdat
         reportData={data}
         onUpdate={updateEnvironmentalImpact}
       />
-    </div >
+    </div>
   );
 }

@@ -129,7 +129,7 @@ export function AirLeakageContent({
 
       await response.json();
       toast.success("Data submitted successfully!");
-      onSave()
+      onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
     }
