@@ -66,12 +66,27 @@ interface WaterHeaterData {
   title: string;
 }
 
+interface FinancialItem {
+  title: string;
+  amount: string;
+}
+
+interface FinancialData {
+  title: string;
+  data: FinancialItem[];
+  monthlyPayment: string;
+  financingPeriodYears: number;
+}
+
 // Define the type for reportData
 interface ReportData {
   airLeakage?: AirLeakageData;
   insulation?: InsulationData;
   heatingAndCooling?: HeatingCoolingData;
   waterHeater?: WaterHeaterData;
+  summaryOfConcerns?: any;
+  solutionsAndRecommendations?: any;
+  financialSummary?: FinancialData;
   [key: string]: any;
 }
 
@@ -115,6 +130,7 @@ const ReportPage = ({
       const data = await response.json();
 
       if (data.success) {
+        console.log("Report data:", data.data);
         setReportData(data.data.reportData || {});
         setReportUrl(data.data.reportUrl || "");
         setReportStatus(data.data.displayReport || false);
@@ -128,6 +144,8 @@ const ReportPage = ({
       setLoading(false);
     }
   };
+
+  // console.log(reportData);
 
   // Filter heating and cooling items from heatingAndCooling data
   const getHeatingData = () => {

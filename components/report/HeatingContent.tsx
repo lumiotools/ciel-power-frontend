@@ -63,7 +63,7 @@ interface HeatingContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
   driveImages?: driveImages[];
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 interface PerformanceCardProps {
