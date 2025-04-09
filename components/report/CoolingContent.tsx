@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "./ImageUpload";
+import { ImageCustomer } from "@/components/report/ImageCustomer";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { driveImages } from "@/utils/image-utils";
@@ -52,7 +53,7 @@ interface CoolingContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
   driveImages?: driveImages[];
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 // interface ImageUploadProps {
@@ -708,22 +709,26 @@ const CoolingSystemCard: React.FC<CoolingSystemCardProps> = ({
                   driveImages={driveImages}
                 />
               ) : (
-                <motion.div
-                  className="relative h-48 overflow-hidden rounded-lg"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <img
-                    src={"/placeholder.jpg"}
-                    alt="Air Conditioning Unit"
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                    <p className="text-white text-sm">
-                      Example of a {systemData.type || "central"} air
-                      conditioning unit
-                    </p>
-                  </div>
-                </motion.div>
+                // <motion.div
+                //   className="relative h-48 overflow-hidden rounded-lg"
+                //   whileHover={{ scale: 1.02 }}
+                // >
+                //   <img
+                //     src={"/placeholder.jpg"}
+                //     alt="Air Conditioning Unit"
+                //     className="object-cover w-full h-full"
+                //   />
+                //   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                //     <p className="text-white text-sm">
+                //       Example of a {systemData.type || "central"} air
+                //       conditioning unit
+                //     </p>
+                //   </div>
+                // </motion.div>
+                <ImageCustomer
+                  image={systemData.image}
+                  driveImages={driveImages}
+                />
               )}
             </div>
           </div>
@@ -821,14 +826,14 @@ export function CoolingContent({
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end items-center">
+      {isAdmin && (<div className="flex justify-end items-center">
         <button
           onClick={onSumit}
           className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
         >
           Save
         </button>
-      </div>
+      </div>)}
       <motion.div {...fadeInUp}>
         <Card className="border-amber-100">
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
