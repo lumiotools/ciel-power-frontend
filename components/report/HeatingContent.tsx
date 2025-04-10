@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageCustomer } from "@/components/report/ImageCustomer";
 import {
   Thermometer,
   Flame,
@@ -826,17 +827,14 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                     />
                   </div>
                 ) : (
-                  systemData.image && (
+                  // systemData.image && (
                     <motion.div
                       className="relative h-48 overflow-hidden rounded-lg mt-4"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <Image
-                        src={systemData.image ?? ""}
-                        alt={`${item.name} Image`}
-                        className="object-cover w-full h-full"
-                        width={500}
-                        height={500}
+                      <ImageCustomer
+                        image={systemData.image}
+                        driveImages={driveImages}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                         <p className="text-white text-sm">
@@ -844,7 +842,8 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                         </p>
                       </div>
                     </motion.div>
-                  )
+                    
+                  // )
                 )}
               </div>
             </div>

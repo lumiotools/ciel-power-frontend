@@ -14,6 +14,7 @@ import {
 import Image from "next/image";
 // import { Close } from "@radix-ui/react-dialog";
 import { IoMdClose } from "react-icons/io";
+import ImageCustomer from "./ImageCustomer";
 
 interface GaugeChartProps {
   value: number;
@@ -552,12 +553,16 @@ export function KneewallAssessment({
                         }
                       />
                     ) : (
-                      <Image
-                        src={data.image || "/placeholder.svg"}
-                        alt="Insulation inspection"
-                        className="w-full h-64 object-cover rounded-lg mt-4"
-                        width={400}
-                        height={256}
+                      // <Image
+                      //   src={data.image || "/placeholder.svg"}
+                      //   alt="Insulation inspection"
+                      //   className="w-full h-64 object-cover rounded-lg mt-4"
+                      //   width={400}
+                      //   height={256}
+                      // />
+                      <ImageCustomer
+                        image={data.image}
+                        driveImages={driveImages}
                       />
                     )}
                   </div>
