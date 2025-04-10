@@ -6,8 +6,9 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const BookingContractPage = () => {
-  const params = useParams<{ bookingNumber: string }>();
+  const params = useParams<{ bookingNumber: string, contractId: string }>();
   const bookingNumber = params.bookingNumber;
+  const contractId = params.contractId;
 
   const [signUrl, setSignUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,7 @@ const BookingContractPage = () => {
     const fetchSignUrl = async () => {
       try {
         const response = await fetch(
-          `/api/user/bookings/${bookingNumber}/contract`,
+          `/api/user/bookings/${bookingNumber}/contract/${contractId}`,
         );
         const data = await response.json();
         if (!data.success) {
