@@ -47,11 +47,14 @@ export const ImageUpload = ({
   return (
     <div className="relative">
       <Image
-        src={imageSelected?.thumbnailLink ?? imageFromDB ?? "/placeholder.svg"}
-        alt="Insulation inspection"
+        src={imageSelected?.thumbnailLink ?? imageFromDB ?? "/placeholder.jpg"}
+        alt="alternate image"
         className="w-full h-64 object-cover rounded-lg mt-4"
         width={400}
         height={256}
+        onError={(e) => {
+          e.currentTarget.src = "/placeholder.jpg"; // Fallback to placeholder image
+        }}
       />
 
       <button
@@ -72,7 +75,7 @@ export const ImageUpload = ({
                       className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
                     >
                       <Image
-                        src={img?.thumbnailLink}
+                        src={img?.thumbnailLink ?? "/placeholder.jpg"}
                         alt={`Drive Image ${index + 1}`}
                         width={60}
                         height={60}

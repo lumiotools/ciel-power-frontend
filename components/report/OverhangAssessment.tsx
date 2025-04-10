@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "./ImageUpload";
+import ImageCustomer from "./ImageCustomer";
 
 interface GaugeChartProps {
   value: number;
@@ -512,10 +513,9 @@ export function OverhangAssessment({
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-teal-100 text-teal-500 px-4 py-1 rounded-full text-sm">
                     Current Status
                   </div>
-                  <img
-                    src={overhangData.image || "/placeholder.svg"}
-                    alt="Overhang insulation"
-                    className="w-full h-64 object-cover rounded-lg mt-4"
+                  <ImageCustomer
+                    image={overhangData.image || "/placeholder.svg"}
+                    driveImages={driveImages}
                   />
                 </div>
               )}

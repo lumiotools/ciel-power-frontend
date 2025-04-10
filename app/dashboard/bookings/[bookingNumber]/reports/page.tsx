@@ -66,12 +66,27 @@ interface WaterHeaterData {
   title: string;
 }
 
+interface FinancialItem {
+  title: string;
+  amount: string;
+}
+
+interface FinancialData {
+  title: string;
+  data: FinancialItem[];
+  monthlyPayment: string;
+  financingPeriodYears: number;
+}
+
 // Define the type for reportData
 interface ReportData {
   airLeakage?: AirLeakageData;
   insulation?: InsulationData;
   heatingAndCooling?: HeatingCoolingData;
   waterHeater?: WaterHeaterData;
+  summaryOfConcerns?: any;
+  solutionsAndRecommendations?: any;
+  financialSummary?: FinancialData;
   [key: string]: any;
 }
 
@@ -90,6 +105,7 @@ const ReportPage = ({
   const [reportData, setReportData] = useState<ReportData>({});
   const [reportStatus, setReportStatus] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imgOfUser, SetImageOfUser] = useState([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -115,6 +131,7 @@ const ReportPage = ({
       const data = await response.json();
 
       if (data.success) {
+        console.log("Report data:", data.data);
         setReportData(data.data.reportData || {});
         setReportUrl(data.data.reportUrl || "");
         setReportStatus(data.data.displayReport || false);
@@ -128,6 +145,35 @@ const ReportPage = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+      const fetchData = async () => {
+        try {
+          //  = await fetchImages({ userid: bookingNumber });
+  
+          const imagesOfUser = await fetch(
+            `/api/user/bookings/${bookingNumber}/pictures`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              cache: "default",
+              next: { revalidate: 3600 }, // Revalidate every 3600 seconds
+            },
+          );
+          const data = await imagesOfUser.json();
+  
+          SetImageOfUser(data?.data?.pictures);
+        } catch (error) {
+          console.log("Error fetching images:", error);
+          toast.error("Failed to fetch images");
+        }
+      };
+      fetchData();
+    }, [bookingNumber]);
+
+  // console.log(reportData);
 
   // Filter heating and cooling items from heatingAndCooling data
   const getHeatingData = () => {
@@ -213,11 +259,11 @@ const ReportPage = ({
       case "air-leakage":
         return <AirLeakageContent data={reportData.airLeakage} />;
       case "insulation":
-        return <InsulationContent data={reportData.insulation} />;
+        return <InsulationContent data={reportData.insulation} driveImages={imgOfUser} />;
       case "heating":
-        return <HeatingContent data={getHeatingData()} />;
+        return <HeatingContent data={getHeatingData()} driveImages={imgOfUser} />;
       case "cooling":
-        return <CoolingContent data={getCoolingData()} />;
+        return <CoolingContent data={getCoolingData()} driveImages={imgOfUser} />;
       case "summary":
         return <ReportSummary data={reportData} />;
       case "future solutions and certifications":

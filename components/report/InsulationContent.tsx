@@ -36,7 +36,7 @@ interface InsulationContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: InsulationDataItem) => void;
   driveImages?: string[];
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 // Helper function to find the best matching item for a specific component type
@@ -230,14 +230,14 @@ export function InsulationContent({
 
   return (
     <div className="space-y-8 pb-20">
-      <div className="flex justify-end items-center">
+      {isAdmin && (<div className="flex justify-end items-center">
         <button
           onClick={onSumit}
           className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
         >
           Save
         </button>
-      </div>
+      </div>)}
 
       <InsulationOverview />
 

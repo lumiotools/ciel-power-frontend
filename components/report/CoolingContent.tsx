@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "./ImageUpload";
+import { ImageCustomer } from "@/components/report/ImageCustomer";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { driveImages } from "@/utils/image-utils";
@@ -52,7 +53,7 @@ interface CoolingContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
   driveImages?: driveImages[];
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 // interface ImageUploadProps {
@@ -65,9 +66,11 @@ interface SystemDetailsProps {
   type: string;
   condition: string;
   year?: number;
+  seer: number;
   onUpdateType: (value: string) => void;
   onUpdateCondition: (value: string) => void;
   onUpdateYear?: (value: number) => void;
+  onUpdateSeer?: (value: number) => void;
 }
 
 interface CoolingSystemCardProps {
@@ -392,9 +395,11 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
   type,
   condition,
   year,
+  seer,
   onUpdateType,
   onUpdateCondition,
   onUpdateYear,
+  onUpdateSeer,
 }) => (
   <div className="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800 rounded-lg p-4">
     <div>
@@ -419,7 +424,7 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
       )}
     </div>
     {year && (
-      <div className="col-span-2">
+      <div className="">
         <p className="text-sm text-gray-600 dark:text-gray-400">Year</p>
         {isAdmin && onUpdateYear ? (
           <EditableField
@@ -434,6 +439,20 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
         )}
       </div>
     )}
+
+    <div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">Seer</p>
+      {isAdmin && onUpdateSeer ? (
+        <EditableField
+          value={`${seer}`}
+          onSave={(value) => onUpdateSeer(Number(value))}
+          type="number"
+          min={0}
+        />
+      ) : (
+        <p className="font-medium">{seer}</p>
+      )}
+    </div>
   </div>
 );
 
@@ -635,6 +654,7 @@ const CoolingSystemCard: React.FC<CoolingSystemCardProps> = ({
                   type={systemData.type}
                   condition={systemData.condition}
                   year={systemData.year}
+                  seer={systemData.currentSEER}
                   onUpdateType={(value) => {
                     updateSystemData("type", value);
                     if (onUpdateItem) {
@@ -662,6 +682,15 @@ const CoolingSystemCard: React.FC<CoolingSystemCardProps> = ({
                       });
                     }
                   }}
+                  onUpdateSeer={(value) => {
+                    updateSystemData("currentSEER", value);
+                    if (onUpdateItem) {
+                      onUpdateItem({
+                        ...item,
+                        value: value,
+                      });
+                    }
+                  }}
                 />
                 <div className="flex items-center space-x-2 text-amber-600 mt-4">
                   <Zap className="h-5 w-5" />
@@ -680,22 +709,26 @@ const CoolingSystemCard: React.FC<CoolingSystemCardProps> = ({
                   driveImages={driveImages}
                 />
               ) : (
-                <motion.div
-                  className="relative h-48 overflow-hidden rounded-lg"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <img
-                    src={systemData.image}
-                    alt="Air Conditioning Unit"
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                    <p className="text-white text-sm">
-                      Example of a {systemData.type || "central"} air
-                      conditioning unit
-                    </p>
-                  </div>
-                </motion.div>
+                // <motion.div
+                //   className="relative h-48 overflow-hidden rounded-lg"
+                //   whileHover={{ scale: 1.02 }}
+                // >
+                //   <img
+                //     src={"/placeholder.jpg"}
+                //     alt="Air Conditioning Unit"
+                //     className="object-cover w-full h-full"
+                //   />
+                //   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                //     <p className="text-white text-sm">
+                //       Example of a {systemData.type || "central"} air
+                //       conditioning unit
+                //     </p>
+                //   </div>
+                // </motion.div>
+                <ImageCustomer
+                  image={systemData.image}
+                  driveImages={driveImages}
+                />
               )}
             </div>
           </div>
@@ -793,14 +826,14 @@ export function CoolingContent({
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end items-center">
+      {isAdmin && (<div className="flex justify-end items-center">
         <button
           onClick={onSumit}
           className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
         >
           Save
         </button>
-      </div>
+      </div>)}
       <motion.div {...fadeInUp}>
         <Card className="border-amber-100">
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">

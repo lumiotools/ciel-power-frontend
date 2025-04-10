@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "./ImageUpload";
+import { ImageCustomer } from "@/components/report/ImageCustomer";
 
 interface EditableFieldProps {
   value: string;
@@ -499,21 +500,25 @@ export function RimJoistAssessment({
                   driveImages={driveImages}
                 />
               ) : (
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="relative aspect-video rounded-lg overflow-hidden"
-                >
-                  <img
-                    src={rimJoistData.image || "/placeholder.svg"}
-                    alt="Rim joist area"
-                    className="object-cover w-full"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="font-semibold mb-1">Current Condition</h3>
-                    <p className="text-sm">{getConditionDescription()}</p>
-                  </div>
-                </motion.div>
+                // <motion.div
+                //   whileHover={{ scale: 1.02 }}
+                //   className="relative aspect-video rounded-lg overflow-hidden"
+                // >
+                //   <img
+                //     src={rimJoistData.image || "/placeholder.svg"}
+                //     alt="Rim joist area"
+                //     className="object-cover w-full"
+                //   />
+                //   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                //   <div className="absolute bottom-4 left-4 text-white">
+                //     <h3 className="font-semibold mb-1">Current Condition</h3>
+                //     <p className="text-sm">{getConditionDescription()}</p>
+                //   </div>
+                // </motion.div>
+                <ImageCustomer
+                  image={rimJoistData.image}
+                  driveImages={driveImages}
+                />
               )}
 
               <Card>

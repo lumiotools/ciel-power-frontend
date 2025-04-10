@@ -28,7 +28,7 @@ interface AirLeakageContentProps {
   data?: AirLeakageData;
   isAdmin?: boolean;
   onUpdateValue?: (newValue: string) => void;
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 export function AirLeakageContent({
@@ -58,6 +58,8 @@ export function AirLeakageContent({
     { id: 18, label: "Windows & Doors" },
     { id: 19, label: "Common Walls Between Attached Dwelling Units" },
   ];
+
+  console.log("AirLeakageContent data:", data);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -129,7 +131,7 @@ export function AirLeakageContent({
 
       await response.json();
       toast.success("Data submitted successfully!");
-      onSave()
+      onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
     }
@@ -137,14 +139,14 @@ export function AirLeakageContent({
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end items-center">
+      {isAdmin &&(<div className="flex justify-end items-center">
         <button
           onClick={onSumit}
           className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
         >
           Save
         </button>
-      </div>
+      </div>)}
       {/* Introduction Section */}
       <motion.div {...fadeInUp}>
         <Card>

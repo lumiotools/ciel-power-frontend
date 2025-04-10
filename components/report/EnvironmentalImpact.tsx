@@ -43,7 +43,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   isAdmin,
   onUpdate,
   multiline = false,
-  placeholder = "Enter text"
+  placeholder = "Enter text",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue || "");
@@ -77,7 +77,9 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (!multiline && e.key === "Enter") {
       handleSave();
     }
@@ -124,7 +126,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
 
   return (
     <div
-      className={`${isAdmin ? 'cursor-pointer hover:bg-gray-50 rounded p-1 group' : ''} ${!value ? 'text-gray-400 italic' : ''}`}
+      className={`${isAdmin ? "cursor-pointer hover:bg-gray-50 rounded p-1 group" : ""} ${!value ? "text-gray-400 italic" : ""}`}
       onClick={handleClick}
     >
       {value || (!isAdmin ? "No content" : placeholder)}
@@ -147,7 +149,7 @@ const ValueWithUnit: React.FC<ValueWithUnitProps> = ({
   data,
   isAdmin,
   onUpdate,
-  placeholder = "Enter value"
+  placeholder = "Enter value",
 }) => {
   return (
     <div className="flex items-center">
@@ -164,14 +166,22 @@ const ValueWithUnit: React.FC<ValueWithUnitProps> = ({
   );
 };
 
-export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNumber, reportData }: EnvironmentalImpactProps) {
-  const [environmentalData, setEnvironmentalData] = useState<EnvironmentalData>({
-    title: "Environmental Impact",
-    currentFootprint: { value: "", unit: "lbs of CO2" },
-    projectedSavings: { value: "", unit: "%" },
-    projectedFootprint: { value: "", unit: "lbs of CO2" },
-    totalReduction: { value: "", unit: "lbs of CO2" }
-  });
+export function EnvironmentalImpact({
+  data,
+  isAdmin = false,
+  onUpdate,
+  bookingNumber,
+  reportData,
+}: EnvironmentalImpactProps) {
+  const [environmentalData, setEnvironmentalData] = useState<EnvironmentalData>(
+    {
+      title: "Environmental Impact",
+      currentFootprint: { value: "", unit: "lbs of CO2" },
+      projectedSavings: { value: "", unit: "%" },
+      projectedFootprint: { value: "", unit: "lbs of CO2" },
+      totalReduction: { value: "", unit: "lbs of CO2" },
+    },
+  );
 
   const REPORT_DATA_KEY = "report_data";
 
@@ -181,7 +191,9 @@ export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNu
       setEnvironmentalData(data);
     } else if (bookingNumber) {
       // Try to load from localStorage if no data was passed
-      const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+      const savedData = localStorage.getItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+      );
       if (savedData) {
         try {
           const parsedData = JSON.parse(savedData);
@@ -189,22 +201,31 @@ export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNu
             setEnvironmentalData(parsedData.environmentalImpact);
           }
         } catch (e) {
-          console.error("Error parsing environmental data from localStorage:", e);
+          console.error(
+            "Error parsing environmental data from localStorage:",
+            e,
+          );
         }
       }
     }
   }, [data, bookingNumber]);
 
-  const handleUpdate = (field: keyof EnvironmentalData, subField: 'value' | 'unit', value: string) => {
+  const handleUpdate = (
+    field: keyof EnvironmentalData,
+    subField: "value" | "unit",
+    value: string,
+  ) => {
     if (!isAdmin) return;
 
     // Create a deep copy of the current data
-    const updatedData = JSON.parse(JSON.stringify(environmentalData)) as EnvironmentalData;
-    
+    const updatedData = JSON.parse(
+      JSON.stringify(environmentalData),
+    ) as EnvironmentalData;
+
     // Update the specific field and subfield
-    if (field !== 'title') {
+    if (field !== "title") {
       updatedData[field][subField] = value;
-    } else if (field === 'title') {
+    } else if (field === "title") {
       updatedData.title = value;
     }
 
@@ -213,17 +234,19 @@ export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNu
     // Save to localStorage if bookingNumber is available
     if (bookingNumber) {
       try {
-        const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+        const savedData = localStorage.getItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+        );
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           const updatedReportData = {
             ...parsedData,
-            environmentalImpact: updatedData
+            environmentalImpact: updatedData,
           };
-          
+
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedReportData)
+            JSON.stringify(updatedReportData),
           );
           console.log("Saved environmental data to localStorage");
         }
@@ -262,26 +285,36 @@ export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNu
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b">
                 <div>
-                  <span className="font-medium">Household Carbon Footprint</span>
-                  <p className="text-xs text-gray-500">*based on the Utility Bills provided (annually)</p>
+                  <span className="font-medium">
+                    Household Carbon Footprint
+                  </span>
+                  <p className="text-xs text-gray-500">
+                    *based on the Utility Bills provided (annually)
+                  </p>
                 </div>
                 <div className="text-gray-700 font-semibold">
-                  <ValueWithUnit 
+                  <ValueWithUnit
                     data={environmentalData.currentFootprint}
                     isAdmin={isAdmin}
-                    onUpdate={(value) => handleUpdate("currentFootprint", "value", value)}
+                    onUpdate={(value) =>
+                      handleUpdate("currentFootprint", "value", value)
+                    }
                     placeholder="Enter value"
                   />
                 </div>
               </div>
 
               <div className="flex justify-between items-center py-2 border-b">
-                <span className="font-medium">Projected Total Energy Savings</span>
+                <span className="font-medium">
+                  Projected Total Energy Savings
+                </span>
                 <div className="text-green-600 font-semibold">
-                  <ValueWithUnit 
+                  <ValueWithUnit
                     data={environmentalData.projectedSavings}
                     isAdmin={isAdmin}
-                    onUpdate={(value) => handleUpdate("projectedSavings", "value", value)}
+                    onUpdate={(value) =>
+                      handleUpdate("projectedSavings", "value", value)
+                    }
                     placeholder="Enter value"
                   />
                 </div>
@@ -289,14 +322,20 @@ export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNu
 
               <div className="flex justify-between items-center py-2 border-b">
                 <div>
-                  <span className="font-medium">Projected Carbon Footprint</span>
-                  <p className="text-xs text-gray-500">*after installing proposed upgrades</p>
+                  <span className="font-medium">
+                    Projected Carbon Footprint
+                  </span>
+                  <p className="text-xs text-gray-500">
+                    *after installing proposed upgrades
+                  </p>
                 </div>
                 <div className="text-gray-700 font-semibold">
-                  <ValueWithUnit 
+                  <ValueWithUnit
                     data={environmentalData.projectedFootprint}
                     isAdmin={isAdmin}
-                    onUpdate={(value) => handleUpdate("projectedFootprint", "value", value)}
+                    onUpdate={(value) =>
+                      handleUpdate("projectedFootprint", "value", value)
+                    }
                     placeholder="Enter value"
                   />
                 </div>
@@ -306,14 +345,20 @@ export function EnvironmentalImpact({ data, isAdmin = false, onUpdate, bookingNu
             <div className="mt-8 bg-green-50 p-4 rounded-lg">
               <div className="flex justify-between items-center">
                 <div>
-                  <h4 className="text-lg font-medium text-gray-800">Projected CO2 Reduction</h4>
-                  <p className="text-xs text-gray-500">*Over a 10 year period</p>
+                  <h4 className="text-lg font-medium text-gray-800">
+                    Projected CO2 Reduction
+                  </h4>
+                  <p className="text-xs text-gray-500">
+                    *Over a 10 year period
+                  </p>
                 </div>
                 <div className="text-green-600 text-xl font-bold">
-                  <ValueWithUnit 
+                  <ValueWithUnit
                     data={environmentalData.totalReduction}
                     isAdmin={isAdmin}
-                    onUpdate={(value) => handleUpdate("totalReduction", "value", value)}
+                    onUpdate={(value) =>
+                      handleUpdate("totalReduction", "value", value)
+                    }
                     placeholder="Enter value"
                   />
                 </div>

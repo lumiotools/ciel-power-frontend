@@ -100,8 +100,8 @@ const stepsSequence = [
   { label: "Booking Created", key: "bookingCreated" },
   { label: "Utility Bills Uploaded", key: "utilityBills" },
   { label: "Audit Performed", key: "auditPerformed" },
-  { label: "Report Generated", key: "reportGenerated" },
   { label: "Follow Up Scheduled", key: "followUpScheduled" },
+  { label: "Report Generated", key: "reportGenerated" },
   { label: "Proposal Signed", key: "proposalSigned" },
   { label: "Payment Done", key: "paymentDone" },
 ];
@@ -373,22 +373,18 @@ const BookingDetailsPage = () => {
             {/* Address */}
             <div className="flex items-start gap-2">
               {/* Icon or any marker if needed */}
-              <p className="text-muted-foreground">{`${
-                customerDetails?.streetAddress.line1 ?? ""
-              } ${customerDetails?.streetAddress.line2 ?? ""}, ${
-                customerDetails?.streetAddress.city ?? ""
-              }, ${customerDetails?.streetAddress.province ?? ""} ${
-                customerDetails?.streetAddress.postalCode ?? ""
-              }`}</p>
+              <p className="text-muted-foreground">{`${customerDetails?.streetAddress.line1 ?? ""
+                } ${customerDetails?.streetAddress.line2 ?? ""}, ${customerDetails?.streetAddress.city ?? ""
+                }, ${customerDetails?.streetAddress.province ?? ""} ${customerDetails?.streetAddress.postalCode ?? ""
+                }`}</p>
             </div>
 
             {/* Contact */}
             <div>
               <h4 className="font-medium">
                 {" "}
-                {`${customerDetails?.firstName ?? ""} ${
-                  customerDetails?.lastName ?? ""
-                }`}{" "}
+                {`${customerDetails?.firstName ?? ""} ${customerDetails?.lastName ?? ""
+                  }`}{" "}
               </h4>
               <p className="text-muted-foreground">
                 {customerDetails?.phoneNumbers?.[0].number}{" "}
@@ -417,22 +413,22 @@ const BookingDetailsPage = () => {
             {/* What to Expect */}
             {(currentStage === "bookingCreated" ||
               currentStage === "utilityBills") && (
-              <div>
-                <h4 className="mb-4 font-medium">What to expect?</h4>
-                <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
-                  <li>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </li>
-                  <li>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </li>
-                </ol>
-              </div>
-            )}
+                <div>
+                  <h4 className="mb-4 font-medium">What to expect?</h4>
+                  <ol className="ml-4 list-outside list-disc space-y-2 text-muted-foreground">
+                    <li>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                      do eiusmod tempor incididunt ut labore et dolore magna
+                      aliqua.
+                    </li>
+                    <li>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                      do eiusmod tempor incididunt ut labore et dolore magna
+                      aliqua.
+                    </li>
+                  </ol>
+                </div>
+              )}
 
             {/* View Report Button */}
             {/* <Button variant="secondary" className="w-full">
@@ -442,51 +438,60 @@ const BookingDetailsPage = () => {
             {/* Reschedule / Cancel Buttons (Only if NOT a Follow-up Meeting) */}
             {(currentStage === "bookingCreated" ||
               currentStage === "utilityBills") && (
-              <div className="flex flex-wrap gap-4">
-                {!booking.canceled && isPastBooking && (
-                  <Button
-                    onClick={handleRescheduleClick}
-                    variant="default"
-                    className="flex-1 bg-[#96C93D] hover:bg-[#85b234]"
-                  >
-                    Reschedule Booking
-                  </Button>
-                )}
-                {!booking.canceled && isPastBooking && (
-                  <Button
-                    onClick={() => handleCancelBooking()}
-                    variant="outline"
-                    className="flex-1 text-red-500 hover:bg-red-50 hover:text-red-600"
-                  >
-                    Cancel Booking
-                  </Button>
-                )}
-              </div>
-            )}
+                <div className="flex flex-wrap gap-4">
+                  {!booking.canceled && isPastBooking && (
+                    <Button
+                      onClick={handleRescheduleClick}
+                      variant="default"
+                      className="flex-1 bg-[#96C93D] hover:bg-[#85b234]"
+                    >
+                      Reschedule Booking
+                    </Button>
+                  )}
+                  {!booking.canceled && isPastBooking && (
+                    <Button
+                      onClick={() => handleCancelBooking()}
+                      variant="outline"
+                      className="flex-1 text-red-500 hover:bg-red-50 hover:text-red-600"
+                    >
+                      Cancel Booking
+                    </Button>
+                  )}
+                </div>
+              )}
 
             {(currentStage === "reportGenerated" ||
               currentStage === "followUpScheduled" ||
               currentStage === "proposalSigned" ||
               currentStage === "paymentDone") && (
-              <div>
-                <h4 className="text-lg font-bold">
-                  Congratulations, your audit report has been generated!
-                </h4>
-                {reportUrl && (
-                  <Link
-                    href={reportUrl}
-                    target="_blank"
-                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
-                  >
-                    Click here to view the report
-                  </Link>
-                )}
-              </div>
-            )}
+                <div className="flex justify-between items-center">
+                  <h4 className="text-lg font-bold">
+                    Congratulations, your audit report has been generated!
+                  </h4>
+                  {reportUrl ? (
+                    <Link
+                      href={reportUrl}
+                      target="_blank"
+                      className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                    >
+                      Click here to view the report
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        window.location.href = `/dashboard/bookings/${bookingNumber}/reports`
+                      }
+                      className="bg-[#96C93D] text-white hover:bg-[#85b234] py-2 px-4 rounded text-sm"
+                    >
+                      View Report
+                    </button>
+                  )}
+                </div>
+              )}
 
             {/* Schedule Follow-Up Consultation */}
             {currentStage === "followUpScheduled" &&
-            !followUpScheduleDetails?.isCancelled ? (
+              !followUpScheduleDetails?.isCancelled ? (
               <>
                 <h4 className="mt-6 text-lg font-bold">
                   Your Follow-Up Consultation Details
@@ -575,27 +580,25 @@ const BookingDetailsPage = () => {
           {/* </Card> */}
 
           {/* Auditor Card */}
-          {/* <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px]"> */}
-          {/* <h4 className="mb-4 text-lg font-medium">
-                Your Assigned Auditor
-              </h4> */}
-          {/* <div className="mb-4 flex flex-col items-center"> */}
-          {/* <div className="mb-4 overflow-hidden rounded-lg"> */}
-          {/* Auditor avatar or placeholder image */}
-          {/* <img
-                    src="https://st2.depositphotos.com/9998432/48284/v/450/depositphotos_482842120-stock-illustration-default-avatar-photo-placeholder-grey.jpg"
-                    alt="Auditor"
-                    width={120}
-                    height={120}
-                    className="object-cover rounded-full"
-                  /> */}
-          {/* </div> */}
-          {/* <h5 className="font-medium">{booking.auditor}</h5> */}
-          {/* </div> */}
-          {/* <Button className="w-full bg-[#96C93D] hover:bg-[#85b234]">
-                Track Professional
-              </Button> */}
-          {/* </Card> */}
+          <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px] flex flex-col justify-center">
+            <h4 className="mb-4 text-lg font-medium text-center">Your Assigned Auditor</h4>
+            <div className="mb-4 flex flex-col items-center justify-center">
+              <div className="mb-4 overflow-hidden rounded-lg">
+                {/* Auditor avatar or placeholder image */}
+                <img
+                  src="https://st2.depositphotos.com/9998432/48284/v/450/depositphotos_482842120-stock-illustration-default-avatar-photo-placeholder-grey.jpg"
+                  alt="Auditor"
+                  width={120}
+                  height={120}
+                  className="object-cover rounded-full"
+                />
+              </div>
+              <h5 className="font-medium">{booking.auditor}</h5>
+            </div>
+            {/* <Button className="w-full bg-[#96C93D] hover:bg-[#85b234]">
+        Track Professional
+      </Button> */}
+          </Card>
           {/* </div> */}
         </div>
 
