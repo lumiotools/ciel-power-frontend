@@ -61,6 +61,7 @@ interface BookingDetailsResponse {
       displayReport: string;
     } | null;
     offeredContracts: OfferedContract[] | null;
+    completedContractLink: string | null;
   };
 }
 
@@ -103,6 +104,9 @@ export default function BookingDetailsPage({
   const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
     []
   );
+  const [completedContractFileUrl, setCompletedContractFileUrl] = useState<
+    string | null
+  >(null);
   const [hasReportChanges, setHasReportChanges] = useState(false);
 
   // Separate loading states for different actions
@@ -183,6 +187,9 @@ export default function BookingDetailsPage({
           setOfferedContracts(data.data.offeredContracts);
         } else {
           setOfferedContracts([]);
+        }
+        if (data.data.completedContractLink) {
+          setCompletedContractFileUrl(data.data.completedContractLink);
         }
       } else {
         toast.error(data.message || "Failed to fetch booking details");
@@ -755,7 +762,7 @@ export default function BookingDetailsPage({
                                   )
                                 }
                                 className="data-[state=checked]:bg-[#5cb85c]"
-                                disabled={isTogglingContract === contract.id}
+                                disabled={!!completedContractFileUrl || isTogglingContract === contract.id}
                               />
                               {isTogglingContract === contract.id && (
                                 <div className="ml-2 animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-[#5cb85c]"></div>
@@ -765,13 +772,14 @@ export default function BookingDetailsPage({
                           {contract.accepted && (
                             <div className="flex justify-between items-center py-2">
                               <span className="text-green-500 font-medium">
-                                Customer has signed this contract, <br />
-                                confirm once Ciel Representative has signed it
+                                Customer has signed this contract
+                                {!completedContractFileUrl && (
+                                  <>
+                                    ,<br />
+                                    Pending Ciel Power Representative signature
+                                  </>
+                                )}
                               </span>
-                              <Button className="h-8 bg-[#5cb85c] hover:bg-[#4a9d4a]">
-                                <Check className="h-4 w-4 mr-2" />
-                                Confirm
-                              </Button>
                             </div>
                           )}
                         </div>
@@ -797,7 +805,7 @@ export default function BookingDetailsPage({
                           size="sm"
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
                           onClick={() => handleRemoveContract(contract.id)}
-                          disabled={isRemovingContract === contract.id}
+                          disabled={!!completedContractFileUrl || (isRemovingContract === contract.id)}
                         >
                           {isRemovingContract === contract.id ? (
                             <>

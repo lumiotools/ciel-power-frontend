@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +14,8 @@ const BookingContractPage = () => {
   const [signUrl, setSignUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const handleAcceptContract = async () => {
     let loading = toast.loading("Updating contract status...");
@@ -27,6 +29,7 @@ const BookingContractPage = () => {
       }
       toast.dismiss(loading);
       toast.success("Contract accepted successfully");
+      router.replace(`/dashboard/bookings/${bookingNumber}`);
     } catch (error) {
       toast.dismiss(loading);
       toast.error((error as Error).message || "Failed to accept contract");
