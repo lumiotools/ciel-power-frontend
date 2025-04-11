@@ -286,61 +286,51 @@ export function CrawlspaceAssessment({
   ) => {
     setCrawlspaceData((prev) => {
       const newData = { ...prev, [field]: value };
-
-      // Update rValue and efficiency together
+  
+      let updatedField: Partial<InsulationItemData> = {};
+  
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
             ? Number.parseInt(value.replace("R", ""))
             : value;
+  
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
-          newData.efficiency = (numericValue / prev.recommendedValue) * 100;
-
-          // Notify parent component of the change
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: numericValue,
-            });
-          }
+          newData.efficiency = Math.round(
+            (numericValue / newData.recommendedValue) * 100,
+          );
+          updatedField.rValue = numericValue;
         }
       } else if (field === "efficiency") {
         const numericValue =
           typeof value === "string" ? Number.parseInt(value) : value;
+  
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue;
-          newData.rValue = (numericValue * prev.recommendedValue) / 100;
-
-          // Notify parent component of the change
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: Math.round((numericValue * prev.recommendedValue) / 100),
-            });
-          }
+          const calculatedRValue = Math.round(
+            (numericValue * newData.recommendedValue) / 100,
+          );
+          newData.rValue = calculatedRValue;
+          updatedField.rValue = calculatedRValue;
         }
-      } else if (field === "material") {
-        // Notify parent component of the change
-        if (onUpdate && data) {
-          onUpdate({
-            ...data,
-            material: value as string,
-          });
-        }
-      } else if (field === "condition") {
-        // Notify parent component of the change
-        if (onUpdate && data) {
-          onUpdate({
-            ...data,
-            condition: value as string,
-          });
-        }
+      } else if (field === "material" || field === "condition") {
+        updatedField[field] = value as string;
       }
-
+  
+      // Call onUpdate only when a change is relevant
+      if (onUpdate && Object.keys(updatedField).length > 0) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? { name: "Your Home's Crawlspace Wall Insulation" }),
+          ...updatedField,
+        };
+        onUpdate(updatedItem);
+      }
+  
       return newData;
     });
   };
+  
 
   // Determine description text based on crawlspace data
   const getDescriptionText = () => {
