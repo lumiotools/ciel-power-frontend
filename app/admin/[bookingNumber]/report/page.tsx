@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { set } from "date-fns";
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -283,7 +284,19 @@ const ReportPage = ({
     console.log("hitting updateInsulation function");
     console.log("Updated item: ", updatedItem);
 
-    if (!isAdmin || !reportData.insulation?.data) return;
+    if (!isAdmin) return;
+
+    if (!reportData.insulation?.data) {
+      console.log("Initializing insulation data structure");
+      setReportData({
+        ...reportData,
+        insulation: {
+          ...reportData.insulation,
+          data: [],
+        },
+      });
+      return;
+    }
 
     const newData = [...reportData.insulation.data];
     const index = newData.findIndex((item) => item.name === updatedItem.name);
@@ -301,6 +314,28 @@ const ReportPage = ({
 
       setReportData(updatedReportData);
 
+      setIsChangesSaved(false);
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(
+          `${REPORT_DATA_KEY}_${bookingNumber}`,
+          JSON.stringify(updatedReportData),
+        );
+        console.log("Saved insulation data to localStorage");
+      } catch (e) {
+        console.error("Error saving insulation data to localStorage:", e);
+      }
+    } else {
+      const updatedReportData = {
+        ...reportData,
+        insulation: {
+          ...reportData.insulation,
+          data: [...newData, updatedItem],
+        },
+      }
+
+      setReportData(updatedReportData);
       setIsChangesSaved(false);
 
       // Save to localStorage
@@ -432,9 +467,29 @@ const ReportPage = ({
   };
 
   const updateConcerns = (newConcerns: any) => {
-    if (!isAdmin || !reportData.summaryOfConcerns?.data) return;
+    if (!isAdmin) return;
+
+    if (!reportData.summaryOfConcerns?.data) {
+      console.log("Initializing summaryOfConcerns data structure");
+      setReportData({
+        ...reportData,
+        summaryOfConcerns: {
+          ...reportData.summaryOfConcerns,
+          data: [
+            {
+              name: "Basic Health and Safety",
+              data: [newConcerns.healthSafety],
+            },
+          ],
+        },
+      });
+
+      return;
+    }
 
     const newSummaryData = [...reportData.summaryOfConcerns.data];
+
+    console.log("newConcerns", newConcerns);
 
     // Update health safety section
     const healthSafetyIndex = newSummaryData.findIndex(

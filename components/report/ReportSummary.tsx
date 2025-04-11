@@ -435,6 +435,7 @@ export function ReportSummary({
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
+        console.log("New concerns:", newConcerns);
         // Separate concerns into health safety and combustion
         const healthSafety = newConcerns.filter(
           (item) =>
@@ -447,6 +448,9 @@ export function ReportSummary({
             item.name.toLowerCase().includes("combustion") ||
             item.name.toLowerCase().includes("gas"),
         );
+
+        console.log("Health and Safety Concerns:", healthSafety);
+        console.log("Combustion Concerns:", combustion);
 
         onUpdateConcerns({
           healthSafety,

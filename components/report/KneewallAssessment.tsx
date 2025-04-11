@@ -377,23 +377,23 @@ export function KneewallAssessment({
   const defaultKneewallData: KneewallData[] = [
     {
       title: "Your Home's Kneewall Flat Insulation",
-      material: 'N/A',
+      material: 'None',
       condition: "N/A",
       rValue: "R0",
       recommendation: "R60",
       currentValue: 0,
       maxValue: 60,
-      image: "https://i.postimg.cc/vHVnqZhb/Screenshot-2024-11-25-030211.png",
+      image: null,
     },
     {
       title: "Your Kneewall Insulation",
-      material: 'N/A',
+      material: 'None',
       condition: "N/A",
       rValue: "R0",
       recommendation: "R13",
       currentValue: 0,
       maxValue: 13,
-      image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png",
+      image: null,
     },
   ];
 
@@ -471,56 +471,43 @@ export function KneewallAssessment({
   ) => {
     console.log("Updating kneewall data:", index, field, value);
     console.log("Current kneewall data and function:", data, onUpdate);
+  
     setKneewallData((prev) => {
       const newData = [...prev];
       newData[index] = { ...newData[index], [field]: value };
 
+      console.log("New kneewall data:", newData);
+  
       // Update currentValue if rValue changes
       if (field === "rValue") {
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
-
-          // Send update to parent if available
-          if (onUpdate && data) {
-            const updatedItem: InsulationItemData = {
-              ...data,
-              rValue: numericValue,
-            };
-            onUpdate(updatedItem);
-          }
         }
-      } else if (field === "material" && onUpdate) {
-        // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          material: value,
-        };
-        onUpdate(updatedItem);
-      } else if (field === "condition" && onUpdate) {
-        // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          condition: value,
-        };
-        onUpdate(updatedItem);
-      } else if (field === "image" && onUpdate) {
-        //removed data , because when data is not available we will create a new
-        // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          image: value,
-        };
-        console.log("Updated image:started");
-        onUpdate(updatedItem);
-        console.log("Updated image:done sucessfully");
       }
-
-      console.log("Updated kneewall data:", newData);
-
+  
+      // Trigger update to parent
+      if (onUpdate) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? {}), // if data exists, spread it; else create new
+          name: newData[index].title,
+          material: field === "material" ? value : newData[index].material,
+          condition: field === "condition" ? value : newData[index].condition,
+          rValue:
+            field === "rValue"
+              ? parseInt(value.replace("R", ""))
+              : newData[index].currentValue,
+          image: field === "image" ? value : newData[index].image,
+        };
+  
+        console.log("Sending update to parent:", updatedItem);
+        onUpdate(updatedItem);
+      }
+  
       return newData;
     });
   };
+  
 
   return (
     <div className="space-y-8">

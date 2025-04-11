@@ -351,9 +351,9 @@ export function OverhangAssessment({
 
   // Default data to use if no report data is provided
   const defaultOverhangData: OverhangData = {
-    material: '9.5" Fiberglass',
-    condition: "Good",
-    rValue: 30,
+    material: 'None',
+    condition:'N/A',
+    rValue: 0,
     recommendedValue: 30,
     maxValue: 40,
     efficiency: 100,
@@ -366,8 +366,8 @@ export function OverhangAssessment({
 
     // Create overhang data from report data
     return {
-      material: data.material || '9.5" Fiberglass',
-      condition: data.condition || "Good",
+      material: data.material || 'None',
+      condition: data.condition || "N/A",
       rValue: data.rValue || 0,
       recommendedValue: 30, // Standard recommendation for overhang insulation
       maxValue: 40, // Standard max value for gauge
@@ -413,64 +413,59 @@ export function OverhangAssessment({
   ) => {
     setOverhangData((prev) => {
       const newData = { ...prev, [field]: value };
-
+  
+      let updatedField: Partial<InsulationItemData> = {};
+  
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
             ? Number.parseInt(value.replace("R", ""))
             : value;
+  
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
-          newData.efficiency = (numericValue / prev.recommendedValue) * 100;
-
-          // Notify parent of update
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: numericValue,
-            });
-          }
+          newData.efficiency = Math.round(
+            (numericValue / newData.recommendedValue) * 100,
+          );
+          updatedField.rValue = numericValue;
         }
       } else if (field === "efficiency") {
         const numericValue =
           typeof value === "string" ? Number.parseInt(value) : value;
+  
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue;
-          newData.rValue = (numericValue * prev.recommendedValue) / 100;
-
-          // Notify parent of update
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: Math.round((numericValue * prev.recommendedValue) / 100),
-            });
-          }
+          const calculatedR = Math.round(
+            (numericValue * newData.recommendedValue) / 100,
+          );
+          newData.rValue = calculatedR;
+          updatedField.rValue = calculatedR;
         }
-      } else if (
-        (field === "material" || field === "condition") &&
-        onUpdate &&
-        data
-      ) {
-        // For material and condition updates, notify parent
-        onUpdate({
-          ...data,
-          [field]: value as string,
-        });
-      } else if (field === "image" && onUpdate && data) {
-        //removed data , because when data is not available we will create a new
-        // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          image: value,
-        };
-        console.log("Updated image:started");
-        onUpdate(updatedItem);
-        console.log("Updated image:done sucessfully");
+      } else if (field === "material" || field === "condition") {
+        updatedField[field] = value as string;
+      } else if (field === "image") {
+        updatedField.image = value as string;
       }
-
+  
+      // Fire update if there's something to save
+      if (onUpdate && Object.keys(updatedField).length > 0) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? {
+            name: "Your Home's Overhang Insulation",
+            rValue: 0,
+            material: "None",
+            condition: "N/A",
+            image: "",
+          }),
+          ...updatedField,
+        };
+        onUpdate(updatedItem);
+      }
+  
       return newData;
     });
   };
+  
 
   // Get appropriate feedback message based on R-value
   const getEfficiencyFeedback = () => {
