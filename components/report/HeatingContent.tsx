@@ -993,7 +993,6 @@ export function HeatingContent({
       updatedReportData = JSON.parse(data);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: "AUTOMATED",
         reportUrl: "",
       };
 

@@ -787,7 +787,6 @@ export function CoolingContent({
       updatedReportData = JSON.parse(data, null, 2);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
         reportUrl: "",
       };
 

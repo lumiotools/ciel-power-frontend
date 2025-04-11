@@ -14,6 +14,7 @@ import KnowledgeContent from "@/components/booking/knowledgeContent";
 import BookingProgress from "@/components/component/booking-progress";
 import BlogContent from "@/components/booking/blogs";
 import Link from "next/link";
+import ContractDisplay from "@/components/booking/contractDisplay";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -44,6 +45,11 @@ interface BookingDetails {
   auditor: string;
 }
 
+export interface ContractData {
+  id: string;
+  name: string;
+}
+
 interface ApiResponse {
   success: boolean;
   message: string;
@@ -52,9 +58,10 @@ interface ApiResponse {
     customer: CustomerDetails;
     currentStage: string;
     reportUrl?: string | null;
+    reportData?: any | null;
     newFollowUpScheduleUrl: string;
-    followUpScheduleDetails: FollowUpDetals;
-    isContractCreated: boolean;
+    followUpScheduleDetails: FollowUpDetals | null;
+    offeredContracts: ContractData[];
     youtubeVideos: YouTubeVideo[];
     blogs: BlogPost[];
   };
@@ -139,7 +146,7 @@ const BookingDetailsPage = () => {
     string | null
   >(null);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
-  const [isContractCreated, setIsContractCreated] = useState<boolean>(false);
+  const [offeredContracts, setOfferedContracts] = useState<ContractData[]>([]);
 
   const handleRescheduleClick = () => {
     setModalOpen(true);
@@ -206,8 +213,7 @@ const BookingDetailsPage = () => {
     const fetchBookingDetails = async () => {
       try {
         const response = await fetch(`/api/user/bookings/${bookingNumber}`);
-
-        const data: ApiResponse = await response.json();
+        const data = await response.json();
         if (data.success) {
           setBooking(data.data.booking);
           setCustomerDetails(data.data.customer);
@@ -219,7 +225,7 @@ const BookingDetailsPage = () => {
           setCurrentStage(data.data.currentStage);
           setNewFollowUpScheduleLink(data.data.newFollowUpScheduleUrl || null);
           setReportUrl(data.data.reportUrl || null);
-          setIsContractCreated(data.data.isContractCreated);
+          setOfferedContracts(data.data.offeredContracts || []);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -539,20 +545,11 @@ const BookingDetailsPage = () => {
             )}
 
             {/* Contract Details */}
-            {isContractCreated && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-bold">
-                    Your Contract has been created
-                  </h4>
-                  <Link
-                    href={`/dashboard/bookings/${bookingNumber}/contract`}
-                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm cursor"
-                  >
-                    View Now
-                  </Link>
-                </div>
-              </div>
+            {offeredContracts && offeredContracts.length > 0 && (
+              <ContractDisplay
+                bookingNumber={bookingNumber} 
+                offeredContracts={offeredContracts} 
+              />
             )}
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
@@ -659,12 +656,12 @@ const BookingDetailsPage = () => {
 
 export default BookingDetailsPage;
 
-const filterYoutubeSuggestions = (youtubeSuggestions) => {
-  const today = new Date();
-  const oneYearAgo = new Date(today.setFullYear(today.getFullYear() - 1));
-  const filteredSuggestions = youtubeSuggestions.filter((content) => {
-    const contentDate = new Date(content.creationTime);
-    return contentDate >= oneYearAgo && contentDate <= today;
-  });
-  return filteredSuggestions;
-};
+// const filterYoutubeSuggestions = (youtubeSuggestions) => {
+//   const today = new Date();
+//   const oneYearAgo = new Date(today.setFullYear(today.getFullYear() - 1));
+//   const filteredSuggestions = youtubeSuggestions.filter((content) => {
+//     const contentDate = new Date(content.creationTime);
+//     return contentDate >= oneYearAgo && contentDate <= today;
+//   });
+//   return filteredSuggestions;
+// };

@@ -616,7 +616,6 @@ export function ReportSummary({
       updatedReportData = JSON.parse(data);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
         reportUrl: "",
       };
 
