@@ -48,6 +48,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 interface BookingDetailsResponse {
   success: boolean;
@@ -71,6 +72,7 @@ interface OfferedContract {
   customerRecipient: string;
   cielPowerRepresentativeRecipient: string;
   accepted: boolean;
+  link: string;
   created_at: string;
   updated_at: string;
 }
@@ -713,14 +715,17 @@ export default function BookingDetailsPage({
               {offeredContracts.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-4">
                   {offeredContracts.map((contract) => (
-                    <Card key={contract.id} className="border-gray-200">
+                    <Card
+                      key={contract.id}
+                      className="border-gray-200 flex flex-col"
+                    >
                       <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex justify-between items-start">
                           <span>{contract.name}</span>
                           {renderStatusBadge(contract.status)}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pb-2">
+                      <CardContent className="pb-2 flex-grow">
                         <div className="space-y-2 text-sm">
                           <div>
                             <span className="text-gray-500">Customer:</span>{" "}
@@ -757,9 +762,27 @@ export default function BookingDetailsPage({
                               )}
                             </div>
                           </div>
+                          {contract.accepted && (
+                            <div className="flex justify-between items-center py-2">
+                              <span className="text-green-500 font-medium">
+                                Customer has signed this contract, <br />
+                                confirm once Ciel Representative has signed it
+                              </span>
+                              <Button className="h-8 bg-[#5cb85c] hover:bg-[#4a9d4a]">
+                                <Check className="h-4 w-4 mr-2" />
+                                Confirm
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between pt-2">
+                      <CardFooter className="flex gap-4 pt-2">
+                        <Link href={contract.link} target="_blank">
+                          <Button variant="outline" size="sm">
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Open in PandaDoc
+                          </Button>
+                        </Link>
                         <Button
                           variant="outline"
                           size="sm"
@@ -768,10 +791,11 @@ export default function BookingDetailsPage({
                           <Eye className="h-4 w-4 mr-1" />
                           Preview
                         </Button>
+
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
                           onClick={() => handleRemoveContract(contract.id)}
                           disabled={isRemovingContract === contract.id}
                         >
