@@ -47,6 +47,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface BookingDetailsResponse {
   success: boolean;
@@ -56,7 +57,7 @@ interface BookingDetailsResponse {
     report: {
       reportUrl: string;
       reportData: object;
-      displayReport: boolean;
+      displayReport: string;
     } | null;
     offeredContracts: OfferedContract[] | null;
   };
@@ -96,8 +97,8 @@ export default function BookingDetailsPage({
   const [loading, setLoading] = useState(true);
   const [reportUrl, setReportUrl] = useState("");
   const [reportData, setReportData] = useState<Object | null>(null);
-  const [reportStatus, setReportStatus] = useState(false);
-  const [initialReportStatus, setInitialReportStatus] = useState(false);
+  const [reportStatus, setReportStatus] = useState("NONE");
+  const [initialReportStatus, setInitialReportStatus] = useState("NONE");
   const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
     []
   );
@@ -169,13 +170,13 @@ export default function BookingDetailsPage({
         if (data.data.report) {
           setReportData(data.data.report.reportData || null);
           setReportUrl(data.data.report.reportUrl || "");
-          setReportStatus(data.data.report.displayReport || false);
-          setInitialReportStatus(data.data.report.displayReport || false);
+          setReportStatus(data.data.report.displayReport ?? "NONE");
+          setInitialReportStatus(data.data.report.displayReport ??"NONE");
         } else {
           setReportData(null);
           setReportUrl("");
-          setReportStatus(false);
-          setInitialReportStatus(false);
+          setReportStatus("NONE");
+          setInitialReportStatus("NONE");
         }
 
         // Handle offered contracts
@@ -427,7 +428,7 @@ export default function BookingDetailsPage({
         const updatedReportData: {
           reportUrl: string;
           reportData: object | null;
-          displayReport: boolean;
+          displayReport: string;
         } = {
           reportUrl: reportUrl,
           reportData: reportUrl !== "" ? null : reportData,
@@ -671,13 +672,13 @@ export default function BookingDetailsPage({
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="reportStatus">Report Display Status</Label>
-                  <Switch
-                    id="reportStatus"
-                    checked={reportStatus}
-                    onCheckedChange={setReportStatus}
-                    className="data-[state=checked]:bg-[#5cb85c]"
-                    disabled={isSavingReport}
-                  />
+                  <Tabs defaultValue="NONE" value={reportStatus} onValueChange={setReportStatus}>
+                    <TabsList>
+                      <TabsTrigger value="NONE">None</TabsTrigger>
+                      <TabsTrigger value="STATIC">Static</TabsTrigger>
+                      <TabsTrigger value="AUTOMATED">Automated</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
 
                 <div className="flex justify-end gap-3 mt-6">
