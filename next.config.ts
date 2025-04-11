@@ -44,6 +44,9 @@ const nextConfig: NextConfig = {
       destination: `${process.env.NEXT_PUBLIC_API_URL}/user/:path*`,
     },
   ],
+  experimental:{
+    proxyTimeout: 1000 * 60 * 2, // 2 minutes
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
