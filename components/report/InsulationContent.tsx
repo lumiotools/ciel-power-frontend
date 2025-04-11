@@ -109,8 +109,8 @@ const findBestMatchingItem = (
     // Second priority: find items with known conditions
     const knownConditionItems = matchingItems.filter(
       (item) =>
-        item.condition.toLowerCase() !== "unknown" &&
-        item.material.toLowerCase() !== "unknown",
+        item.condition?.toLowerCase() !== "unknown" &&
+        item.material?.toLowerCase() !== "unknown",
     );
     if (knownConditionItems.length > 0) {
       return knownConditionItems[0]; // Return the first item with known condition

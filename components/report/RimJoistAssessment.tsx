@@ -290,8 +290,9 @@ export function RimJoistAssessment({
   ) => {
     setRimJoistData((prev) => {
       const newData = { ...prev, [field]: value };
-
-      // Update rValue and efficiency together
+  
+      let updatedField: Partial<InsulationItemData> = {};
+  
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
@@ -299,56 +300,47 @@ export function RimJoistAssessment({
             : value;
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
-          newData.efficiency = (numericValue / prev.recommendedValue) * 100;
-
-          // Notify parent of update
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: numericValue,
-            });
-          }
+          newData.efficiency = Math.round(
+            (numericValue / newData.recommendedValue) * 100,
+          );
+          updatedField.rValue = numericValue;
         }
       } else if (field === "efficiency") {
         const numericValue =
           typeof value === "string" ? Number.parseInt(value) : value;
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue;
-          newData.rValue = (numericValue * prev.recommendedValue) / 100;
-
-          // Notify parent of update
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: Math.round((numericValue * prev.recommendedValue) / 100),
-            });
-          }
+          const calculatedRValue = Math.round(
+            (numericValue * newData.recommendedValue) / 100,
+          );
+          newData.rValue = calculatedRValue;
+          updatedField.rValue = calculatedRValue;
         }
-      } else if (
-        (field === "material" || field === "condition") &&
-        onUpdate &&
-        data
-      ) {
-        // For material and condition updates, notify parent
-        onUpdate({
-          ...data,
-          [field]: value as string,
-        });
-      } else if (field === "image" && onUpdate && data) {
-        //removed data , because when data is not available we will create a new
-        // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          image: value,
-        };
-        console.log("Updated image:started");
-        onUpdate(updatedItem);
-        console.log("Updated image:done sucessfully");
+      } else if (field === "material" || field === "condition") {
+        updatedField[field] = value as string;
+      } else if (field === "image") {
+        updatedField.image = value as string;
       }
-
+  
+      // Fire update only when something changed
+      if (onUpdate && Object.keys(updatedField).length > 0) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? {
+            name: "Your Home's Rim Joist Insulation",
+            rValue: 0,
+            material: "None",
+            condition: "N/A",
+            image: "",
+          }),
+          ...updatedField,
+        };
+        onUpdate(updatedItem);
+      }
+  
       return newData;
     });
   };
+  
 
   // Get the appropriate description based on the R-value
   const getConditionDescription = () => {
