@@ -230,7 +230,7 @@ const BookingDetailsPage = () => {
           setReportUrl(data.data.reportUrl || null);
           setOfferedContracts(data.data.offeredContracts || []);
           setCompletedContractFileUrl(
-            data.data.reportData?.completedContractLink || null
+            data.data.completedContractLink || null
           );
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
