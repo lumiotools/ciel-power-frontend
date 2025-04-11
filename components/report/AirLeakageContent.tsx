@@ -104,7 +104,6 @@ export function AirLeakageContent({
       updatedReportData = JSON.parse(data, null, 2);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
         reportUrl: "",
       };
     } catch (e) {

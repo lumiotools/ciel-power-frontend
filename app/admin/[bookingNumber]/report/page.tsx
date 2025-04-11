@@ -213,7 +213,7 @@ const ReportPage = ({
         // Save to state
         setReportData(fetchedReportData);
         setReportUrl(data.data.reportUrl || "");
-        setReportStatus(data.data.displayReport || false);
+        setReportStatus(data.data.displayReport || "NONE");
 
         // Save to localStorage only for admin users
         if (isAdmin) {

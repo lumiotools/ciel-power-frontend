@@ -134,7 +134,7 @@ const ReportPage = ({
         console.log("Report data:", data.data);
         setReportData(data.data.reportData || {});
         setReportUrl(data.data.reportUrl || "");
-        setReportStatus(data.data.displayReport || false);
+        setReportStatus(data.data.displayReport || "NONE");
       } else {
         toast.error(data.message || "Failed to fetch report details");
       }
