@@ -98,10 +98,10 @@ export default function BookingDetailsPage({
   const [reportUrl, setReportUrl] = useState("");
   const [reportData, setReportData] = useState<Object | null>(null);
   const [reportStatus, setReportStatus] = useState("NONE");
-  const [initialReportStatus, setInitialReportStatus] = useState("NONE");
   const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
     []
   );
+  const [hasReportChanges, setHasReportChanges] = useState(false);
 
   // Separate loading states for different actions
   const [isSavingReport, setIsSavingReport] = useState(false);
@@ -134,8 +134,7 @@ export default function BookingDetailsPage({
     setSelectedRepresentativeRecipientId,
   ] = useState("");
 
-  
-  const [isIframeLoading, setIsIframeLoading] = useState(true)
+  const [isIframeLoading, setIsIframeLoading] = useState(true);
 
   useEffect(() => {
     if (bookingNumber) {
@@ -143,12 +142,9 @@ export default function BookingDetailsPage({
     }
   }, [bookingNumber]);
 
-  // Track if report status has changed
   useEffect(() => {
-    if (reportStatus !== undefined) {
-      setInitialReportStatus(reportStatus);
-    }
-  }, []);
+    setHasReportChanges(true);
+  }, [reportUrl, reportStatus]);
 
   const fetchBookingDetails = async () => {
     setLoading(true);
@@ -171,12 +167,13 @@ export default function BookingDetailsPage({
           setReportData(data.data.report.reportData || null);
           setReportUrl(data.data.report.reportUrl || "");
           setReportStatus(data.data.report.displayReport ?? "NONE");
-          setInitialReportStatus(data.data.report.displayReport ??"NONE");
+          setTimeout(() => {
+            setHasReportChanges(false);
+          }, 500);
         } else {
           setReportData(null);
           setReportUrl("");
           setReportStatus("NONE");
-          setInitialReportStatus("NONE");
         }
 
         // Handle offered contracts
@@ -422,7 +419,7 @@ export default function BookingDetailsPage({
 
     try {
       // Check if report data has changed
-      if (reportStatus !== initialReportStatus) {
+      if (hasReportChanges) {
         hasChanges = true;
 
         const updatedReportData: {
@@ -450,7 +447,6 @@ export default function BookingDetailsPage({
 
         if (responseData.success) {
           reportUpdated = true;
-          setInitialReportStatus(reportStatus);
         } else {
           toast.error(
             responseData.message || "Failed to update report details"
@@ -554,9 +550,6 @@ export default function BookingDetailsPage({
       </div>
     );
   }
-
-  // Check if there are any unsaved changes
-  const hasUnsavedChanges = reportStatus !== initialReportStatus;
 
   return (
     <div className="min-h-screen bg-[#f5f9f0]">
@@ -672,7 +665,11 @@ export default function BookingDetailsPage({
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="reportStatus">Report Display Status</Label>
-                  <Tabs defaultValue="NONE" value={reportStatus} onValueChange={setReportStatus}>
+                  <Tabs
+                    defaultValue="NONE"
+                    value={reportStatus}
+                    onValueChange={setReportStatus}
+                  >
                     <TabsList>
                       <TabsTrigger value="NONE">None</TabsTrigger>
                       <TabsTrigger value="STATIC">Static</TabsTrigger>
@@ -685,7 +682,7 @@ export default function BookingDetailsPage({
                   <Button
                     onClick={handleSaveChanges}
                     className="bg-[#5cb85c] hover:bg-[#4a9d4a] px-6"
-                    disabled={isSavingReport || !hasUnsavedChanges}
+                    disabled={isSavingReport || !hasReportChanges}
                   >
                     {isSavingReport ? (
                       <>
@@ -1018,11 +1015,13 @@ export default function BookingDetailsPage({
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                 <div className="flex flex-col items-center">
                   <div className="h-12 w-12 rounded-full border-4 border-gray-200 border-t-[#96C93D] animate-spin"></div>
-                  <p className="mt-4 text-sm text-gray-500">Loading document...</p>
+                  <p className="mt-4 text-sm text-gray-500">
+                    Loading document...
+                  </p>
                 </div>
               </div>
             )}
-          
+
             {previewContractId && (
               <iframe
                 src={`/api/admin/bookings/${bookingNumber}/contract/${previewContractId}/preview`}

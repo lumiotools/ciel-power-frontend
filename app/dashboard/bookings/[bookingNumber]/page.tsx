@@ -466,35 +466,6 @@ const BookingDetailsPage = () => {
                 </div>
               )}
 
-            {(currentStage === "reportGenerated" ||
-              currentStage === "followUpScheduled" ||
-              currentStage === "proposalSigned" ||
-              currentStage === "paymentDone") && (
-                <div className="flex justify-between items-center">
-                  <h4 className="text-lg font-bold">
-                    Congratulations, your audit report has been generated!
-                  </h4>
-                  {reportUrl ? (
-                    <Link
-                      href={reportUrl}
-                      target="_blank"
-                      className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
-                    >
-                      Click here to view the report
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        window.location.href = `/dashboard/bookings/${bookingNumber}/reports`
-                      }
-                      className="bg-[#96C93D] text-white hover:bg-[#85b234] py-2 px-4 rounded text-sm"
-                    >
-                      View Report
-                    </button>
-                  )}
-                </div>
-              )}
-
             {/* Schedule Follow-Up Consultation */}
             {currentStage === "followUpScheduled" &&
               !followUpScheduleDetails?.isCancelled ? (
@@ -524,7 +495,7 @@ const BookingDetailsPage = () => {
             ) : (
               // If no followUpScheduleDetails exists, show header & follow-up link (Spaced Apart)
               (currentStage === "followUpScheduled" ||
-                currentStage === "reportGenerated") && (
+                currentStage === "auditPerformed") && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold">
@@ -543,6 +514,34 @@ const BookingDetailsPage = () => {
                 </div>
               )
             )}
+            
+            {(currentStage === "reportGenerated" ||
+              currentStage === "proposalSigned" ||
+              currentStage === "paymentDone") && (
+                <div className="flex justify-between items-center">
+                  <h4 className="text-lg font-bold">
+                    Congratulations, your audit report has been generated!
+                  </h4>
+                  {reportUrl ? (
+                    <Link
+                      href={reportUrl}
+                      target="_blank"
+                      className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                    >
+                      Click here to view the report
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        window.location.href = `/dashboard/bookings/${bookingNumber}/reports`
+                      }
+                      className="bg-[#96C93D] text-white hover:bg-[#85b234] py-2 px-4 rounded text-sm"
+                    >
+                      View Report
+                    </button>
+                  )}
+                </div>
+              )}
 
             {/* Contract Details */}
             {offeredContracts && offeredContracts.length > 0 && (
