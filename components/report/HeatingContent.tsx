@@ -855,6 +855,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
 };
 
 // HeatingContent component with the ability to save data
+// Modified HeatingContent component with default data cards
 export function HeatingContent({
   data,
   isAdmin = false,
@@ -871,8 +872,28 @@ export function HeatingContent({
     transition: { duration: 0.5 },
   };
 
-  // Ensure we have data to work with
-  const heatingItems = data?.data || [];
+  // Default heating items for when no data is available
+  const defaultHeatingItems = [
+    {
+      condition: "N/A",
+      name: "Primary Heating System",
+      parameter: "AFUE",
+      type: "None",
+      value: 0,
+      year: new Date().getFullYear(),
+    },
+    {
+      condition: "N/A",
+      name: "Water Heater",
+      parameter: "UEF",
+      type: "None",
+      value: 0,
+      year: new Date().getFullYear(),
+    }
+  ];
+
+  // Use provided data or default items
+  const heatingItems = data?.data?.length > 0 ? data.data : defaultHeatingItems;
 
   console.log("HeatingContent received data:", data);
   console.log("Heating items to render:", heatingItems);
@@ -881,7 +902,81 @@ export function HeatingContent({
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
     if (isAdmin && onUpdateItem) {
       console.log("Updating item in HeatingContent:", updatedItem);
-      onUpdateItem(updatedItem);
+      
+      // If we're using default data, we need to create a new heating data structure
+      if (!data?.data?.length) {
+        // Find which default item is being updated
+        const index = defaultHeatingItems.findIndex(item => item.name === updatedItem.name);
+        
+        // Create a new array with the updated item
+        const newHeatingItems = [...defaultHeatingItems];
+        if (index !== -1) {
+          newHeatingItems[index] = updatedItem;
+        } else {
+          // If somehow the item doesn't match any default items, just add it
+          newHeatingItems.push(updatedItem);
+        }
+        
+        // Create the data structure that matches the expected format
+        const newHeatingData = {
+          data: newHeatingItems,
+          title: "Heating & Water Heating Systems"
+        };
+        
+        // Try to get existing report data from localStorage
+        const REPORT_DATA_KEY = "report_data";
+        try {
+          const savedDataString = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+          let savedData = savedDataString ? JSON.parse(savedDataString) : {};
+          
+          // Update with our new heating data
+          // Check if it's a water heater item
+          const isWaterHeater = updatedItem.name.toLowerCase().includes("water");
+          
+          if (isWaterHeater) {
+            // Create or update waterHeater section
+            savedData = {
+              ...savedData,
+              waterHeater: {
+                data: [updatedItem],
+                title: "Water Heating Systems"
+              }
+            };
+          } else {
+            // Update or create heatingAndCooling section
+            // Preserve any existing cooling items
+            const existingCoolingItems = savedData.heatingAndCooling?.data?.filter(
+              (item) => 
+                item.name.toLowerCase().includes("a/c") ||
+                item.name.toLowerCase().includes("air condition") ||
+                item.name.toLowerCase().includes("cooling") ||
+                item.name.toLowerCase().includes("heat pump")
+            ) || [];
+            
+            savedData = {
+              ...savedData,
+              heatingAndCooling: {
+                ...savedData.heatingAndCooling,
+                data: [...existingCoolingItems, updatedItem],
+                title: "Heating and Cooling Systems"
+              }
+            };
+          }
+          
+          // Save back to localStorage
+          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(savedData));
+          
+          // Since we've directly updated localStorage, inform the parent component
+          onUpdateItem(updatedItem);
+          
+        } catch (e) {
+          console.error("Error handling localStorage updates:", e);
+          toast.error("Failed to update heating data in local storage");
+        }
+      } else {
+        // Use normal update flow if we have existing data
+        onUpdateItem(updatedItem);
+      }
     }
   };
 
@@ -898,7 +993,7 @@ export function HeatingContent({
       updatedReportData = JSON.parse(data);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
+        displayReport: "AUTOMATED",
         reportUrl: "",
       };
 
@@ -971,40 +1066,30 @@ export function HeatingContent({
         </Card>
       </motion.div>
 
-      {heatingItems.length > 0 ? (
-        heatingItems.map((item, index) => {
-          // Determine appropriate recommended value based on item type
-          const isWaterHeater = item.name.toLowerCase().includes("water");
-          const recommendedValue = isWaterHeater ? 62 : 92;
+      {heatingItems.map((item, index) => {
+        // Determine appropriate recommended value based on item type
+        const isWaterHeater = item.name.toLowerCase().includes("water");
+        const recommendedValue = isWaterHeater ? 62 : 92;
 
-          console.log(
-            `Rendering item ${index}:`,
-            item,
-            "isWaterHeater:",
-            isWaterHeater,
-          );
+        console.log(
+          `Rendering item ${index}:`,
+          item,
+          "isWaterHeater:",
+          isWaterHeater,
+        );
 
-          return (
-            <HeatingSystemCard
-              key={`${item.name}-${index}`}
-              item={item}
-              index={index}
-              isAdmin={isAdmin}
-              recommendedValue={recommendedValue}
-              onUpdateItem={handleUpdateItem}
-              driveImages={driveImages}
-            />
-          );
-        })
-      ) : (
-        <motion.div {...fadeInUp}>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-gray-600">No heating system data available.</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+        return (
+          <HeatingSystemCard
+            key={`${item.name}-${index}`}
+            item={item}
+            index={index}
+            isAdmin={isAdmin}
+            recommendedValue={recommendedValue}
+            onUpdateItem={handleUpdateItem}
+            driveImages={driveImages}
+          />
+        );
+      })}
     </div>
   );
 }

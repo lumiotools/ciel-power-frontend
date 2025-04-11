@@ -325,7 +325,7 @@ const ReportPage = ({
     );
 
     if (!isAdmin) return;
-
+    console.log("Updated item: ", updatedItem);
     // Check if it's a water heater item
     const isWaterHeaterItem = updatedItem.name.toLowerCase().includes("water");
 
@@ -364,6 +364,37 @@ const ReportPage = ({
     } else if (reportData.heatingAndCooling?.data) {
       // Update in heatingAndCooling data (unchanged from before)
       // ...existing code here...
+      const newHeatingData = [...reportData.heatingAndCooling.data];
+      
+      const index = newHeatingData.findIndex(
+        (item) => item.name === updatedItem.name,
+      );
+      if (index !== -1) {
+        newHeatingData[index] = updatedItem;
+
+        const updatedReportData = {
+          ...reportData,
+          heatingAndCooling: {
+            ...reportData.heatingAndCooling,
+            data: newHeatingData,
+          },
+        };
+
+        setReportData(updatedReportData);
+        setIsChangesSaved(false);
+
+        // Save to localStorage
+        try {
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(updatedReportData),
+          );
+          console.log("newHeatingData", newHeatingData);
+          console.log("Saved heating data to localStorage");
+        } catch (e) {
+          console.error("Error saving heating data to localStorage:", e);
+        }
+      }
     }
   };
 
