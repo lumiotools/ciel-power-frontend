@@ -41,11 +41,11 @@ const CoolingSystemCard = ({
   driveImages,
 }: CoolingSystemCardProps) => {
   // Use a ref to store the full item state to prevent any loss between renders
-  const itemRef = useRef<HeatingCoolingItem>({...item});
-  
+  const itemRef = useRef<HeatingCoolingItem>({ ...item });
+
   // Use state only for triggering re-renders when fields change
   const [, forceRender] = useState(0);
-  
+
   // Animation state
   const [animate, setAnimate] = useState(false);
   const elemRef = useRef(null);
@@ -53,23 +53,23 @@ const CoolingSystemCard = ({
   // Update our ref with any initial changes from parent
   useEffect(() => {
     // Only update ref on first render to avoid losing local changes
-    if (JSON.stringify(itemRef.current) === JSON.stringify({...item})) {
-      itemRef.current = {...item};
+    if (JSON.stringify(itemRef.current) === JSON.stringify({ ...item })) {
+      itemRef.current = { ...item };
     }
   }, [item]);
 
   // Set up intersection observer for animation
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setAnimate(true);
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (elemRef.current) observer.observe(elemRef.current);
@@ -81,12 +81,12 @@ const CoolingSystemCard = ({
     // First update our ref
     itemRef.current = {
       ...itemRef.current,
-      [field]: value
+      [field]: value,
     };
-    
+
     // Force render to reflect changes
-    forceRender(prev => prev + 1);
-    
+    forceRender((prev) => prev + 1);
+
     // Notify parent (only if provided)
     if (onUpdateItem) {
       console.log(`Updating ${field} to:`, value);
@@ -97,8 +97,8 @@ const CoolingSystemCard = ({
 
   // Get the current value to display (numeric or string)
   const getSeerValue = () => {
-    return typeof itemRef.current.value === 'number' 
-      ? itemRef.current.value 
+    return typeof itemRef.current.value === "number"
+      ? itemRef.current.value
       : 0;
   };
 
@@ -106,7 +106,7 @@ const CoolingSystemCard = ({
   const getDescriptionText = () => {
     const seerValue = getSeerValue();
     const recommendedSEER = 16;
-    
+
     return `Your air conditioner's current ${itemRef.current.parameter} rating of ${seerValue} means it's operating ${
       seerValue < recommendedSEER
         ? ` below optimal efficiency. Upgrading to a high-efficiency model with ${recommendedSEER} ${itemRef.current.parameter} could result in significant energy savings.`
@@ -138,8 +138,7 @@ const CoolingSystemCard = ({
                 itemRef.current.name
               )}
             </div>
-            -
-            {/* Parameter field */}
+            -{/* Parameter field */}
             <div className="text-xl font-bold text-amber-700 flex items-center">
               {isAdmin ? (
                 <input
@@ -155,7 +154,7 @@ const CoolingSystemCard = ({
             Rating
           </CardTitle>
         </CardHeader>
-        
+
         <CardContent className="p-6 bg-amber-50/50">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
@@ -172,7 +171,7 @@ const CoolingSystemCard = ({
                 <h3 className="relative text-2xl font-semibold text-amber-600 dark:text-amber-300 mb-6">
                   Current Performance
                 </h3>
-                
+
                 {/* Gauge visualization */}
                 <div className="relative w-full max-w-[400px] mx-auto">
                   <svg viewBox="-10 0 220 110" className="w-full">
@@ -207,7 +206,9 @@ const CoolingSystemCard = ({
                       initial={{ strokeDasharray: "0, 314" }}
                       animate={
                         animate
-                          ? { strokeDasharray: `${(getSeerValue() / 20) * 100 * 3.14}, 314` }
+                          ? {
+                              strokeDasharray: `${(getSeerValue() / 20) * 100 * 3.14}, 314`,
+                            }
                           : { strokeDasharray: "0, 314" }
                       }
                       transition={{ duration: 1, ease: "easeOut" }}
@@ -223,7 +224,7 @@ const CoolingSystemCard = ({
                     </text>
                   </svg>
                 </div>
-                
+
                 <div className="mt-8 grid grid-cols-2 gap-8">
                   <div>
                     <p className="text-base text-gray-600 dark:text-gray-400">
@@ -233,7 +234,9 @@ const CoolingSystemCard = ({
                       <input
                         type="number"
                         value={getSeerValue()}
-                        onChange={(e) => updateField("value", Number(e.target.value))}
+                        onChange={(e) =>
+                          updateField("value", Number(e.target.value))
+                        }
                         className="text-3xl font-bold text-[#b45309] bg-transparent border-b border-amber-700 outline-none w-24"
                         min={0}
                         max={40}
@@ -255,7 +258,7 @@ const CoolingSystemCard = ({
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -267,11 +270,13 @@ const CoolingSystemCard = ({
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
                   {getDescriptionText()}
                 </p>
-                
+
                 {/* System details section */}
                 <div className="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800 rounded-lg p-4">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Type</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Type
+                    </p>
                     {isAdmin ? (
                       <input
                         type="text"
@@ -280,25 +285,33 @@ const CoolingSystemCard = ({
                         className="border-b border-amber-700 bg-transparent outline-none"
                       />
                     ) : (
-                      <p className="font-medium">{itemRef.current.type || "Central"}</p>
+                      <p className="font-medium">
+                        {itemRef.current.type || "Central"}
+                      </p>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Condition</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Condition
+                    </p>
                     {isAdmin ? (
                       <Select
                         value={itemRef.current.condition}
-                        onValueChange={(value) => updateField("condition", value)}
+                        onValueChange={(value) =>
+                          updateField("condition", value)
+                        }
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue>{itemRef.current.condition}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {["Poor", "Fair", "Good", "Excellent", "N/A"].map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
+                          {["Poor", "Fair", "Good", "Excellent", "N/A"].map(
+                            (option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ),
+                          )}
                         </SelectContent>
                       </Select>
                     ) : (
@@ -306,12 +319,16 @@ const CoolingSystemCard = ({
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Year</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Year
+                    </p>
                     {isAdmin ? (
                       <input
                         type="number"
                         value={itemRef.current.year || new Date().getFullYear()}
-                        onChange={(e) => updateField("year", Number(e.target.value))}
+                        onChange={(e) =>
+                          updateField("year", Number(e.target.value))
+                        }
                         className="border-b border-amber-700 bg-transparent outline-none"
                         min={1900}
                         max={new Date().getFullYear()}
@@ -321,12 +338,16 @@ const CoolingSystemCard = ({
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">SEER</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      SEER
+                    </p>
                     {isAdmin ? (
                       <input
                         type="number"
                         value={getSeerValue()}
-                        onChange={(e) => updateField("value", Number(e.target.value))}
+                        onChange={(e) =>
+                          updateField("value", Number(e.target.value))
+                        }
                         className="border-b border-amber-700 bg-transparent outline-none"
                         min={0}
                       />
@@ -335,7 +356,7 @@ const CoolingSystemCard = ({
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2 text-amber-600 mt-4">
                   <Zap className="h-5 w-5" />
                   <span className="text-sm">

@@ -377,17 +377,17 @@ export function KneewallAssessment({
   const defaultKneewallData: KneewallData[] = [
     {
       title: "Your Home's Kneewall Flat Insulation",
-      material: 'None',
+      material: "None",
       condition: "N/A",
       rValue: "R0",
       recommendation: "R60",
       currentValue: 0,
       maxValue: 60,
-      image: null,
+      image: "/placeholder.jpg",
     },
     {
       title: "Your Kneewall Insulation",
-      material: 'None',
+      material: "None",
       condition: "N/A",
       rValue: "R0",
       recommendation: "R13",
@@ -406,11 +406,11 @@ export function KneewallAssessment({
       title: data.name || "Your Kneewall Insulation",
       material: data.material || "Not specified",
       condition: data.condition || "Not assessed",
-      rValue: `R${data.rValue}`,
+      rValue: data.rValue ? `R${data.rValue}` : "Not assessed",
       recommendation: data.name?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
       currentValue: data.rValue,
       maxValue: data.name?.toLowerCase().includes("flat") ? 60 : 13,
-      image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png", // Default image
+      image: data?.image ?? "/placeholder.jpg", // Default image
     };
 
     // If we have data for a single kneewall, return it as a single item array
@@ -471,21 +471,22 @@ export function KneewallAssessment({
   ) => {
     console.log("Updating kneewall data:", index, field, value);
     console.log("Current kneewall data and function:", data, onUpdate);
-  
+
     setKneewallData((prev) => {
       const newData = [...prev];
       newData[index] = { ...newData[index], [field]: value };
 
       console.log("New kneewall data:", newData);
-  
+
       // Update currentValue if rValue changes
       if (field === "rValue") {
+        console.log("Inside rvalue");
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
         }
       }
-  
+
       // Trigger update to parent
       if (onUpdate) {
         const updatedItem: InsulationItemData = {
@@ -496,18 +497,17 @@ export function KneewallAssessment({
           rValue:
             field === "rValue"
               ? parseInt(value.replace("R", ""))
-              : newData[index].currentValue,
+              : (newData[index].currentValue ?? 0),
           image: field === "image" ? value : newData[index].image,
         };
-  
+
         console.log("Sending update to parent:", updatedItem);
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   return (
     <div className="space-y-8">
@@ -563,7 +563,7 @@ export function KneewallAssessment({
                           <dd className="font-medium text-gray-900 dark:text-gray-100">
                             {isAdmin ? (
                               <EditableField
-                                value={data.material}
+                                value={data.material ?? "null"}
                                 onSave={(value) =>
                                   updateKneewallData(index, "material", value)
                                 }

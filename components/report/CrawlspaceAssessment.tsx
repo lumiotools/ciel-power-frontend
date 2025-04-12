@@ -286,15 +286,15 @@ export function CrawlspaceAssessment({
   ) => {
     setCrawlspaceData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       let updatedField: Partial<InsulationItemData> = {};
-  
+
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
             ? Number.parseInt(value.replace("R", ""))
             : value;
-  
+
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
           newData.efficiency = Math.round(
@@ -305,7 +305,7 @@ export function CrawlspaceAssessment({
       } else if (field === "efficiency") {
         const numericValue =
           typeof value === "string" ? Number.parseInt(value) : value;
-  
+
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue;
           const calculatedRValue = Math.round(
@@ -317,7 +317,7 @@ export function CrawlspaceAssessment({
       } else if (field === "material" || field === "condition") {
         updatedField[field] = value as string;
       }
-  
+
       // Call onUpdate only when a change is relevant
       if (onUpdate && Object.keys(updatedField).length > 0) {
         const updatedItem: InsulationItemData = {
@@ -326,11 +326,10 @@ export function CrawlspaceAssessment({
         };
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   // Determine description text based on crawlspace data
   const getDescriptionText = () => {

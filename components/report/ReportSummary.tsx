@@ -349,9 +349,11 @@ export function ReportSummary({
 
     try {
       // Use the new data structure with title and benefits only
-      const recs = data.solutionsAndRecommendations.recommendations.map((rec) => ({
-        ...rec,
-      }));
+      const recs = data.solutionsAndRecommendations.recommendations.map(
+        (rec) => ({
+          ...rec,
+        }),
+      );
 
       // console.log("Processed recommendations:", recs);
       setRecommendations(recs);
@@ -431,7 +433,7 @@ export function ReportSummary({
     };
 
     // Update our local state first
-    setConcerns(prevConcerns => [newConcern, ...prevConcerns]);
+    setConcerns((prevConcerns) => [newConcern, ...prevConcerns]);
 
     // If onUpdateConcerns callback is provided, prepare the data for the parent
     if (onUpdateConcerns) {
@@ -442,20 +444,38 @@ export function ReportSummary({
 
       // Prepare the data structure for the parent component
       const healthSafety = isCombustionConcern
-        ? [...concerns.filter(item =>
-          !item.name.toLowerCase().includes("combustion") &&
-          !item.name.toLowerCase().includes("gas"))]
-        : [newConcern, ...concerns.filter(item =>
-          !item.name.toLowerCase().includes("combustion") &&
-          !item.name.toLowerCase().includes("gas"))];
+        ? [
+            ...concerns.filter(
+              (item) =>
+                !item.name.toLowerCase().includes("combustion") &&
+                !item.name.toLowerCase().includes("gas"),
+            ),
+          ]
+        : [
+            newConcern,
+            ...concerns.filter(
+              (item) =>
+                !item.name.toLowerCase().includes("combustion") &&
+                !item.name.toLowerCase().includes("gas"),
+            ),
+          ];
 
       const combustion = isCombustionConcern
-        ? [newConcern, ...concerns.filter(item =>
-          item.name.toLowerCase().includes("combustion") ||
-          item.name.toLowerCase().includes("gas"))]
-        : [...concerns.filter(item =>
-          item.name.toLowerCase().includes("combustion") ||
-          item.name.toLowerCase().includes("gas"))];
+        ? [
+            newConcern,
+            ...concerns.filter(
+              (item) =>
+                item.name.toLowerCase().includes("combustion") ||
+                item.name.toLowerCase().includes("gas"),
+            ),
+          ]
+        : [
+            ...concerns.filter(
+              (item) =>
+                item.name.toLowerCase().includes("combustion") ||
+                item.name.toLowerCase().includes("gas"),
+            ),
+          ];
 
       // Call the parent update function
       onUpdateConcerns({

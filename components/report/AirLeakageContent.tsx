@@ -138,14 +138,16 @@ export function AirLeakageContent({
 
   return (
     <div className="space-y-8">
-      {isAdmin &&(<div className="flex justify-end items-center">
-        <button
-          onClick={onSumit}
-          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
-        >
-          Save
-        </button>
-      </div>)}
+      {isAdmin && (
+        <div className="flex justify-end items-center">
+          <button
+            onClick={onSumit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
+          >
+            Save
+          </button>
+        </div>
+      )}
       {/* Introduction Section */}
       <motion.div {...fadeInUp}>
         <Card>

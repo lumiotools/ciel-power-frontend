@@ -53,7 +53,7 @@ export function CoolingContent({
           item.name.toLowerCase().includes("heat pump"),
       );
     }
-    
+
     // Otherwise, use default cooling items
     return [
       {
@@ -63,10 +63,10 @@ export function CoolingContent({
         type: "None",
         value: 0,
         year: new Date().getFullYear(),
-      }
+      },
     ];
   };
-  
+
   // Get items to display
   const coolingItems = getCoolingItems();
 
@@ -143,7 +143,7 @@ export function CoolingContent({
           </button>
         </div>
       )}
-      
+
       <Card className="border-amber-100">
         <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
           <CardTitle className="text-2xl text-amber-600 dark:text-amber-200 flex items-center gap-2">
@@ -153,9 +153,9 @@ export function CoolingContent({
         </CardHeader>
         <CardContent className="p-6 space-y-4 bg-amber-50/50">
           <p className="text-gray-700 dark:text-gray-300">
-            During your Home Energy Assessment, our technician closely
-            examined your cooling equipment to determine the efficiency level
-            of the system.
+            During your Home Energy Assessment, our technician closely examined
+            your cooling equipment to determine the efficiency level of the
+            system.
           </p>
           <div className="flex items-start space-x-4 text-gray-600 dark:text-gray-300">
             <Info className="h-5 w-5 mt-1 flex-shrink-0 text-amber-600" />

@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { set } from "date-fns";
+import { DefaultReportData } from "./utils";
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -151,7 +152,7 @@ const ReportPage = ({
 
         SetImageOfUser(data?.data?.pictures);
       } catch (error) {
-        console.log("Error fetching images:", error);
+        console.error("Error fetching images:", error);
         toast.error("Failed to fetch images");
       }
     };
@@ -164,34 +165,6 @@ const ReportPage = ({
       setIsAdmin(window.location.href.includes("admin"));
     }
   }, []);
-
-  useEffect(() => {
-    // Admin users can load from localStorage, otherwise always fetch fresh
-    if (isAdmin) {
-      const savedData = localStorage.getItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-      );
-
-      if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-          setReportData(parsedData);
-        } catch (e) {
-          console.error("Error parsing saved report data:", e);
-          // If parsing fails, fetch fresh data
-          if (bookingNumber) {
-            fetchReportDetails();
-          }
-        }
-      } else if (bookingNumber) {
-        // If no data in localStorage, fetch from API
-        fetchReportDetails();
-      }
-    } else if (bookingNumber) {
-      // Customer users always fetch fresh data
-      fetchReportDetails();
-    }
-  }, [bookingNumber, isAdmin]);
 
   const fetchReportDetails = async () => {
     setLoading(true);
@@ -209,21 +182,27 @@ const ReportPage = ({
       const data = await response.json();
 
       if (data.success) {
-        const fetchedReportData = data.data.reportData || {};
+        const fetchedReportData = data.data.reportData || DefaultReportData;
+
+        if (!fetchedReportData.insulation.missingDataZones) {
+          fetchedReportData.insulation.missingDataZones = [];
+        }
 
         // Save to state
         setReportData(fetchedReportData);
         setReportUrl(data.data.reportUrl || "");
         setReportStatus(data.data.displayReport || "NONE");
 
+        const IsAdmin =
+          typeof window !== "undefined" &&
+          window.location.href.includes("admin");
         // Save to localStorage only for admin users
-        if (isAdmin) {
+        if (IsAdmin) {
           try {
             localStorage.setItem(
               `${REPORT_DATA_KEY}_${bookingNumber}`,
               JSON.stringify(fetchedReportData),
             );
-            console.log("Saved initial report data to localStorage");
           } catch (e) {
             console.error("Error saving report data to localStorage:", e);
           }
@@ -239,10 +218,42 @@ const ReportPage = ({
     }
   };
 
+  useEffect(() => {
+    // Admin users can load from localStorage, otherwise always fetch fresh
+    const IsAdmin =
+      typeof window !== "undefined" && window.location.href.includes("admin");
+    if (IsAdmin) {
+      const savedData = localStorage.getItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
+      );
+
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+
+          setReportData(parsedData);
+        } catch (e) {
+          console.error("Error parsing saved report data:", e);
+          // If parsing fails, fetch fresh data
+
+          if (bookingNumber) {
+            fetchReportDetails();
+          }
+        }
+      } else if (bookingNumber) {
+        // If no data in localStorage, fetch from API
+
+        fetchReportDetails();
+      }
+    } else if (bookingNumber) {
+      // Customer users always fetch fresh data
+
+      fetchReportDetails();
+    }
+  }, [bookingNumber]);
+
   // Update functions for each section
   const updateAirLeakage = (newValue: string) => {
-    console.log("hitting updateAirLeakage function", newValue);
-    console.log("isadmin", isAdmin);
     if (!isAdmin) return; // Only admin can update
 
     // Handle the case where airLeakage might not exist or might be incomplete
@@ -281,13 +292,9 @@ const ReportPage = ({
   };
 
   const updateInsulationItem = (updatedItem: InsulationItem) => {
-    console.log("hitting updateInsulation function");
-    console.log("Updated item: ", updatedItem);
-
     if (!isAdmin) return;
 
     if (!reportData.insulation?.data) {
-      console.log("Initializing insulation data structure");
       setReportData({
         ...reportData,
         insulation: {
@@ -322,7 +329,6 @@ const ReportPage = ({
           `${REPORT_DATA_KEY}_${bookingNumber}`,
           JSON.stringify(updatedReportData),
         );
-        console.log("Saved insulation data to localStorage");
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -333,7 +339,7 @@ const ReportPage = ({
           ...reportData.insulation,
           data: [...newData, updatedItem],
         },
-      }
+      };
 
       setReportData(updatedReportData);
       setIsChangesSaved(false);
@@ -344,7 +350,6 @@ const ReportPage = ({
           `${REPORT_DATA_KEY}_${bookingNumber}`,
           JSON.stringify(updatedReportData),
         );
-        console.log("Saved insulation data to localStorage");
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -397,21 +402,23 @@ const ReportPage = ({
       newReportData.waterHeater = {
         ...(newReportData.waterHeater || {}),
         data: newWaterHeaterData,
-        title: "Water Heating Systems"
+        title: "Water Heating Systems",
       };
 
       // IMPORTANT: If we don't have heating data yet, ensure we add the default heating item
       if (!newReportData.heatingAndCooling?.data) {
         newReportData.heatingAndCooling = {
-          data: [{
-            condition: "N/A",
-            name: "Primary Heating System",
-            parameter: "AFUE",
-            type: "None",
-            value: 0,
-            year: new Date().getFullYear(),
-          }],
-          title: "Heating and Cooling Systems"
+          data: [
+            {
+              condition: "N/A",
+              name: "Primary Heating System",
+              parameter: "AFUE",
+              type: "None",
+              value: 0,
+              year: new Date().getFullYear(),
+            },
+          ],
+          title: "Heating and Cooling Systems",
         };
       }
     } else {
@@ -428,22 +435,24 @@ const ReportPage = ({
             item.name.toLowerCase().includes("a/c") ||
             item.name.toLowerCase().includes("air condition") ||
             item.name.toLowerCase().includes("cooling") ||
-            item.name.toLowerCase().includes("heat pump")
+            item.name.toLowerCase().includes("heat pump"),
         );
 
         // Filter out heating items (excluding cooling and water heaters)
         const heatingItems = newHeatingData.filter(
           (item) =>
-            !(item.name.toLowerCase().includes("a/c") ||
+            !(
+              item.name.toLowerCase().includes("a/c") ||
               item.name.toLowerCase().includes("air condition") ||
               item.name.toLowerCase().includes("cooling") ||
               item.name.toLowerCase().includes("heat pump") ||
-              item.name.toLowerCase().includes("water"))
+              item.name.toLowerCase().includes("water")
+            ),
         );
 
         // Find the specific item we're updating
         const index = heatingItems.findIndex(
-          (item) => item.name === updatedItem.name
+          (item) => item.name === updatedItem.name,
         );
 
         if (index !== -1) {
@@ -465,21 +474,23 @@ const ReportPage = ({
       newReportData.heatingAndCooling = {
         ...(newReportData.heatingAndCooling || {}),
         data: newHeatingData,
-        title: "Heating and Cooling Systems"
+        title: "Heating and Cooling Systems",
       };
 
       // IMPORTANT: If we don't have water heater data yet, ensure we add the default water heater item
       if (!newReportData.waterHeater?.data) {
         newReportData.waterHeater = {
-          data: [{
-            condition: "N/A",
-            name: "Water Heater",
-            parameter: "UEF",
-            type: "None",
-            value: 0,
-            year: new Date().getFullYear(),
-          }],
-          title: "Water Heating Systems"
+          data: [
+            {
+              condition: "N/A",
+              name: "Water Heater",
+              parameter: "UEF",
+              type: "None",
+              value: 0,
+              year: new Date().getFullYear(),
+            },
+          ],
+          title: "Water Heating Systems",
         };
       }
     }
@@ -492,7 +503,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(newReportData)
+        JSON.stringify(newReportData),
       );
       console.log("New report data saved to localStorage:", newReportData);
     } catch (e) {
@@ -500,12 +511,9 @@ const ReportPage = ({
     }
   };
 
-
   // Improved updateCoolingItem function to ensure state preservation
 
   const updateCoolingItem = (updatedItem: HeatingCoolingItem) => {
-    console.log("reportPage updateCoolingItem called with:", updatedItem);
-
     if (!isAdmin) return;
 
     // Initialize or update heatingAndCooling data
@@ -515,12 +523,13 @@ const ReportPage = ({
     if (reportData.heatingAndCooling?.data) {
       // Get existing heating items (non-cooling)
       existingHeatingItems = reportData.heatingAndCooling.data.filter(
-        (item) => !(
-          item.name.toLowerCase().includes("a/c") ||
-          item.name.toLowerCase().includes("air condition") ||
-          item.name.toLowerCase().includes("cooling") ||
-          item.name.toLowerCase().includes("heat pump")
-        )
+        (item) =>
+          !(
+            item.name.toLowerCase().includes("a/c") ||
+            item.name.toLowerCase().includes("air condition") ||
+            item.name.toLowerCase().includes("cooling") ||
+            item.name.toLowerCase().includes("heat pump")
+          ),
       );
 
       // Get existing cooling items
@@ -529,12 +538,12 @@ const ReportPage = ({
           item.name.toLowerCase().includes("a/c") ||
           item.name.toLowerCase().includes("air condition") ||
           item.name.toLowerCase().includes("cooling") ||
-          item.name.toLowerCase().includes("heat pump")
+          item.name.toLowerCase().includes("heat pump"),
       );
 
       // Find if we already have this item
       const index = existingCoolingItems.findIndex(
-        (item) => item.name === updatedItem.name
+        (item) => item.name === updatedItem.name,
       );
 
       if (index !== -1) {
@@ -543,10 +552,17 @@ const ReportPage = ({
         updatedCoolingItems[index] = updatedItem;
 
         // Combine cooling and heating items
-        newHeatingAndCoolingData = [...existingHeatingItems, ...updatedCoolingItems];
+        newHeatingAndCoolingData = [
+          ...existingHeatingItems,
+          ...updatedCoolingItems,
+        ];
       } else {
         // Add new cooling item
-        newHeatingAndCoolingData = [...existingHeatingItems, ...existingCoolingItems, updatedItem];
+        newHeatingAndCoolingData = [
+          ...existingHeatingItems,
+          ...existingCoolingItems,
+          updatedItem,
+        ];
       }
     } else {
       // No existing data, start with this item
@@ -559,22 +575,19 @@ const ReportPage = ({
       heatingAndCooling: {
         ...(reportData.heatingAndCooling || {}),
         data: newHeatingAndCoolingData,
-        title: "Heating and Cooling Systems"
-      }
+        title: "Heating and Cooling Systems",
+      },
     };
 
     setReportData(updatedReportData);
     setIsChangesSaved(false);
-
-    // Save to localStorage
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
-      console.log("Updated cooling data in localStorage:", updatedReportData);
     } catch (e) {
-      console.error("Error saving cooling data to localStorage:", e);
+      console.error("Error saving heating data to localStorage:", e);
     }
   };
 
@@ -659,8 +672,6 @@ const ReportPage = ({
 
     // If we get here, the data structure exists, so update normally
     const newSummaryData = [...reportData.summaryOfConcerns.data];
-
-    console.log("Updating existing concerns:", newConcerns);
 
     // Update health safety section
     const healthSafetyIndex = newSummaryData.findIndex(
@@ -852,16 +863,18 @@ const ReportPage = ({
 
     // Return defaults with empty arrays if no data exists
     if (!reportData.heatingAndCooling?.data && !reportData.waterHeater?.data) {
-      console.log("No heating or water heater data found, returning empty arrays");
+      console.log(
+        "No heating or water heater data found, returning empty arrays",
+      );
       return {
         data: [],
-        title: "Heating & Water Heating Systems"
+        title: "Heating & Water Heating Systems",
       };
     }
 
     // Get heating items (excluding cooling items)
-    const heatingItems = reportData.heatingAndCooling?.data?.filter(
-      (item) => {
+    const heatingItems =
+      reportData.heatingAndCooling?.data?.filter((item) => {
         // Check if it's a heating item (not cooling and not water heater)
         return !(
           item.name.toLowerCase().includes("a/c") ||
@@ -870,15 +883,10 @@ const ReportPage = ({
           item.name.toLowerCase().includes("heat pump") ||
           item.name.toLowerCase().includes("water")
         );
-      }
-    ) || [];
+      }) || [];
 
     // Get water heater items
     const waterHeaterItems = reportData.waterHeater?.data || [];
-
-    console.log("Water heater items:", waterHeaterItems);
-    console.log("Heating items:", heatingItems);
-    console.log("Combined items:", [...heatingItems, ...waterHeaterItems]);
 
     return {
       data: [...heatingItems, ...waterHeaterItems],
@@ -1100,10 +1108,11 @@ const ReportPage = ({
               ].map((tab) => (
                 <button
                   key={tab}
-                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
-                    ? "border-b-2 border-lime-500 text-lime-500"
-                    : "text-gray-600 hover:text-lime-500"
-                    }`}
+                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
+                    activeSubMenu === tab
+                      ? "border-b-2 border-lime-500 text-lime-500"
+                      : "text-gray-600 hover:text-lime-500"
+                  }`}
                   onClick={() => handleChangeActiveSubMenu(tab)}
                 >
                   {["air-leakage", "insulation", "heating", "cooling"].includes(

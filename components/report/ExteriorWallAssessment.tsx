@@ -336,15 +336,15 @@ export function ExteriorWallAssessment({
   ) => {
     setWallData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       let updatedField: Partial<InsulationItemData> = {};
-  
+
       if (field === "rValue") {
         const numericValue =
           typeof value === "number"
             ? value
             : Number.parseInt(value.toString().replace("R", ""));
-  
+
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
           newData.efficiency = Math.round(
@@ -355,7 +355,7 @@ export function ExteriorWallAssessment({
       } else if (field === "material" || field === "condition") {
         updatedField = { [field]: value as string };
       }
-  
+
       if (onUpdate && Object.keys(updatedField).length > 0) {
         const updatedItem: InsulationItemData = {
           ...(data ?? { name: "Your Home's Exterior Wall Insulation" }),
@@ -363,12 +363,10 @@ export function ExteriorWallAssessment({
         };
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
-  
 
   const updateImage = (newImage: string) => {
     updateWallData("images", newImage);
