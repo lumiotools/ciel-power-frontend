@@ -423,43 +423,49 @@ export function ReportSummary({
   };
 
   const addConcern = () => {
-    setConcerns((prev) => {
-      const newConcerns = [
-        {
-          name: "New Concern",
-          concern: "Description of the new concern",
-          flag: true,
-        },
-        ...prev,
-      ];
+    // Create the new concern object
+    const newConcern = {
+      name: "New Concern",
+      concern: "Description of the new concern",
+      flag: true,
+    };
 
-      // If onUpdateConcerns callback is provided, call it with the updated data
-      if (onUpdateConcerns) {
-        console.log("New concerns:", newConcerns);
-        // Separate concerns into health safety and combustion
-        const healthSafety = newConcerns.filter(
-          (item) =>
-            !item.name.toLowerCase().includes("combustion") &&
-            !item.name.toLowerCase().includes("gas"),
-        );
+    // Update our local state first
+    setConcerns(prevConcerns => [newConcern, ...prevConcerns]);
 
-        const combustion = newConcerns.filter(
-          (item) =>
-            item.name.toLowerCase().includes("combustion") ||
-            item.name.toLowerCase().includes("gas"),
-        );
+    // If onUpdateConcerns callback is provided, prepare the data for the parent
+    if (onUpdateConcerns) {
+      // Determine if this is a combustion-related concern
+      const isCombustionConcern =
+        newConcern.name.toLowerCase().includes("combustion") ||
+        newConcern.name.toLowerCase().includes("gas");
 
-        console.log("Health and Safety Concerns:", healthSafety);
-        console.log("Combustion Concerns:", combustion);
+      // Prepare the data structure for the parent component
+      const healthSafety = isCombustionConcern
+        ? [...concerns.filter(item =>
+          !item.name.toLowerCase().includes("combustion") &&
+          !item.name.toLowerCase().includes("gas"))]
+        : [newConcern, ...concerns.filter(item =>
+          !item.name.toLowerCase().includes("combustion") &&
+          !item.name.toLowerCase().includes("gas"))];
 
-        onUpdateConcerns({
-          healthSafety,
-          combustion,
-        });
-      }
+      const combustion = isCombustionConcern
+        ? [newConcern, ...concerns.filter(item =>
+          item.name.toLowerCase().includes("combustion") ||
+          item.name.toLowerCase().includes("gas"))]
+        : [...concerns.filter(item =>
+          item.name.toLowerCase().includes("combustion") ||
+          item.name.toLowerCase().includes("gas"))];
 
-      return newConcerns;
-    });
+      // Call the parent update function
+      onUpdateConcerns({
+        healthSafety,
+        combustion,
+      });
+
+      console.log("New concern added:", newConcern);
+      console.log("All concerns after adding:", [newConcern, ...concerns]);
+    }
   };
 
   const deleteConcern = (index: number) => {
