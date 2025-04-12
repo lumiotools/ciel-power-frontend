@@ -191,6 +191,7 @@ export function InsulationContent({
       // updatedReportData=data;
       updatedReportData = JSON.parse(data, null, 2);
       updatedReportData = {
+        displayReport:false,
         reportData: updatedReportData,
         reportUrl: "",
       };

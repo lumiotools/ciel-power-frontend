@@ -497,7 +497,7 @@ export function KneewallAssessment({
           rValue:
             field === "rValue"
               ? parseInt(value.replace("R", ""))
-              : newData[index].currentValue,
+              : newData[index].currentValue ?? 0,
           image: field === "image" ? value : newData[index].image,
         };
   

@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { set } from "date-fns";
+import { DefaultReportData } from "./utils";
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -151,7 +152,7 @@ const ReportPage = ({
 
         SetImageOfUser(data?.data?.pictures);
       } catch (error) {
-        console.log("Error fetching images:", error);
+        console.error("Error fetching images:", error);
         toast.error("Failed to fetch images");
       }
     };
@@ -182,29 +183,27 @@ const ReportPage = ({
       const data = await response.json();
 
       if (data.success) {
-        const fetchedReportData = data.data.reportData || {};
+        const fetchedReportData = data.data.reportData || DefaultReportData;
 
-        console.log("Fetched report data:", fetchedReportData);
+       
         if (!fetchedReportData.insulation.missingDataZones) {
           fetchedReportData.insulation.missingDataZones = [];
         }
-        // if(fetchedReportData?.insulation?.missingZones?.length > 0){
-        //   toast.error("Insulation data is incomplete. Please check.");
-        // }
 
         // Save to state
         setReportData(fetchedReportData);
         setReportUrl(data.data.reportUrl || "");
         setReportStatus(data.data.displayReport || "NONE");
 
+        const IsAdmin=typeof window !== "undefined" && window.location.href.includes("admin");
         // Save to localStorage only for admin users
-        if (isAdmin) {
+        if (IsAdmin) {
           try {
             localStorage.setItem(
               `${REPORT_DATA_KEY}_${bookingNumber}`,
               JSON.stringify(fetchedReportData)
             );
-            console.log("Saved initial report data to localStorage");
+        
           } catch (e) {
             console.error("Error saving report data to localStorage:", e);
           }
@@ -224,39 +223,35 @@ const ReportPage = ({
     // Admin users can load from localStorage, otherwise always fetch fresh
     const IsAdmin=typeof window !== "undefined" && window.location.href.includes("admin");
     if (IsAdmin) {
-      // console.log("isAdmin", isAdmin);
+    
       const savedData = localStorage.getItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`
       );
 
-      console.log("saved data", savedData);
+     
 
       if (savedData) {
-        console.log("Saved report data found in localStorage:");
+        
         try {
           const parsedData = JSON.parse(savedData);
-          console.log("Parsed report data:");
+        
           setReportData(parsedData);
         } catch (e) {
           console.error("Error parsing saved report data:", e);
           // If parsing fails, fetch fresh data
-          console.log(
-            "Error parsing saved report data, fetching fresh data from API"
-          );
+          
           if (bookingNumber) {
             fetchReportDetails();
           }
         }
       } else if (bookingNumber) {
         // If no data in localStorage, fetch from API
-        console.log(
-          "No saved report data found in localStorage, fetching data again"
-        );
+      
         fetchReportDetails();
       }
     } else if (bookingNumber) {
       // Customer users always fetch fresh data
-      console.log("Customer user, fetching report details from API");
+     
       fetchReportDetails();
     }
   }, [bookingNumber]);
@@ -265,8 +260,7 @@ const ReportPage = ({
 
   // Update functions for each section
   const updateAirLeakage = (newValue: string) => {
-    console.log("hitting updateAirLeakage function", newValue);
-    console.log("isadmin", isAdmin);
+ 
     if (!isAdmin) return; // Only admin can update
 
     // Handle the case where airLeakage might not exist or might be incomplete
@@ -305,16 +299,12 @@ const ReportPage = ({
   };
 
   const updateInsulationItem = (updatedItem: InsulationItem) => {
-    console.log("hitting updateInsulation function");
-    console.log(
-      "Updating item and also trying to set in localstorage: ",
-      updatedItem
-    );
+  
 
     if (!isAdmin) return;
 
     if (!reportData.insulation?.data) {
-      console.log("Initializing insulation data structure");
+    
       setReportData({
         ...reportData,
         insulation: {
@@ -349,7 +339,7 @@ const ReportPage = ({
           `${REPORT_DATA_KEY}_${bookingNumber}`,
           JSON.stringify(updatedReportData)
         );
-        console.log("Saved insulation data to localStorage");
+       
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -371,7 +361,7 @@ const ReportPage = ({
           `${REPORT_DATA_KEY}_${bookingNumber}`,
           JSON.stringify(updatedReportData),
         );
-        console.log("Saved insulation data to localStorage");
+        
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -380,14 +370,10 @@ const ReportPage = ({
 
   // Replace the existing updateHeatingItem function with this one
   const updateHeatingItem = (updatedItem: HeatingCoolingItem) => {
-    console.log(
-      "hitting updateHeating function",
-      reportData.heatingAndCooling?.data,
-      reportData.waterHeater?.data
-    );
+    
 
     if (!isAdmin) return;
-    console.log("Updated item: ", updatedItem);
+   
     // Check if it's a water heater item
     const isWaterHeaterItem = updatedItem.name.toLowerCase().includes("water");
 
@@ -418,7 +404,7 @@ const ReportPage = ({
             `${REPORT_DATA_KEY}_${bookingNumber}`,
             JSON.stringify(updatedReportData)
           );
-          console.log("Saved water heater data to localStorage");
+        
         } catch (e) {
           console.error("Error saving water heater data to localStorage:", e);
         }
@@ -451,8 +437,7 @@ const ReportPage = ({
             `${REPORT_DATA_KEY}_${bookingNumber}`,
             JSON.stringify(updatedReportData),
           );
-          console.log("newHeatingData", newHeatingData);
-          console.log("Saved heating data to localStorage");
+        
         } catch (e) {
           console.error("Error saving heating data to localStorage:", e);
         }
@@ -497,7 +482,7 @@ const ReportPage = ({
     if (!isAdmin) return;
 
     if (!reportData.summaryOfConcerns?.data) {
-      console.log("Initializing summaryOfConcerns data structure");
+   
       setReportData({
         ...reportData,
         summaryOfConcerns: {
@@ -516,7 +501,7 @@ const ReportPage = ({
 
     const newSummaryData = [...reportData.summaryOfConcerns.data];
 
-    console.log("newConcerns", newConcerns);
+    
 
     // Update health safety section
     const healthSafetyIndex = newSummaryData.findIndex(
@@ -705,8 +690,7 @@ const ReportPage = ({
     // Get water heater items
     const waterHeaterItems = reportData.waterHeater?.data || [];
 
-    console.log("Water heater items:", waterHeaterItems);
-    console.log("Heating items:", heatingItems);
+
 
     return {
       data: [...heatingItems, ...waterHeaterItems],
