@@ -672,19 +672,17 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   const getDescriptionText = () => {
     if (isWaterHeater) {
       return shouldShowGaugeChart()
-        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
-            systemData.value < recommendedValue
-              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-              : `This is an efficient unit that meets or exceeds recommended standards.`
-          }`
+        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${systemData.value < recommendedValue
+          ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+          : `This is an efficient unit that meets or exceeds recommended standards.`
+        }`
         : `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     } else {
       return shouldShowGaugeChart()
-        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
-            systemData.value < recommendedValue
-              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-              : `This is an efficient unit that meets or exceeds recommended standards.`
-          }`
+        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${systemData.value < recommendedValue
+          ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+          : `This is an efficient unit that meets or exceeds recommended standards.`
+        }`
         : `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     }
   };
@@ -854,6 +852,26 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   );
 };
 
+const DEFAULT_HEATING_ITEMS = [
+  {
+    condition: "N/A",
+    name: "Primary Heating System",
+    parameter: "AFUE",
+    type: "None",
+    value: 0,
+    year: new Date().getFullYear(),
+  },
+  {
+    condition: "N/A",
+    name: "Water Heater",
+    parameter: "UEF",
+    type: "None",
+    value: 0,
+    year: new Date().getFullYear(),
+  }
+];
+
+
 // HeatingContent component with the ability to save data
 // Modified HeatingContent component with default data cards
 export function HeatingContent({
@@ -865,16 +883,10 @@ export function HeatingContent({
 }: HeatingContentProps) {
   const params = useParams();
   const bookingNumber = params.bookingNumber;
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 },
-  };
-
-  // Default heating items for when no data is available
-  const defaultHeatingItems = [
-    {
+  
+  // Default heating items
+  const DEFAULT_HEATING_ITEMS = {
+    heatingSystem: {
       condition: "N/A",
       name: "Primary Heating System",
       parameter: "AFUE",
@@ -882,111 +894,57 @@ export function HeatingContent({
       value: 0,
       year: new Date().getFullYear(),
     },
-    {
+    waterHeater: {
       condition: "N/A",
       name: "Water Heater",
       parameter: "UEF",
       type: "None",
       value: 0,
       year: new Date().getFullYear(),
-    },
-  ];
+    }
+  };
+  
+  // State for each card separately
+  const [heatingSystemItem, setHeatingSystemItem] = useState(DEFAULT_HEATING_ITEMS.heatingSystem);
+  const [waterHeaterItem, setWaterHeaterItem] = useState(DEFAULT_HEATING_ITEMS.waterHeater);
 
-  // Use provided data or default items
-  const heatingItems = data?.data?.length > 0 ? data.data : defaultHeatingItems;
-
-  console.log("HeatingContent received data:", data);
-  console.log("Heating items to render:", heatingItems);
-
-  // Function to handle updates to heating items
-  const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
-    if (isAdmin && onUpdateItem) {
-      console.log("Updating item in HeatingContent:", updatedItem);
-
-      // If we're using default data, we need to create a new heating data structure
-      if (!data?.data?.length) {
-        // Find which default item is being updated
-        const index = defaultHeatingItems.findIndex(
-          (item) => item.name === updatedItem.name,
-        );
-
-        // Create a new array with the updated item
-        const newHeatingItems = [...defaultHeatingItems];
-        if (index !== -1) {
-          newHeatingItems[index] = updatedItem;
-        } else {
-          // If somehow the item doesn't match any default items, just add it
-          newHeatingItems.push(updatedItem);
-        }
-
-        // Create the data structure that matches the expected format
-        const newHeatingData = {
-          data: newHeatingItems,
-          title: "Heating & Water Heating Systems",
-        };
-
-        // Try to get existing report data from localStorage
-        const REPORT_DATA_KEY = "report_data";
-        try {
-          const savedDataString = localStorage.getItem(
-            `${REPORT_DATA_KEY}_${bookingNumber}`,
-          );
-          let savedData = savedDataString ? JSON.parse(savedDataString) : {};
-
-          // Update with our new heating data
-          // Check if it's a water heater item
-          const isWaterHeater = updatedItem.name
-            .toLowerCase()
-            .includes("water");
-
-          if (isWaterHeater) {
-            // Create or update waterHeater section
-            savedData = {
-              ...savedData,
-              waterHeater: {
-                data: [updatedItem],
-                title: "Water Heating Systems",
-              },
-            };
-          } else {
-            // Update or create heatingAndCooling section
-            // Preserve any existing cooling items
-            const existingCoolingItems =
-              savedData.heatingAndCooling?.data?.filter(
-                (item) =>
-                  item.name.toLowerCase().includes("a/c") ||
-                  item.name.toLowerCase().includes("air condition") ||
-                  item.name.toLowerCase().includes("cooling") ||
-                  item.name.toLowerCase().includes("heat pump"),
-              ) || [];
-
-            savedData = {
-              ...savedData,
-              heatingAndCooling: {
-                ...savedData.heatingAndCooling,
-                data: [...existingCoolingItems, updatedItem],
-                title: "Heating and Cooling Systems",
-              },
-            };
-          }
-
-          // Save back to localStorage
-          localStorage.setItem(
-            `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(savedData),
-          );
-
-          // Since we've directly updated localStorage, inform the parent component
-          onUpdateItem(updatedItem);
-        } catch (e) {
-          console.error("Error handling localStorage updates:", e);
-          toast.error("Failed to update heating data in local storage");
-        }
-      } else {
-        // Use normal update flow if we have existing data
-        onUpdateItem(updatedItem);
+  // Initialize state from provided data
+  useEffect(() => {
+    if (data?.data && data.data.length > 0) {
+      // Look for heating system and water heater in provided data
+      const heatingItem = data.data.find(item => 
+        !item.name.toLowerCase().includes("water"));
+      
+      const waterItem = data.data.find(item => 
+        item.name.toLowerCase().includes("water"));
+      
+      // Update state if items are found
+      if (heatingItem) {
+        setHeatingSystemItem(heatingItem);
+      }
+      
+      if (waterItem) {
+        setWaterHeaterItem(waterItem);
       }
     }
+  }, [data]);
+
+  // Handle update for either card
+  const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
+    if (!isAdmin || !onUpdateItem) return;
+    
+    // Check which item is being updated
+    const isWaterHeater = updatedItem.name.toLowerCase().includes("water");
+    
+    // Update the appropriate local state
+    if (isWaterHeater) {
+      setWaterHeaterItem(updatedItem);
+    } else {
+      setHeatingSystemItem(updatedItem);
+    }
+    
+    // Pass update to parent
+    onUpdateItem(updatedItem);
   };
 
   const handleSave = async () => {
@@ -1031,7 +989,7 @@ export function HeatingContent({
       }
 
       toast.success("Heating systems data saved successfully!");
-      onSave();
+      if (onSave) onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("An error occurred while saving the data");
@@ -1051,7 +1009,12 @@ export function HeatingContent({
         </div>
       )}
 
-      <motion.div {...fadeInUp}>
+      {/* Header card */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <Card>
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
             <CardTitle className="text-2xl text-amber-600 dark:text-amber-200 flex items-center gap-2">
@@ -1074,30 +1037,27 @@ export function HeatingContent({
         </Card>
       </motion.div>
 
-      {heatingItems.map((item, index) => {
-        // Determine appropriate recommended value based on item type
-        const isWaterHeater = item.name.toLowerCase().includes("water");
-        const recommendedValue = isWaterHeater ? 62 : 92;
+      {/* Primary Heating System Card - always displayed */}
+      <HeatingSystemCard
+        key="primary-heating-system"
+        item={heatingSystemItem}
+        index={0}
+        isAdmin={isAdmin}
+        recommendedValue={92}
+        onUpdateItem={handleUpdateItem}
+        driveImages={driveImages}
+      />
 
-        console.log(
-          `Rendering item ${index}:`,
-          item,
-          "isWaterHeater:",
-          isWaterHeater,
-        );
-
-        return (
-          <HeatingSystemCard
-            key={`${item.name}-${index}`}
-            item={item}
-            index={index}
-            isAdmin={isAdmin}
-            recommendedValue={recommendedValue}
-            onUpdateItem={handleUpdateItem}
-            driveImages={driveImages}
-          />
-        );
-      })}
+      {/* Water Heater Card - always displayed */}
+      <HeatingSystemCard
+        key="water-heater"
+        item={waterHeaterItem}
+        index={1}
+        isAdmin={isAdmin}
+        recommendedValue={62}
+        onUpdateItem={handleUpdateItem}
+        driveImages={driveImages}
+      />
     </div>
   );
 }
