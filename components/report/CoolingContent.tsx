@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "./ImageUpload";
+import { ImageCustomer } from "@/components/report/ImageCustomer";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { driveImages } from "@/utils/image-utils";
@@ -52,7 +53,7 @@ interface CoolingContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
   driveImages?: driveImages[];
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 // interface ImageUploadProps {
@@ -708,22 +709,26 @@ const CoolingSystemCard: React.FC<CoolingSystemCardProps> = ({
                   driveImages={driveImages}
                 />
               ) : (
-                <motion.div
-                  className="relative h-48 overflow-hidden rounded-lg"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <img
-                    src={"/placeholder.jpg"}
-                    alt="Air Conditioning Unit"
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                    <p className="text-white text-sm">
-                      Example of a {systemData.type || "central"} air
-                      conditioning unit
-                    </p>
-                  </div>
-                </motion.div>
+                // <motion.div
+                //   className="relative h-48 overflow-hidden rounded-lg"
+                //   whileHover={{ scale: 1.02 }}
+                // >
+                //   <img
+                //     src={"/placeholder.jpg"}
+                //     alt="Air Conditioning Unit"
+                //     className="object-cover w-full h-full"
+                //   />
+                //   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                //     <p className="text-white text-sm">
+                //       Example of a {systemData.type || "central"} air
+                //       conditioning unit
+                //     </p>
+                //   </div>
+                // </motion.div>
+                <ImageCustomer
+                  image={systemData.image}
+                  driveImages={driveImages}
+                />
               )}
             </div>
           </div>
@@ -733,6 +738,7 @@ const CoolingSystemCard: React.FC<CoolingSystemCardProps> = ({
   );
 };
 
+// Modified CoolingContent component with default data cards
 export function CoolingContent({
   data,
   isAdmin = false,
@@ -741,7 +747,6 @@ export function CoolingContent({
   onSave,
 }: CoolingContentProps) {
   const params = useParams();
-
   const bookingNumber = params.bookingNumber;
 
   const fadeInUp = {
@@ -750,24 +755,78 @@ export function CoolingContent({
     transition: { duration: 0.5 },
   };
 
-  // Filter cooling-related items
-  const coolingItems =
-    data?.data?.filter(
-      (item) =>
-        item.name.toLowerCase().includes("a/c") ||
-        item.name.toLowerCase().includes("air condition") ||
-        item.name.toLowerCase().includes("cooling") ||
-        item.name.toLowerCase().includes("heat pump"),
-    ) || [];
+  // Default cooling items for when no data is available
+  const defaultCoolingItems = [
+    {
+      condition: "N/A",
+      name: "Central Air Conditioning",
+      parameter: "SEER",
+      type: "None",
+      value: 0,
+      year: new Date().getFullYear(),
+    }
+  ];
+
+  // Filter cooling-related items or use defaults if none exist
+  const coolingItems = data?.data?.length > 0 
+    ? data.data.filter(
+        (item) =>
+          item.name.toLowerCase().includes("a/c") ||
+          item.name.toLowerCase().includes("air condition") ||
+          item.name.toLowerCase().includes("cooling") ||
+          item.name.toLowerCase().includes("heat pump"),
+      ) 
+    : defaultCoolingItems;
 
   // Handle updating cooling items
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
     if (isAdmin && onUpdateItem) {
-      onUpdateItem(updatedItem);
+      // Check if we're using default data
+      if (!data?.data?.length) {
+        // Create a new entry in localStorage with the proper structure
+        const REPORT_DATA_KEY = "report_data";
+        try {
+          // Get existing data from localStorage
+          const savedDataString = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+          let savedData = savedDataString ? JSON.parse(savedDataString) : {};
+          
+          // Get any existing heating items to preserve them
+          const existingHeatingItems = savedData.heatingAndCooling?.data?.filter(
+            (item) =>
+              item.name.toLowerCase().includes("furnace") ||
+              item.name.toLowerCase().includes("boiler") ||
+              item.name.toLowerCase().includes("heat") && 
+              !item.name.toLowerCase().includes("heat pump")
+          ) || [];
+          
+          // Create or update heatingAndCooling section
+          savedData = {
+            ...savedData,
+            heatingAndCooling: {
+              ...savedData.heatingAndCooling,
+              data: [...existingHeatingItems, updatedItem],
+              title: "Heating and Cooling Systems"
+            }
+          };
+          
+          // Save back to localStorage
+          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(savedData));
+          
+          // Call parent's update function
+          onUpdateItem(updatedItem);
+          
+        } catch (e) {
+          console.error("Error handling localStorage updates:", e);
+          toast.error("Failed to update cooling data in local storage");
+        }
+      } else {
+        // Use normal update flow if we have existing data
+        onUpdateItem(updatedItem);
+      }
     }
   };
 
-  const onSumit = async () => {
+  const handleSave = async () => {
     const REPORT_DATA_KEY = "report_data";
     let updatedReportData;
     try {
@@ -775,24 +834,25 @@ export function CoolingContent({
       console.log("Data from localStorage:", data);
 
       if (!data) {
-        console.error("No insulation data found in localStorage");
+        console.error("No data found in localStorage");
+        toast.error("No data found to save");
         return;
       }
-      // updatedReportData=data;
-      updatedReportData = JSON.parse(data, null, 2);
+
+      updatedReportData = JSON.parse(data);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
         reportUrl: "",
       };
 
-      console.log("Saved insulation data to localStorage");
+      console.log("Data being saved:", updatedReportData);
     } catch (e) {
-      console.error("Error getting insulation data to localStorage:", e);
+      console.error("Error getting data from localStorage:", e);
+      toast.error("Error preparing data for submission");
+      return;
     }
 
     try {
-      console.log("Submitting data:", updatedReportData);
       const response = await fetch(
         `/api/admin/bookings/${bookingNumber}/report/update`,
         {
@@ -806,29 +866,31 @@ export function CoolingContent({
 
       if (!response.ok) {
         const errorData = await response.json();
-        toast.error(errorData.detail || "Failed to fetch report details");
+        toast.error(errorData.detail || "Failed to update report");
         return;
       }
 
-      const data = await response.json();
-      toast.success("Data submitted successfully!");
-      console.log("Data submitted successfully:", data);
+      toast.success("Cooling systems data saved successfully!");
       onSave();
     } catch (error) {
       console.error("Error submitting data:", error);
+      toast.error("An error occurred while saving the data");
     }
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end items-center">
-        <button
-          onClick={onSumit}
-          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
-        >
-          Save
-        </button>
-      </div>
+      {isAdmin && (
+        <div className="flex justify-end items-center">
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 rounded-full bg-green-500 text-white font-bold hover:bg-green-600 transition-colors"
+          >
+            Save
+          </button>
+        </div>
+      )}
+      
       <motion.div {...fadeInUp}>
         <Card className="border-amber-100">
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
@@ -855,26 +917,16 @@ export function CoolingContent({
         </Card>
       </motion.div>
 
-      {coolingItems.length > 0 ? (
-        coolingItems.map((item, index) => (
-          <CoolingSystemCard
-            key={`${item.name}-${index}`}
-            item={item}
-            index={index}
-            isAdmin={isAdmin}
-            onUpdateItem={handleUpdateItem}
-            driveImages={driveImages}
-          />
-        ))
-      ) : (
-        <motion.div {...fadeInUp}>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-gray-600">No cooling system data available.</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+      {coolingItems.map((item, index) => (
+        <CoolingSystemCard
+          key={`${item.name}-${index}`}
+          item={item}
+          index={index}
+          isAdmin={isAdmin}
+          onUpdateItem={handleUpdateItem}
+          driveImages={driveImages}
+        />
+      ))}
     </div>
   );
 }

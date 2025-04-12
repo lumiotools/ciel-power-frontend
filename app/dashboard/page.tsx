@@ -69,8 +69,8 @@ const stepsSequence = [
   { label: "Booking Created", key: "bookingCreated" },
   { label: "Utility Bills Uploaded", key: "utilityBills" },
   { label: "Audit Performed", key: "auditPerformed" },
-  { label: "Report Generated", key: "reportGenerated" },
   { label: "Follow Up Scheduled", key: "followUpSchedule" },
+  { label: "Report Generated", key: "reportGenerated" },
   { label: "Proposal Signed", key: "proposalSigned" },
   { label: "Payment Done", key: "paymentDone" },
 ];

@@ -37,7 +37,7 @@ interface InsulationContentProps {
   isAdmin?: boolean;
   onUpdateItem?: (updatedItem: InsulationDataItem) => void;
   driveImages?: string[];
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 // Helper function to find the best matching item for a specific component type
@@ -110,8 +110,8 @@ const findBestMatchingItem = (
     // Second priority: find items with known conditions
     const knownConditionItems = matchingItems.filter(
       (item) =>
-        item.condition.toLowerCase() !== "unknown" &&
-        item.material.toLowerCase() !== "unknown",
+        item.condition?.toLowerCase() !== "unknown" &&
+        item.material?.toLowerCase() !== "unknown",
     );
     if (knownConditionItems.length > 0) {
       return knownConditionItems[0]; // Return the first item with known condition
@@ -192,7 +192,6 @@ export function InsulationContent({
       updatedReportData = JSON.parse(data, null, 2);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
         reportUrl: "",
       };
 
@@ -231,14 +230,14 @@ export function InsulationContent({
 
   return (
     <div className="space-y-8 pb-20">
-      <div className="flex justify-end items-center">
+      {isAdmin && (<div className="flex justify-end items-center">
         <button
           onClick={onSumit}
           className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
         >
           Save
         </button>
-      </div>
+      </div>)}
 
       <InsulationOverview />
 

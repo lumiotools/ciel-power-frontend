@@ -14,6 +14,7 @@ import {
 import Image from "next/image";
 // import { Close } from "@radix-ui/react-dialog";
 import { IoMdClose } from "react-icons/io";
+import ImageCustomer from "./ImageCustomer";
 
 interface GaugeChartProps {
   value: number;
@@ -376,23 +377,23 @@ export function KneewallAssessment({
   const defaultKneewallData: KneewallData[] = [
     {
       title: "Your Home's Kneewall Flat Insulation",
-      material: '3-4" Cellulose',
-      condition: "Good",
-      rValue: "R13",
+      material: 'None',
+      condition: "N/A",
+      rValue: "R0",
       recommendation: "R60",
-      currentValue: 13,
+      currentValue: 0,
       maxValue: 60,
       image: "/placeholder.jpg",
     },
     {
       title: "Your Kneewall Insulation",
-      material: '2-3" Fiberglass',
-      condition: "Fair",
-      rValue: "R6",
+      material: 'None',
+      condition: "N/A",
+      rValue: "R0",
       recommendation: "R13",
-      currentValue: 6,
+      currentValue: 0,
       maxValue: 13,
-      image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png",
+      image: null,
     },
   ];
 
@@ -470,89 +471,44 @@ export function KneewallAssessment({
   ) => {
     console.log("Updating kneewall data:", index, field, value);
     console.log("Current kneewall data and function:", data, onUpdate);
+  
     setKneewallData((prev) => {
       const newData = [...prev];
       newData[index] = { ...newData[index], [field]: value };
 
+      console.log("New kneewall data:", newData);
+  
       // Update currentValue if rValue changes
       if (field === "rValue") {
         console.log("Inside rvalue");
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
-
-          console.log("data isnde rvalue", data);
-          // Send update to parent if available
-          if (onUpdate && data) {
-            const updatedItem: InsulationItemData = {
-              ...data,
-              rValue: numericValue,
-            };
-            console.log("updating ondate funcgtion");
-            onUpdate(updatedItem);
-          } else {
-            const updatedItem = {
-              ...defaultKneewallData[0],
-              rValue: numericValue,
-            };
-            onUpdate?.(updatedItem);
-          }
         }
-      } else if (field === "material" && onUpdate) {
-        // Send update to parent if available
-        let updatedItem: InsulationItemData;
-        if (data) {
-          updatedItem = {
-            ...(data || []),
-            material: value,
-          };
-        } else {
-          updatedItem = {
-            ...defaultKneewallData[0],
-            material: value,
-          };
-        }
-        onUpdate(updatedItem);
-      } else if (field === "condition" && onUpdate) {
-        // Send update to parent if available
-        let updatedItem: InsulationItemData;
-        if (data) {
-          updatedItem = {
-            ...(data || []),
-            condition: value,
-          };
-        } else {
-          updatedItem = {
-            ...defaultKneewallData[0],
-            condition: value,
-          };
-        }
-        onUpdate(updatedItem);
-      } else if (field === "image" && onUpdate) {
-        //removed data , because when data is not available we will create a new
-        // Send update to parent if available
-        let updatedItem: InsulationItemData;
-        if (data) {
-          updatedItem = {
-            ...(data || []),
-            image: value,
-          };
-        } else {
-          updatedItem = {
-            ...defaultKneewallData[0],
-            image: value,
-          };
-        }
-
-        onUpdate(updatedItem);
-        console.log("Updated image:done sucessfully");
       }
-
-      console.log("Updated kneewall data:", newData);
-
+  
+      // Trigger update to parent
+      if (onUpdate) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? {}), // if data exists, spread it; else create new
+          name: newData[index].title,
+          material: field === "material" ? value : newData[index].material,
+          condition: field === "condition" ? value : newData[index].condition,
+          rValue:
+            field === "rValue"
+              ? parseInt(value.replace("R", ""))
+              : newData[index].currentValue,
+          image: field === "image" ? value : newData[index].image,
+        };
+  
+        console.log("Sending update to parent:", updatedItem);
+        onUpdate(updatedItem);
+      }
+  
       return newData;
     });
   };
+  
 
   return (
     <div className="space-y-8">
@@ -585,12 +541,16 @@ export function KneewallAssessment({
                         }
                       />
                     ) : (
-                      <Image
-                        src={data.image || "/placeholder.svg"}
-                        alt="Insulation inspection"
-                        className="w-full h-64 object-cover rounded-lg mt-4"
-                        width={400}
-                        height={256}
+                      // <Image
+                      //   src={data.image || "/placeholder.svg"}
+                      //   alt="Insulation inspection"
+                      //   className="w-full h-64 object-cover rounded-lg mt-4"
+                      //   width={400}
+                      //   height={256}
+                      // />
+                      <ImageCustomer
+                        image={data.image}
+                        driveImages={driveImages}
                       />
                     )}
                   </div>

@@ -19,13 +19,11 @@ import {
   Clock,
   X,
   FileText,
+  Eye,
+  Trash2,
+  Plus,
 } from "lucide-react";
-import type {
-  Booking,
-  ContractDetails,
-  ContractDoc,
-  Recipient,
-} from "@/types/admin";
+import type { Booking, ContractDoc, Recipient } from "@/types/admin";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -35,6 +33,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 interface BookingDetailsResponse {
   success: boolean;
@@ -44,10 +58,24 @@ interface BookingDetailsResponse {
     report: {
       reportUrl: string;
       reportData: object;
-      displayReport: boolean;
+      displayReport: string;
     } | null;
-    contract: ContractDetails | null;
+    offeredContracts: OfferedContract[] | null;
+    completedContractLink: string | null;
   };
+}
+
+interface OfferedContract {
+  id: string;
+  name: string;
+  status: string;
+  displayContract: boolean;
+  customerRecipient: string;
+  cielPowerRepresentativeRecipient: string;
+  accepted: boolean;
+  link: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ContractSearchResponse {
@@ -72,25 +100,36 @@ export default function BookingDetailsPage({
   const [loading, setLoading] = useState(true);
   const [reportUrl, setReportUrl] = useState("");
   const [reportData, setReportData] = useState<Object | null>(null);
-  const [reportStatus, setReportStatus] = useState(false);
-  const [initialReportStatus, setInitialReportStatus] = useState(false);
-  const [contractDetails, setContractDetails] =
-    useState<ContractDetails | null>(null);
-  const [contractDisplayStatus, setContractDisplayStatus] = useState(false);
-  const [initialContractDisplayStatus, setInitialContractDisplayStatus] =
-    useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [reportStatus, setReportStatus] = useState("NONE");
+  const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
+    []
+  );
+  const [completedContractFileUrl, setCompletedContractFileUrl] = useState<
+    string | null
+  >(null);
+  const [hasReportChanges, setHasReportChanges] = useState(false);
+
+  // Separate loading states for different actions
+  const [isSavingReport, setIsSavingReport] = useState(false);
+  const [isTogglingContract, setIsTogglingContract] = useState<string | null>(
+    null
+  );
+  const [isRemovingContract, setIsRemovingContract] = useState<string | null>(
+    null
+  );
+  const [isAttachingContract, setIsAttachingContract] = useState(false);
+
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewContractId, setPreviewContractId] = useState("");
 
   // Contract search states
-  const [isEditMode, setIsEditMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<ContractDoc[]>([]);
   const [selectedContract, setSelectedContract] = useState<ContractDoc | null>(
-    null,
+    null
   );
-  const [customerRecipient, setCustomerRecipient] = useState("");
-  const [cielPowerRepresentative, setCielPowerRepresentative] = useState("");
 
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
@@ -101,28 +140,17 @@ export default function BookingDetailsPage({
     setSelectedRepresentativeRecipientId,
   ] = useState("");
 
+  const [isIframeLoading, setIsIframeLoading] = useState(true);
+
   useEffect(() => {
     if (bookingNumber) {
       fetchBookingDetails();
     }
   }, [bookingNumber]);
 
-  // Set edit mode when no contract details are available
   useEffect(() => {
-    setIsEditMode(!contractDetails);
-
-    if (contractDetails) {
-      setContractDisplayStatus(contractDetails.displayContract);
-      setInitialContractDisplayStatus(contractDetails.displayContract);
-    }
-  }, [contractDetails]);
-
-  // Track if report status has changed
-  useEffect(() => {
-    if (reportStatus !== undefined) {
-      setInitialReportStatus(reportStatus);
-    }
-  }, []);
+    setHasReportChanges(true);
+  }, [reportUrl, reportStatus]);
 
   const fetchBookingDetails = async () => {
     setLoading(true);
@@ -144,19 +172,24 @@ export default function BookingDetailsPage({
         if (data.data.report) {
           setReportData(data.data.report.reportData || null);
           setReportUrl(data.data.report.reportUrl || "");
-          setReportStatus(data.data.report.displayReport || false);
-          setInitialReportStatus(data.data.report.displayReport || false);
+          setReportStatus(data.data.report.displayReport ?? "NONE");
+          setTimeout(() => {
+            setHasReportChanges(false);
+          }, 500);
         } else {
           setReportData(null);
           setReportUrl("");
-          setReportStatus(false);
-          setInitialReportStatus(false);
+          setReportStatus("NONE");
         }
 
-        if (data.data.contract) {
-          setContractDetails(data.data.contract);
-          setContractDisplayStatus(data.data.contract.displayContract);
-          setInitialContractDisplayStatus(data.data.contract.displayContract);
+        // Handle offered contracts
+        if (data.data.offeredContracts) {
+          setOfferedContracts(data.data.offeredContracts);
+        } else {
+          setOfferedContracts([]);
+        }
+        if (data.data.completedContractLink) {
+          setCompletedContractFileUrl(data.data.completedContractLink);
         }
       } else {
         toast.error(data.message || "Failed to fetch booking details");
@@ -184,7 +217,7 @@ export default function BookingDetailsPage({
 
     try {
       const response = await fetch(
-        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`,
+        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`
       );
 
       if (!response.ok) {
@@ -214,7 +247,7 @@ export default function BookingDetailsPage({
 
     try {
       const response = await fetch(
-        `/api/admin/search/contracts/${contractId}/recipients`,
+        `/api/admin/search/contracts/${contractId}/recipients`
       );
 
       if (!response.ok) {
@@ -243,8 +276,6 @@ export default function BookingDetailsPage({
     // Reset the recipient selections
     setSelectedCustomerRecipientId("");
     setSelectedRepresentativeRecipientId("");
-    setCustomerRecipient("");
-    setCielPowerRepresentative("");
 
     // Fetch recipients for this contract
     fetchRecipients(contract.id);
@@ -266,7 +297,7 @@ export default function BookingDetailsPage({
       return;
     }
 
-    setIsSaving(true);
+    setIsAttachingContract(true);
 
     try {
       const contractData = {
@@ -283,13 +314,20 @@ export default function BookingDetailsPage({
             "Content-Type": "application/json",
           },
           body: JSON.stringify(contractData),
-        },
+        }
       );
 
       const data = await response.json();
 
       if (data.success) {
         toast.success("Contract attached successfully");
+        // Close the modal and reset form
+        setIsContractModalOpen(false);
+        setSelectedContract(null);
+        setSelectedCustomerRecipientId("");
+        setSelectedRepresentativeRecipientId("");
+        setSearchQuery("");
+        setSearchResults([]);
         // Refresh booking details to get the updated contract
         fetchBookingDetails();
       } else {
@@ -299,96 +337,142 @@ export default function BookingDetailsPage({
       console.error("Error attaching contract:", error);
       toast.error("An error occurred while attaching the contract");
     } finally {
-      setIsSaving(false);
+      setIsAttachingContract(false);
     }
   };
 
+  const handleToggleContractDisplay = async (
+    contractId: string,
+    display: boolean
+  ) => {
+    setIsTogglingContract(contractId);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/contract/${contractId}/toggle?displayContract=${display}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Contract display toggled successfully");
+        // Update the local state to reflect the change
+        setOfferedContracts((prevContracts) =>
+          prevContracts.map((contract) =>
+            contract.id === contractId
+              ? { ...contract, displayContract: display }
+              : contract
+          )
+        );
+      } else {
+        toast.error(data.message || "Failed to toggle contract display");
+      }
+    } catch (error) {
+      console.error("Error toggling contract display:", error);
+      toast.error("An error occurred while toggling contract display");
+    } finally {
+      setIsTogglingContract(null);
+    }
+  };
+
+  const handleRemoveContract = async (contractId: string) => {
+    if (!confirm("Are you sure you want to remove this contract?")) {
+      return;
+    }
+
+    setIsRemovingContract(contractId);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/contract/${contractId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Contract removed successfully");
+        // Remove the contract from the local state
+        setOfferedContracts((prevContracts) =>
+          prevContracts.filter((contract) => contract.id !== contractId)
+        );
+      } else {
+        toast.error(data.message || "Failed to remove contract");
+      }
+    } catch (error) {
+      console.error("Error removing contract:", error);
+      toast.error("An error occurred while removing the contract");
+    } finally {
+      setIsRemovingContract(null);
+    }
+  };
+
+  const handlePreviewContract = (contractId: string) => {
+    setPreviewContractId(contractId);
+    setIsPreviewModalOpen(true);
+  };
+
   const handleSaveChanges = async () => {
-    setIsSaving(true);
+    setIsSavingReport(true);
     let hasChanges = false;
     let reportUpdated = false;
-    let contractUpdated = false;
 
     try {
       // Check if report data has changed
-      // if (reportUrl !== "" || reportStatus !== initialReportStatus) {
-      //   hasChanges = true
-
-      //   const updatedReportData = {
-      //     reportUrl: reportUrl,
-      //     reportData: reportUrl !== "" ? null : reportData,
-      //     displayReport: reportStatus,
-      //   }
-
-      //   const reportResponse = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`, {
-      //     method: "PUT",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(updatedReportData),
-      //   })
-
-      //   const reportData = await reportResponse.json()
-
-      //   if (reportData.success) {
-      //     reportUpdated = true
-      //     setInitialReportStatus(reportStatus)
-      //   } else {
-      //     toast.error(reportData.message || "Failed to update report details")
-      //   }
-      // }
-
-      // Check if contract display status has changed
-      if (
-        contractDetails &&
-        contractDisplayStatus !== initialContractDisplayStatus
-      ) {
+      if (hasReportChanges) {
         hasChanges = true;
 
-        const contractResponse = await fetch(
-          `/api/admin/bookings/${bookingNumber}/contract/toggle?displayContract=${contractDisplayStatus}`,
+        const updatedReportData: {
+          reportUrl: string;
+          reportData: object | null;
+          displayReport: string;
+        } = {
+          reportUrl: reportUrl,
+          reportData: reportUrl !== "" ? null : reportData,
+          displayReport: reportStatus,
+        };
+
+        const reportResponse = await fetch(
+          `/api/admin/bookings/${bookingNumber}/report/update`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-          },
+            body: JSON.stringify(updatedReportData),
+          }
         );
 
-        const contractData = await contractResponse.json();
+        const responseData = await reportResponse.json();
 
-        if (contractData.success) {
-          contractUpdated = true;
-          // Update the contract details with the new display status
-          setContractDetails((prev) =>
-            prev
-              ? { ...prev, displayContract: contractData.data.displayContract }
-              : null,
-          );
-          setInitialContractDisplayStatus(contractData.data.displayContract);
+        if (responseData.success) {
+          reportUpdated = true;
         } else {
           toast.error(
-            contractData.message || "Failed to toggle contract display",
+            responseData.message || "Failed to update report details"
           );
         }
       }
 
       if (!hasChanges) {
         toast.info("No changes to save");
-      } else {
-        if (reportUpdated && contractUpdated) {
-          toast.success("All changes saved successfully");
-        } else if (reportUpdated) {
-          toast.success("Report details updated successfully");
-        } else if (contractUpdated) {
-          toast.success("Contract display toggled successfully");
-        }
+      } else if (reportUpdated) {
+        toast.success("Report details updated successfully");
       }
     } catch (error) {
       console.error("Error saving changes:", error);
       toast.error("An error occurred while saving changes");
     } finally {
-      setIsSaving(false);
+      setIsSavingReport(false);
     }
   };
 
@@ -475,11 +559,6 @@ export default function BookingDetailsPage({
       </div>
     );
   }
-
-  // Check if there are any unsaved changes
-  const hasUnsavedChanges =
-    reportStatus !== initialReportStatus ||
-    (contractDetails && contractDisplayStatus !== initialContractDisplayStatus);
 
   return (
     <div className="min-h-screen bg-[#f5f9f0]">
@@ -588,292 +667,415 @@ export default function BookingDetailsPage({
                     value={reportUrl}
                     onChange={(e) => setReportUrl(e.target.value)}
                     placeholder="Enter report URL"
-                    disabled={isSaving}
+                    disabled={isSavingReport}
                     className="bg-white"
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="reportStatus">Report Display Status</Label>
-                  <Switch
-                    id="reportStatus"
-                    checked={reportStatus}
-                    onCheckedChange={setReportStatus}
-                    className="data-[state=checked]:bg-[#5cb85c]"
-                    disabled={isSaving}
-                  />
+                  <Tabs
+                    defaultValue="NONE"
+                    value={reportStatus}
+                    onValueChange={setReportStatus}
+                  >
+                    <TabsList>
+                      <TabsTrigger value="NONE">None</TabsTrigger>
+                      <TabsTrigger value="STATIC">Static</TabsTrigger>
+                      <TabsTrigger value="AUTOMATED">Automated</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button
+                    onClick={handleSaveChanges}
+                    className="bg-[#5cb85c] hover:bg-[#4a9d4a] px-6"
+                    disabled={isSavingReport || !hasReportChanges}
+                  >
+                    {isSavingReport ? (
+                      <>
+                        <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Report Changes"
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Contract Management */}
             <div className="pt-6 border-t">
-              <h3 className="text-lg font-medium mb-6">Contract Management</h3>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-medium">Contract Management</h3>
+                <Button
+                  onClick={() => setIsContractModalOpen(true)}
+                  className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Attach Contract
+                </Button>
+              </div>
 
-              {isEditMode ? (
-                <div className="space-y-6 max-w-2xl">
-                  <div className="space-y-4">
-                    <form
-                      onSubmit={handleSearchContracts}
-                      className="flex gap-2"
+              {offeredContracts.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {offeredContracts.map((contract) => (
+                    <Card
+                      key={contract.id}
+                      className="border-gray-200 flex flex-col"
                     >
-                      <div className="flex-1">
-                        <Input
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search for contracts by name"
-                          disabled={isSearching}
-                          className="bg-white"
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={isSearching || !searchQuery.trim()}
-                        className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
-                      >
-                        {isSearching ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                        ) : (
-                          <Search className="h-4 w-4" />
-                        )}
-                        <span className="ml-2">Search</span>
-                      </Button>
-                    </form>
-
-                    {searchResults.length > 0 && (
-                      <div className="border rounded-md overflow-hidden">
-                        <div className="bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 border-b">
-                          Search Results ({searchResults.length})
-                        </div>
-                        <div className="divide-y max-h-64 overflow-y-auto">
-                          {searchResults.map((doc) => (
-                            <div
-                              key={doc.id}
-                              className={`px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                                selectedContract?.id === doc.id
-                                  ? "bg-green-50"
-                                  : ""
-                              }`}
-                            >
-                              <div className="flex-1">
-                                <div className="font-medium">{doc.name}</div>
-                                <div className="flex items-center gap-3 mt-1">
-                                  {renderStatusBadge(doc.status)}
-                                  <span className="text-xs text-gray-500">
-                                    Created:{" "}
-                                    {new Date(
-                                      doc.createdAt,
-                                    ).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant={
-                                  selectedContract?.id === doc.id
-                                    ? "default"
-                                    : "outline"
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex justify-between items-start">
+                          <span>{contract.name}</span>
+                          {renderStatusBadge(contract.status)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pb-2 flex-grow">
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">Customer:</span>{" "}
+                            {contract.customerRecipient}
+                          </div>
+                          <div>
+                            <span className="text-gray-500">
+                              Representative:
+                            </span>{" "}
+                            {contract.cielPowerRepresentativeRecipient}
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Created:</span>{" "}
+                            {new Date(contract.created_at).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center justify-between pt-2">
+                            <span className="text-gray-500">
+                              Display to Customer:
+                            </span>
+                            <div className="flex items-center">
+                              <Switch
+                                checked={contract.displayContract}
+                                onCheckedChange={(checked) =>
+                                  handleToggleContractDisplay(
+                                    contract.id,
+                                    checked
+                                  )
                                 }
-                                onClick={() => handleSelectContract(doc)}
-                                className={
-                                  selectedContract?.id === doc.id
-                                    ? "bg-[#5cb85c] hover:bg-[#4a9d4a]"
-                                    : ""
-                                }
-                              >
-                                {selectedContract?.id === doc.id ? (
-                                  <>
-                                    <Check className="h-4 w-4 mr-1" />
-                                    Selected
-                                  </>
-                                ) : (
-                                  "Select"
-                                )}
-                              </Button>
+                                className="data-[state=checked]:bg-[#5cb85c]"
+                                disabled={!!completedContractFileUrl || isTogglingContract === contract.id}
+                              />
+                              {isTogglingContract === contract.id && (
+                                <div className="ml-2 animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-[#5cb85c]"></div>
+                              )}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {selectedContract && (
-                    <div className="border rounded-md p-4 bg-gray-50">
-                      <h4 className="font-medium mb-4">
-                        Attach Contract: {selectedContract.name}
-                      </h4>
-
-                      {loadingRecipients ? (
-                        <div className="flex justify-center py-4">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#5cb85c]"></div>
-                        </div>
-                      ) : recipients.length > 0 ? (
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="customerRecipient">
-                              Customer Recipient
-                            </Label>
-                            <Select
-                              value={selectedCustomerRecipientId}
-                              onValueChange={(value) => {
-                                setSelectedCustomerRecipientId(value);
-                                const recipient = recipients.find(
-                                  (r) => r.id === value,
-                                );
-                                if (recipient) {
-                                  setCustomerRecipient(
-                                    `${recipient.name} (${recipient.email})`,
-                                  );
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="bg-white">
-                                <SelectValue placeholder="Select customer recipient" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {recipients.map((recipient) => (
-                                  <SelectItem
-                                    key={recipient.id}
-                                    value={recipient.id}
-                                  >
-                                    {recipient.name} ({recipient.email})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
                           </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="cielPowerRep">
-                              Ciel Power Representative
-                            </Label>
-                            <Select
-                              value={selectedRepresentativeRecipientId}
-                              onValueChange={(value) => {
-                                setSelectedRepresentativeRecipientId(value);
-                                const recipient = recipients.find(
-                                  (r) => r.id === value,
-                                );
-                                if (recipient) {
-                                  setCielPowerRepresentative(
-                                    `${recipient.name} (${recipient.email})`,
-                                  );
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="bg-white">
-                                <SelectValue placeholder="Select Ciel Power representative" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {recipients.map((recipient) => (
-                                  <SelectItem
-                                    key={recipient.id}
-                                    value={recipient.id}
-                                  >
-                                    {recipient.name} ({recipient.email})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <Button
-                            onClick={handleAttachContract}
-                            disabled={
-                              isSaving ||
-                              !selectedCustomerRecipientId ||
-                              !selectedRepresentativeRecipientId
-                            }
-                            className="bg-[#5cb85c] hover:bg-[#4a9d4a] w-full"
-                          >
-                            {isSaving ? (
-                              <>
-                                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
-                                Attaching...
-                              </>
-                            ) : (
-                              "Attach Contract"
-                            )}
+                          {contract.accepted && (
+                            <div className="flex justify-between items-center py-2">
+                              <span className="text-green-500 font-medium">
+                                Customer has signed this contract
+                                {!completedContractFileUrl && (
+                                  <>
+                                    ,<br />
+                                    Pending Ciel Power Representative signature
+                                  </>
+                                )}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex gap-4 pt-2">
+                        <Link href={contract.link} target="_blank">
+                          <Button variant="outline" size="sm">
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Open in PandaDoc
                           </Button>
-                        </div>
-                      ) : (
-                        <div className="text-center py-4 text-gray-500">
-                          No recipients found for this contract. Please select a
-                          different contract.
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : contractDetails ? (
-                <div className="space-y-4 max-w-2xl">
-                  <div className="space-y-2">
-                    <Label>Document Name</Label>
-                    <p className="text-gray-700">{contractDetails.name}</p>
-                  </div>
+                        </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePreviewContract(contract.id)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
 
-                  <div className="space-y-2">
-                    <Label>Customer Recipient</Label>
-                    <p className="text-gray-700">
-                      {contractDetails.customerRecipient}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Ciel Power Representative Recipient</Label>
-                    <p className="text-gray-700">
-                      {contractDetails.cielPowerRepresentativeRecipient}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="contractStatus">
-                      Contract Display Status
-                    </Label>
-                    <Switch
-                      id="contractStatus"
-                      checked={contractDisplayStatus}
-                      onCheckedChange={setContractDisplayStatus}
-                      className="data-[state=checked]:bg-[#5cb85c]"
-                      disabled={isSaving}
-                    />
-                  </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
+                          onClick={() => handleRemoveContract(contract.id)}
+                          disabled={!!completedContractFileUrl || (isRemovingContract === contract.id)}
+                        >
+                          {isRemovingContract === contract.id ? (
+                            <>
+                              <div className="h-3 w-3 mr-1 animate-spin rounded-full border-b-2 border-red-500"></div>
+                              Removing...
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Remove
+                            </>
+                          )}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
                 </div>
               ) : (
-                <div className="text-gray-500">
-                  No contract details available.
+                <div className="bg-gray-50 border rounded-md p-6 text-center">
+                  <p className="text-gray-500">
+                    No contracts have been attached to this booking yet.
+                  </p>
+                  <Button
+                    onClick={() => setIsContractModalOpen(true)}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Attach Contract
+                  </Button>
                 </div>
               )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="pt-6 border-t flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/admin")}
-                disabled={isSaving}
-                className="px-6"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveChanges}
-                className="bg-[#5cb85c] hover:bg-[#4a9d4a] px-6"
-                disabled={isSaving || !hasUnsavedChanges}
-              >
-                {isSaving ? (
-                  <>
-                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Attach Contract Modal */}
+      <Dialog open={isContractModalOpen} onOpenChange={setIsContractModalOpen}>
+        <DialogContent className="sm:max-w-md md:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Attach Contract</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Contract Search Form */}
+            <form onSubmit={handleSearchContracts} className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for contracts by name"
+                  disabled={isSearching}
+                  className="bg-white"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={isSearching || !searchQuery.trim()}
+                className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
+              >
+                {isSearching ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+                <span className="ml-2">Search</span>
+              </Button>
+            </form>
+
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="border rounded-md overflow-hidden">
+                <div className="bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 border-b">
+                  Search Results ({searchResults.length})
+                </div>
+                <div className="divide-y max-h-64 overflow-y-auto">
+                  {searchResults.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className={`px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors ${
+                        selectedContract?.id === doc.id ? "bg-green-50" : ""
+                      }`}
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium">{doc.name}</div>
+                        <div className="flex items-center gap-3 mt-1">
+                          {renderStatusBadge(doc.status)}
+                          <span className="text-xs text-gray-500">
+                            Created:{" "}
+                            {new Date(doc.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={
+                          selectedContract?.id === doc.id
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() => handleSelectContract(doc)}
+                        className={
+                          selectedContract?.id === doc.id
+                            ? "bg-[#5cb85c] hover:bg-[#4a9d4a]"
+                            : ""
+                        }
+                      >
+                        {selectedContract?.id === doc.id ? (
+                          <>
+                            <Check className="h-4 w-4 mr-1" />
+                            Selected
+                          </>
+                        ) : (
+                          "Select"
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recipients Selection */}
+            {selectedContract && (
+              <div className="border rounded-md p-4 bg-gray-50">
+                <h4 className="font-medium mb-4">
+                  Attach Contract: {selectedContract.name}
+                </h4>
+
+                {loadingRecipients ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#5cb85c]"></div>
+                  </div>
+                ) : recipients.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="customerRecipient">
+                        Customer Recipient
+                      </Label>
+                      <Select
+                        value={selectedCustomerRecipientId}
+                        onValueChange={(value) => {
+                          setSelectedCustomerRecipientId(value);
+                        }}
+                      >
+                        <SelectTrigger className="bg-white">
+                          <SelectValue placeholder="Select customer recipient" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {recipients.map((recipient) => (
+                            <SelectItem key={recipient.id} value={recipient.id}>
+                              {recipient.name} ({recipient.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cielPowerRep">
+                        Ciel Power Representative
+                      </Label>
+                      <Select
+                        value={selectedRepresentativeRecipientId}
+                        onValueChange={(value) => {
+                          setSelectedRepresentativeRecipientId(value);
+                        }}
+                      >
+                        <SelectTrigger className="bg-white">
+                          <SelectValue placeholder="Select Ciel Power representative" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {recipients.map((recipient) => (
+                            <SelectItem key={recipient.id} value={recipient.id}>
+                              {recipient.name} ({recipient.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Button
+                      onClick={handleAttachContract}
+                      disabled={
+                        isAttachingContract ||
+                        !selectedCustomerRecipientId ||
+                        !selectedRepresentativeRecipientId
+                      }
+                      className="bg-[#5cb85c] hover:bg-[#4a9d4a] w-full"
+                    >
+                      {isAttachingContract ? (
+                        <>
+                          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
+                          Attaching...
+                        </>
+                      ) : (
+                        "Attach Contract"
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No recipients found for this contract. Please select a
+                    different contract.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsContractModalOpen(false);
+                setSelectedContract(null);
+                setSelectedCustomerRecipientId("");
+                setSelectedRepresentativeRecipientId("");
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contract Preview Modal */}
+      <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
+        <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Contract Preview</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-grow overflow-hidden relative">
+            {isIframeLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                <div className="flex flex-col items-center">
+                  <div className="h-12 w-12 rounded-full border-4 border-gray-200 border-t-[#96C93D] animate-spin"></div>
+                  <p className="mt-4 text-sm text-gray-500">
+                    Loading document...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {previewContractId && (
+              <iframe
+                src={`/api/admin/bookings/${bookingNumber}/contract/${previewContractId}/preview`}
+                className="w-full h-full border-0"
+                title="Contract Preview"
+                onLoad={() => setIsIframeLoading(false)}
+              />
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setIsPreviewModalOpen(false);
+                setPreviewContractId("");
+              }}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { IoMdClose } from "react-icons/io";
 import Image from "next/image";
+import ImageCustomer from "./ImageCustomer";
 
 interface EditableFieldProps {
   value: string;
@@ -32,7 +33,7 @@ interface WallData {
   recommendedValue: number;
   maxValue: number;
   efficiency: number;
-  images: string[];
+  images: string; // Changed from string[] to string
 }
 
 // New interface for the data coming from reportData
@@ -167,53 +168,6 @@ const EditableField: React.FC<EditableFieldProps> = ({
   );
 };
 
-// const ImageUpload: React.FC<{
-//   src: string
-//   label: string
-//   onImageChange: (newImage: string) => void
-// }> = ({ src, label, onImageChange }) => {
-//   const fileInputRef = useRef<HTMLInputElement>(null)
-//   const [isEditing, setIsEditing] = useState(false)
-
-//   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = event.target.files?.[0]
-//     if (file) {
-//       // Here you would typically upload the file to your server
-//       // For now, we'll just create a local URL
-//       const imageUrl = URL.createObjectURL(file)
-//       onImageChange(imageUrl)
-//       setIsEditing(false)
-//     }
-//   }
-
-//   return (
-//     <motion.div whileHover={{ scale: 1.05 }} className="relative aspect-square rounded-lg overflow-hidden">
-//       <img src={src || "/placeholder.svg"} alt={label} className="w-full h-full object-cover" />
-//       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-//       <div className="absolute bottom-2 left-2 text-white text-sm">{label}</div>
-//       {isEditing && (
-//         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-//           <div className="bg-white p-4 rounded">
-//             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-//             <button
-//               onClick={() => fileInputRef.current?.click()}
-//               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-//             >
-//               Choose New Image
-//             </button>
-//             <button onClick={() => setIsEditing(false)} className="ml-2 px-4 py-2 rounded border hover:bg-gray-100">
-//               Cancel
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//       <button onClick={() => setIsEditing(true)} className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg">
-//         <Edit2 className="w-4 h-4" />
-//       </button>
-//     </motion.div>
-//   )
-// }
-
 const ImageUpload = ({
   image,
   onImageChange,
@@ -224,14 +178,11 @@ const ImageUpload = ({
   driveImages?: string[];
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  // const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Here you would typically upload the file to your server
-      // For now, we'll just create a local URL
       const imageUrl = URL.createObjectURL(file);
       onImageChange(imageUrl);
       setIsModalOpen(false);
@@ -247,7 +198,7 @@ const ImageUpload = ({
   const handleSave = () => {
     if (imageSelected) {
       onImageChange(imageSelected?.id);
-      setIsModalOpen(false); // Close the modal after saving
+      setIsModalOpen(false);
     }
   };
 
@@ -260,32 +211,6 @@ const ImageUpload = ({
         width={400}
         height={256}
       />
-      {/* {isEditing && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg mt-4">
-          <div className="bg-white p-4 rounded">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              // onClick={() => fileInputRef.current?.click()}
-              onClick={() => setIsModalOpen(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Choose New Image
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )} */}
       <button
         onClick={() => setIsModalOpen(true)}
         className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
@@ -315,12 +240,6 @@ const ImageUpload = ({
                         }`}
                         onClick={() => handleImageSelect(img)}
                       />
-                      {/* <button
-                        onClick={() => onImageChange(img)}
-                        className="absolute bottom-2 right-2 bg-blue-500 text-white px-2 py-1 rounded"
-                      >
-                        Select
-                      </button> */}
                     </div>
                   ))}
                 </div>
@@ -336,17 +255,10 @@ const ImageUpload = ({
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                // onClick={() => setIsModalOpen(true)}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
                 Choose New Image
               </button>
-              {/* <button
-                onClick={() => setIsModalOpen(false)}
-                className="ml-2 px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button> */}
             </div>
             <div className="flex justify-end gap-2 mb-4">
               <button
@@ -363,11 +275,6 @@ const ImageUpload = ({
               </button>
             </div>
           </div>
-          {/* <Close
-            onClick={() => setIsModalOpen(false)}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-            size={24}
-          /> */}
           <IoMdClose
             size={24}
             className=" absolute top-3 right-3"
@@ -393,7 +300,6 @@ export function ExteriorWallAssessment({
   onUpdate,
   driveImages,
 }: ExteriorWallAssessmentProps) {
-  // Default data to use if no report data is provided
   const defaultWallData: WallData = {
     material: "None",
     condition: "N/A",
@@ -401,35 +307,26 @@ export function ExteriorWallAssessment({
     recommendedValue: 13,
     maxValue: 20,
     efficiency: 0,
-    images: [
-      "https://i.postimg.cc/tJYRBb1L/Screenshot-2024-11-25-033358.png",
-      "https://i.postimg.cc/T2D35d6D/Screenshot-2024-11-25-033443.png",
-    ],
+    images: "/placeholder.svg",
   };
 
-  // Process the provided data into the format expected by our component
   const processWallData = (): WallData => {
     if (!data) return defaultWallData;
 
-    // Create wall data from report data
     return {
       material: data.material || "None",
       condition: data.condition || "N/A",
       rValue: data.rValue || 0,
-      recommendedValue: 13, // Standard recommendation
-      maxValue: 20, // Standard max value for scale
+      recommendedValue: 13,
+      maxValue: 20,
       efficiency: data.rValue ? Math.round((data.rValue / 13) * 100) : 0,
-      images: [
-        "https://i.postimg.cc/tJYRBb1L/Screenshot-2024-11-25-033358.png",
-        "https://i.postimg.cc/T2D35d6D/Screenshot-2024-11-25-033443.png",
-      ],
+      images: "/placeholder.svg",
     };
   };
 
   const [wallData, setWallData] = useState<WallData>(processWallData());
 
   useEffect(() => {
-    // Update wall data if report data changes
     setWallData(processWallData());
   }, [data]);
 
@@ -439,46 +336,42 @@ export function ExteriorWallAssessment({
   ) => {
     setWallData((prev) => {
       const newData = { ...prev, [field]: value };
-
+  
+      let updatedField: Partial<InsulationItemData> = {};
+  
       if (field === "rValue") {
         const numericValue =
           typeof value === "number"
             ? value
             : Number.parseInt(value.toString().replace("R", ""));
+  
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
           newData.efficiency = Math.round(
-            (numericValue / prev.recommendedValue) * 100,
+            (numericValue / newData.recommendedValue) * 100,
           );
-
-          // Notify parent component if provided
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: numericValue,
-            });
-          }
+          updatedField = { rValue: numericValue };
         }
-      } else if (
-        (field === "material" || field === "condition") &&
-        onUpdate &&
-        data
-      ) {
-        // For material and condition updates, notify parent
-        onUpdate({
-          ...data,
-          [field]: value as string,
-        });
+      } else if (field === "material" || field === "condition") {
+        updatedField = { [field]: value as string };
       }
-
+  
+      if (onUpdate && Object.keys(updatedField).length > 0) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? { name: "Your Home's Exterior Wall Insulation" }),
+          ...updatedField,
+        };
+        onUpdate(updatedItem);
+      }
+  
       return newData;
     });
   };
+  
+  
 
-  const updateImage = (index: number, newImage: string) => {
-    const newImages = [...wallData.images];
-    newImages[index] = newImage;
-    updateWallData("images", newImages);
+  const updateImage = (newImage: string) => {
+    updateWallData("images", newImage);
   };
 
   return (
@@ -605,32 +498,17 @@ export function ExteriorWallAssessment({
             </div>
 
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {wallData.images.map((src, index) =>
-                  isAdmin ? (
-                    <ImageUpload
-                      key={index}
-                      src={src || "/placeholder.svg"}
-                      label={index === 0 ? "Thermal Image" : "Regular Image"}
-                      onImageChange={(newImage) => updateImage(index, newImage)}
-                    />
-                  ) : (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      className="relative aspect-square rounded-lg overflow-hidden"
-                    >
-                      <img
-                        src={src || "/placeholder.svg"}
-                        alt={`Image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-2 left-2 text-white text-sm">
-                        {index === 0 ? "Thermal Image" : "Regular Image"}
-                      </div>
-                    </motion.div>
-                  ),
+              <div className="relative aspect-square rounded-lg overflow-hidden">
+                {isAdmin ? (
+                  <ImageUpload
+                    image={wallData.images || "/placeholder.svg"}
+                    onImageChange={(newImage) => updateImage(newImage)}
+                  />
+                ) : (
+                  <ImageCustomer
+                    image={wallData.images || "/placeholder.svg"}
+                    driveImages={driveImages}
+                  />
                 )}
               </div>
 

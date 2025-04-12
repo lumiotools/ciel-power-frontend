@@ -2,22 +2,62 @@
 
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const BookingContractPage = () => {
-  const params = useParams<{ bookingNumber: string }>();
+  const params = useParams<{ bookingNumber: string; contractId: string }>();
   const bookingNumber = params.bookingNumber;
+  const contractId = params.contractId;
 
   const [signUrl, setSignUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const router = useRouter();
+
+  const handleAcceptContract = async () => {
+    let loading = toast.loading("Updating contract status...");
+    try {
+      const response = await fetch(`/api/user/bookings/${bookingNumber}/contract/${contractId}/accept`, {
+        method: "POST",
+      })
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.detail || "Failed to accept contract");
+      }
+      toast.dismiss(loading);
+      toast.success("Contract accepted successfully");
+      router.replace(`/dashboard/bookings/${bookingNumber}`);
+    } catch (error) {
+      toast.dismiss(loading);
+      toast.error((error as Error).message || "Failed to accept contract");
+    }
+  }
+
+  const sessionStatus = (event: MessageEvent<any>) => {
+    const type = event.data && event.data.type;
+    const payload = event.data && event.data.payload;
+
+    switch (type) {
+      case "session_view.document.loaded":
+        console.log("Session view is loaded");
+        break;
+      case "session_view.document.completed":
+        handleAcceptContract();
+        break;
+      case "session_view.document.exception":
+        console.log("Exception during document finalization");
+        break;
+    }
+  };
+
   useEffect(() => {
     const fetchSignUrl = async () => {
       try {
         const response = await fetch(
-          `/api/user/bookings/${bookingNumber}/contract`,
+          `/api/user/bookings/${bookingNumber}/contract/${contractId}`
         );
         const data = await response.json();
         if (!data.success) {
@@ -32,6 +72,12 @@ const BookingContractPage = () => {
     };
 
     fetchSignUrl();
+
+    window.addEventListener("message", sessionStatus);
+
+    return () => {
+      window.removeEventListener("message", sessionStatus);
+    };
   }, []);
 
   return (

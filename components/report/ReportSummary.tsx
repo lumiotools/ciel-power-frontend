@@ -73,7 +73,7 @@ interface ReportSummaryProps {
     // Updated solutionsAndRecommendations structure
     solutionsAndRecommendations?: {
       title: string;
-      data: Recommendation[];
+      recommendations: Recommendation[];
     };
     financialSummary?: FinancialData;
     federalTaxCredits?: {
@@ -99,7 +99,7 @@ interface ReportSummaryProps {
   onUpdateFinancials?: (financials: any) => void;
   onUpdateTaxCredits?: (taxCredits: any) => void;
   onUpdateEnvironmentalImpact?: (environmentalData: any) => void;
-  onSave: () => void;
+  onSave?: () => void;
 }
 
 interface InPlaceEditProps {
@@ -341,21 +341,27 @@ export function ReportSummary({
 
   // Process recommendations data - Updated for new format
   useEffect(() => {
-    if (!data?.solutionsAndRecommendations?.data) return;
+    // if (!data?.solutionsAndRecommendations?.data) return;
+
+    // console.log("Recommendations data:", data?.solutionsAndRecommendations?.recommendations);
 
     if (!data?.solutionsAndRecommendations?.recommendations) return;
 
     try {
       // Use the new data structure with title and benefits only
-      const recs = data.solutionsAndRecommendations.data.map((rec) => ({
+      const recs = data.solutionsAndRecommendations.recommendations.map((rec) => ({
         ...rec,
       }));
+
+      // console.log("Processed recommendations:", recs);
       setRecommendations(recs);
     } catch (error) {
       console.error("Error processing recommendations data:", error);
       setRecommendations([]);
     }
   }, [data?.solutionsAndRecommendations]);
+
+  console.log(recommendations);
 
   // Concern functions
   const getIconForConcern = (name?: string) => {
@@ -429,6 +435,7 @@ export function ReportSummary({
 
       // If onUpdateConcerns callback is provided, call it with the updated data
       if (onUpdateConcerns) {
+        console.log("New concerns:", newConcerns);
         // Separate concerns into health safety and combustion
         const healthSafety = newConcerns.filter(
           (item) =>
@@ -441,6 +448,9 @@ export function ReportSummary({
             item.name.toLowerCase().includes("combustion") ||
             item.name.toLowerCase().includes("gas"),
         );
+
+        console.log("Health and Safety Concerns:", healthSafety);
+        console.log("Combustion Concerns:", combustion);
 
         onUpdateConcerns({
           healthSafety,
@@ -610,7 +620,6 @@ export function ReportSummary({
       updatedReportData = JSON.parse(data);
       updatedReportData = {
         reportData: updatedReportData,
-        displayReport: true,
         reportUrl: "",
       };
 
