@@ -144,7 +144,7 @@ const ReportPage = ({
             },
             cache: "default",
             next: { revalidate: 3600 }, // Revalidate every 3600 seconds
-          },
+          }
         );
         const data = await imagesOfUser.json();
 
@@ -164,39 +164,12 @@ const ReportPage = ({
     }
   }, []);
 
-  useEffect(() => {
-    // Admin users can load from localStorage, otherwise always fetch fresh
-    if (isAdmin) {
-      const savedData = localStorage.getItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-      );
-
-      if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-          setReportData(parsedData);
-        } catch (e) {
-          console.error("Error parsing saved report data:", e);
-          // If parsing fails, fetch fresh data
-          if (bookingNumber) {
-            fetchReportDetails();
-          }
-        }
-      } else if (bookingNumber) {
-        // If no data in localStorage, fetch from API
-        fetchReportDetails();
-      }
-    } else if (bookingNumber) {
-      // Customer users always fetch fresh data
-      fetchReportDetails();
-    }
-  }, [bookingNumber, isAdmin]);
 
   const fetchReportDetails = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/report`,
+        `/api/admin/bookings/${bookingNumber}/report`
       );
 
       if (!response.ok) {
@@ -210,6 +183,14 @@ const ReportPage = ({
       if (data.success) {
         const fetchedReportData = data.data.reportData || {};
 
+        console.log("Fetched report data:", fetchedReportData);
+        if (!fetchedReportData.insulation.missingDataZones) {
+          fetchedReportData.insulation.missingDataZones = [];
+        }
+        // if(fetchedReportData?.insulation?.missingZones?.length > 0){
+        //   toast.error("Insulation data is incomplete. Please check.");
+        // }
+
         // Save to state
         setReportData(fetchedReportData);
         setReportUrl(data.data.reportUrl || "");
@@ -220,7 +201,7 @@ const ReportPage = ({
           try {
             localStorage.setItem(
               `${REPORT_DATA_KEY}_${bookingNumber}`,
-              JSON.stringify(fetchedReportData),
+              JSON.stringify(fetchedReportData)
             );
             console.log("Saved initial report data to localStorage");
           } catch (e) {
@@ -237,6 +218,49 @@ const ReportPage = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Admin users can load from localStorage, otherwise always fetch fresh
+    const IsAdmin=typeof window !== "undefined" && window.location.href.includes("admin");
+    if (IsAdmin) {
+      // console.log("isAdmin", isAdmin);
+      const savedData = localStorage.getItem(
+        `${REPORT_DATA_KEY}_${bookingNumber}`
+      );
+
+      console.log("saved data", savedData);
+
+      if (savedData) {
+        console.log("Saved report data found in localStorage:");
+        try {
+          const parsedData = JSON.parse(savedData);
+          console.log("Parsed report data:");
+          setReportData(parsedData);
+        } catch (e) {
+          console.error("Error parsing saved report data:", e);
+          // If parsing fails, fetch fresh data
+          console.log(
+            "Error parsing saved report data, fetching fresh data from API"
+          );
+          if (bookingNumber) {
+            fetchReportDetails();
+          }
+        }
+      } else if (bookingNumber) {
+        // If no data in localStorage, fetch from API
+        console.log(
+          "No saved report data found in localStorage, fetching data again"
+        );
+        fetchReportDetails();
+      }
+    } else if (bookingNumber) {
+      // Customer users always fetch fresh data
+      console.log("Customer user, fetching report details from API");
+      fetchReportDetails();
+    }
+  }, [bookingNumber]);
+
+  
 
   // Update functions for each section
   const updateAirLeakage = (newValue: string) => {
@@ -272,7 +296,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(newData),
+        JSON.stringify(newData)
       );
     } catch (e) {
       console.error("Error saving updated report data to localStorage:", e);
@@ -281,7 +305,10 @@ const ReportPage = ({
 
   const updateInsulationItem = (updatedItem: InsulationItem) => {
     console.log("hitting updateInsulation function");
-    console.log("Updated item: ", updatedItem);
+    console.log(
+      "Updating item and also trying to set in localstorage: ",
+      updatedItem
+    );
 
     if (!isAdmin || !reportData.insulation?.data) return;
 
@@ -307,7 +334,7 @@ const ReportPage = ({
       try {
         localStorage.setItem(
           `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData),
+          JSON.stringify(updatedReportData)
         );
         console.log("Saved insulation data to localStorage");
       } catch (e) {
@@ -321,7 +348,7 @@ const ReportPage = ({
     console.log(
       "hitting updateHeating function",
       reportData.heatingAndCooling?.data,
-      reportData.waterHeater?.data,
+      reportData.waterHeater?.data
     );
 
     if (!isAdmin) return;
@@ -333,7 +360,7 @@ const ReportPage = ({
       // Update in waterHeater data
       const newWaterHeaterData = [...reportData.waterHeater.data];
       const index = newWaterHeaterData.findIndex(
-        (item) => item.name === updatedItem.name,
+        (item) => item.name === updatedItem.name
       );
 
       if (index !== -1) {
@@ -354,7 +381,7 @@ const ReportPage = ({
         try {
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedReportData),
+            JSON.stringify(updatedReportData)
           );
           console.log("Saved water heater data to localStorage");
         } catch (e) {
@@ -392,7 +419,7 @@ const ReportPage = ({
       try {
         localStorage.setItem(
           `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData),
+          JSON.stringify(updatedReportData)
         );
       } catch (e) {
         console.error("Error saving cooling data to localStorage:", e);
@@ -407,7 +434,7 @@ const ReportPage = ({
 
     // Update health safety section
     const healthSafetyIndex = newSummaryData.findIndex(
-      (section) => section.name === "Basic Health and Safety",
+      (section) => section.name === "Basic Health and Safety"
     );
 
     if (healthSafetyIndex !== -1 && newConcerns.healthSafety) {
@@ -416,7 +443,7 @@ const ReportPage = ({
 
     // Update combustion section
     const combustionIndex = newSummaryData.findIndex(
-      (section) => section.name === "Combustion Testing",
+      (section) => section.name === "Combustion Testing"
     );
 
     if (combustionIndex !== -1 && newConcerns.combustion) {
@@ -439,7 +466,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
+        JSON.stringify(updatedReportData)
       );
     } catch (e) {
       console.error("Error saving concerns to localStorage:", e);
@@ -465,7 +492,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
+        JSON.stringify(updatedReportData)
       );
     } catch (e) {
       console.error("Error saving recommendations to localStorage:", e);
@@ -488,7 +515,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
+        JSON.stringify(updatedReportData)
       );
     } catch (e) {
       console.error("Error saving financials to localStorage:", e);
@@ -511,7 +538,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
+        JSON.stringify(updatedReportData)
       );
     } catch (e) {
       console.error("Error saving tax credits to localStorage:", e);
@@ -534,12 +561,12 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
+        JSON.stringify(updatedReportData)
       );
     } catch (e) {
       console.error(
         "Error saving environmental impact data to localStorage:",
-        e,
+        e
       );
     }
   };
@@ -586,7 +613,7 @@ const ReportPage = ({
         (item) =>
           item.name.toLowerCase().includes("furnace") ||
           item.name.toLowerCase().includes("boiler") ||
-          item.name.toLowerCase().includes("heat"),
+          item.name.toLowerCase().includes("heat")
       ) || [];
 
     // Get water heater items
@@ -610,7 +637,7 @@ const ReportPage = ({
         item.name.toLowerCase().includes("a/c") ||
         item.name.toLowerCase().includes("air condition") ||
         item.name.toLowerCase().includes("cooling") ||
-        item.name.toLowerCase().includes("heat pump"),
+        item.name.toLowerCase().includes("heat pump")
     );
 
     return {
@@ -823,7 +850,7 @@ const ReportPage = ({
                   onClick={() => handleChangeActiveSubMenu(tab)}
                 >
                   {["air-leakage", "insulation", "heating", "cooling"].includes(
-                    tab,
+                    tab
                   )
                     ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
                     : tab.charAt(0).toUpperCase() + tab.slice(1)}

@@ -21,6 +21,7 @@ interface InsulationDataItem {
   material: string;
   name: string;
   rValue: number;
+  image: string;
 }
 
 // Define an interface for the entire insulation data structure
@@ -251,7 +252,7 @@ export function InsulationContent({
       {/* Standard components that have specialized UI */}
       {/* {!!findBestMatchingItem(data?.data, "kneewall") && ( */}
       <KneewallAssessment
-        data={findBestMatchingItem(data?.data, "kneewall")}
+        data={findBestMatchingItem(data?.data, "kneewall") ?? []}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
         driveImages={driveImages}

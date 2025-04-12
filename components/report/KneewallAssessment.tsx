@@ -382,7 +382,7 @@ export function KneewallAssessment({
       recommendation: "R60",
       currentValue: 13,
       maxValue: 60,
-      image: "https://i.postimg.cc/vHVnqZhb/Screenshot-2024-11-25-030211.png",
+      image: "/placeholder.jpg",
     },
     {
       title: "Your Kneewall Insulation",
@@ -405,11 +405,11 @@ export function KneewallAssessment({
       title: data.name || "Your Kneewall Insulation",
       material: data.material || "Not specified",
       condition: data.condition || "Not assessed",
-      rValue: `R${data.rValue}`,
+      rValue: data.rValue ? `R${data.rValue}` : "Not assessed",
       recommendation: data.name?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
       currentValue: data.rValue,
       maxValue: data.name?.toLowerCase().includes("flat") ? 60 : 13,
-      image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png", // Default image
+      image: data?.image ?? "/placeholder.jpg", // Default image
     };
 
     // If we have data for a single kneewall, return it as a single item array
@@ -418,7 +418,7 @@ export function KneewallAssessment({
   };
 
   const [kneewallData, setKneewallData] = useState<KneewallData[]>(
-    processedKneewallData(),
+    processedKneewallData()
   );
   const [animateCharts, setAnimateCharts] = useState<boolean[]>([]);
 
@@ -450,7 +450,7 @@ export function KneewallAssessment({
               }
             });
           },
-          { threshold: 0.5 },
+          { threshold: 0.5 }
         );
 
         observer.observe(chartElement);
@@ -466,7 +466,7 @@ export function KneewallAssessment({
   const updateKneewallData = (
     index: number,
     field: keyof KneewallData,
-    value: string,
+    value: string
   ) => {
     console.log("Updating kneewall data:", index, field, value);
     console.log("Current kneewall data and function:", data, onUpdate);
@@ -476,41 +476,74 @@ export function KneewallAssessment({
 
       // Update currentValue if rValue changes
       if (field === "rValue") {
+        console.log("Inside rvalue");
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
 
+          console.log("data isnde rvalue", data);
           // Send update to parent if available
           if (onUpdate && data) {
             const updatedItem: InsulationItemData = {
               ...data,
               rValue: numericValue,
             };
+            console.log("updating ondate funcgtion");
             onUpdate(updatedItem);
+          } else {
+            const updatedItem = {
+              ...defaultKneewallData[0],
+              rValue: numericValue,
+            };
+            onUpdate?.(updatedItem);
           }
         }
       } else if (field === "material" && onUpdate) {
         // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          material: value,
-        };
+        let updatedItem: InsulationItemData;
+        if (data) {
+          updatedItem = {
+            ...(data || []),
+            material: value,
+          };
+        } else {
+          updatedItem = {
+            ...defaultKneewallData[0],
+            material: value,
+          };
+        }
         onUpdate(updatedItem);
       } else if (field === "condition" && onUpdate) {
         // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          condition: value,
-        };
+        let updatedItem: InsulationItemData;
+        if (data) {
+          updatedItem = {
+            ...(data || []),
+            condition: value,
+          };
+        } else {
+          updatedItem = {
+            ...defaultKneewallData[0],
+            condition: value,
+          };
+        }
         onUpdate(updatedItem);
       } else if (field === "image" && onUpdate) {
         //removed data , because when data is not available we will create a new
         // Send update to parent if available
-        const updatedItem: InsulationItemData = {
-          ...data,
-          image: value,
-        };
-        console.log("Updated image:started");
+        let updatedItem: InsulationItemData;
+        if (data) {
+          updatedItem = {
+            ...(data || []),
+            image: value,
+          };
+        } else {
+          updatedItem = {
+            ...defaultKneewallData[0],
+            image: value,
+          };
+        }
+
         onUpdate(updatedItem);
         console.log("Updated image:done sucessfully");
       }
@@ -571,7 +604,7 @@ export function KneewallAssessment({
                           <dd className="font-medium text-gray-900 dark:text-gray-100">
                             {isAdmin ? (
                               <EditableField
-                                value={data.material}
+                                value={data.material ?? "null"}
                                 onSave={(value) =>
                                   updateKneewallData(index, "material", value)
                                 }
