@@ -349,9 +349,11 @@ export function ReportSummary({
 
     try {
       // Use the new data structure with title and benefits only
-      const recs = data.solutionsAndRecommendations.recommendations.map((rec) => ({
-        ...rec,
-      }));
+      const recs = data.solutionsAndRecommendations.recommendations.map(
+        (rec) => ({
+          ...rec,
+        }),
+      );
 
       // console.log("Processed recommendations:", recs);
       setRecommendations(recs);

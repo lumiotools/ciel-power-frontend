@@ -290,9 +290,9 @@ export function RimJoistAssessment({
   ) => {
     setRimJoistData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       let updatedField: Partial<InsulationItemData> = {};
-  
+
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
@@ -321,7 +321,7 @@ export function RimJoistAssessment({
       } else if (field === "image") {
         updatedField.image = value as string;
       }
-  
+
       // Fire update only when something changed
       if (onUpdate && Object.keys(updatedField).length > 0) {
         const updatedItem: InsulationItemData = {
@@ -336,11 +336,10 @@ export function RimJoistAssessment({
         };
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   // Get the appropriate description based on the R-value
   const getConditionDescription = () => {

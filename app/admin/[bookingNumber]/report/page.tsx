@@ -146,7 +146,7 @@ const ReportPage = ({
             },
             cache: "default",
             next: { revalidate: 3600 }, // Revalidate every 3600 seconds
-          }
+          },
         );
         const data = await imagesOfUser.json();
 
@@ -166,12 +166,11 @@ const ReportPage = ({
     }
   }, []);
 
-
   const fetchReportDetails = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/report`
+        `/api/admin/bookings/${bookingNumber}/report`,
       );
 
       if (!response.ok) {
@@ -185,7 +184,6 @@ const ReportPage = ({
       if (data.success) {
         const fetchedReportData = data.data.reportData || DefaultReportData;
 
-       
         if (!fetchedReportData.insulation.missingDataZones) {
           fetchedReportData.insulation.missingDataZones = [];
         }
@@ -195,15 +193,16 @@ const ReportPage = ({
         setReportUrl(data.data.reportUrl || "");
         setReportStatus(data.data.displayReport || "NONE");
 
-        const IsAdmin=typeof window !== "undefined" && window.location.href.includes("admin");
+        const IsAdmin =
+          typeof window !== "undefined" &&
+          window.location.href.includes("admin");
         // Save to localStorage only for admin users
         if (IsAdmin) {
           try {
             localStorage.setItem(
               `${REPORT_DATA_KEY}_${bookingNumber}`,
-              JSON.stringify(fetchedReportData)
+              JSON.stringify(fetchedReportData),
             );
-        
           } catch (e) {
             console.error("Error saving report data to localStorage:", e);
           }
@@ -221,46 +220,40 @@ const ReportPage = ({
 
   useEffect(() => {
     // Admin users can load from localStorage, otherwise always fetch fresh
-    const IsAdmin=typeof window !== "undefined" && window.location.href.includes("admin");
+    const IsAdmin =
+      typeof window !== "undefined" && window.location.href.includes("admin");
     if (IsAdmin) {
-    
       const savedData = localStorage.getItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`
+        `${REPORT_DATA_KEY}_${bookingNumber}`,
       );
 
-     
-
       if (savedData) {
-        
         try {
           const parsedData = JSON.parse(savedData);
-        
+
           setReportData(parsedData);
         } catch (e) {
           console.error("Error parsing saved report data:", e);
           // If parsing fails, fetch fresh data
-          
+
           if (bookingNumber) {
             fetchReportDetails();
           }
         }
       } else if (bookingNumber) {
         // If no data in localStorage, fetch from API
-      
+
         fetchReportDetails();
       }
     } else if (bookingNumber) {
       // Customer users always fetch fresh data
-     
+
       fetchReportDetails();
     }
   }, [bookingNumber]);
 
-  
-
   // Update functions for each section
   const updateAirLeakage = (newValue: string) => {
- 
     if (!isAdmin) return; // Only admin can update
 
     // Handle the case where airLeakage might not exist or might be incomplete
@@ -291,7 +284,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(newData)
+        JSON.stringify(newData),
       );
     } catch (e) {
       console.error("Error saving updated report data to localStorage:", e);
@@ -299,12 +292,9 @@ const ReportPage = ({
   };
 
   const updateInsulationItem = (updatedItem: InsulationItem) => {
-  
-
     if (!isAdmin) return;
 
     if (!reportData.insulation?.data) {
-    
       setReportData({
         ...reportData,
         insulation: {
@@ -337,9 +327,8 @@ const ReportPage = ({
       try {
         localStorage.setItem(
           `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData)
+          JSON.stringify(updatedReportData),
         );
-       
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -350,7 +339,7 @@ const ReportPage = ({
           ...reportData.insulation,
           data: [...newData, updatedItem],
         },
-      }
+      };
 
       setReportData(updatedReportData);
       setIsChangesSaved(false);
@@ -361,7 +350,6 @@ const ReportPage = ({
           `${REPORT_DATA_KEY}_${bookingNumber}`,
           JSON.stringify(updatedReportData),
         );
-        
       } catch (e) {
         console.error("Error saving insulation data to localStorage:", e);
       }
@@ -370,10 +358,8 @@ const ReportPage = ({
 
   // Replace the existing updateHeatingItem function with this one
   const updateHeatingItem = (updatedItem: HeatingCoolingItem) => {
-    
-
     if (!isAdmin) return;
-   
+
     // Check if it's a water heater item
     const isWaterHeaterItem = updatedItem.name.toLowerCase().includes("water");
 
@@ -381,7 +367,7 @@ const ReportPage = ({
       // Update in waterHeater data
       const newWaterHeaterData = [...reportData.waterHeater.data];
       const index = newWaterHeaterData.findIndex(
-        (item) => item.name === updatedItem.name
+        (item) => item.name === updatedItem.name,
       );
 
       if (index !== -1) {
@@ -402,9 +388,8 @@ const ReportPage = ({
         try {
           localStorage.setItem(
             `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedReportData)
+            JSON.stringify(updatedReportData),
           );
-        
         } catch (e) {
           console.error("Error saving water heater data to localStorage:", e);
         }
@@ -413,7 +398,7 @@ const ReportPage = ({
       // Update in heatingAndCooling data (unchanged from before)
       // ...existing code here...
       const newHeatingData = [...reportData.heatingAndCooling.data];
-      
+
       const index = newHeatingData.findIndex(
         (item) => item.name === updatedItem.name,
       );
@@ -437,7 +422,6 @@ const ReportPage = ({
             `${REPORT_DATA_KEY}_${bookingNumber}`,
             JSON.stringify(updatedReportData),
           );
-        
         } catch (e) {
           console.error("Error saving heating data to localStorage:", e);
         }
@@ -470,7 +454,7 @@ const ReportPage = ({
       try {
         localStorage.setItem(
           `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData)
+          JSON.stringify(updatedReportData),
         );
       } catch (e) {
         console.error("Error saving cooling data to localStorage:", e);
@@ -482,7 +466,6 @@ const ReportPage = ({
     if (!isAdmin) return;
 
     if (!reportData.summaryOfConcerns?.data) {
-   
       setReportData({
         ...reportData,
         summaryOfConcerns: {
@@ -501,11 +484,9 @@ const ReportPage = ({
 
     const newSummaryData = [...reportData.summaryOfConcerns.data];
 
-    
-
     // Update health safety section
     const healthSafetyIndex = newSummaryData.findIndex(
-      (section) => section.name === "Basic Health and Safety"
+      (section) => section.name === "Basic Health and Safety",
     );
 
     if (healthSafetyIndex !== -1 && newConcerns.healthSafety) {
@@ -514,7 +495,7 @@ const ReportPage = ({
 
     // Update combustion section
     const combustionIndex = newSummaryData.findIndex(
-      (section) => section.name === "Combustion Testing"
+      (section) => section.name === "Combustion Testing",
     );
 
     if (combustionIndex !== -1 && newConcerns.combustion) {
@@ -537,7 +518,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
       console.error("Error saving concerns to localStorage:", e);
@@ -563,7 +544,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
       console.error("Error saving recommendations to localStorage:", e);
@@ -586,7 +567,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
       console.error("Error saving financials to localStorage:", e);
@@ -609,7 +590,7 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
       console.error("Error saving tax credits to localStorage:", e);
@@ -632,12 +613,12 @@ const ReportPage = ({
     try {
       localStorage.setItem(
         `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData)
+        JSON.stringify(updatedReportData),
       );
     } catch (e) {
       console.error(
         "Error saving environmental impact data to localStorage:",
-        e
+        e,
       );
     }
   };
@@ -684,13 +665,11 @@ const ReportPage = ({
         (item) =>
           item.name.toLowerCase().includes("furnace") ||
           item.name.toLowerCase().includes("boiler") ||
-          item.name.toLowerCase().includes("heat")
+          item.name.toLowerCase().includes("heat"),
       ) || [];
 
     // Get water heater items
     const waterHeaterItems = reportData.waterHeater?.data || [];
-
-
 
     return {
       data: [...heatingItems, ...waterHeaterItems],
@@ -707,7 +686,7 @@ const ReportPage = ({
         item.name.toLowerCase().includes("a/c") ||
         item.name.toLowerCase().includes("air condition") ||
         item.name.toLowerCase().includes("cooling") ||
-        item.name.toLowerCase().includes("heat pump")
+        item.name.toLowerCase().includes("heat pump"),
     );
 
     return {
@@ -920,7 +899,7 @@ const ReportPage = ({
                   onClick={() => handleChangeActiveSubMenu(tab)}
                 >
                   {["air-leakage", "insulation", "heating", "cooling"].includes(
-                    tab
+                    tab,
                   )
                     ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
                     : tab.charAt(0).toUpperCase() + tab.slice(1)}

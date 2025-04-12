@@ -828,21 +828,21 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                   </div>
                 ) : (
                   // systemData.image && (
-                    <motion.div
-                      className="relative h-48 overflow-hidden rounded-lg mt-4"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <ImageCustomer
-                        image={systemData.image}
-                        driveImages={driveImages}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                        <p className="text-white text-sm">
-                          {item.name} - {systemData.type || "standard"} unit
-                        </p>
-                      </div>
-                    </motion.div>
-                    
+                  <motion.div
+                    className="relative h-48 overflow-hidden rounded-lg mt-4"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <ImageCustomer
+                      image={systemData.image}
+                      driveImages={driveImages}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                      <p className="text-white text-sm">
+                        {item.name} - {systemData.type || "standard"} unit
+                      </p>
+                    </div>
+                  </motion.div>
+
                   // )
                 )}
               </div>
@@ -889,7 +889,7 @@ export function HeatingContent({
       type: "None",
       value: 0,
       year: new Date().getFullYear(),
-    }
+    },
   ];
 
   // Use provided data or default items
@@ -902,12 +902,14 @@ export function HeatingContent({
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
     if (isAdmin && onUpdateItem) {
       console.log("Updating item in HeatingContent:", updatedItem);
-      
+
       // If we're using default data, we need to create a new heating data structure
       if (!data?.data?.length) {
         // Find which default item is being updated
-        const index = defaultHeatingItems.findIndex(item => item.name === updatedItem.name);
-        
+        const index = defaultHeatingItems.findIndex(
+          (item) => item.name === updatedItem.name,
+        );
+
         // Create a new array with the updated item
         const newHeatingItems = [...defaultHeatingItems];
         if (index !== -1) {
@@ -916,59 +918,66 @@ export function HeatingContent({
           // If somehow the item doesn't match any default items, just add it
           newHeatingItems.push(updatedItem);
         }
-        
+
         // Create the data structure that matches the expected format
         const newHeatingData = {
           data: newHeatingItems,
-          title: "Heating & Water Heating Systems"
+          title: "Heating & Water Heating Systems",
         };
-        
+
         // Try to get existing report data from localStorage
         const REPORT_DATA_KEY = "report_data";
         try {
-          const savedDataString = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+          const savedDataString = localStorage.getItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+          );
           let savedData = savedDataString ? JSON.parse(savedDataString) : {};
-          
+
           // Update with our new heating data
           // Check if it's a water heater item
-          const isWaterHeater = updatedItem.name.toLowerCase().includes("water");
-          
+          const isWaterHeater = updatedItem.name
+            .toLowerCase()
+            .includes("water");
+
           if (isWaterHeater) {
             // Create or update waterHeater section
             savedData = {
               ...savedData,
               waterHeater: {
                 data: [updatedItem],
-                title: "Water Heating Systems"
-              }
+                title: "Water Heating Systems",
+              },
             };
           } else {
             // Update or create heatingAndCooling section
             // Preserve any existing cooling items
-            const existingCoolingItems = savedData.heatingAndCooling?.data?.filter(
-              (item) => 
-                item.name.toLowerCase().includes("a/c") ||
-                item.name.toLowerCase().includes("air condition") ||
-                item.name.toLowerCase().includes("cooling") ||
-                item.name.toLowerCase().includes("heat pump")
-            ) || [];
-            
+            const existingCoolingItems =
+              savedData.heatingAndCooling?.data?.filter(
+                (item) =>
+                  item.name.toLowerCase().includes("a/c") ||
+                  item.name.toLowerCase().includes("air condition") ||
+                  item.name.toLowerCase().includes("cooling") ||
+                  item.name.toLowerCase().includes("heat pump"),
+              ) || [];
+
             savedData = {
               ...savedData,
               heatingAndCooling: {
                 ...savedData.heatingAndCooling,
                 data: [...existingCoolingItems, updatedItem],
-                title: "Heating and Cooling Systems"
-              }
+                title: "Heating and Cooling Systems",
+              },
             };
           }
-          
+
           // Save back to localStorage
-          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(savedData));
-          
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(savedData),
+          );
+
           // Since we've directly updated localStorage, inform the parent component
           onUpdateItem(updatedItem);
-          
         } catch (e) {
           console.error("Error handling localStorage updates:", e);
           toast.error("Failed to update heating data in local storage");

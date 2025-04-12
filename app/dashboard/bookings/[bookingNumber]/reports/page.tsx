@@ -147,31 +147,31 @@ const ReportPage = ({
   };
 
   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          //  = await fetchImages({ userid: bookingNumber });
-  
-          const imagesOfUser = await fetch(
-            `/api/user/bookings/${bookingNumber}/pictures`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              cache: "default",
-              next: { revalidate: 3600 }, // Revalidate every 3600 seconds
+    const fetchData = async () => {
+      try {
+        //  = await fetchImages({ userid: bookingNumber });
+
+        const imagesOfUser = await fetch(
+          `/api/user/bookings/${bookingNumber}/pictures`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
             },
-          );
-          const data = await imagesOfUser.json();
-  
-          SetImageOfUser(data?.data?.pictures);
-        } catch (error) {
-          console.log("Error fetching images:", error);
-          toast.error("Failed to fetch images");
-        }
-      };
-      fetchData();
-    }, [bookingNumber]);
+            cache: "default",
+            next: { revalidate: 3600 }, // Revalidate every 3600 seconds
+          },
+        );
+        const data = await imagesOfUser.json();
+
+        SetImageOfUser(data?.data?.pictures);
+      } catch (error) {
+        console.log("Error fetching images:", error);
+        toast.error("Failed to fetch images");
+      }
+    };
+    fetchData();
+  }, [bookingNumber]);
 
   // console.log(reportData);
 
@@ -259,11 +259,20 @@ const ReportPage = ({
       case "air-leakage":
         return <AirLeakageContent data={reportData.airLeakage} />;
       case "insulation":
-        return <InsulationContent data={reportData.insulation} driveImages={imgOfUser} />;
+        return (
+          <InsulationContent
+            data={reportData.insulation}
+            driveImages={imgOfUser}
+          />
+        );
       case "heating":
-        return <HeatingContent data={getHeatingData()} driveImages={imgOfUser} />;
+        return (
+          <HeatingContent data={getHeatingData()} driveImages={imgOfUser} />
+        );
       case "cooling":
-        return <CoolingContent data={getCoolingData()} driveImages={imgOfUser} />;
+        return (
+          <CoolingContent data={getCoolingData()} driveImages={imgOfUser} />
+        );
       case "summary":
         return <ReportSummary data={reportData} />;
       case "future solutions and certifications":

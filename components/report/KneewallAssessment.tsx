@@ -377,7 +377,7 @@ export function KneewallAssessment({
   const defaultKneewallData: KneewallData[] = [
     {
       title: "Your Home's Kneewall Flat Insulation",
-      material: 'None',
+      material: "None",
       condition: "N/A",
       rValue: "R0",
       recommendation: "R60",
@@ -387,7 +387,7 @@ export function KneewallAssessment({
     },
     {
       title: "Your Kneewall Insulation",
-      material: 'None',
+      material: "None",
       condition: "N/A",
       rValue: "R0",
       recommendation: "R13",
@@ -419,7 +419,7 @@ export function KneewallAssessment({
   };
 
   const [kneewallData, setKneewallData] = useState<KneewallData[]>(
-    processedKneewallData()
+    processedKneewallData(),
   );
   const [animateCharts, setAnimateCharts] = useState<boolean[]>([]);
 
@@ -451,7 +451,7 @@ export function KneewallAssessment({
               }
             });
           },
-          { threshold: 0.5 }
+          { threshold: 0.5 },
         );
 
         observer.observe(chartElement);
@@ -467,17 +467,17 @@ export function KneewallAssessment({
   const updateKneewallData = (
     index: number,
     field: keyof KneewallData,
-    value: string
+    value: string,
   ) => {
     console.log("Updating kneewall data:", index, field, value);
     console.log("Current kneewall data and function:", data, onUpdate);
-  
+
     setKneewallData((prev) => {
       const newData = [...prev];
       newData[index] = { ...newData[index], [field]: value };
 
       console.log("New kneewall data:", newData);
-  
+
       // Update currentValue if rValue changes
       if (field === "rValue") {
         console.log("Inside rvalue");
@@ -486,7 +486,7 @@ export function KneewallAssessment({
           newData[index].currentValue = numericValue;
         }
       }
-  
+
       // Trigger update to parent
       if (onUpdate) {
         const updatedItem: InsulationItemData = {
@@ -497,18 +497,17 @@ export function KneewallAssessment({
           rValue:
             field === "rValue"
               ? parseInt(value.replace("R", ""))
-              : newData[index].currentValue ?? 0,
+              : (newData[index].currentValue ?? 0),
           image: field === "image" ? value : newData[index].image,
         };
-  
+
         console.log("Sending update to parent:", updatedItem);
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   return (
     <div className="space-y-8">

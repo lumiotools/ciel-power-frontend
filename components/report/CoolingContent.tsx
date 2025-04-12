@@ -764,19 +764,20 @@ export function CoolingContent({
       type: "None",
       value: 0,
       year: new Date().getFullYear(),
-    }
+    },
   ];
 
   // Filter cooling-related items or use defaults if none exist
-  const coolingItems = data?.data?.length > 0 
-    ? data.data.filter(
-        (item) =>
-          item.name.toLowerCase().includes("a/c") ||
-          item.name.toLowerCase().includes("air condition") ||
-          item.name.toLowerCase().includes("cooling") ||
-          item.name.toLowerCase().includes("heat pump"),
-      ) 
-    : defaultCoolingItems;
+  const coolingItems =
+    data?.data?.length > 0
+      ? data.data.filter(
+          (item) =>
+            item.name.toLowerCase().includes("a/c") ||
+            item.name.toLowerCase().includes("air condition") ||
+            item.name.toLowerCase().includes("cooling") ||
+            item.name.toLowerCase().includes("heat pump"),
+        )
+      : defaultCoolingItems;
 
   // Handle updating cooling items
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
@@ -787,34 +788,39 @@ export function CoolingContent({
         const REPORT_DATA_KEY = "report_data";
         try {
           // Get existing data from localStorage
-          const savedDataString = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
+          const savedDataString = localStorage.getItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+          );
           let savedData = savedDataString ? JSON.parse(savedDataString) : {};
-          
+
           // Get any existing heating items to preserve them
-          const existingHeatingItems = savedData.heatingAndCooling?.data?.filter(
-            (item) =>
-              item.name.toLowerCase().includes("furnace") ||
-              item.name.toLowerCase().includes("boiler") ||
-              item.name.toLowerCase().includes("heat") && 
-              !item.name.toLowerCase().includes("heat pump")
-          ) || [];
-          
+          const existingHeatingItems =
+            savedData.heatingAndCooling?.data?.filter(
+              (item) =>
+                item.name.toLowerCase().includes("furnace") ||
+                item.name.toLowerCase().includes("boiler") ||
+                (item.name.toLowerCase().includes("heat") &&
+                  !item.name.toLowerCase().includes("heat pump")),
+            ) || [];
+
           // Create or update heatingAndCooling section
           savedData = {
             ...savedData,
             heatingAndCooling: {
               ...savedData.heatingAndCooling,
               data: [...existingHeatingItems, updatedItem],
-              title: "Heating and Cooling Systems"
-            }
+              title: "Heating and Cooling Systems",
+            },
           };
-          
+
           // Save back to localStorage
-          localStorage.setItem(`${REPORT_DATA_KEY}_${bookingNumber}`, JSON.stringify(savedData));
-          
+          localStorage.setItem(
+            `${REPORT_DATA_KEY}_${bookingNumber}`,
+            JSON.stringify(savedData),
+          );
+
           // Call parent's update function
           onUpdateItem(updatedItem);
-          
         } catch (e) {
           console.error("Error handling localStorage updates:", e);
           toast.error("Failed to update cooling data in local storage");
@@ -890,7 +896,7 @@ export function CoolingContent({
           </button>
         </div>
       )}
-      
+
       <motion.div {...fadeInUp}>
         <Card className="border-amber-100">
           <CardHeader className="bg-amber-50 dark:bg-amber-900/20">

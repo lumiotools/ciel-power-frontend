@@ -1,37 +1,48 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { FileText, ExternalLink, File, PenLine } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import Link from "next/link"
-import React from "react"
+import { useState } from "react";
+import { FileText, ExternalLink, File, PenLine } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import Link from "next/link";
+import React from "react";
 
 interface ContractData {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface ContractDisplayProps {
-  bookingNumber: string
-  offeredContracts: ContractData[]
+  bookingNumber: string;
+  offeredContracts: ContractData[];
 }
 
-const ContractDisplay = ({ bookingNumber, offeredContracts }: ContractDisplayProps) => {
-  const [selectedContract, setSelectedContract] = useState<ContractData | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isIframeLoading, setIsIframeLoading] = useState(true)
+const ContractDisplay = ({
+  bookingNumber,
+  offeredContracts,
+}: ContractDisplayProps) => {
+  const [selectedContract, setSelectedContract] = useState<ContractData | null>(
+    null,
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isIframeLoading, setIsIframeLoading] = useState(true);
 
   // Reset loading state when modal opens
   React.useEffect(() => {
     if (isModalOpen) {
-      setIsIframeLoading(true)
+      setIsIframeLoading(true);
     }
-  }, [isModalOpen])
+  }, [isModalOpen]);
 
   const handleViewContract = (contract: ContractData) => {
-    setSelectedContract(contract)
-    setIsModalOpen(true)
-  }
+    setSelectedContract(contract);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="mt-6">
@@ -46,8 +57,12 @@ const ContractDisplay = ({ bookingNumber, offeredContracts }: ContractDisplayPro
               <FileText className="h-8 w-8 text-gray-700" />
             </div>
             <div className="flex-grow min-w-0">
-              <h5 className="font-medium text-gray-900 truncate mb-1">{contract.name}</h5>
-              <p className="text-xs text-gray-500">Contract ID: {contract.id.substring(0, 8)}...</p>
+              <h5 className="font-medium text-gray-900 truncate mb-1">
+                {contract.name}
+              </h5>
+              <p className="text-xs text-gray-500">
+                Contract ID: {contract.id.substring(0, 8)}...
+              </p>
             </div>
             <button
               onClick={() => handleViewContract(contract)}
@@ -63,14 +78,18 @@ const ContractDisplay = ({ bookingNumber, offeredContracts }: ContractDisplayPro
       {offeredContracts.length === 0 && (
         <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
           <File className="h-12 w-12 text-gray-400 mb-3" />
-          <p className="text-gray-500 text-center">No contracts available for this booking</p>
+          <p className="text-gray-500 text-center">
+            No contracts available for this booking
+          </p>
         </div>
       )}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-4xl w-full h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">{selectedContract?.name}</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              {selectedContract?.name}
+            </DialogTitle>
           </DialogHeader>
 
           <div className="flex-1 bg-gray-50 rounded-md overflow-hidden relative">
@@ -78,7 +97,9 @@ const ContractDisplay = ({ bookingNumber, offeredContracts }: ContractDisplayPro
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                 <div className="flex flex-col items-center">
                   <div className="h-12 w-12 rounded-full border-4 border-gray-200 border-t-[#96C93D] animate-spin"></div>
-                  <p className="mt-4 text-sm text-gray-500">Loading document...</p>
+                  <p className="mt-4 text-sm text-gray-500">
+                    Loading document...
+                  </p>
                 </div>
               </div>
             )}
@@ -93,7 +114,9 @@ const ContractDisplay = ({ bookingNumber, offeredContracts }: ContractDisplayPro
           </div>
 
           <DialogFooter className="mt-4 flex justify-between items-center">
-            <p className="text-sm text-gray-500">Please review the contract carefully before signing</p>
+            <p className="text-sm text-gray-500">
+              Please review the contract carefully before signing
+            </p>
             {selectedContract && (
               <Link
                 href={`/dashboard/bookings/${bookingNumber}/contract/${selectedContract.id}`}
@@ -107,7 +130,7 @@ const ContractDisplay = ({ bookingNumber, offeredContracts }: ContractDisplayPro
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default ContractDisplay
+export default ContractDisplay;

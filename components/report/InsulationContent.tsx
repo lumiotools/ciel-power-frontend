@@ -191,7 +191,6 @@ export function InsulationContent({
       // updatedReportData=data;
       updatedReportData = JSON.parse(data, null, 2);
       updatedReportData = {
-        displayReport:false,
         reportData: updatedReportData,
         reportUrl: "",
       };
@@ -231,14 +230,16 @@ export function InsulationContent({
 
   return (
     <div className="space-y-8 pb-20">
-      {isAdmin && (<div className="flex justify-end items-center">
-        <button
-          onClick={onSumit}
-          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
-        >
-          Save
-        </button>
-      </div>)}
+      {isAdmin && (
+        <div className="flex justify-end items-center">
+          <button
+            onClick={onSumit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
+          >
+            Save
+          </button>
+        </div>
+      )}
 
       <InsulationOverview />
 

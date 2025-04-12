@@ -136,7 +136,7 @@ const BookingDetailsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [youtubeSuggestions, setYoutubeSuggestions] = useState<YouTubeVideo[]>(
-    []
+    [],
   );
   const [followUpScheduleDetails, setFollowUpScheduleDetails] =
     useState<FollowUpDetals | null>(null);
@@ -229,9 +229,7 @@ const BookingDetailsPage = () => {
           setNewFollowUpScheduleLink(data.data.newFollowUpScheduleUrl || null);
           setReportUrl(data.data.reportUrl || null);
           setOfferedContracts(data.data.offeredContracts || []);
-          setCompletedContractFileUrl(
-            data.data.completedContractLink || null
-          );
+          setCompletedContractFileUrl(data.data.completedContractLink || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
