@@ -568,13 +568,14 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   recommendedValue = 92,
   onUpdateItem,
   driveImages,
+  allData,
 }) => {
   const [systemData, setSystemData] = useState({
-    type: item.type || "null",
-    condition: item.condition || "null",
-    value: typeof item.value === "number" ? item.value : 0,
-    parameterName: item.parameter || "null",
-    year: item.year,
+    type: item?.type ?? "null",
+    condition: item?.condition ?? "null",
+    value: typeof item?.value === "number" ? item.value : 0,
+    parameterName: item?.parameter ?? "null",
+    year: item?.year,
     image: item?.image,
   });
 
@@ -627,12 +628,15 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
 
   // Update local state and propagate changes to parent component
   const updateSystemData = (field: keyof typeof systemData, value: any) => {
+    console.log("System Data", systemData);
     const updatedData = {
       ...systemData,
       [field]: value,
     };
 
     setSystemData(updatedData);
+
+    console.log("Item: ", item);
 
     // Only call onUpdateItem if it exists
     if (onUpdateItem) {
@@ -666,26 +670,24 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   };
 
   // Determine if this is a water heater based on name
-  const isWaterHeater = item.name.toLowerCase().includes("water");
+  const isWaterHeater = item?.name?.toLowerCase()?.includes("water");
 
   // Get description text based on item type
   const getDescriptionText = () => {
     if (isWaterHeater) {
       return shouldShowGaugeChart()
-        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
-            systemData.value < recommendedValue
-              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-              : `This is an efficient unit that meets or exceeds recommended standards.`
-          }`
-        : `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
+        ? `This ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${systemData.value < recommendedValue
+          ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+          : `This is an efficient unit that meets or exceeds recommended standards.`
+        }`
+        : `This ${item?.name?.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     } else {
       return shouldShowGaugeChart()
-        ? `This ${item.name.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
-            systemData.value < recommendedValue
-              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-              : `This is an efficient unit that meets or exceeds recommended standards.`
-          }`
-        : `This ${item.name.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
+        ? `This ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${systemData.value < recommendedValue
+          ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+          : `This is an efficient unit that meets or exceeds recommended standards.`
+        }`
+        : `This ${item?.name?.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     }
   };
 
@@ -906,49 +908,46 @@ export function HeatingContent({
   };
 
   // State for each card separately
-  const [heatingSystemItem, setHeatingSystemItem] = useState(
-    DEFAULT_HEATING_ITEMS.heatingSystem,
-  );
-  const [waterHeaterItem, setWaterHeaterItem] = useState(
-    DEFAULT_HEATING_ITEMS.waterHeater,
-  );
+  const [heatingSystemItem, setHeatingSystemItem] = useState([]);
+  const [waterHeaterItem, setWaterHeaterItem] = useState([]);
+  useEffect(() => {
+    console.log("Heating system item:", heatingSystemItem);
+  }, [heatingSystemItem]);
 
   // Initialize state from provided data
   useEffect(() => {
     if (data?.data && data.data.length > 0) {
       // Look for heating system and water heater in provided data
-      const heatingItem = data.data.find(
-        (item) => !item.name.toLowerCase().includes("water"),
+      console.log("Data received:", data.data);
+      const heatingItem = data.data.filter(
+        (item) => !item?.name?.toLowerCase()?.includes("water"),
       );
+
+      console.log("heating item", heatingItem)
 
       const waterItem = data.data.find((item) =>
         item.name.toLowerCase().includes("water"),
       );
 
+
       // Update state if items are found
       if (heatingItem) {
+        console.log("heating item", heatingItem)
         setHeatingSystemItem(heatingItem);
       }
 
       if (waterItem) {
         setWaterHeaterItem(waterItem);
       }
+    } else {
+      setHeatingSystemItem([DEFAULT_HEATING_ITEMS.heatingSystem]);
+      setWaterHeaterItem(DEFAULT_HEATING_ITEMS.waterHeater);
     }
   }, [data]);
 
   // Handle update for either card
   const handleUpdateItem = (updatedItem: HeatingCoolingItem) => {
     if (!isAdmin || !onUpdateItem) return;
-
-    // Check which item is being updated
-    const isWaterHeater = updatedItem.name.toLowerCase().includes("water");
-
-    // Update the appropriate local state
-    if (isWaterHeater) {
-      setWaterHeaterItem(updatedItem);
-    } else {
-      setHeatingSystemItem(updatedItem);
-    }
 
     // Pass update to parent
     onUpdateItem(updatedItem);
@@ -1003,6 +1002,8 @@ export function HeatingContent({
     }
   };
 
+  console.log("heating system item", heatingSystemItem);
+
   return (
     <div className="space-y-8">
       {isAdmin && (
@@ -1045,15 +1046,34 @@ export function HeatingContent({
       </motion.div>
 
       {/* Primary Heating System Card - always displayed */}
-      <HeatingSystemCard
-        key="primary-heating-system"
-        item={heatingSystemItem}
-        index={0}
-        isAdmin={isAdmin}
-        recommendedValue={92}
-        onUpdateItem={handleUpdateItem}
-        driveImages={driveImages}
-      />
+      {heatingSystemItem.length > 0 ? heatingSystemItem.map((item, i) => {
+        return (
+          <HeatingSystemCard
+            key={`heating-system-${i}`}
+            item={item}
+            index={0}
+            isAdmin={isAdmin}
+            recommendedValue={92}
+            onUpdateItem={handleUpdateItem}
+            driveImages={driveImages}
+            allData={heatingSystemItem}
+          />
+        );
+      })
+        :
+        <HeatingSystemCard
+          key="heating-system-default"
+          item={DEFAULT_HEATING_ITEMS.heatingSystem}
+          index={0}
+          isAdmin={isAdmin}
+          recommendedValue={92}
+          onUpdateItem={handleUpdateItem}
+          driveImages={driveImages}
+          allData={heatingSystemItem}
+        />
+      }
+
+      {/* Water Heater Card - only displayed if water heater item is found */}
 
       {/* Water Heater Card - always displayed */}
       <HeatingSystemCard

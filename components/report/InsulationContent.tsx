@@ -272,6 +272,7 @@ export function InsulationContent({
         data={findBestMatchingItem(data?.data, "crawlspace")}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
+        driveImages={driveImages}
       />
       {/* )} */}
       {/* {!!findBestMatchingItem(data?.data, "rim joist") && ( */}
