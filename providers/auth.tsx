@@ -21,6 +21,8 @@ export interface UserDetails {
   lastName: string;
   emailAddress: string;
   admin?: boolean | undefined;
+  bookeoCustomerId?: string;
+  bookingNumber?: string;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {

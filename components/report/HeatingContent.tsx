@@ -676,17 +676,19 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   const getDescriptionText = () => {
     if (isWaterHeater) {
       return shouldShowGaugeChart()
-        ? `This ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${systemData.value < recommendedValue
-          ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-          : `This is an efficient unit that meets or exceeds recommended standards.`
-        }`
+        ? `This ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
+            systemData.value < recommendedValue
+              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+              : `This is an efficient unit that meets or exceeds recommended standards.`
+          }`
         : `This ${item?.name?.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     } else {
       return shouldShowGaugeChart()
-        ? `This ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${systemData.value < recommendedValue
-          ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
-          : `This is an efficient unit that meets or exceeds recommended standards.`
-        }`
+        ? `This ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${systemData.value}%. ${
+            systemData.value < recommendedValue
+              ? `Upgrading to a high-efficiency model with ${recommendedValue}% ${systemData.parameterName} could result in significant energy savings.`
+              : `This is an efficient unit that meets or exceeds recommended standards.`
+          }`
         : `This ${item?.name?.toLowerCase()} does not have a specified ${systemData.parameterName} rating.`;
     }
   };
@@ -923,16 +925,15 @@ export function HeatingContent({
         (item) => !item?.name?.toLowerCase()?.includes("water"),
       );
 
-      console.log("heating item", heatingItem)
+      console.log("heating item", heatingItem);
 
       const waterItem = data.data.find((item) =>
         item.name.toLowerCase().includes("water"),
       );
 
-
       // Update state if items are found
       if (heatingItem) {
-        console.log("heating item", heatingItem)
+        console.log("heating item", heatingItem);
         setHeatingSystemItem(heatingItem);
       }
 
@@ -1046,21 +1047,22 @@ export function HeatingContent({
       </motion.div>
 
       {/* Primary Heating System Card - always displayed */}
-      {heatingSystemItem.length > 0 ? heatingSystemItem.map((item, i) => {
-        return (
-          <HeatingSystemCard
-            key={`heating-system-${i}`}
-            item={item}
-            index={0}
-            isAdmin={isAdmin}
-            recommendedValue={92}
-            onUpdateItem={handleUpdateItem}
-            driveImages={driveImages}
-            allData={heatingSystemItem}
-          />
-        );
-      })
-        :
+      {heatingSystemItem.length > 0 ? (
+        heatingSystemItem.map((item, i) => {
+          return (
+            <HeatingSystemCard
+              key={`heating-system-${i}`}
+              item={item}
+              index={0}
+              isAdmin={isAdmin}
+              recommendedValue={92}
+              onUpdateItem={handleUpdateItem}
+              driveImages={driveImages}
+              allData={heatingSystemItem}
+            />
+          );
+        })
+      ) : (
         <HeatingSystemCard
           key="heating-system-default"
           item={DEFAULT_HEATING_ITEMS.heatingSystem}
@@ -1071,7 +1073,7 @@ export function HeatingContent({
           driveImages={driveImages}
           allData={heatingSystemItem}
         />
-      }
+      )}
 
       {/* Water Heater Card - only displayed if water heater item is found */}
 

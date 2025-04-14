@@ -353,7 +353,11 @@ export function ExteriorWallAssessment({
           );
           updatedField = { rValue: numericValue };
         }
-      } else if (field === "material" || field === "condition" || field === "image") {
+      } else if (
+        field === "material" ||
+        field === "condition" ||
+        field === "image"
+      ) {
         updatedField = { [field]: value as string };
       }
 
