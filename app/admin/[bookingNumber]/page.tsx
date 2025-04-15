@@ -62,6 +62,12 @@ interface BookingDetailsResponse {
     } | null;
     offeredContracts: OfferedContract[] | null;
     completedContractLink: string | null;
+    payment: {
+      amount: number;
+      currency: string;
+      status: string;
+      updated_at: string;
+    } | null;
   };
 }
 
@@ -142,6 +148,16 @@ export default function BookingDetailsPage({
 
   const [isIframeLoading, setIsIframeLoading] = useState(true);
 
+  const [payment, setPayment] = useState<{
+    amount: number;
+    currency: string;
+    status: string;
+    updated_at: string;
+  } | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [isAddingPayment, setIsAddingPayment] = useState(false);
+  const [isDeletingPayment, setIsDeletingPayment] = useState(false);
+
   useEffect(() => {
     if (bookingNumber) {
       fetchBookingDetails();
@@ -190,6 +206,11 @@ export default function BookingDetailsPage({
         }
         if (data.data.completedContractLink) {
           setCompletedContractFileUrl(data.data.completedContractLink);
+        }
+        if (data.data.payment) {
+          setPayment(data.data.payment);
+        } else {
+          setPayment(null);
         }
       } else {
         toast.error(data.message || "Failed to fetch booking details");
@@ -473,6 +494,72 @@ export default function BookingDetailsPage({
       toast.error("An error occurred while saving changes");
     } finally {
       setIsSavingReport(false);
+    }
+  };
+
+  const handleAddPayment = async () => {
+    if (!paymentAmount || isNaN(parseFloat(paymentAmount))) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    setIsAddingPayment(true);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/payment`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount: parseFloat(paymentAmount) }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Payment details added successfully");
+        setPaymentAmount("");
+        fetchBookingDetails(); // Refresh to get updated payment details
+      } else {
+        toast.error(data.message || "Failed to add payment details");
+      }
+    } catch (error) {
+      console.error("Error adding payment details:", error);
+      toast.error("An error occurred while adding payment details");
+    } finally {
+      setIsAddingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async () => {
+    if (!confirm("Are you sure you want to delete this payment?")) {
+      return;
+    }
+
+    setIsDeletingPayment(true);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/payment`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Payment details deleted successfully");
+        setPayment(null);
+      } else {
+        toast.error(data.message || "Failed to delete payment details");
+      }
+    } catch (error) {
+      console.error("Error deleting payment details:", error);
+      toast.error("An error occurred while deleting payment details");
+    } finally {
+      setIsDeletingPayment(false);
     }
   };
 
@@ -762,7 +849,10 @@ export default function BookingDetailsPage({
                                   )
                                 }
                                 className="data-[state=checked]:bg-[#5cb85c]"
-                                disabled={!!completedContractFileUrl || isTogglingContract === contract.id}
+                                disabled={
+                                  !!completedContractFileUrl ||
+                                  isTogglingContract === contract.id
+                                }
                               />
                               {isTogglingContract === contract.id && (
                                 <div className="ml-2 animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-[#5cb85c]"></div>
@@ -805,7 +895,10 @@ export default function BookingDetailsPage({
                           size="sm"
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
                           onClick={() => handleRemoveContract(contract.id)}
-                          disabled={!!completedContractFileUrl || (isRemovingContract === contract.id)}
+                          disabled={
+                            !!completedContractFileUrl ||
+                            isRemovingContract === contract.id
+                          }
                         >
                           {isRemovingContract === contract.id ? (
                             <>
@@ -836,6 +929,99 @@ export default function BookingDetailsPage({
                     <Plus className="h-4 w-4 mr-2" />
                     Attach Contract
                   </Button>
+                </div>
+              )}
+            </div>
+            {/* Payment Details */}
+            <div className="pt-6 border-t">
+              {payment ? (
+                <Card className="max-w-md">
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      Payment Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Amount:</span>
+                      <span className="font-medium">
+                        {payment.amount} {payment.currency}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Status:</span>
+                      <Badge
+                        variant={
+                          payment.status === "Paid"
+                            ? "default"
+                            : payment.status === "Failed"
+                              ? "destructive"
+                              : "outline"
+                        }
+                      >
+                        {payment.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Last Updated:</span>
+                      <span>
+                        {new Date(payment.updated_at).toLocaleString()}
+                      </span>
+                    </div>
+                  </CardContent>
+                  {payment.status !== "Paid" && (
+                    <CardFooter>
+                      <Button
+                        variant="destructive"
+                        onClick={handleDeletePayment}
+                        disabled={isDeletingPayment}
+                      >
+                        {isDeletingPayment ? (
+                          <>
+                            <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Payment
+                          </>
+                        )}
+                      </Button>
+                    </CardFooter>
+                  )}
+                </Card>
+              ) : (
+                <div className="max-w-md space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentAmount">Payment Amount</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="paymentAmount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                        placeholder="Enter amount"
+                        className="bg-white"
+                      />
+                      <Button
+                        onClick={handleAddPayment}
+                        disabled={isAddingPayment || !paymentAmount}
+                        className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
+                      >
+                        {isAddingPayment ? (
+                          <>
+                            <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
+                            Adding...
+                          </>
+                        ) : (
+                          "Add Payment"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
