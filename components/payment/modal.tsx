@@ -145,7 +145,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto max-h-[80dvh] overflow-x-hidden">
       <PaymentElement />
 
       {paymentError && (
