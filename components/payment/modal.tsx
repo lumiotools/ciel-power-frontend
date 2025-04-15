@@ -80,7 +80,7 @@ export default function PaymentModal({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Complete Payment</DialogTitle>
+          <DialogTitle className="text-2xl font-bold ">Complete Payment</DialogTitle>
         </DialogHeader>
 
         {isLoading ? (
@@ -156,7 +156,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
         <Button
           type="button"
           variant="outline"
-          className="w-1/2"
+          className="w-1/2 h-12 py-3 text-base border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors"
           onClick={onSuccess}
           disabled={isProcessing}
         >
@@ -164,7 +164,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
         </Button>
         <Button
           type="submit"
-          className="w-1/2"
+          className="w-1/2 h-12 py-3 text-base text-white font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!stripe || isProcessing}
         >
           {isProcessing ? (
