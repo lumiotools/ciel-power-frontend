@@ -17,6 +17,34 @@ import Image from "next/image";
 import GoogleReview from "./_comp/Google-review";
 import Recommendation from "./_comp/Recommendation";
 
+import {
+  LogOut,
+  ClipboardList,
+  FileText,
+  Award,
+  LayoutDashboard,
+  MapPin,
+  Calendar,
+  CheckCircle,
+  PenToolIcon as Tool,
+  Hammer,
+  CheckSquare,
+  ThumbsUp,
+  ChevronDown,
+  ChevronUp,
+  FileCheck,
+  ArrowUpCircle,
+  ChevronRight,
+  Percent,
+  Zap,
+  DollarSign,
+  Home,
+  Leaf,
+  ListChecks,
+  FileSpreadsheet,
+} from "lucide-react";
+import RescheduleModal from "@/components/component/reshedule-modal";
+
 // interface Service {
 //   id: string;
 //   name: string;
@@ -57,6 +85,47 @@ interface Booking {
   serviceId: string;
   price: Price;
   currentStage?: string;
+}
+
+interface AllBookings {
+  bookingDetails: {
+    serviceName: string;
+    startTime: string;
+    endTime: string;
+    address: {
+      line1: string;
+      line2: string;
+      city: string;
+      province: string;
+      countryCode: string;
+      postalCode: string;
+    };
+    auditor: {
+      name: string;
+    };
+    rescheduleAvailable: boolean;
+  };
+  utilityBillDetails: {
+    count: number;
+  };
+
+  reportConsultation: {
+    consultationBookingUrl: string;
+  };
+  consultationDetails: {
+    startTime: string;
+    endTime: string;
+    isCancelled: boolean;
+    rescheduleLink: string;
+  };
+  proposalDetails: {
+    count: number;
+    completedContractLink: string;
+  };
+  paymentDetails: {
+    amount: number;
+    status: string;
+  };
 }
 
 interface BookingsResponse {
@@ -104,23 +173,49 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<RecommendationData[]>(
-    [],
+    []
   );
+
+  // State to track if timeline is expanded or collapsed
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
+  // State for reschedule modal
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [currentBookingId, setCurrentBookingId] = useState("");
+
+  // Toggle timeline expansion
+  const toggleTimeline = () => {
+    setIsTimelineExpanded(!isTimelineExpanded);
+  };
+
+  // Open reschedule modal
+  const openRescheduleModal = (bookingId: string) => {
+    setCurrentBookingId(bookingId);
+    setIsRescheduleModalOpen(true);
+  };
+
+  // Handle reschedule confirmation
+  const handleRescheduleConfirm = (date: Date, timeSlot: string) => {
+    console.log(
+      `Booking ${currentBookingId} rescheduled to ${date.toDateString()} at ${timeSlot}`
+    );
+    // In a real app, you would make an API call here
+  };
+
   // const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   //usestate condition for dropdown
 
   const [openDropdown, setOpenDropdown] = useState<boolean[]>(
-    Array(FAQDetails.length).fill(false),
+    Array(FAQDetails.length).fill(false)
   );
 
   const [faqOpen, setFaqOpen] = useState<boolean[]>(
-    Array(FAQQuestions.length).fill(false),
+    Array(FAQQuestions.length).fill(false)
   );
 
   const toggleDropdown = (index: number) => {
     setOpenDropdown((prev) =>
-      prev.map((item, i) => (i === index ? !item : item)),
+      prev.map((item, i) => (i === index ? !item : item))
     );
     if (index === FAQDetails.length - 1) {
       setFaqOpen((prev) => prev.map(() => false));
@@ -187,33 +282,52 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
+
+    const fetchBookingDetails = async (bookingNumber: string) => {
+      try {
+        const res = await fetch(`/api/user/bookings/${bookingNumber}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        const data = await res.json();
+        console.log("Booking details response:", data);
+        setBookings(data?.data || []);
+        console.log("Booking details response:", data);
+      } catch (error) {
+        console.error("Error fetching booking details:", error);
+      }
+    };
     if (userDetails?.bookingNumber) {
       fetchData(userDetails?.bookingNumber);
+      fetchBookingDetails(userDetails?.bookingNumber);
     }
   }, [userDetails?.bookingNumber]);
 
-  const getBookings = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/user/bookings`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-      const data: BookingsResponse = await response.json();
+  // const getBookings = useCallback(async () => {
+  //   try {
+  //     const response = await fetch(`/api/user/bookings`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       credentials: "include",
+  //     });
+  //     const data: BookingsResponse = await response.json();
 
-      if (data.success) {
-        console.log("Bookings data:", data.data.bookings);
-        setBookings(data.data.bookings);
-      } else {
-        throw new Error(data.message || "Failed to fetch bookings");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      toast.error("No Bookings Found");
-    }
-  }, []);
+  //     if (data.success) {
+  //       console.log("Bookings data:", data.data.bookings);
+  //       setBookings(data.data.bookings);
+  //     } else {
+  //       throw new Error(data.message || "Failed to fetch bookings");
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : "An error occurred");
+  //     toast.error("No Bookings Found");
+  //   }
+  // }, []);
 
   // const handleNext = () => {
   //   setCurrentIndex((prev) => Math.min(services.length - 1, prev + 1));
@@ -231,11 +345,21 @@ export default function DashboardPage() {
   //   }
   // };
 
-  const formatDateTime = (dateStr: string): string => {
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return "";
     const date = new Date(dateStr);
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
+      weekday: "short",
       day: "numeric",
+      timeZone: "UTC",
+    }).format(date);
+  };
+
+  const formatTime = (dateStr: string): string => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
@@ -243,6 +367,14 @@ export default function DashboardPage() {
     }).format(date);
   };
 
+  const isOneAndHalfHourAhead = (startTime: string): boolean => {
+    const startDate = new Date(startTime);
+    const currentDate = new Date();
+    if (currentDate < startDate) return false;
+    const diffInHours =
+      (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
+    return diffInHours >= 1.5;
+  };
   // const getStatusBadge = (booking: Booking): React.ReactElement => {
   //   if (booking.canceled) {
   //     return (
@@ -268,24 +400,24 @@ export default function DashboardPage() {
   //   );
   // };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([
-          // getServices(),
-          getBookings(),
-        ]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load dashboard data");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       await Promise.all([
+  //         // getServices(),
+  //         getBookings(),
+  //       ]);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //       setError("Failed to load dashboard data");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   if (loading) {
     return (
@@ -311,266 +443,1201 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="space-y-6">
-        {/* Header Section */}
-        <div
-          className="flex-1 px-8 py-4"
-          style={{ backgroundColor: "#F0F8E6" }}
-        >
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">
-              Welcome {userDetails?.firstName}!
-            </h1>
-            <div className="p-2 rounded-full bg-gray-100">
-              {/* Profile Image with Circular Crop */}
-              <img
-                src="profile.png"
-                alt="Profile"
-                className="h-10 w-10 rounded-full"
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Main Content Container */}
         <div className="container mx-auto p-6">
-          {/* Suggested Services Section */}
-          {/* <div className="flex justify-between items-center mb-5">
-            <h2 className="text-2xl font-medium">Suggested Services</h2>
-          </div>
+          {/* main component */}
 
-          <div className="relative overflow-hidden">
-            <div
-              className="flex relative overflow-x-auto"
-              onWheel={handleWheel}
-              style={{ cursor: "pointer", overflow: "hidden" }}
-            >
-              <div
-                className="flex transition-all ease-in-out duration-300 gap-6"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          <div className="flex-1 overflow-auto p-8 bg-white">
+            <h1 className="text-2xl font-bold mb-6">Your Dashboard</h1>
+
+            {/* Container Card with Light Green Background */}
+            <div className="bg-[#f9fcf6] rounded-xl border border-[#e0f0d0] p-6 shadow-sm relative mt-8">
+              {/* Collapse/Expand button positioned half on/half off the container */}
+              <button
+                onClick={toggleTimeline}
+                className="absolute -top-4 right-6 flex items-center justify-center w-8 h-8 rounded-full bg-white text-[#8bc34a] hover:bg-[#f5f9ed] transition-colors border border-[#e0f0d0] shadow-sm z-10"
+                aria-label={
+                  isTimelineExpanded ? "Collapse Timeline" : "Expand Timeline"
+                }
               >
-                {services.map((service) => (
-                  <ServiceCard service={service} key={service.id} />
-                ))}
-              </div>
+                {isTimelineExpanded ? (
+                  <ChevronUp size={20} />
+                ) : (
+                  <ChevronDown size={20} />
+                )}
+              </button>
 
-              {currentIndex > 0 && (
+              <div className="timeline-container relative">
+                {/* Card Stack Effect when collapsed */}
+                {!isTimelineExpanded && (
+                  <>
+                    {/* Third card peeking out */}
+                    <div className="absolute top-8 left-0 right-0 h-4 bg-white rounded-lg border border-gray-200 shadow-sm z-10"></div>
+                    {/* Second card peeking out */}
+                    <div className="absolute top-4 left-0 right-0 h-4 bg-white rounded-lg border border-gray-200 shadow-sm z-20"></div>
+                  </>
+                )}
+
+                {/* Top Timeline Item - You're Officially Certified! */}
                 <div
-                  onClick={handlePrev} // Implement handlePrev
-                  className="absolute top-0 left-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)",
-                  }}
+                  className={`timeline-item mb-6 relative transition-all duration-500 ease-in-out z-30 ${
+                    isTimelineExpanded ? "" : "shadow-lg"
+                  }`}
                 >
-                  <svg
-                    width="13"
-                    height="35"
-                    viewBox="0 0 13 35"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <rect
-                      x="12"
-                      width="20.4583"
-                      height="1.16905"
-                      transform="rotate(123.122 12 0)"
-                      fill="#D9D9D9"
-                    />
-                    <rect
-                      width="20.4583"
-                      height="1.16905"
-                      transform="matrix(-0.546427 -0.837507 0.837507 -0.546427 12 34.5779)"
-                      fill="#D9D9D9"
-                    />
-                  </svg>
+                  <div className="bg-[#f5f9ed] rounded-lg p-6 border border-[#e0f0d0]">
+                    <div className="flex items-center mb-4">
+                      <Award size={24} className="text-[#8bc34a] mr-2" />
+                      <div className="font-medium text-lg">
+                        You're Officially Certified!
+                      </div>
+                    </div>
+
+                    <p className="text-gray-600 mb-4">
+                      Your Pearl Certification is being issued — your
+                      energy-efficient upgrades are complete and recognized.
+                    </p>
+                    <Link href="/pearl-certification">
+                      <button className="text-[#007BFF] text-sm font-medium">
+                        View Details
+                      </button>
+                    </Link>
+                  </div>
                 </div>
-              )}
 
-              <div
-                onClick={handleNext}
-                className="absolute top-0 right-0 h-full w-24 flex items-center justify-center cursor-pointer z-10"
-                style={{
-                  background:
-                    "linear-gradient(270deg, #636561 -18.5%, rgba(99, 101, 97, 0.7) 58.92%, rgba(99, 101, 97, 0.2) 139.5%)",
-                }}
-              >
-                <svg
-                  width="13"
-                  height="35"
-                  viewBox="0 0 13 35"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                {/* The rest of the timeline items - only shown when expanded */}
+                <div
+                  className={`timeline-items-container transition-all duration-500 ease-in-out overflow-hidden ${
+                    isTimelineExpanded
+                      ? "max-h-[5000px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
                 >
-                  <rect
-                    x="0.979004"
-                    width="20.4583"
-                    height="1.16905"
-                    transform="rotate(56.8778 0.979004 0)"
-                    fill="#D9D9D9"
-                  />
-                  <rect
-                    width="20.4583"
-                    height="1.16905"
-                    transform="matrix(0.546427 -0.837507 -0.837507 -0.546427 0.979004 34.5779)"
-                    fill="#D9D9D9"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div> */}
+                  {/* Timeline Item - Final Review by Your Utility */}
+                  {/* <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <ClipboardList
+                          size={24}
+                          className="text-[#8bc34a] mr-2"
+                        />
+                        <div className="font-medium text-lg">
+                          Final Review by Your Utility
+                        </div>
+                      </div>
 
-          {/* Your Bookings Section */}
-          <div className="mt-5">
-            <h2 className="text-2xl font-medium text-left">
-              Your Home Energy Audit Details
-            </h2>
-          </div>
-
-          <div
-            className="mt-3 mb-4 text-gray-700"
-            style={{
-              fontFamily: "Poppins",
-              fontWeight: 400,
-              fontSize: "14px",
-              lineHeight: "150%",
-              letterSpacing: "0%",
-              color: "#545454",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <p className="mb-3 text-left">
-              We're preparing for an in-home visit to evaluate how your home
-              uses energy. Your Ciel Home Energy Auditor will collect important
-              details to help us understand how your home is performing — here's
-              what to expect and how to prepare.
-            </p>
-            <p className="text-left">
-              Once we've gathered all the information from your home visit,
-              we'll get to work on your personalized energy report — it'll be
-              ready for you a few days after the visit. To complete the report,
-              we'll also need a copy of your most recent energy bill.
-            </p>
-          </div>
-
-          <section
-            className="bg-white rounded-lg p-6 mt-6"
-            style={{ backgroundColor: "#F0F8E6" }}
-          >
-            {bookings.length > 0 ? (
-              bookings.map((booking) => (
-                <Card
-                  key={booking.bookingNumber}
-                  className="mb-6 relative p-6 rounded-[12px]"
-                >
-                  {/* <div key={booking.bookingNumber} className="mb-6 relative"> */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium">
-                        {formatDateTime(booking.startTime)}
-                      </h3>
-                      <p className="text-[#636561] font-medium">
-                        {booking.serviceName}
+                      <p className="text-gray-600 mb-4">
+                        Your project is being reviewed for approval. Some homes
+                        are selected for a quality check — Let us know if yours
+                        is.
                       </p>
-                      <div className="flex items-center text-[#636561] text-sm mt-1">
-                        <Clock className="h-4 w-4 mr-2" />
-                        <span>Booking #{booking.bookingNumber}</span>
+
+                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="font-medium">Status:</span>
+                          <span className="text-[#8bc34a] font-medium">
+                            Final Review
+                          </span>
+                        </div>
+                      </div>
+                      <Link href="/final-review">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div> */}
+
+                  {/* Timeline Item - Confirm & Complete Your Project */}
+                  {/* <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center">
+                          <ThumbsUp size={24} className="text-[#8bc34a] mr-2" />
+                          <div className="font-medium text-lg">
+                            Confirm & Complete Your Project
+                          </div>
+                        </div>
+                        <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2">
+                          <CheckCircle size={18} />
+                          Confirm
+                        </button>
+                      </div>
+
+                      <p className="text-gray-600 mb-4">
+                        Confirming your project completion takes just a moment —
+                        and helps unlock your final rebates and certification.
+                        We'll guide you through the documents so you can move
+                        forward with full confidence.
+                      </p>
+                      <Link href="/confirm-project">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div> */}
+
+                  {/* Timeline Item - Confirming Your Home Is Ready */}
+                  {/* <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <CheckSquare
+                          size={24}
+                          className="text-[#8bc34a] mr-2"
+                        />
+                        <div className="font-medium text-lg">
+                          Confirming Your Home Is Ready
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 mb-4">
+                        We take this step seriously because we know how much
+                        your home means to you. This final check allows us to
+                        make sure it's performing beautifully — and gives you
+                        the comfort, safety, and savings we set out to deliver.
+                      </p>
+
+                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                        <div className="flex items-center gap-1">
+                          <ClipboardList size={16} className="text-[#8bc34a]" />
+                          <span>Post-Install Check</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar size={16} className="text-[#8bc34a]" />
+                          <span>Fri 7 Feb</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock size={16} className="text-[#8bc34a]" />
+                          <span>11:00 AM</span>
+                        </div>
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="font-medium">Status:</span>
+                          <span className="text-[#8bc34a] font-medium">
+                            In Progress
+                          </span>
+                        </div>
+                      </div>
+                      <Link href="/home-ready">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div> */}
+
+                  {/* Timeline Item - Your Home is Being Upgraded - CHANGED ICON */}
+                  {/* <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <ArrowUpCircle
+                          size={24}
+                          className="text-[#8bc34a] mr-2"
+                        />
+                        <div className="font-medium text-lg">
+                          Your Home is Being Upgraded
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 mb-4">
+                        We're working on your home with care — improving
+                        efficiency, comfort, and performance at every step.
+                      </p>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                          <Hammer
+                            size={18}
+                            className="text-[#8bc34a] mr-2 mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div className="font-medium">
+                                Insulation Installation
+                              </div>
+                              <div className="text-[#8bc34a] text-sm font-medium flex items-center">
+                                <span className="animate-pulse mr-1">●</span> In
+                                Progress
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              Started: Mon 3 Feb, 9:00 AM • Estimated
+                              completion: 1:00 PM
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                          <Hammer
+                            size={18}
+                            className="text-[#8bc34a] mr-2 mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div className="font-medium">
+                                HVAC Installation
+                              </div>
+                              <div className="text-[#8bc34a] text-sm font-medium flex items-center">
+                                <span className="animate-pulse mr-1">●</span> In
+                                Progress
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              Started: Wed 5 Feb, 10:00 AM • Estimated
+                              completion: 4:00 PM
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="font-medium">Status:</span>
+                          <span className="text-[#8bc34a] font-medium">
+                            Ongoing
+                          </span>
+                        </div>
+                      </div>
+                      <Link href="/home-upgrade">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div> */}
+
+                  {/* Timeline Item - Installation is Scheduled */}
+                  {/* <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="mb-4">
+                        <div className="flex items-center">
+                          <Calendar size={24} className="text-[#8bc34a] mr-2" />
+                          <div className="font-medium text-lg">
+                            Installation is Scheduled
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 mb-4">
+                        Your energy upgrades are on the calendar. We'll make
+                        sure you know exactly what to expect before we get
+                        started.
+                      </p>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                          <Tool
+                            size={18}
+                            className="text-[#8bc34a] mr-2 mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div className="font-medium">
+                                Insulation Installation
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                              <Calendar size={14} className="text-[#8bc34a]" />
+                              <span>Mon 3 Feb</span>
+                              <Clock
+                                size={14}
+                                className="text-[#8bc34a] ml-2"
+                              />
+                              <span>9:00 AM - 1:00 PM</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                          <Tool
+                            size={18}
+                            className="text-[#8bc34a] mr-2 mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div className="font-medium">
+                                HVAC Installation
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                              <Calendar size={14} className="text-[#8bc34a]" />
+                              <span>Wed 5 Feb</span>
+                              <Clock
+                                size={14}
+                                className="text-[#8bc34a] ml-2"
+                              />
+                              <span>10:00 AM - 4:00 PM</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="font-medium">Status:</span>
+                          <span className="text-[#8bc34a] font-medium">
+                            Scheduled
+                          </span>
+                        </div>
+                      </div>
+                      <Link href="/installation-scheduled">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div> */}
+
+                  {/* Timeline Item - One Last Thing! */}
+                  {/* <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <Tool size={24} className="text-[#8bc34a] mr-2" />
+                        <div className="font-medium text-lg">
+                          One Last Thing!
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 mb-4">
+                        To finalize your project and secure your installation
+                        dates, please complete the payment for your selected
+                        upgrades. Your investment in energy efficiency is just a
+                        click away.
+                      </p>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                          <Hammer
+                            size={18}
+                            className="text-[#8bc34a] mr-2 mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div className="font-medium">
+                                Insulation Installation
+                              </div>
+                              <div className="text-gray-700 text-sm">
+                                $2,350.00
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                          <Zap size={18} className="text-[#8bc34a] mr-2 mt-1" />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div className="font-medium">
+                                HVAC Installation
+                              </div>
+                              <div className="text-gray-700 text-sm">
+                                $2,525.00
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="text-gray-700 text-sm">
+                          <span className="font-medium">Total:</span> $4,875.00
+                        </div>
+                        <a
+                          href="https://stripe.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-[#8bc34a] text-white px-4 py-2 rounded-md hover:bg-[#95c25a] transition-colors"
+                        >
+                          Payment Gateway
+                        </a>
+                      </div>
+
+                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="font-medium">Status:</span>
+                          <span className="text-[#8bc34a] font-medium">
+                            Pending
+                          </span>
+                        </div>
+                      </div>
+                      <Link href="/one-last-thing">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  </div> */}
+
+                  {/* Timeline Item - Your Project Plans Are Ready */}
+                  {bookings?.proposalDetails && (
+                    <div className="timeline-item mb-6 relative">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="flex items-center mb-4">
+                          <FileCheck
+                            size={24}
+                            className="text-[#8bc34a] mr-2"
+                          />
+                          <div className="font-medium text-lg">
+                            Your Project Plans Are Ready
+                          </div>
+                        </div>
+
+                        <p className="text-gray-600 mb-4">
+                          Review & sign the proposal which works for you! We've
+                          prepared detailed project plans based on your audit
+                          results. Choose the option that best fits your needs
+                          and budget to move forward with your home energy
+                          improvements.
+                        </p>
+
+                        <div className="mb-4">
+                          {bookings?.proposalDetails?.count > 0 && (
+                            <Link href="/document-portal#review-plans">
+                              <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+                                <FileText size={18} />
+                                Go to Your Proposals
+                              </button>
+                            </Link>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="font-medium">Status:</span>
+                            <span className="text-[#8bc34a] font-medium">
+                              Complete
+                            </span>
+                          </div>
+                        </div>
+                        <Link href="/project-plans-ready">
+                          <button className="text-[#007BFF] text-sm font-medium">
+                            View Details
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timeline Item - We're Lining Everything Up */}
+                  {!isOneAndHalfHourAhead(
+                    bookings?.bookingDetails?.startTime
+                  ) && (
+                    <div className="timeline-item mb-6 relative">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="flex items-center mb-2">
+                          <CheckCircle
+                            size={24}
+                            className="text-[#8bc34a] mr-2"
+                          />
+                          <div className="font-medium text-lg">
+                            We're Lining Everything Up
+                          </div>
+                        </div>
+
+                        <div className="mb-3 text-[#8bc34a] font-medium">
+                          Thanks for signing off!
+                        </div>
+
+                        <p className="text-gray-600 mb-4">
+                          We're wrapping up final details and approvals.
+                          Installation will be scheduled soon, and we'll keep
+                          you informed along the way.
+                        </p>
+
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="font-medium">Status:</span>
+                            <span className="text-[#8bc34a] font-medium">
+                              Processing
+                            </span>
+                          </div>
+                        </div>
+                        <Link href="/lining-everything-up">
+                          <button className="text-[#007BFF] text-sm font-medium">
+                            View Details
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timeline Item - Your Audit Results are in - MOVED HERE */}
+                  {bookings?.consultationDetails && (
+                    <div className="timeline-item mb-6 relative">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="flex items-center">
+                            <FileCheck
+                              size={24}
+                              className="text-[#8bc34a] mr-2"
+                            />
+                            <div className="font-medium text-lg">
+                              Your Audit Results are in
+                            </div>
+                          </div>
+                          {bookings?.consultationDetails?.rescheduleLink && (
+                            <Link
+                              href={
+                                bookings?.consultationDetails?.rescheduleLink
+                              }
+                              onClick={() =>
+                                openRescheduleModal("AUDIT-RESULTS-123")
+                              }
+                              className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
+                            >
+                              <Clock size={18} />
+                              Reschedule
+                            </Link>
+                          )}
+                        </div>
+
+                        <p className="text-gray-600 mb-4">
+                          Your comprehensive home energy report is now
+                          available. Review your project plan and sign the
+                          contracts to proceed. All necessary documents,
+                          including your detailed report with findings,
+                          recommendations, and potential savings calculations
+                          are available for your review.
+                        </p>
+
+                        <div className="mb-4">
+                          <Link href="/report">
+                            <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+                              <FileText size={18} />
+                              Go to Your Report
+                            </button>
+                          </Link>
+                        </div>
+
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-4">
+                          <div className="flex items-center gap-1">
+                            <ClipboardList
+                              size={16}
+                              className="text-[#8bc34a]"
+                            />
+                            <span>Consultation</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar size={16} className="text-[#8bc34a]" />
+                            <span>
+                              {formatDate(
+                                bookings?.consultationDetails.startTime
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={16} className="text-[#8bc34a]" />
+                            <span>
+                              {formatTime(
+                                bookings?.consultationDetails.startTime
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="font-medium">Status:</span>
+                            <span className="text-[#8bc34a] font-medium">
+                              Complete
+                            </span>
+                          </div>
+                        </div>
+                        <Link href="/audit-results">
+                          <button className="text-[#007BFF] text-sm font-medium">
+                            View Details
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timeline Item - Your Results Are In — Let's Talk */}
+                  {bookings?.reportConsultation && (
+                    <div className="timeline-item mb-6 relative">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="flex items-center">
+                            <FileSpreadsheet
+                              size={24}
+                              className="text-[#8bc34a] mr-2"
+                            />
+                            <div className="font-medium text-lg">
+                              Your Results Are In — Let's Talk
+                            </div>
+                          </div>
+                          <div className="flex gap-3 items-center">
+                            {bookings?.reportConsultation
+                              ?.consultationBookingUrl ? (
+                              <Link
+                                target="_blank"
+                                href={
+                                  bookings?.reportConsultation
+                                    ?.consultationBookingUrl
+                                }
+                                className={` "bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
+                              >
+                                <Calendar size={18} />
+                                Book Consultation
+                              </Link>
+                            ) : (
+                              <button
+                                disabled={"true"}
+                                className={` "bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
+                              >
+                                {" "}
+                                <Calendar size={18} />
+                                Book Consultation
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-600 mb-4">
+                          We've completed your audit and reviewed your home's
+                          performance. Now it's time to schedule a consultation
+                          with your Ciel Home Performance Consultant to walk
+                          through the findings and talk about what's next.
+                        </p>
+
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="font-medium">Status:</span>
+                            <span className="text-[#8bc34a] font-medium">
+                              Audit Complete
+                            </span>
+                          </div>
+                        </div>
+                        <Link href="/results-lets-talk">
+                          <button className="text-[#007BFF] text-sm font-medium">
+                            View Details
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timeline Item - Upload Utility Bills */}
+                  <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <FileText size={24} className="text-[#8bc34a] mr-2" />
+                        <div className="font-medium text-lg">
+                          Upload Your Utility Bills
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 mb-4">
+                        Refer to the Document Portal on the sidebar to upload
+                        your Utility Bills, our auditor will review this next.
+                        Sharing your utility bills helps us analyze your energy
+                        usage patterns and identify potential savings.
+                      </p>
+
+                      <div className="flex justify-between items-center">
+                        <Link href="/document-portal#upload-utility-bills">
+                          <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+                            <FileText size={18} />
+                            Go to Your Bills
+                          </button>
+                        </Link>
+
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Status:</span>
+                            <span className="text-[#8bc34a] font-medium">
+                              {bookings?.utilityBillDetails?.count > 0
+                                ? "Completed"
+                                : "Pending"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <Link href="/utility-bills-details">
+                          <button className="text-[#007BFF] text-sm font-medium">
+                            View Details
+                          </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
 
-                  {/* <BookingProgress
-                    steps={[
-                      { label: "Created", status: "completed" },
-                      {
-                        label: booking.canceled ? "Cancelled" : "Confirmed",
-                        status: booking.canceled
-                          ? "cancelled"
-                          : booking.accepted
-                            ? "completed"
-                            : "upcoming",
-                      },
-                      { label: "Auditor Assigned", status: "upcoming" },
-                      { label: "On the Way", status: "upcoming" },
-                      { label: "Ongoing", status: "upcoming" },
-                      { label: "Complete", status: "upcoming" },
-                    ]}
-                  /> */}
+                  {/* Timeline Item - Professional Home Energy Audit */}
+                  <div className="timeline-item mb-6 relative">
+                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center">
+                          <ListChecks
+                            size={24}
+                            className="text-[#8bc34a] mr-2"
+                          />
+                          <div>
+                            <div className="font-medium text-lg">
+                              Professional Home Energy Audit
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Auditor Assigned:{" "}
+                              <span className="text-[#8bc34a] font-medium">
+                                {bookings?.bookingDetails?.auditor?.name}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => openRescheduleModal("AUDIT-345678")}
+                          disabled={
+                            !bookings?.bookingDetails?.rescheduleAvailable
+                          }
+                          className={`${!bookings?.bookingDetails?.rescheduleAvailable ? "opacity-35" : ""} bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors`}
+                        >
+                          <Clock size={18} />
+                          Reschedule
+                        </button>
+                      </div>
 
-                  <BookingProgress
-                    steps={getStepStatus(
-                      booking.currentStage || "bookingCreated",
-                    )}
-                  />
+                      <p className="text-gray-600 mb-4">
+                        We're preparing for an in-home visit to evaluate how
+                        your home uses energy. Your Ciel Home Energy Auditor
+                        will collect important details to help us understand how
+                        your home is performing.
+                      </p>
 
-                  <div className="flex flex-wrap justify-between mt-4">
-                    <Link href={`/dashboard/bookings/${booking.bookingNumber}`}>
-                      <Button variant="link" className="text-blue-600">
-                        View Details
-                      </Button>
-                    </Link>
-                    {/* <div>
-                      <Button className="bg-[#5ea502] hover:bg-[#5ea502]/90">
-                        Reschedule
-                      </Button>
-                    </div> */}
+                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                        <div className="flex items-center gap-1">
+                          <Calendar size={16} className="text-[#8bc34a]" />
+                          <span>
+                            {formatDate(bookings?.bookingDetails?.startTime)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock size={16} className="text-[#8bc34a]" />
+                          <span>
+                            {formatTime(bookings?.bookingDetails?.startTime)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin size={16} className="text-[#8bc34a]" />
+                          <span>
+                            {!!bookings?.bookingDetails?.address?.line1
+                              ? `${bookings?.bookingDetails?.address?.line1},`
+                              : ""}
+                          </span>
+                          <span>
+                            {!!bookings?.bookingDetails?.address?.line2
+                              ? `${bookings?.bookingDetails?.address?.line2},`
+                              : ""}
+                          </span>
+                          <span>
+                            {!!bookings?.bookingDetails?.address?.city
+                              ? `${bookings?.bookingDetails?.address?.city},`
+                              : ""}
+                          </span>
+                          <span>
+                            {!!bookings?.bookingDetails?.address?.province
+                              ? `${bookings?.bookingDetails?.address?.province},`
+                              : ""}
+                          </span>
+                          <span>
+                            {!!bookings?.bookingDetails?.address?.countryCode
+                              ? `${bookings?.bookingDetails?.address?.countryCode}`
+                              : ""}
+                          </span>
+                          <span>
+                            {!!bookings?.bookingDetails?.address?.postalCode
+                              ? `${bookings?.bookingDetails?.address?.postalCode}`
+                              : ""}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="font-medium">Status:</span>
+                          <span className="text-[#8bc34a] font-medium">
+                            Scheduled
+                          </span>
+                        </div>
+                      </div>
+
+                      <Link href="/audit-details">
+                        <button className="text-[#007BFF] text-sm font-medium">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
                   </div>
-                  {/* </div> */}
-                </Card>
-              ))
-            ) : (
-              <div className="relative flex h-[250px] items-stretch rounded-lg bg-[#f0f8e6] overflow-hidden">
-                {/* Left Column with Image (30% width) */}
-                <div className="relative w-[30%]">
-                  <img
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsLeft-HfKNAPd5hBQiuWSXWbJBLgcAfYZg76.png"
-                    alt="Left Icon"
-                    className="h-full w-full object-cover"
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
-                    }}
-                  />
-                </div>
-
-                {/* Middle Column with Text Content (40% width) */}
-                <div className="flex w-[40%] flex-col items-center justify-center gap-4 px-8">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src="/calendarIcon.png"
-                      alt="Icon"
-                      className="h-8 w-8"
-                    />
-                    <p className="text-lg font-medium text-[#4d4e4b]">
-                      No Current Bookings
-                    </p>
-                  </div>
-                  <Button className="rounded-3xl bg-[#76BC1C] px-6 py-2 text-white hover:bg-[#67b502] outline outline-2 outline-white outline-offset-2 focus:outline-offset-2 focus:outline-white">
-                    Book Your First Service
-                  </Button>
-                </div>
-
-                {/* Right Column with Image (30% width) */}
-                <div className="relative w-[30%]">
-                  <img
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NobookingsRight-Cmh90ifFQDGvXhLdSTeJDXVP0hWr3i.png"
-                    alt="Right Icon"
-                    className="h-full w-full object-cover"
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(270deg, rgba(103, 181, 2, 0.2) 0%, rgba(174, 216, 121, 0.7) 48.43%, #F0F8E6 93.13%)",
-                    }}
-                  />
                 </div>
               </div>
-            )}
-          </section>
+            </div>
+
+            {/* Recommended for You Section */}
+            <div className="mt-12">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Recommended for You</h2>
+                <Link
+                  href="/recommendations"
+                  className="text-[#8bc34a] flex items-center"
+                >
+                  View More Recommendations <ChevronRight className="ml-1" />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Card 1 */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="h-32 overflow-hidden">
+                    <Image
+                      src="/professional-audit.png"
+                      alt="Professional Audit"
+                      width={300}
+                      height={200}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-[#8bc34a] font-medium">
+                        Professional Audit
+                      </h3>
+                      <ChevronRight className="text-[#8bc34a]" />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Cut energy costs with a professional audit
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card 2 */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="h-32 overflow-hidden">
+                    <Image
+                      src="/attic-insulation.png"
+                      alt="Attic Insulation"
+                      width={300}
+                      height={200}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-[#8bc34a] font-medium">
+                        Attic Insulation
+                      </h3>
+                      <ChevronRight className="text-[#8bc34a]" />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Keeps your home warmer in winter and cooler in summer
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card 3 */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="h-32 overflow-hidden">
+                    <Image
+                      src="/solar-panels.png"
+                      alt="Solar Panels Electrification"
+                      width={300}
+                      height={200}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-[#8bc34a] font-medium">
+                        Solar Panels Electrification
+                      </h3>
+                      <ChevronRight className="text-[#8bc34a]" />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Electrifying home is a smart way to lower household energy
+                      consumption
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card 4 */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="h-32 overflow-hidden">
+                    <Image
+                      src="/ac-installation.png"
+                      alt="AC Installation and Setup"
+                      width={300}
+                      height={200}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-[#8bc34a] font-medium">
+                        AC Installation and Setup
+                      </h3>
+                      <ChevronRight className="text-[#8bc34a]" />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Experience the best in cooling with our top-notch AC
+                      installation services
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Google Reviews Section */}
+            <div className="mt-12 mb-8 bg-[#f9fcf6] rounded-xl border border-[#e0f0d0] p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-xl font-medium text-gray-700">
+                    Our Google Reviews
+                  </h3>
+                  <div className="flex items-center mt-2">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-6 h-6 text-[#8bc34a] fill-current"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="ml-2 text-gray-600">
+                      4.9 rating of 39 reviews
+                    </span>
+                  </div>
+                </div>
+                <button className="bg-gradient-to-r from-[#a6d66b] to-[#8bc34a] hover:opacity-90 text-white font-medium py-2 px-6 rounded-md flex items-center gap-2">
+                  <FileText size={18} />
+                  Write a review
+                </button>
+              </div>
+
+              {/* Reviews Carousel */}
+              <div className="relative">
+                <div className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar">
+                  {/* Review 1 */}
+                  <div className="bg-white rounded-lg border border-[#e0f0d0] p-6 min-w-[350px] max-w-[350px] flex flex-col">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full overflow-hidden mr-3 bg-[#4CAF50] flex items-center justify-center text-white font-bold text-lg">
+                        MK
+                      </div>
+                      <div>
+                        <div className="font-medium">Maria Korsgaard</div>
+                        <div className="text-sm text-gray-500">15/03/2023</div>
+                      </div>
+                    </div>
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-5 h-5 text-[#8bc34a] fill-current"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 mb-4 flex-grow">
+                      The energy auditor was thorough and professional. They
+                      identified several areas where we could improve
+                      efficiency. After implementing their recommendations, our
+                      energy bills dropped by 25%! Highly recommend Ciel Power.
+                    </p>
+                    <div className="flex justify-end">
+                      <svg className="w-6 h-6" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Review 2 */}
+                  <div className="bg-white rounded-lg border border-[#e0f0d0] p-6 min-w-[350px] max-w-[350px] flex flex-col">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full overflow-hidden mr-3 bg-[#2196F3] flex items-center justify-center text-white font-bold text-lg">
+                        MC
+                      </div>
+                      <div>
+                        <div className="font-medium">Maren Calzoni</div>
+                        <div className="text-sm text-gray-500">12/03/2023</div>
+                      </div>
+                    </div>
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-5 h-5 text-[#8bc34a] fill-current"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 mb-4 flex-grow">
+                      Our home was always cold in winter despite cranking up the
+                      heat. The Ciel Power audit revealed poor insulation and
+                      air leaks. After fixing these issues, our home stays warm
+                      and comfortable with much lower heating costs. 10/10!
+                    </p>
+                    <div className="flex justify-end">
+                      <svg className="w-6 h-6" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Review 3 */}
+                  <div className="bg-white rounded-lg border border-[#e0f0d0] p-6 min-w-[350px] max-w-[350px] flex flex-col">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full overflow-hidden mr-3 bg-[#FF9800] flex items-center justify-center text-white font-bold text-lg">
+                        DD
+                      </div>
+                      <div>
+                        <div className="font-medium">Davis Dokidis</div>
+                        <div className="text-sm text-gray-500">08/03/2021</div>
+                      </div>
+                    </div>
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-5 h-5 text-[#8bc34a] fill-current"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 mb-4 flex-grow">
+                      Mark from Ciel Power was knowledgeable and friendly. The
+                      thermal imaging showed exactly where we were losing
+                      energy. The detailed report helped us prioritize upgrades.
+                      Our home is now more comfortable and efficient...
+                      <span className="text-[#8bc34a] cursor-pointer">
+                        See more
+                      </span>
+                    </p>
+                    <div className="flex justify-end">
+                      <svg className="w-6 h-6" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Review 4 */}
+                  <div className="bg-white rounded-lg border border-[#e0f0d0] p-6 min-w-[350px] max-w-[350px] flex flex-col">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full overflow-hidden mr-3 bg-[#9C27B0] flex items-center justify-center text-white font-bold text-lg">
+                        JT
+                      </div>
+                      <div>
+                        <div className="font-medium">James Thompson</div>
+                        <div className="text-sm text-gray-500">22/02/2023</div>
+                      </div>
+                    </div>
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-5 h-5 text-[#8bc34a] fill-current"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 mb-4 flex-grow">
+                      We were skeptical about the value of an energy audit, but
+                      it was worth every penny. Ciel Power identified issues we
+                      never would have found ourselves. The rebates they helped
+                      us get covered most of the audit cost. Excellent service!
+                    </p>
+                    <div className="flex justify-end">
+                      <svg className="w-6 h-6" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Arrows */}
+                <button className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#e0f0d0]">
+                  <ChevronDown className="rotate-90 text-[#8bc34a]" size={24} />
+                </button>
+                <button className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#e0f0d0]">
+                  <ChevronDown
+                    className="-rotate-90 text-[#8bc34a]"
+                    size={24}
+                  />
+                </button>
+              </div>
+            </div>
+            {/* Reschedule Modal */}
+            <RescheduleModal
+              isOpen={isRescheduleModalOpen}
+              onClose={() => setIsRescheduleModalOpen(false)}
+              bookingId={currentBookingId}
+              onConfirm={handleRescheduleConfirm}
+            />
+          </div>
 
           {/* faq section */}
           <div className="bg-gray-100 p-6">
