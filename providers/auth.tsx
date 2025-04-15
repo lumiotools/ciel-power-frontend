@@ -98,7 +98,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AUTH_CONTEXT.Provider
       value={{ isLoading, isLoggedIn, userDetails, checkAuth, logoutUser }}
     >
-      {children}
+      {isLoading ? (
+        <div className="w-screen h-screen flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        children
+      )}
     </AUTH_CONTEXT.Provider>
   );
 };
