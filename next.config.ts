@@ -28,6 +28,18 @@ const nextConfig: NextConfig = {
         // port: '',
         // pathname: '/admin/**',
       },
+      {
+        protocol: "https",
+        hostname: "hebbkx1anhila5yf.public.blob.vercel-storage.com",
+        // port: '',
+        // pathname: '/admin/**',
+      },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        // port: '',
+        // pathname: '/admin/**',
+      },
     ],
   },
   rewrites: async () => [
@@ -44,7 +56,7 @@ const nextConfig: NextConfig = {
       destination: `${process.env.NEXT_PUBLIC_API_URL}/user/:path*`,
     },
   ],
-  experimental:{
+  experimental: {
     proxyTimeout: 1000 * 60 * 2, // 2 minutes
   },
   typescript: {

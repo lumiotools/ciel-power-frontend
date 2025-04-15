@@ -44,10 +44,16 @@ export const ImageUpload = ({
     }
   };
 
+  console.log("imageSelected", imageFromDB);
+
   return (
     <div className="relative">
       <Image
-        src={imageSelected?.thumbnailLink ?? imageFromDB ?? "/placeholder.jpg"}
+        src={
+          imageSelected?.thumbnailLink ??
+          (!!driveImages && imageFromDB) ??
+          "/placeholder.jpg"
+        }
         alt="alternate image"
         className="w-full h-64 object-cover rounded-lg mt-4"
         width={400}

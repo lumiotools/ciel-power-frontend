@@ -14,6 +14,8 @@ import { ChatBot } from "@/components/modal/ChatBot";
 import Link from "next/link";
 import { FAQDetails, FAQQuestions } from "./_comp/utils";
 import Image from "next/image";
+import GoogleReview from "./_comp/Google-review";
+import Recommendation from "./_comp/Recommendation";
 
 // interface Service {
 //   id: string;
@@ -65,6 +67,14 @@ interface BookingsResponse {
   };
 }
 
+interface RecommendationData {
+  description: string;
+  thumbnail: string;
+  title: string;
+  url: string;
+  videoId: string;
+}
+
 const stepsSequence = [
   { label: "Booking Created", key: "bookingCreated" },
   { label: "Utility Bills Uploaded", key: "utilityBills" },
@@ -93,6 +103,9 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [recommendation, setRecommendation] = useState<RecommendationData[]>(
+    [],
+  );
   // const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   //usestate condition for dropdown
@@ -119,6 +132,7 @@ export default function DashboardPage() {
   };
 
   const { userDetails } = useContext(AUTH_CONTEXT);
+  console.log("User Details:", userDetails);
 
   // const getServices = useCallback(async () => {
   //   try {
@@ -136,6 +150,48 @@ export default function DashboardPage() {
   //   }
   // }, []);
 
+  function saveRecommendation({ data }: { data: RecommendationData[] }) {
+    try {
+      const existingData = localStorage.getItem("recommendation");
+      if (
+        !existingData ||
+        existingData === undefined ||
+        existingData.length === 0
+      ) {
+        localStorage.setItem("recommendation", JSON.stringify(data));
+      }
+    } catch (error) {
+      console.error("Error saving recommendation to localStorage:", error);
+    }
+  }
+
+  useEffect(() => {
+    const fetchData = async (id: string) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/user/bookings/${id}/recommended-videos`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        const data = await res.json();
+        setRecommendation(data || []);
+        saveRecommendation({ data: data || [] });
+        console.log("Recommended videos response:", data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (userDetails?.bookingNumber) {
+      fetchData(userDetails?.bookingNumber);
+    }
+  }, [userDetails?.bookingNumber]);
+
   const getBookings = useCallback(async () => {
     try {
       const response = await fetch(`/api/user/bookings`, {
@@ -146,7 +202,9 @@ export default function DashboardPage() {
         credentials: "include",
       });
       const data: BookingsResponse = await response.json();
+
       if (data.success) {
+        console.log("Bookings data:", data.data.bookings);
         setBookings(data.data.bookings);
       } else {
         throw new Error(data.message || "Failed to fetch bookings");
@@ -227,10 +285,7 @@ export default function DashboardPage() {
     };
 
     fetchData();
-  }, [
-    // getServices,
-    getBookings,
-  ]);
+  }, []);
 
   if (loading) {
     return (
@@ -581,6 +636,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Recommended for you */}
+          <Recommendation data={recommendation} />
+
+          {/* Google review */}
+          <GoogleReview />
           <ChatBot />
 
           {/* FAQs Section */}

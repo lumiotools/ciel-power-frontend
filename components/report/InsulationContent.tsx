@@ -21,6 +21,7 @@ interface InsulationDataItem {
   material: string;
   name: string;
   rValue: number;
+  image: string;
 }
 
 // Define an interface for the entire insulation data structure
@@ -229,14 +230,16 @@ export function InsulationContent({
 
   return (
     <div className="space-y-8 pb-20">
-      {isAdmin && (<div className="flex justify-end items-center">
-        <button
-          onClick={onSumit}
-          className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
-        >
-          Save
-        </button>
-      </div>)}
+      {isAdmin && (
+        <div className="flex justify-end items-center">
+          <button
+            onClick={onSumit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
+          >
+            Save
+          </button>
+        </div>
+      )}
 
       <InsulationOverview />
 
@@ -250,7 +253,7 @@ export function InsulationContent({
       {/* Standard components that have specialized UI */}
       {/* {!!findBestMatchingItem(data?.data, "kneewall") && ( */}
       <KneewallAssessment
-        data={findBestMatchingItem(data?.data, "kneewall")}
+        data={findBestMatchingItem(data?.data, "kneewall") ?? []}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
         driveImages={driveImages}
@@ -269,6 +272,7 @@ export function InsulationContent({
         data={findBestMatchingItem(data?.data, "crawlspace")}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
+        driveImages={driveImages}
       />
       {/* )} */}
       {/* {!!findBestMatchingItem(data?.data, "rim joist") && ( */}

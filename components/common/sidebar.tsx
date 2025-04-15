@@ -11,6 +11,14 @@ import { AUTH_CONTEXT } from "@/providers/auth";
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: "/dashboard.svg" },
+  { name: "Incentives", href: "/incentives", icon: "/sidebar/dollar.svg" },
+  {
+    name: "Tax Credits",
+    href: "/tax-credits",
+    icon: "/sidebar/percentage.svg",
+  },
+  { name: "Knowledge Base", href: "/knowledge-base", icon: "/sidebar/knowledge.svg" },
+  { name: "About Us", href: "/about-us", icon: "/sidebar/home.svg" },
   // { name: "Audit Info", href: "/dashboard/expect", icon: "/peopleIcon.svg" },
   // {name: "View Report" , href: "/dashboard/bookings/2559502143682185/reports", icon: '/file.svg'},
   // { name: "Proposals", href: "/dashboard/expect", icon: "/handIcon.svg" },

@@ -16,6 +16,7 @@ import {
 import { IoMdClose } from "react-icons/io";
 import Image from "next/image";
 import ImageCustomer from "./ImageCustomer";
+import { ImageUpload } from "./ImageUpload";
 
 interface EditableFieldProps {
   value: string;
@@ -33,7 +34,7 @@ interface WallData {
   recommendedValue: number;
   maxValue: number;
   efficiency: number;
-  images: string; // Changed from string[] to string
+  image: string; // Changed from string[] to string
 }
 
 // New interface for the data coming from reportData
@@ -168,123 +169,123 @@ const EditableField: React.FC<EditableFieldProps> = ({
   );
 };
 
-const ImageUpload = ({
-  image,
-  onImageChange,
-  driveImages,
-}: {
-  image: string;
-  onImageChange: (newImage: string) => void;
-  driveImages?: string[];
-}) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+// const ImageUpload = ({
+//   image,
+//   onImageChange,
+//   driveImages,
+// }: {
+//   image: string;
+//   onImageChange: (newImage: string) => void;
+//   driveImages?: string[];
+// }) => {
+//   const fileInputRef = React.useRef<HTMLInputElement>(null);
+//   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
-      setIsModalOpen(false);
-    }
-  };
+//   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = event.target.files?.[0];
+//     if (file) {
+//       const imageUrl = URL.createObjectURL(file);
+//       onImageChange(imageUrl);
+//       setIsModalOpen(false);
+//     }
+//   };
 
-  const [imageSelected, setImageSelected] = useState<string>([]);
-  const handleImageSelect = (image: string) => {
-    console.log("Selected image:", image);
-    setImageSelected(image);
-  };
+//   const [imageSelected, setImageSelected] = useState<string>([]);
+//   const handleImageSelect = (image: string) => {
+//     console.log("Selected image:", image);
+//     setImageSelected(image);
+//   };
 
-  const handleSave = () => {
-    if (imageSelected) {
-      onImageChange(imageSelected?.id);
-      setIsModalOpen(false);
-    }
-  };
+//   const handleSave = () => {
+//     if (imageSelected) {
+//       onImageChange(imageSelected?.id);
+//       setIsModalOpen(false);
+//     }
+//   };
 
-  return (
-    <div className="relative">
-      <Image
-        src={imageSelected?.thumbnailLink ?? image ?? "/placeholder.svg"}
-        alt="Insulation inspection"
-        className="w-full h-64 object-cover rounded-lg mt-4"
-        width={400}
-        height={256}
-      />
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
-      >
-        <Edit2 className="w-4 h-4" />
-      </button>
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
-          <div className=" max-h-[80vh] max-w-[70vw] overflow-y-auto bg-white">
-            <div>
-              {driveImages && (
-                <div className="grid grid-cols-3 gap-4 mb-4 p-3 rounded-lg">
-                  {driveImages.map((img, index) => (
-                    <div
-                      key={index}
-                      className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
-                    >
-                      <Image
-                        src={img?.thumbnailLink}
-                        alt={`Drive Image ${index + 1}`}
-                        width={60}
-                        height={60}
-                        className={`w-full h-full object-cover ${
-                          imageSelected?.id === img?.id
-                            ? "ring-2 ring-blue-500 border-2 border-red-400"
-                            : ""
-                        }`}
-                        onClick={() => handleImageSelect(img)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="bg-white p-4 rounded">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Choose New Image
-              </button>
-            </div>
-            <div className="flex justify-end gap-2 mb-4">
-              <button
-                onClick={handleSave}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-          <IoMdClose
-            size={24}
-            className=" absolute top-3 right-3"
-            onClick={() => setIsModalOpen(false)}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
+//   return (
+//     <div className="relative">
+//       <Image
+//         src={imageSelected?.thumbnailLink ?? image ?? "/placeholder.svg"}
+//         alt="Insulation inspection"
+//         className="w-full h-64 object-cover rounded-lg mt-4"
+//         width={400}
+//         height={256}
+//       />
+//       <button
+//         onClick={() => setIsModalOpen(true)}
+//         className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
+//       >
+//         <Edit2 className="w-4 h-4" />
+//       </button>
+//       {isModalOpen && (
+//         <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
+//           <div className=" max-h-[80vh] max-w-[70vw] overflow-y-auto bg-white">
+//             <div>
+//               {driveImages && (
+//                 <div className="grid grid-cols-3 gap-4 mb-4 p-3 rounded-lg">
+//                   {driveImages.map((img, index) => (
+//                     <div
+//                       key={index}
+//                       className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
+//                     >
+//                       <Image
+//                         src={img?.thumbnailLink}
+//                         alt={`Drive Image ${index + 1}`}
+//                         width={60}
+//                         height={60}
+//                         className={`w-full h-full object-cover ${
+//                           imageSelected?.id === img?.id
+//                             ? "ring-2 ring-blue-500 border-2 border-red-400"
+//                             : ""
+//                         }`}
+//                         onClick={() => handleImageSelect(img)}
+//                       />
+//                     </div>
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
+//             <div className="bg-white p-4 rounded">
+//               <input
+//                 type="file"
+//                 ref={fileInputRef}
+//                 onChange={handleFileChange}
+//                 accept="image/*"
+//                 className="hidden"
+//               />
+//               <button
+//                 onClick={() => fileInputRef.current?.click()}
+//                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//               >
+//                 Choose New Image
+//               </button>
+//             </div>
+//             <div className="flex justify-end gap-2 mb-4">
+//               <button
+//                 onClick={handleSave}
+//                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//               >
+//                 Save
+//               </button>
+//               <button
+//                 onClick={() => setIsModalOpen(false)}
+//                 className="px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           </div>
+//           <IoMdClose
+//             size={24}
+//             className=" absolute top-3 right-3"
+//             onClick={() => setIsModalOpen(false)}
+//           />
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
 interface FieldItem {
   label: string;
@@ -336,15 +337,15 @@ export function ExteriorWallAssessment({
   ) => {
     setWallData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       let updatedField: Partial<InsulationItemData> = {};
-  
+
       if (field === "rValue") {
         const numericValue =
           typeof value === "number"
             ? value
             : Number.parseInt(value.toString().replace("R", ""));
-  
+
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
           newData.efficiency = Math.round(
@@ -352,10 +353,14 @@ export function ExteriorWallAssessment({
           );
           updatedField = { rValue: numericValue };
         }
-      } else if (field === "material" || field === "condition") {
+      } else if (
+        field === "material" ||
+        field === "condition" ||
+        field === "image"
+      ) {
         updatedField = { [field]: value as string };
       }
-  
+
       if (onUpdate && Object.keys(updatedField).length > 0) {
         const updatedItem: InsulationItemData = {
           ...(data ?? { name: "Your Home's Exterior Wall Insulation" }),
@@ -363,15 +368,13 @@ export function ExteriorWallAssessment({
         };
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
-  
 
   const updateImage = (newImage: string) => {
-    updateWallData("images", newImage);
+    updateWallData("image", newImage);
   };
 
   return (
@@ -501,6 +504,7 @@ export function ExteriorWallAssessment({
               <div className="relative aspect-square rounded-lg overflow-hidden">
                 {isAdmin ? (
                   <ImageUpload
+                    driveImages={driveImages}
                     image={wallData.images || "/placeholder.svg"}
                     onImageChange={(newImage) => updateImage(newImage)}
                   />

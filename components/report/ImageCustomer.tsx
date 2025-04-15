@@ -8,7 +8,9 @@ export const ImageCustomer = ({
   image: string;
   driveImages?: { id: string; thumbnailLink: string }[] | undefined;
 }) => {
-  const imageFromDB = driveImages?.find((img) => img.id === image)?.thumbnailLink;
+  const imageFromDB = driveImages?.find(
+    (img) => img.id === image,
+  )?.thumbnailLink;
   console.log("Image id:", image);
   console.log("Drive Images:", driveImages);
 

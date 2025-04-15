@@ -20,9 +20,12 @@ const BookingContractPage = () => {
   const handleAcceptContract = async () => {
     let loading = toast.loading("Updating contract status...");
     try {
-      const response = await fetch(`/api/user/bookings/${bookingNumber}/contract/${contractId}/accept`, {
-        method: "POST",
-      })
+      const response = await fetch(
+        `/api/user/bookings/${bookingNumber}/contract/${contractId}/accept`,
+        {
+          method: "POST",
+        },
+      );
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.detail || "Failed to accept contract");
@@ -34,7 +37,7 @@ const BookingContractPage = () => {
       toast.dismiss(loading);
       toast.error((error as Error).message || "Failed to accept contract");
     }
-  }
+  };
 
   const sessionStatus = (event: MessageEvent<any>) => {
     const type = event.data && event.data.type;
@@ -57,7 +60,7 @@ const BookingContractPage = () => {
     const fetchSignUrl = async () => {
       try {
         const response = await fetch(
-          `/api/user/bookings/${bookingNumber}/contract/${contractId}`
+          `/api/user/bookings/${bookingNumber}/contract/${contractId}`,
         );
         const data = await response.json();
         if (!data.success) {

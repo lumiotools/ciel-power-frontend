@@ -15,6 +15,7 @@ import Image from "next/image";
 // import { Close } from "@radix-ui/react-dialog";
 import { IoMdClose } from "react-icons/io";
 import ImageCustomer from "./ImageCustomer";
+import { ImageUpload } from "./ImageUpload";
 
 interface GaugeChartProps {
   value: number;
@@ -202,170 +203,170 @@ const EditableField = ({
   );
 };
 
-const ImageUpload = ({
-  image,
-  onImageChange,
-  driveImages,
-}: {
-  image: string;
-  onImageChange: (newImage: string) => void;
-  driveImages?: string[];
-}) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  // const [isEditing, setIsEditing] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+// const ImageUpload = ({
+//   image,
+//   onImageChange,
+//   driveImages,
+// }: {
+//   image: string;
+//   onImageChange: (newImage: string) => void;
+//   driveImages?: string[];
+// }) => {
+//   const fileInputRef = React.useRef<HTMLInputElement>(null);
+//   // const [isEditing, setIsEditing] = useState(false);
+//   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Here you would typically upload the file to your server
-      // For now, we'll just create a local URL
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
-      setIsModalOpen(false);
-    }
-  };
+//   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = event.target.files?.[0];
+//     if (file) {
+//       // Here you would typically upload the file to your server
+//       // For now, we'll just create a local URL
+//       const imageUrl = URL.createObjectURL(file);
+//       onImageChange(imageUrl);
+//       setIsModalOpen(false);
+//     }
+//   };
 
-  const [imageSelected, setImageSelected] = useState<string>([]);
-  const handleImageSelect = (image: string) => {
-    console.log("Selected image:", image);
-    setImageSelected(image);
-  };
+//   const [imageSelected, setImageSelected] = useState<string>([]);
+//   const handleImageSelect = (image: string) => {
+//     console.log("Selected image:", image);
+//     setImageSelected(image);
+//   };
 
-  const handleSave = () => {
-    if (imageSelected) {
-      onImageChange(imageSelected?.id);
-      setIsModalOpen(false); // Close the modal after saving
-    }
-  };
+//   const handleSave = () => {
+//     if (imageSelected) {
+//       onImageChange(imageSelected?.id);
+//       setIsModalOpen(false); // Close the modal after saving
+//     }
+//   };
 
-  return (
-    <div className="relative">
-      <Image
-        src={imageSelected?.thumbnailLink ?? image ?? "/placeholder.svg"}
-        alt="Insulation inspection"
-        className="w-full h-64 object-cover rounded-lg mt-4"
-        width={400}
-        height={256}
-      />
-      {/* {isEditing && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg mt-4">
-          <div className="bg-white p-4 rounded">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              // onClick={() => fileInputRef.current?.click()}
-              onClick={() => setIsModalOpen(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Choose New Image
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )} */}
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
-      >
-        <Edit2 className="w-4 h-4" />
-      </button>
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
-          <div className=" max-h-[80vh] max-w-[70vw] overflow-y-auto bg-white">
-            <div>
-              {driveImages && (
-                <div className="grid grid-cols-3 gap-4 mb-4 p-3 rounded-lg">
-                  {driveImages.map((img, index) => (
-                    <div
-                      key={index}
-                      className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
-                    >
-                      <Image
-                        src={img?.thumbnailLink}
-                        alt={`Drive Image ${index + 1}`}
-                        width={60}
-                        height={60}
-                        className={`w-full h-full object-cover ${
-                          imageSelected?.id === img?.id
-                            ? "ring-2 ring-blue-500 border-2 border-red-400"
-                            : ""
-                        }`}
-                        onClick={() => handleImageSelect(img)}
-                      />
-                      {/* <button
-                        onClick={() => onImageChange(img)}
-                        className="absolute bottom-2 right-2 bg-blue-500 text-white px-2 py-1 rounded"
-                      >
-                        Select
-                      </button> */}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="bg-white p-4 rounded">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                // onClick={() => setIsModalOpen(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Choose New Image
-              </button>
-              {/* <button
-                onClick={() => setIsModalOpen(false)}
-                className="ml-2 px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button> */}
-            </div>
-            <div className="flex justify-end gap-2 mb-4">
-              <button
-                onClick={handleSave}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-          {/* <Close
-            onClick={() => setIsModalOpen(false)}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-            size={24}
-          /> */}
-          <IoMdClose
-            size={24}
-            className=" absolute top-3 right-3"
-            onClick={() => setIsModalOpen(false)}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
+//   return (
+//     <div className="relative">
+//       <Image
+//         src={imageSelected?.thumbnailLink ?? image ?? "/placeholder.svg"}
+//         alt="Insulation inspection"
+//         className="w-full h-64 object-cover rounded-lg mt-4"
+//         width={400}
+//         height={256}
+//       />
+//       {/* {isEditing && (
+//         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg mt-4">
+//           <div className="bg-white p-4 rounded">
+//             <input
+//               type="file"
+//               ref={fileInputRef}
+//               onChange={handleFileChange}
+//               accept="image/*"
+//               className="hidden"
+//             />
+//             <button
+//               // onClick={() => fileInputRef.current?.click()}
+//               onClick={() => setIsModalOpen(true)}
+//               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//             >
+//               Choose New Image
+//             </button>
+//             <button
+//               onClick={() => setIsEditing(false)}
+//               className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
+//             >
+//               Cancel
+//             </button>
+//           </div>
+//         </div>
+//       )} */}
+//       <button
+//         onClick={() => setIsModalOpen(true)}
+//         className="absolute top-6 right-2 bg-white p-2 rounded-full shadow-lg"
+//       >
+//         <Edit2 className="w-4 h-4" />
+//       </button>
+//       {isModalOpen && (
+//         <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
+//           <div className=" max-h-[80vh] max-w-[70vw] overflow-y-auto bg-white">
+//             <div>
+//               {driveImages && (
+//                 <div className="grid grid-cols-3 gap-4 mb-4 p-3 rounded-lg">
+//                   {driveImages.map((img, index) => (
+//                     <div
+//                       key={index}
+//                       className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden"
+//                     >
+//                       <Image
+//                         src={img?.thumbnailLink}
+//                         alt={`Drive Image ${index + 1}`}
+//                         width={60}
+//                         height={60}
+//                         className={`w-full h-full object-cover ${
+//                           imageSelected?.id === img?.id
+//                             ? "ring-2 ring-blue-500 border-2 border-red-400"
+//                             : ""
+//                         }`}
+//                         onClick={() => handleImageSelect(img)}
+//                       />
+//                       {/* <button
+//                         onClick={() => onImageChange(img)}
+//                         className="absolute bottom-2 right-2 bg-blue-500 text-white px-2 py-1 rounded"
+//                       >
+//                         Select
+//                       </button> */}
+//                     </div>
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
+//             <div className="bg-white p-4 rounded">
+//               <input
+//                 type="file"
+//                 ref={fileInputRef}
+//                 onChange={handleFileChange}
+//                 accept="image/*"
+//                 className="hidden"
+//               />
+//               <button
+//                 onClick={() => fileInputRef.current?.click()}
+//                 // onClick={() => setIsModalOpen(true)}
+//                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//               >
+//                 Choose New Image
+//               </button>
+//               {/* <button
+//                 onClick={() => setIsModalOpen(false)}
+//                 className="ml-2 px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
+//               >
+//                 Cancel
+//               </button> */}
+//             </div>
+//             <div className="flex justify-end gap-2 mb-4">
+//               <button
+//                 onClick={handleSave}
+//                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//               >
+//                 Save
+//               </button>
+//               <button
+//                 onClick={() => setIsModalOpen(false)}
+//                 className="px-4 py-2 rounded border hover:bg-gray-100 cursor-pointer"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           </div>
+//           {/* <Close
+//             onClick={() => setIsModalOpen(false)}
+//             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+//             size={24}
+//           /> */}
+//           <IoMdClose
+//             size={24}
+//             className=" absolute top-3 right-3"
+//             onClick={() => setIsModalOpen(false)}
+//           />
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
 export function KneewallAssessment({
   data,
@@ -377,17 +378,17 @@ export function KneewallAssessment({
   const defaultKneewallData: KneewallData[] = [
     {
       title: "Your Home's Kneewall Flat Insulation",
-      material: 'None',
+      material: "None",
       condition: "N/A",
       rValue: "R0",
       recommendation: "R60",
       currentValue: 0,
       maxValue: 60,
-      image: null,
+      image: "/placeholder.jpg",
     },
     {
       title: "Your Kneewall Insulation",
-      material: 'None',
+      material: "None",
       condition: "N/A",
       rValue: "R0",
       recommendation: "R13",
@@ -406,11 +407,11 @@ export function KneewallAssessment({
       title: data.name || "Your Kneewall Insulation",
       material: data.material || "Not specified",
       condition: data.condition || "Not assessed",
-      rValue: `R${data.rValue}`,
+      rValue: data.rValue ? `R${data.rValue}` : "Not assessed",
       recommendation: data.name?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
       currentValue: data.rValue,
       maxValue: data.name?.toLowerCase().includes("flat") ? 60 : 13,
-      image: "https://i.postimg.cc/dQbxhDSy/Screenshot-2024-11-25-025748.png", // Default image
+      image: data?.image ?? "/placeholder.jpg", // Default image
     };
 
     // If we have data for a single kneewall, return it as a single item array
@@ -471,21 +472,22 @@ export function KneewallAssessment({
   ) => {
     console.log("Updating kneewall data:", index, field, value);
     console.log("Current kneewall data and function:", data, onUpdate);
-  
+
     setKneewallData((prev) => {
       const newData = [...prev];
       newData[index] = { ...newData[index], [field]: value };
 
       console.log("New kneewall data:", newData);
-  
+
       // Update currentValue if rValue changes
       if (field === "rValue") {
+        console.log("Inside rvalue");
         const numericValue = parseInt(value.replace("R", ""));
         if (!isNaN(numericValue)) {
           newData[index].currentValue = numericValue;
         }
       }
-  
+
       // Trigger update to parent
       if (onUpdate) {
         const updatedItem: InsulationItemData = {
@@ -496,18 +498,17 @@ export function KneewallAssessment({
           rValue:
             field === "rValue"
               ? parseInt(value.replace("R", ""))
-              : newData[index].currentValue,
+              : (newData[index].currentValue ?? 0),
           image: field === "image" ? value : newData[index].image,
         };
-  
+
         console.log("Sending update to parent:", updatedItem);
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   return (
     <div className="space-y-8">
@@ -563,7 +564,7 @@ export function KneewallAssessment({
                           <dd className="font-medium text-gray-900 dark:text-gray-100">
                             {isAdmin ? (
                               <EditableField
-                                value={data.material}
+                                value={data.material ?? "null"}
                                 onSave={(value) =>
                                   updateKneewallData(index, "material", value)
                                 }

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ImageUpload } from "./ImageUpload";
 
 interface EditableFieldProps {
   value: string;
@@ -44,6 +45,7 @@ interface CrawlspaceAssessmentProps {
   data?: InsulationItemData | null;
   isAdmin?: boolean;
   onUpdate?: (updatedItem: InsulationItemData) => void;
+  driveImages?: string[];
 }
 
 interface FieldItem {
@@ -172,77 +174,78 @@ const EditableField: React.FC<EditableFieldProps> = ({
   );
 };
 
-const ImageUpload: React.FC<{
-  src: string;
-  onImageChange: (newImage: string) => void;
-}> = ({ src, onImageChange }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [isEditing, setIsEditing] = useState(false);
+// const ImageUpload: React.FC<{
+//   src: string;
+//   onImageChange: (newImage: string) => void;
+// }> = ({ src, onImageChange }) => {
+//   const fileInputRef = React.useRef<HTMLInputElement>(null);
+//   const [isEditing, setIsEditing] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
-      setIsEditing(false);
-    }
-  };
+//   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = event.target.files?.[0];
+//     if (file) {
+//       const imageUrl = URL.createObjectURL(file);
+//       onImageChange(imageUrl);
+//       setIsEditing(false);
+//     }
+//   };
 
-  return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      className="relative aspect-video rounded-lg overflow-hidden"
-    >
-      <img
-        src={src || "/placeholder.svg"}
-        alt="Crawlspace wall"
-        className="object-cover w-full"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute bottom-4 left-4 text-white">
-        <h3 className="font-semibold mb-1">Current Condition</h3>
-        <p className="text-sm">Uninsulated crawlspace walls</p>
-      </div>
-      {isEditing && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Choose New Image
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-      {!isEditing && (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg"
-        >
-          <Edit2 className="w-4 h-4" />
-        </button>
-      )}
-    </motion.div>
-  );
-};
+//   return (
+//     <motion.div
+//       whileHover={{ scale: 1.02 }}
+//       className="relative aspect-video rounded-lg overflow-hidden"
+//     >
+//       <img
+//         src={src || "/placeholder.svg"}
+//         alt="Crawlspace wall"
+//         className="object-cover w-full"
+//       />
+//       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+//       <div className="absolute bottom-4 left-4 text-white">
+//         <h3 className="font-semibold mb-1">Current Condition</h3>
+//         <p className="text-sm">Uninsulated crawlspace walls</p>
+//       </div>
+//       {isEditing && (
+//         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+//           <div className="bg-white p-4 rounded">
+//             <input
+//               type="file"
+//               ref={fileInputRef}
+//               onChange={handleFileChange}
+//               accept="image/*"
+//               className="hidden"
+//             />
+//             <button
+//               onClick={() => fileInputRef.current?.click()}
+//               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+//             >
+//               Choose New Image
+//             </button>
+//             <button
+//               onClick={() => setIsEditing(false)}
+//               className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
+//             >
+//               Cancel
+//             </button>
+//           </div>
+//         </div>
+//       )}
+//       {!isEditing && (
+//         <button
+//           onClick={() => setIsEditing(true)}
+//           className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg"
+//         >
+//           <Edit2 className="w-4 h-4" />
+//         </button>
+//       )}
+//     </motion.div>
+//   );
+// };
 
 export function CrawlspaceAssessment({
   data,
   isAdmin = false,
+  driveImages,
   onUpdate,
 }: CrawlspaceAssessmentProps) {
   // Default data to use if no report data is provided
@@ -286,15 +289,15 @@ export function CrawlspaceAssessment({
   ) => {
     setCrawlspaceData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       let updatedField: Partial<InsulationItemData> = {};
-  
+
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
             ? Number.parseInt(value.replace("R", ""))
             : value;
-  
+
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
           newData.efficiency = Math.round(
@@ -305,7 +308,7 @@ export function CrawlspaceAssessment({
       } else if (field === "efficiency") {
         const numericValue =
           typeof value === "string" ? Number.parseInt(value) : value;
-  
+
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue;
           const calculatedRValue = Math.round(
@@ -317,7 +320,7 @@ export function CrawlspaceAssessment({
       } else if (field === "material" || field === "condition") {
         updatedField[field] = value as string;
       }
-  
+
       // Call onUpdate only when a change is relevant
       if (onUpdate && Object.keys(updatedField).length > 0) {
         const updatedItem: InsulationItemData = {
@@ -326,11 +329,10 @@ export function CrawlspaceAssessment({
         };
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   // Determine description text based on crawlspace data
   const getDescriptionText = () => {
@@ -470,6 +472,7 @@ export function CrawlspaceAssessment({
               {isAdmin ? (
                 <ImageUpload
                   src={crawlspaceData.image || "/placeholder.svg"}
+                  driveImages={driveImages}
                   onImageChange={(newImage) =>
                     updateCrawlspaceData("image", newImage)
                   }

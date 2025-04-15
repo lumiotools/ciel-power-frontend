@@ -351,8 +351,8 @@ export function OverhangAssessment({
 
   // Default data to use if no report data is provided
   const defaultOverhangData: OverhangData = {
-    material: 'None',
-    condition:'N/A',
+    material: "None",
+    condition: "N/A",
     rValue: 0,
     recommendedValue: 30,
     maxValue: 40,
@@ -366,7 +366,7 @@ export function OverhangAssessment({
 
     // Create overhang data from report data
     return {
-      material: data.material || 'None',
+      material: data.material || "None",
       condition: data.condition || "N/A",
       rValue: data.rValue || 0,
       recommendedValue: 30, // Standard recommendation for overhang insulation
@@ -413,15 +413,15 @@ export function OverhangAssessment({
   ) => {
     setOverhangData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       let updatedField: Partial<InsulationItemData> = {};
-  
+
       if (field === "rValue") {
         const numericValue =
           typeof value === "string"
             ? Number.parseInt(value.replace("R", ""))
             : value;
-  
+
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue;
           newData.efficiency = Math.round(
@@ -432,7 +432,7 @@ export function OverhangAssessment({
       } else if (field === "efficiency") {
         const numericValue =
           typeof value === "string" ? Number.parseInt(value) : value;
-  
+
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue;
           const calculatedR = Math.round(
@@ -446,7 +446,7 @@ export function OverhangAssessment({
       } else if (field === "image") {
         updatedField.image = value as string;
       }
-  
+
       // Fire update if there's something to save
       if (onUpdate && Object.keys(updatedField).length > 0) {
         const updatedItem: InsulationItemData = {
@@ -461,11 +461,10 @@ export function OverhangAssessment({
         };
         onUpdate(updatedItem);
       }
-  
+
       return newData;
     });
   };
-  
 
   // Get appropriate feedback message based on R-value
   const getEfficiencyFeedback = () => {
