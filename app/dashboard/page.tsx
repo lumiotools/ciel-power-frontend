@@ -44,6 +44,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import RescheduleModal from "@/components/component/reshedule-modal";
+import PaymentModal from "@/components/payment/modal";
 
 // interface Service {
 //   id: string;
@@ -166,27 +167,131 @@ const getStepStatus = (currentStage: string) => {
   });
 };
 
+const isOneAndHalfHourAhead = (startTime: string): boolean => {
+  const startDate = new Date(startTime);
+  const currentDate = new Date();
+  if (currentDate < startDate) return false;
+  const diffInHours =
+    (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
+  return diffInHours >= 1.5;
+};
+
+const formatDate = (dateStr: string): string => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    weekday: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+};
+
+const formatTime = (dateStr: string): string => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+    timeZone: "UTC",
+  }).format(date);
+};
+
 export default function DashboardPage() {
   // const router = useRouter();
   // const [services, setServices] = useState<Service[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<AllBookings>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<RecommendationData[]>(
     []
   );
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // State to track if timeline is expanded or collapsed
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
   // State for reschedule modal
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [currentBookingId, setCurrentBookingId] = useState("");
+  const [latestState, setLatestState] = useState("");
+
+  const State: Array<keyof AllBookings> = [
+    "bookingDetails",
+    "utilityBillDetails",
+    "reportConsultation",
+    "consultationDetails",
+    "proposalDetails",
+    "paymentDetails",
+  ];
 
   // Toggle timeline expansion
   const toggleTimeline = () => {
     setIsTimelineExpanded(!isTimelineExpanded);
   };
 
+  useEffect(() => {
+    for (let i = 0; i < State.length; i++) {
+      const key = State[i]; // Get the current key from State
+      if (bookings[key]) {
+        // Check if the key exists in bookings and has a value
+        console.log("bookings[key]:", bookings[key]);
+        console.log("State[i]:", key);
+        setLatestState(key); // Set the latest state
+      } else {
+        break; // Stop the loop after finding the first valid key
+      }
+    }
+    console.log("latestState", latestState);
+  }, [bookings]);
+
+  const CloseModalContent = () => {
+    switch (latestState) {
+      case "bookingDetails":
+        return (
+          <EnergyAudit
+            BookingDetails={bookings.bookingDetails}
+            onClick={() => openRescheduleModal("AUDIT-345678")}
+          />
+        );
+      case "utilityBillDetails":
+        return (
+          <UtilityBills UtilityBillDetails={bookings.utilityBillDetails} />
+        );
+      case "reportConsultation":
+        return bookings?.reportConsultation ? (
+          <ReportConsaltation
+            ReportConsultation={bookings?.reportConsultation}
+          />
+        ) : null;
+
+      case "consultationDetails":
+        return bookings?.consultationDetails ? (
+          <ConsultationDerails
+            BookingDetails={bookings.bookingDetails}
+            ConsultationDetails={bookings.consultationDetails}
+            onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
+          />
+        ) : null;
+
+      case "proposalDetails":
+        return isOneAndHalfHourAhead(bookings?.bookingDetails?.startTime) ? (
+          <WeAreLinning />
+        ) : null;
+
+      case "paymentDetails":
+        return (
+          <PaymentDetails
+            PaymentDetails={bookings?.paymentDetails}
+            userDetails={userDetails}
+            onClick={() => setIsModalOpen(false)}
+          />
+        );
+      default:
+        return "";
+    }
+  };
   // Open reschedule modal
   const openRescheduleModal = (bookingId: string) => {
     setCurrentBookingId(bookingId);
@@ -260,6 +365,23 @@ export default function DashboardPage() {
     }
   }
 
+  const fetchBookingDetails = async (bookingNumber: string) => {
+    try {
+      const res = await fetch(`/api/user/bookings/${bookingNumber}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      const data = await res.json();
+      console.log("Booking details response:", data);
+      setBookings(data?.data || []);
+      console.log("Booking details response:", data);
+    } catch (error) {
+      console.error("Error fetching booking details:", error);
+    }
+  };
   useEffect(() => {
     const fetchData = async (id: string) => {
       setLoading(true);
@@ -283,23 +405,6 @@ export default function DashboardPage() {
       }
     };
 
-    const fetchBookingDetails = async (bookingNumber: string) => {
-      try {
-        const res = await fetch(`/api/user/bookings/${bookingNumber}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-        const data = await res.json();
-        console.log("Booking details response:", data);
-        setBookings(data?.data || []);
-        console.log("Booking details response:", data);
-      } catch (error) {
-        console.error("Error fetching booking details:", error);
-      }
-    };
     if (userDetails?.bookingNumber) {
       fetchData(userDetails?.bookingNumber);
       fetchBookingDetails(userDetails?.bookingNumber);
@@ -345,36 +450,6 @@ export default function DashboardPage() {
   //   }
   // };
 
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      weekday: "short",
-      day: "numeric",
-      timeZone: "UTC",
-    }).format(date);
-  };
-
-  const formatTime = (dateStr: string): string => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-      timeZone: "UTC",
-    }).format(date);
-  };
-
-  const isOneAndHalfHourAhead = (startTime: string): boolean => {
-    const startDate = new Date(startTime);
-    const currentDate = new Date();
-    if (currentDate < startDate) return false;
-    const diffInHours =
-      (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
-    return diffInHours >= 1.5;
-  };
   // const getStatusBadge = (booking: Booking): React.ReactElement => {
   //   if (booking.canceled) {
   //     return (
@@ -472,14 +547,16 @@ export default function DashboardPage() {
                 {!isTimelineExpanded && (
                   <>
                     {/* Third card peeking out */}
-                    <div className="absolute top-8 left-0 right-0 h-4 bg-white rounded-lg border border-gray-200 shadow-sm z-10"></div>
+                    {/* <div className="absolute top-8 left-0 right-0 h-4 bg-white rounded-lg border border-gray-200 shadow-sm z-10"></div> */}
                     {/* Second card peeking out */}
-                    <div className="absolute top-4 left-0 right-0 h-4 bg-white rounded-lg border border-gray-200 shadow-sm z-20"></div>
+                    {/* <div className="absolute top-4 left-0 right-0 h-4 bg-white rounded-lg border border-gray-200 shadow-sm z-20"></div> */}
+
+                    {CloseModalContent()}
                   </>
                 )}
 
                 {/* Top Timeline Item - You're Officially Certified! */}
-                <div
+                {/* <div
                   className={`timeline-item mb-6 relative transition-all duration-500 ease-in-out z-30 ${
                     isTimelineExpanded ? "" : "shadow-lg"
                   }`}
@@ -502,7 +579,7 @@ export default function DashboardPage() {
                       </button>
                     </Link>
                   </div>
-                </div>
+                </div> */}
 
                 {/* The rest of the timeline items - only shown when expanded */}
                 <div
@@ -867,8 +944,105 @@ export default function DashboardPage() {
                     </div>
                   </div> */}
 
+                  {/* New Payment Process */}
+                  <PaymentDetails
+                    PaymentDetails={bookings?.paymentDetails}
+                    userDetails={userDetails}
+                    onClick={() => setIsModalOpen(false)}
+                  />
+                  {/* {bookings?.paymentDetails && (
+                    <div className="timeline-item mb-6 relative">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="flex items-center mb-4">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            className="lucide lucide-pen-tool text-[#8bc34a] mr-2"
+                          >
+                            <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path>
+                            <path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path>
+                            <path d="m2.3 2.3 7.286 7.286"></path>
+                            <circle cx="11" cy="11" r="2"></circle>
+                          </svg>
+                          <div className="font-medium text-lg">
+                            One Last Thing!
+                          </div>
+                        </div>
+                        <p className="text-gray-600 mb-4">
+                          To finalize your project and secure your installation
+                          dates, please complete the payment for your selected
+                          upgrades. Your investment in energy efficiency is just
+                          a click away.
+                        </p>
+                        <div className="mb-4">
+                          <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              className="lucide lucide-dollar-sign text-[#8bc34a] mr-2 mt-1"
+                            >
+                              <line x1="12" x2="12" y1="2" y2="22"></line>
+                              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-center">
+                                <div className="font-medium">Total amount</div>
+                                <div className="text-gray-700 text-sm">
+                                  ${bookings?.paymentDetails?.amount}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="text-gray-700 text-sm">
+                            <span className="font-medium"></span>
+                          </div>
+                          {userDetails?.bookingNumber && (
+                            <button
+                              disabled={
+                                bookings?.paymentDetails?.status === "Completed"
+                              }
+                              onClick={() => setIsModalOpen(true)}
+                              className="bg-[#8bc34a] text-white px-4 py-2 rounded-md hover:bg-[#95c25a] transition-colors"
+                            >
+                              Pay Now
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+                          <a href="/one-last-thing">
+                            <button className="text-[#007BFF] text-sm font-medium">
+                              View Details
+                            </button>
+                          </a>
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="font-medium">Status:</span>
+                            <span className="text-[#8bc34a] font-medium">
+                              {bookings?.paymentDetails?.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )} */}
+
                   {/* Timeline Item - Your Project Plans Are Ready */}
-                  {bookings?.proposalDetails && (
+                  {/* {bookings?.proposalDetails && (
                     <div className="timeline-item mb-6 relative">
                       <div className="bg-white rounded-lg p-6 border border-gray-200">
                         <div className="flex items-center mb-4">
@@ -915,209 +1089,35 @@ export default function DashboardPage() {
                         </Link>
                       </div>
                     </div>
-                  )}
+                  )} */}
+
+                  <ProjectPlansReady
+                    ProposalDetails={bookings?.proposalDetails}
+                  />
 
                   {/* Timeline Item - We're Lining Everything Up */}
-                  {!isOneAndHalfHourAhead(
+                  {isOneAndHalfHourAhead(
                     bookings?.bookingDetails?.startTime
-                  ) && (
-                    <div className="timeline-item mb-6 relative">
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
-                        <div className="flex items-center mb-2">
-                          <CheckCircle
-                            size={24}
-                            className="text-[#8bc34a] mr-2"
-                          />
-                          <div className="font-medium text-lg">
-                            We're Lining Everything Up
-                          </div>
-                        </div>
-
-                        <div className="mb-3 text-[#8bc34a] font-medium">
-                          Thanks for signing off!
-                        </div>
-
-                        <p className="text-gray-600 mb-4">
-                          We're wrapping up final details and approvals.
-                          Installation will be scheduled soon, and we'll keep
-                          you informed along the way.
-                        </p>
-
-                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
-                          <div className="flex items-center gap-1 ml-auto">
-                            <span className="font-medium">Status:</span>
-                            <span className="text-[#8bc34a] font-medium">
-                              Processing
-                            </span>
-                          </div>
-                        </div>
-                        <Link href="/lining-everything-up">
-                          <button className="text-[#007BFF] text-sm font-medium">
-                            View Details
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
+                  ) && <WeAreLinning />}
 
                   {/* Timeline Item - Your Audit Results are in - MOVED HERE */}
                   {bookings?.consultationDetails && (
-                    <div className="timeline-item mb-6 relative">
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center">
-                            <FileCheck
-                              size={24}
-                              className="text-[#8bc34a] mr-2"
-                            />
-                            <div className="font-medium text-lg">
-                              Your Audit Results are in
-                            </div>
-                          </div>
-                          {bookings?.consultationDetails?.rescheduleLink && (
-                            <Link
-                              href={
-                                bookings?.consultationDetails?.rescheduleLink
-                              }
-                              onClick={() =>
-                                openRescheduleModal("AUDIT-RESULTS-123")
-                              }
-                              className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
-                            >
-                              <Clock size={18} />
-                              Reschedule
-                            </Link>
-                          )}
-                        </div>
-
-                        <p className="text-gray-600 mb-4">
-                          Your comprehensive home energy report is now
-                          available. Review your project plan and sign the
-                          contracts to proceed. All necessary documents,
-                          including your detailed report with findings,
-                          recommendations, and potential savings calculations
-                          are available for your review.
-                        </p>
-
-                        <div className="mb-4">
-                          <Link href="/report">
-                            <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
-                              <FileText size={18} />
-                              Go to Your Report
-                            </button>
-                          </Link>
-                        </div>
-
-                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-4">
-                          <div className="flex items-center gap-1">
-                            <ClipboardList
-                              size={16}
-                              className="text-[#8bc34a]"
-                            />
-                            <span>Consultation</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar size={16} className="text-[#8bc34a]" />
-                            <span>
-                              {formatDate(
-                                bookings?.consultationDetails.startTime
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock size={16} className="text-[#8bc34a]" />
-                            <span>
-                              {formatTime(
-                                bookings?.consultationDetails.startTime
-                              )}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
-                          <div className="flex items-center gap-1 ml-auto">
-                            <span className="font-medium">Status:</span>
-                            <span className="text-[#8bc34a] font-medium">
-                              Complete
-                            </span>
-                          </div>
-                        </div>
-                        <Link href="/audit-results">
-                          <button className="text-[#007BFF] text-sm font-medium">
-                            View Details
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
+                    <ConsultationDerails
+                      BookingDetails={bookings.bookingDetails}
+                      ConsultationDetails={bookings.consultationDetails}
+                      onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
+                    />
                   )}
 
                   {/* Timeline Item - Your Results Are In — Let's Talk */}
                   {bookings?.reportConsultation && (
-                    <div className="timeline-item mb-6 relative">
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center">
-                            <FileSpreadsheet
-                              size={24}
-                              className="text-[#8bc34a] mr-2"
-                            />
-                            <div className="font-medium text-lg">
-                              Your Results Are In — Let's Talk
-                            </div>
-                          </div>
-                          <div className="flex gap-3 items-center">
-                            {bookings?.reportConsultation
-                              ?.consultationBookingUrl ? (
-                              <Link
-                                target="_blank"
-                                href={
-                                  bookings?.reportConsultation
-                                    ?.consultationBookingUrl
-                                }
-                                className={` "bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
-                              >
-                                <Calendar size={18} />
-                                Book Consultation
-                              </Link>
-                            ) : (
-                              <button
-                                disabled={"true"}
-                                className={` "bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
-                              >
-                                {" "}
-                                <Calendar size={18} />
-                                Book Consultation
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        <p className="text-gray-600 mb-4">
-                          We've completed your audit and reviewed your home's
-                          performance. Now it's time to schedule a consultation
-                          with your Ciel Home Performance Consultant to walk
-                          through the findings and talk about what's next.
-                        </p>
-
-                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
-                          <div className="flex items-center gap-1 ml-auto">
-                            <span className="font-medium">Status:</span>
-                            <span className="text-[#8bc34a] font-medium">
-                              Audit Complete
-                            </span>
-                          </div>
-                        </div>
-                        <Link href="/results-lets-talk">
-                          <button className="text-[#007BFF] text-sm font-medium">
-                            View Details
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
+                    <ReportConsaltation
+                      ReportConsultation={bookings?.reportConsultation}
+                    />
                   )}
 
                   {/* Timeline Item - Upload Utility Bills */}
-                  <div className="timeline-item mb-6 relative">
+                  {/* <div className="timeline-item mb-6 relative">
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
                       <div className="flex items-center mb-4">
                         <FileText size={24} className="text-[#8bc34a] mr-2" />
@@ -1161,10 +1161,14 @@ export default function DashboardPage() {
                         </Link>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
+
+                  <UtilityBills
+                    UtilityBillDetails={bookings.utilityBillDetails}
+                  />
 
                   {/* Timeline Item - Professional Home Energy Audit */}
-                  <div className="timeline-item mb-6 relative">
+                  {/* <div className="timeline-item mb-6 relative">
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
                       <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center">
@@ -1263,7 +1267,12 @@ export default function DashboardPage() {
                         </button>
                       </Link>
                     </div>
-                  </div>
+                  </div> */}
+
+                  <EnergyAudit
+                    BookingDetails={bookings.bookingDetails}
+                    onClick={() => openRescheduleModal("AUDIT-345678")}
+                  />
                 </div>
               </div>
             </div>
@@ -1637,6 +1646,16 @@ export default function DashboardPage() {
               bookingId={currentBookingId}
               onConfirm={handleRescheduleConfirm}
             />
+            {userDetails?.bookingNumber && (
+              <PaymentModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                  setIsModalOpen(false);
+                  fetchBookingDetails(userDetails?.bookingNumber);
+                }}
+                bookingNumber={userDetails?.bookingNumber}
+              />
+            )}
           </div>
 
           {/* faq section */}
@@ -2213,5 +2232,461 @@ const Circle = () => {
 const SimpleCircle = () => {
   return (
     <div className="min-w-2 min-h-2 flex-shrink-0 border-2  bg-black rounded-full"></div>
+  );
+};
+
+const PaymentDetails = ({ PaymentDetails, userDetails, onClick }) => {
+  if (!PaymentDetails) return null;
+  // {bookings?.paymentDetails && (
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="lucide lucide-pen-tool text-[#8bc34a] mr-2"
+          >
+            <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path>
+            <path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path>
+            <path d="m2.3 2.3 7.286 7.286"></path>
+            <circle cx="11" cy="11" r="2"></circle>
+          </svg>
+          <div className="font-medium text-lg">One Last Thing!</div>
+        </div>
+        <p className="text-gray-600 mb-4">
+          To finalize your project and secure your installation dates, please
+          complete the payment for your selected upgrades. Your investment in
+          energy efficiency is just a click away.
+        </p>
+        <div className="mb-4">
+          <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="lucide lucide-dollar-sign text-[#8bc34a] mr-2 mt-1"
+            >
+              <line x1="12" x2="12" y1="2" y2="22"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <div className="flex-1">
+              <div className="flex justify-between items-center">
+                <div className="font-medium">Total amount</div>
+                <div className="text-gray-700 text-sm">
+                  ${PaymentDetails?.amount}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-gray-700 text-sm">
+            <span className="font-medium"></span>
+          </div>
+          {userDetails?.bookingNumber && (
+            <button
+              disabled={PaymentDetails?.status === "Completed"}
+              onClick={onClick}
+              className="bg-[#8bc34a] text-white px-4 py-2 rounded-md hover:bg-[#95c25a] transition-colors"
+            >
+              Pay Now
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+          <a href="/one-last-thing">
+            <button className="text-[#007BFF] text-sm font-medium">
+              View Details
+            </button>
+          </a>
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="font-medium">Status:</span>
+            <span className="text-[#8bc34a] font-medium">
+              {PaymentDetails?.status}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    // )}
+  );
+};
+
+const ProjectPlansReady = ({ ProposalDetails }) => {
+  // bookings?.proposalDetails &&
+  if (!ProposalDetails) return null;
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center mb-4">
+          <FileCheck size={24} className="text-[#8bc34a] mr-2" />
+          <div className="font-medium text-lg">
+            Your Project Plans Are Ready
+          </div>
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          Review & sign the proposal which works for you! We've prepared
+          detailed project plans based on your audit results. Choose the option
+          that best fits your needs and budget to move forward with your home
+          energy improvements.
+        </p>
+
+        <div className="mb-4">
+          {ProposalDetails?.count > 0 && (
+            <Link href="/document-portal#review-plans">
+              <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+                <FileText size={18} />
+                Go to Your Proposals
+              </button>
+            </Link>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="font-medium">Status:</span>
+            <span className="text-[#8bc34a] font-medium">Complete</span>
+          </div>
+        </div>
+        <Link href="/project-plans-ready">
+          <button className="text-[#007BFF] text-sm font-medium">
+            View Details
+          </button>
+        </Link>
+      </div>
+    </div>
+    // )}
+  );
+};
+
+const WeAreLinning = () => {
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center mb-2">
+          <CheckCircle size={24} className="text-[#8bc34a] mr-2" />
+          <div className="font-medium text-lg">We're Lining Everything Up</div>
+        </div>
+
+        <div className="mb-3 text-[#8bc34a] font-medium">
+          Thanks for signing off!
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          We're wrapping up final details and approvals. Installation will be
+          scheduled soon, and we'll keep you informed along the way.
+        </p>
+
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="font-medium">Status:</span>
+            <span className="text-[#8bc34a] font-medium">Processing</span>
+          </div>
+        </div>
+        <Link href="/lining-everything-up">
+          <button className="text-[#007BFF] text-sm font-medium">
+            View Details
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+const ConsultationDerails = ({
+  ConsultationDetails,
+  BookingDetails,
+  onClick,
+}) => {
+  // () =>
+  //   openRescheduleModal("AUDIT-RESULTS-123")
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <FileCheck size={24} className="text-[#8bc34a] mr-2" />
+            <div className="font-medium text-lg">Your Audit Results are in</div>
+          </div>
+          {!isOneAndHalfHourAhead(BookingDetails?.startTime) &&
+          ConsultationDetails?.rescheduleLink ? (
+            <Link
+              href={ConsultationDetails?.rescheduleLink}
+              onClick={onClick}
+              className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
+            >
+              <Clock size={18} />
+              Reschedule
+            </Link>
+          ) : (
+            <button
+              disabled={
+                isOneAndHalfHourAhead(BookingDetails?.startTime) &&
+                ConsultationDetails?.rescheduleLink
+              }
+              className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
+            >
+              {" "}
+              <Clock size={18} />
+              Reschedule
+            </button>
+          )}
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          Your comprehensive home energy report is now available. Review your
+          project plan and sign the contracts to proceed. All necessary
+          documents, including your detailed report with findings,
+          recommendations, and potential savings calculations are available for
+          your review.
+        </p>
+
+        <div className="mb-4">
+          <Link href="/report">
+            <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+              <FileText size={18} />
+              Go to Your Report
+            </button>
+          </Link>
+        </div>
+
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-4">
+          <div className="flex items-center gap-1">
+            <ClipboardList size={16} className="text-[#8bc34a]" />
+            <span>Consultation</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar size={16} className="text-[#8bc34a]" />
+            <span>{formatDate(ConsultationDetails.startTime)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={16} className="text-[#8bc34a]" />
+            <span>{formatTime(ConsultationDetails.startTime)}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="font-medium">Status:</span>
+            <span className="text-[#8bc34a] font-medium">Complete</span>
+          </div>
+        </div>
+        <Link href="/audit-results">
+          <button className="text-[#007BFF] text-sm font-medium">
+            View Details
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+const ReportConsaltation = ({ ReportConsultation }) => {
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <FileSpreadsheet size={24} className="text-[#8bc34a] mr-2" />
+            <div className="font-medium text-lg">
+              Your Results Are In — Let's Talk
+            </div>
+          </div>
+          <div className="flex gap-3 items-center">
+            {ReportConsultation?.consultationBookingUrl ? (
+              <Link
+                target="_blank"
+                href={ReportConsultation?.consultationBookingUrl}
+                className={` bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
+              >
+                <Calendar size={18} />
+                Book Consultation
+              </Link>
+            ) : (
+              <button
+                disabled={true}
+                className={`opacity-35 bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
+              >
+                {" "}
+                <Calendar size={18} />
+                Book Consultation
+              </button>
+            )}
+          </div>
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          We've completed your audit and reviewed your home's performance. Now
+          it's time to schedule a consultation with your Ciel Home Performance
+          Consultant to walk through the findings and talk about what's next.
+        </p>
+
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="font-medium">Status:</span>
+            <span className="text-[#8bc34a] font-medium">Audit Complete</span>
+          </div>
+        </div>
+        <Link href="/results-lets-talk">
+          <button className="text-[#007BFF] text-sm font-medium">
+            View Details
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+const UtilityBills = ({ UtilityBillDetails }) => {
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex items-center mb-4">
+          <FileText size={24} className="text-[#8bc34a] mr-2" />
+          <div className="font-medium text-lg">Upload Your Utility Bills</div>
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          Refer to the Document Portal on the sidebar to upload your Utility
+          Bills, our auditor will review this next. Sharing your utility bills
+          helps us analyze your energy usage patterns and identify potential
+          savings.
+        </p>
+
+        <div className="flex justify-between items-center">
+          <Link href="/document-portal#upload-utility-bills">
+            <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+              <FileText size={18} />
+              Go to Your Bills
+            </button>
+          </Link>
+
+          <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4">
+            <div className="flex items-center gap-1">
+              <span className="font-medium">Status:</span>
+              <span className="text-[#8bc34a] font-medium">
+                {UtilityBillDetails?.count > 0 ? "Completed" : "Pending"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <Link href="/utility-bills-details">
+            <button className="text-[#007BFF] text-sm font-medium">
+              View Details
+            </button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EnergyAudit = ({ BookingDetails, onClick }) => {
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <ListChecks size={24} className="text-[#8bc34a] mr-2" />
+            <div>
+              <div className="font-medium text-lg">
+                Professional Home Energy Audit
+              </div>
+              <div className="text-sm text-gray-500">
+                Auditor Assigned:{" "}
+                <span className="text-[#8bc34a] font-medium">
+                  {BookingDetails?.auditor?.name}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onClick}
+            disabled={!BookingDetails?.rescheduleAvailable}
+            className={`${!BookingDetails?.rescheduleAvailable ? "opacity-35" : ""} bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors`}
+          >
+            <Clock size={18} />
+            Reschedule
+          </button>
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          We're preparing for an in-home visit to evaluate how your home uses
+          energy. Your Ciel Home Energy Auditor will collect important details
+          to help us understand how your home is performing.
+        </p>
+
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
+          <div className="flex items-center gap-1">
+            <Calendar size={16} className="text-[#8bc34a]" />
+            <span>{formatDate(BookingDetails?.startTime)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={16} className="text-[#8bc34a]" />
+            <span>{formatTime(BookingDetails?.startTime)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MapPin size={16} className="text-[#8bc34a]" />
+            <span>
+              {!!BookingDetails?.address?.line1
+                ? `${BookingDetails?.address?.line1},`
+                : ""}
+            </span>
+            <span>
+              {!!BookingDetails?.address?.line2
+                ? `${BookingDetails?.address?.line2},`
+                : ""}
+            </span>
+            <span>
+              {!!BookingDetails?.address?.city
+                ? `${BookingDetails?.address?.city},`
+                : ""}
+            </span>
+            <span>
+              {!!BookingDetails?.address?.province
+                ? `${BookingDetails?.address?.province},`
+                : ""}
+            </span>
+            <span>
+              {!!BookingDetails?.address?.countryCode
+                ? `${BookingDetails?.address?.countryCode}`
+                : ""}
+            </span>
+            <span>
+              {!!BookingDetails?.address?.postalCode
+                ? `${BookingDetails?.address?.postalCode}`
+                : ""}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="font-medium">Status:</span>
+            <span className="text-[#8bc34a] font-medium">Scheduled</span>
+          </div>
+        </div>
+
+        <Link href="/audit-details">
+          <button className="text-[#007BFF] text-sm font-medium">
+            View Details
+          </button>
+        </Link>
+      </div>
+    </div>
   );
 };
