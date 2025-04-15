@@ -2,6 +2,7 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import VideoPlayer from "./VideoPlayer";
+import Link from "next/link";
 
 const AllRecommendation = () => {
   const [data, setData] = useState([]);
@@ -22,7 +23,7 @@ const AllRecommendation = () => {
     <div className="flex-1 overflow-auto p-8 bg-white relative">
       <h1 className="text-2xl font-bold">Recommended for You</h1>
       <div className="my-3">
-        <a href="/dashboard">
+        <Link href="/dashboard">
           <button className="flex items-center text-[#8bc34a] hover:underline">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +41,7 @@ const AllRecommendation = () => {
             </svg>
             <span className="ml-1">Back to Dashboard</span>
           </button>
-        </a>
+        </Link>
       </div>
       <p className="text-gray-600 mb-8">
         Explore these videos to learn more about energy efficiency, home
