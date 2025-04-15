@@ -1,7 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronRight, Play, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import VideoPlayer from "./component/video-player";
 
@@ -28,12 +35,26 @@ interface ApiResponse {
   data: KnowledgeBaseData;
 }
 
+const VIDEOS_PER_PAGE = 25;
+const MAX_DESCRIPTION_WORDS = 25;
+
+const truncateDescription = (description: string, maxWords: number): string => {
+  if (!description) return "";
+
+  const words = description.split(" ");
+  if (words.length <= maxWords) return description;
+
+  return words.slice(0, maxWords).join(" ") + "...";
+};
+
 const KnowledgeBase = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<KnowledgeBaseData | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
   const [showVideoPlayer, setShowVideoPlayer] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +98,38 @@ const KnowledgeBase = () => {
     setSelectedVideo(null);
   };
 
+  const handleViewMore = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+    window.scrollTo(0, 0);
+  };
+
+  const handleBackToAllCategories = () => {
+    setSelectedCategory(null);
+    window.scrollTo(0, 0);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
+
+  const selectedCategoryData =
+    selectedCategory && data
+      ? data.categorized_videos.find((cat) => cat.category === selectedCategory)
+      : null;
+
+  const totalPages = selectedCategoryData
+    ? Math.ceil(selectedCategoryData.videos.length / VIDEOS_PER_PAGE)
+    : 0;
+
+  const paginatedVideos = selectedCategoryData
+    ? selectedCategoryData.videos.slice(
+        (currentPage - 1) * VIDEOS_PER_PAGE,
+        currentPage * VIDEOS_PER_PAGE
+      )
+    : [];
+
   return (
     <div className="flex-1 overflow-auto p-8 bg-white">
       <h1 className="text-2xl font-bold mb-6">Knowledge Base</h1>
@@ -94,11 +147,6 @@ const KnowledgeBase = () => {
               <h2 className="text-xl font-bold text-[#8bc34a] mb-2">
                 {selectedVideo.title}
               </h2>
-              {selectedVideo.description && (
-                <p className="text-gray-600 mb-4">
-                  {selectedVideo.description}
-                </p>
-              )}
               <VideoPlayer content={selectedVideo} />
             </div>
           </div>
@@ -120,52 +168,229 @@ const KnowledgeBase = () => {
 
       {!loading && !error && data && (
         <div className="mt-12 mb-8">
-          <h2 className="text-2xl font-bold mb-6">Services by Categories</h2>
+          {selectedCategory && selectedCategoryData ? (
+            <>
+              <div className="flex items-center mb-6">
+                <button
+                  onClick={handleBackToAllCategories}
+                  className="flex items-center text-[#8bc34a] hover:underline mr-4"
+                >
+                  <ChevronLeft size={20} />
+                  <span>Back to All Categories</span>
+                </button>
+              </div>
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold mb-6">
+                  {selectedCategoryData.category}
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Showing {(currentPage - 1) * VIDEOS_PER_PAGE + 1} -{" "}
+                  {Math.min(
+                    currentPage * VIDEOS_PER_PAGE,
+                    selectedCategoryData.videos.length
+                  )}{" "}
+                  of {selectedCategoryData.videos.length} videos
+                </p>
 
-          {data.categorized_videos.map((categoryData, categoryIndex) => (
-            <div className="mb-10" key={categoryIndex}>
-              <h3 className="text-xl font-medium text-gray-700 mb-4">
-                {categoryData.category}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {categoryData.videos.map((video, videoIndex) => (
-                  <div
-                    key={videoIndex}
-                    className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
-                    onClick={() => handleVideoClick(video)}
-                  >
-                    <div className="relative h-40 overflow-hidden group">
-                      <Image
-                        src={video.thumbnail || "/placeholder.svg"}
-                        alt={video.title}
-                        width={300}
-                        height={200}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-16 h-16 rounded-full bg-[#8bc34a] bg-opacity-90 flex items-center justify-center">
-                          <Play size={30} className="text-white ml-1" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {paginatedVideos.map((video, videoIndex) => (
+                    <div
+                      key={videoIndex}
+                      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                      onClick={() => handleVideoClick(video)}
+                    >
+                      <div className="relative h-40 overflow-hidden group">
+                        <Image
+                          src={video.thumbnail || "/placeholder.svg"}
+                          alt={video.title}
+                          width={300}
+                          height={200}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-16 h-16 rounded-full bg-[#8bc34a] bg-opacity-90 flex items-center justify-center">
+                            <Play size={30} className="text-white ml-1" />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-[#8bc34a] font-medium">
-                          {video.title}
-                        </h3>
-                        <ChevronRight className="text-[#8bc34a]" />
+                      <div className="p-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="text-[#8bc34a] font-medium">
+                            {video.title}
+                          </h3>
+                          <ChevronRight className="text-[#8bc34a]" />
+                        </div>
+                        {video.description && (
+                          <p className="text-sm text-gray-600">
+                            {truncateDescription(
+                              video.description,
+                              MAX_DESCRIPTION_WORDS
+                            )}
+                          </p>
+                        )}
                       </div>
-                      {video.description && (
-                        <p className="text-sm text-gray-600">
-                          {video.description}
-                        </p>
-                      )}
                     </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center mt-8 gap-2">
+                    <button
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-md ${
+                        currentPage === 1
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-[#8bc34a] hover:bg-[#8bc34a] hover:bg-opacity-10"
+                      }`}
+                      aria-label="First page"
+                    >
+                      <ChevronFirst size={20} />
+                    </button>
+
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-md ${
+                        currentPage === 1
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-[#8bc34a] hover:bg-[#8bc34a] hover:bg-opacity-10"
+                      }`}
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="flex gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter((page) => {
+                          // Show current page, first and last pages, and pages around current page
+                          return (
+                            page === 1 ||
+                            page === totalPages ||
+                            (page >= currentPage - 1 && page <= currentPage + 1)
+                          );
+                        })
+                        .map((page, index, array) => (
+                          <React.Fragment key={page}>
+                            {index > 0 && array[index - 1] !== page - 1 && (
+                              <span className="px-3 py-1 text-gray-500">
+                                ...
+                              </span>
+                            )}
+                            <button
+                              onClick={() => handlePageChange(page)}
+                              className={`px-3 py-1 rounded-md ${
+                                currentPage === page
+                                  ? "bg-[#8bc34a] text-white"
+                                  : "text-gray-700 hover:bg-gray-100"
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          </React.Fragment>
+                        ))}
+                    </div>
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-md ${
+                        currentPage === totalPages
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-[#8bc34a] hover:bg-[#8bc34a] hover:bg-opacity-10"
+                      }`}
+                      aria-label="Next page"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+
+                    <button
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-md ${
+                        currentPage === totalPages
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-[#8bc34a] hover:bg-[#8bc34a] hover:bg-opacity-10"
+                      }`}
+                      aria-label="Last page"
+                    >
+                      <ChevronLast size={20} />
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          ))}
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold mb-6">
+                Services by Categories
+              </h2>
+
+              {data.categorized_videos.map((categoryData, categoryIndex) => (
+                <div className="mb-10" key={categoryIndex}>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-medium text-gray-700">
+                      {categoryData.category}
+                    </h3>
+                    {categoryData.videos.length > 3 && (
+                      <button
+                        onClick={() => handleViewMore(categoryData.category)}
+                        className="flex items-center text-[#8bc34a] hover:underline"
+                      >
+                        <span>View More</span>
+                        <ChevronRight size={20} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {categoryData.videos
+                      .slice(0, 4)
+                      .map((video, videoIndex) => (
+                        <div
+                          key={videoIndex}
+                          className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                          onClick={() => handleVideoClick(video)}
+                        >
+                          <div className="relative h-40 overflow-hidden group">
+                            <Image
+                              src={video.thumbnail || "/placeholder.svg"}
+                              alt={video.title}
+                              width={300}
+                              height={200}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="w-16 h-16 rounded-full bg-[#8bc34a] bg-opacity-90 flex items-center justify-center">
+                                <Play size={30} className="text-white ml-1" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <h3 className="text-[#8bc34a] font-medium">
+                                {video.title}
+                              </h3>
+                              <ChevronRight className="text-[#8bc34a]" />
+                            </div>
+                            {video.description && (
+                              <p className="text-sm text-gray-600">
+                                {truncateDescription(
+                                  video.description,
+                                  MAX_DESCRIPTION_WORDS
+                                )}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
