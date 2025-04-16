@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from "@/providers/auth";
 import { Toaster } from "sonner";
+import BookingProvider from "@/providers/booking";
 
 export const metadata: Metadata = {
   title: "Ciel Power",
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <Toaster />
-          {children}
+          <BookingProvider>
+            <Toaster />
+            {children}
+          </BookingProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ import {
 } from "lucide-react";
 import RescheduleModal from "@/components/component/reshedule-modal";
 import PaymentModal from "@/components/payment/modal";
+import { BOOKING_CONTEXT } from "@/providers/booking";
 
 // interface Service {
 //   id: string;
@@ -201,12 +203,8 @@ const formatTime = (dateStr: string): string => {
 export default function DashboardPage() {
   // const router = useRouter();
   // const [services, setServices] = useState<Service[]>([]);
-  const [bookings, setBookings] = useState<AllBookings>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [recommendation, setRecommendation] = useState<RecommendationData[]>(
-    []
-  );
+  const { isLoading, bookingDetails, recommendedVideos, refreshBookingData } =
+    useContext(BOOKING_CONTEXT);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -232,58 +230,64 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    for (let i = 0; i < State.length; i++) {
-      const key = State[i]; // Get the current key from State
-      if (bookings[key]) {
-        // Check if the key exists in bookings and has a value
-        console.log("bookings[key]:", bookings[key]);
-        console.log("State[i]:", key);
-        setLatestState(key); // Set the latest state
-      } else {
-        break; // Stop the loop after finding the first valid key
+    // Your existing code that doesn't involve data fetching can stay here
+    if (bookingDetails) {
+      for (let i = 0; i < State.length; i++) {
+        const key = State[i];
+        if (bookingDetails[key]) {
+          console.log("bookings[key]:", bookingDetails[key]);
+          console.log("State[i]:", key);
+          setLatestState(key);
+        } else {
+          break;
+        }
       }
+      console.log("latestState", latestState);
     }
-    console.log("latestState", latestState);
-  }, [bookings]);
+  }, [bookingDetails]);
 
   const CloseModalContent = () => {
     switch (latestState) {
       case "bookingDetails":
         return (
           <EnergyAudit
-            BookingDetails={bookings.bookingDetails}
+            BookingDetails={bookingDetails?.bookingDetails}
             onClick={() => openRescheduleModal("AUDIT-345678")}
           />
         );
       case "utilityBillDetails":
         return (
-          <UtilityBills UtilityBillDetails={bookings.utilityBillDetails} />
+          <UtilityBills
+            UtilityBillDetails={bookingDetails?.utilityBillDetails}
+          />
         );
       case "reportConsultation":
-        return bookings?.reportConsultation ? (
+        return bookingDetails?.reportConsultation ? (
           <ReportConsaltation
-            ReportConsultation={bookings?.reportConsultation}
+            ReportConsultation={bookingDetails?.reportConsultation}
           />
         ) : null;
 
       case "consultationDetails":
-        return bookings?.consultationDetails ? (
+        return bookingDetails?.consultationDetails ? (
           <ConsultationDerails
-            BookingDetails={bookings.bookingDetails}
-            ConsultationDetails={bookings.consultationDetails}
+            BookingDetails={bookingDetails.bookingDetails}
+            ConsultationDetails={bookingDetails.consultationDetails}
             onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
           />
         ) : null;
 
       case "proposalDetails":
-        return isOneAndHalfHourAhead(bookings?.bookingDetails?.startTime) ? (
+        return isOneAndHalfHourAhead(
+          bookingDetails?.bookingDetails?.startTime
+        ) ? (
           <WeAreLinning />
         ) : null;
 
       case "paymentDetails":
         return (
           <PaymentDetails
-            PaymentDetails={bookings?.paymentDetails}
+            PaymentDetails={bookingDetails?.paymentDetails}
             userDetails={userDetails}
             onClick={() => setIsModalOpen(false)}
           />
@@ -349,67 +353,6 @@ export default function DashboardPage() {
   //     toast.error("No Services Found");
   //   }
   // }, []);
-
-  function saveRecommendation({ data }: { data: RecommendationData[] }) {
-    try {
-      const existingData = localStorage.getItem("recommendation");
-      if (
-        !existingData ||
-        existingData === undefined ||
-        existingData.length === 0
-      ) {
-        localStorage.setItem("recommendation", JSON.stringify(data));
-      }
-    } catch (error) {
-      console.error("Error saving recommendation to localStorage:", error);
-    }
-  }
-
-  const fetchBookingDetails = async (bookingNumber: string) => {
-    try {
-      const res = await fetch(`/api/user/bookings/${bookingNumber}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-      const data = await res.json();
-      console.log("Booking details response:", data);
-      setBookings(data?.data || []);
-      console.log("Booking details response:", data);
-    } catch (error) {
-      console.error("Error fetching booking details:", error);
-    }
-  };
-  useEffect(() => {
-    const fetchData = async (id: string) => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/user/bookings/${id}/recommended-videos`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-        const data = await res.json();
-        setRecommendation(data || []);
-        saveRecommendation({ data: data || [] });
-        console.log("Recommended videos response:", data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load dashboard data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userDetails?.bookingNumber) {
-      fetchData(userDetails?.bookingNumber);
-      fetchBookingDetails(userDetails?.bookingNumber);
-    }
-  }, [userDetails?.bookingNumber]);
 
   // const getBookings = useCallback(async () => {
   //   try {
@@ -494,7 +437,7 @@ export default function DashboardPage() {
   //   fetchData();
   // }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center space-x-2">
@@ -505,16 +448,16 @@ export default function DashboardPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-700 text-center">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="bg-white p-6 rounded-lg shadow-md">
+  //         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+  //         <p className="text-gray-700 text-center">{error}</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
   return (
     <div className="min-h-screen bg-white">
       <div className="space-y-6">
@@ -555,7 +498,7 @@ export default function DashboardPage() {
                   </>
                 )}
 
-                {/* Top Timeline Item - You're Officially Certified! */}
+                {/* Top Timeline Item - You&apos;re Officially Certified! */}
                 {/* <div
                   className={`timeline-item mb-6 relative transition-all duration-500 ease-in-out z-30 ${
                     isTimelineExpanded ? "" : "shadow-lg"
@@ -565,7 +508,7 @@ export default function DashboardPage() {
                     <div className="flex items-center mb-4">
                       <Award size={24} className="text-[#8bc34a] mr-2" />
                       <div className="font-medium text-lg">
-                        You're Officially Certified!
+                        You&apos;re Officially Certified!
                       </div>
                     </div>
 
@@ -643,7 +586,7 @@ export default function DashboardPage() {
                       <p className="text-gray-600 mb-4">
                         Confirming your project completion takes just a moment —
                         and helps unlock your final rebates and certification.
-                        We'll guide you through the documents so you can move
+                        We&apos;ll guide you through the documents so you can move
                         forward with full confidence.
                       </p>
                       <Link href="/confirm-project">
@@ -670,7 +613,7 @@ export default function DashboardPage() {
                       <p className="text-gray-600 mb-4">
                         We take this step seriously because we know how much
                         your home means to you. This final check allows us to
-                        make sure it's performing beautifully — and gives you
+                        make sure it&apos;s performing beautifully — and gives you
                         the comfort, safety, and savings we set out to deliver.
                       </p>
 
@@ -716,7 +659,7 @@ export default function DashboardPage() {
                       </div>
 
                       <p className="text-gray-600 mb-4">
-                        We're working on your home with care — improving
+                        We&apos;re working on your home with care — improving
                         efficiency, comfort, and performance at every step.
                       </p>
 
@@ -795,7 +738,7 @@ export default function DashboardPage() {
                       </div>
 
                       <p className="text-gray-600 mb-4">
-                        Your energy upgrades are on the calendar. We'll make
+                        Your energy upgrades are on the calendar. We&apos;ll make
                         sure you know exactly what to expect before we get
                         started.
                       </p>
@@ -946,7 +889,7 @@ export default function DashboardPage() {
 
                   {/* New Payment Process */}
                   <PaymentDetails
-                    PaymentDetails={bookings?.paymentDetails}
+                    PaymentDetails={bookingDetails?.paymentDetails}
                     userDetails={userDetails}
                     onClick={() => setIsModalOpen(false)}
                   />
@@ -1056,7 +999,7 @@ export default function DashboardPage() {
                         </div>
 
                         <p className="text-gray-600 mb-4">
-                          Review & sign the proposal which works for you! We've
+                          Review & sign the proposal which works for you! We&apos;ve
                           prepared detailed project plans based on your audit
                           results. Choose the option that best fits your needs
                           and budget to move forward with your home energy
@@ -1092,27 +1035,27 @@ export default function DashboardPage() {
                   )} */}
 
                   <ProjectPlansReady
-                    ProposalDetails={bookings?.proposalDetails}
+                    ProposalDetails={bookingDetails?.proposalDetails}
                   />
 
-                  {/* Timeline Item - We're Lining Everything Up */}
+                  {/* Timeline Item - We&apos;re Lining Everything Up */}
                   {isOneAndHalfHourAhead(
-                    bookings?.bookingDetails?.startTime
+                    bookingDetails?.bookingDetails?.startTime
                   ) && <WeAreLinning />}
 
                   {/* Timeline Item - Your Audit Results are in - MOVED HERE */}
-                  {bookings?.consultationDetails && (
+                  {bookingDetails?.consultationDetails && (
                     <ConsultationDerails
-                      BookingDetails={bookings.bookingDetails}
-                      ConsultationDetails={bookings.consultationDetails}
+                      BookingDetails={bookingDetails.bookingDetails}
+                      ConsultationDetails={bookingDetails.consultationDetails}
                       onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
                     />
                   )}
 
-                  {/* Timeline Item - Your Results Are In — Let's Talk */}
-                  {bookings?.reportConsultation && (
+                  {/* Timeline Item - Your Results Are In — Let&apos;s Talk */}
+                  {bookingDetails?.reportConsultation && (
                     <ReportConsaltation
-                      ReportConsultation={bookings?.reportConsultation}
+                      ReportConsultation={bookingDetails?.reportConsultation}
                     />
                   )}
 
@@ -1164,7 +1107,7 @@ export default function DashboardPage() {
                   </div> */}
 
                   <UtilityBills
-                    UtilityBillDetails={bookings.utilityBillDetails}
+                    UtilityBillDetails={bookingDetails?.utilityBillDetails}
                   />
 
                   {/* Timeline Item - Professional Home Energy Audit */}
@@ -1201,7 +1144,7 @@ export default function DashboardPage() {
                       </div>
 
                       <p className="text-gray-600 mb-4">
-                        We're preparing for an in-home visit to evaluate how
+                        We&apos;re preparing for an in-home visit to evaluate how
                         your home uses energy. Your Ciel Home Energy Auditor
                         will collect important details to help us understand how
                         your home is performing.
@@ -1270,7 +1213,7 @@ export default function DashboardPage() {
                   </div> */}
 
                   <EnergyAudit
-                    BookingDetails={bookings.bookingDetails}
+                    BookingDetails={bookingDetails?.bookingDetails}
                     onClick={() => openRescheduleModal("AUDIT-345678")}
                   />
                 </div>
@@ -1651,7 +1594,7 @@ export default function DashboardPage() {
                 isOpen={isModalOpen}
                 onClose={() => {
                   setIsModalOpen(false);
-                  fetchBookingDetails(userDetails?.bookingNumber);
+                  refreshBookingData();
                 }}
                 bookingNumber={userDetails?.bookingNumber}
               />
@@ -1723,7 +1666,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Recommended for you */}
-          <Recommendation data={recommendation} />
+          <Recommendation data={recommendedVideos} />
 
           {/* Google review */}
           <GoogleReview />
@@ -1763,9 +1706,10 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
             Audit.
           </p>
           <p>
-            <span className="text-2xl text-deep-green">"</span> The first step
-            to accessing NJ's utility programs for <br /> energy-efficient home
-            upgrades. <span className="text-2xl text-deep-green">"</span>{" "}
+            <span className="text-2xl text-deep-green">&quot;</span> The first
+            step to accessing NJ&apos;s utility programs for <br />{" "}
+            energy-efficient home upgrades.{" "}
+            <span className="text-2xl text-deep-green">&quot;</span>{" "}
           </p>
           <div className="aspect-video min-w-[70%]">
             <iframe
@@ -1780,21 +1724,21 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
           {/* Added content from the image */}
           <div className="max-w-3xl mx-auto mt-10 text-left">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              What You'll Gain from Your Audit Comfort, savings, and peace of
-              mind — your audit is the first step toward a better home.
+              What You&apos;ll Gain from Your Audit Comfort, savings, and peace
+              of mind — your audit is the first step toward a better home.
             </h2>
 
             <p className="text-gray-600 my-4">
-              A Home Energy Audit is about more than energy use — it's about how
-              your home supports your everyday life. We take a deeper look at
-              the things that can affect your comfort, your health, and your
-              monthly expenses. It's not just about finding problems. It's about
-              finding solutions that work for you.
+              A Home Energy Audit is about more than energy use — it&apos;s
+              about how your home supports your everyday life. We take a deeper
+              look at the things that can affect your comfort, your health, and
+              your monthly expenses. It&apos;s not just about finding problems.
+              It&apos;s about finding solutions that work for you.
             </p>
 
             <p className="text-gray-600 my-4">
               We understand that your home is more than just walls and systems —
-              it's where you and your family rest, breathe, and recharge.
+              it&apos;s where you and your family rest, breathe, and recharge.
               Through the audit, we uncover opportunities to help your home feel
               better, function better, and cost less to run.
             </p>
@@ -1804,9 +1748,9 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
             </h3>
 
             <p className="text-gray-600 mb-2">
-              Thanks to support from New Jersey's Clean Energy Program and the
-              federal government, many homeowners are eligible for substantial
-              financial benefits, including:
+              Thanks to support from New Jersey&apos;s Clean Energy Program and
+              the federal government, many homeowners are eligible for
+              substantial financial benefits, including:
             </p>
             <ul className="list-disc pl-8 text-gray-600 mb-4">
               <li>Up to $6,000 in cash-back incentives</li>
@@ -1827,8 +1771,8 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
             </ul>
 
             <p className="text-gray-600 mb-6">
-              We'll help you understand what you qualify for — and how to take
-              full advantage of these programs.
+              We&apos;ll help you understand what you qualify for — and how to
+              take full advantage of these programs.
             </p>
 
             <h3 className="text-xl font-bold text-gray-800 mt-8 mb-4">
@@ -1836,10 +1780,10 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
             </h3>
 
             <p className="text-gray-600 mb-4">
-              Your audit isn't just about improving efficiency — it's also a
-              step toward improving how you feel at home. We assess how well
-              your home manages airflow, temperature, and moisture, which are
-              all connected to your daily comfort and long-term health.
+              Your audit isn&apos;t just about improving efficiency — it&apos;s
+              also a step toward improving how you feel at home. We assess how
+              well your home manages airflow, temperature, and moisture, which
+              are all connected to your daily comfort and long-term health.
             </p>
 
             <p className="text-gray-600 mb-2">
@@ -1858,9 +1802,9 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
 
             <p className="text-gray-600 mb-6">
               We understand that even small changes can make a big difference.
-              Whether it's helping you sleep more soundly or making your home
-              feel more balanced and breathable, we're here to guide you toward
-              solutions that fit your lifestyle.
+              Whether it&apos;s helping you sleep more soundly or making your
+              home feel more balanced and breathable, we&apos;re here to guide
+              you toward solutions that fit your lifestyle.
             </p>
 
             <h3 className="text-xl font-bold text-gray-800 mt-8 mb-4">
@@ -1869,12 +1813,12 @@ const CardData = ({ index, faqOpen, toggleFaqQuestion }: CardDataProps) => {
 
             <p className="text-gray-600 mb-4">
               After your home visit, your personalized results will be added to
-              your customer portal. You'll be able to log in anytime to explore
-              insights about your home's energy use, review suggested
-              improvements, and track available incentives. Everything is
-              organized in one place — clear, simple, and tailored to your home.
-              No dense reports, just useful information you can act on when
-              you're ready.
+              your customer portal. You&apos;ll be able to log in anytime to
+              explore insights about your home&apos;s energy use, review
+              suggested improvements, and track available incentives. Everything
+              is organized in one place — clear, simple, and tailored to your
+              home. No dense reports, just useful information you can act on
+              when you&apos;re ready.
             </p>
           </div>
         </div>
@@ -2340,7 +2284,7 @@ const ProjectPlansReady = ({ ProposalDetails }) => {
         </div>
 
         <p className="text-gray-600 mb-4">
-          Review & sign the proposal which works for you! We've prepared
+          Review & sign the proposal which works for you! We&apos;ve prepared
           detailed project plans based on your audit results. Choose the option
           that best fits your needs and budget to move forward with your home
           energy improvements.
@@ -2380,7 +2324,9 @@ const WeAreLinning = () => {
       <div className="bg-white rounded-lg p-6 border border-gray-200">
         <div className="flex items-center mb-2">
           <CheckCircle size={24} className="text-[#8bc34a] mr-2" />
-          <div className="font-medium text-lg">We're Lining Everything Up</div>
+          <div className="font-medium text-lg">
+            We&apos;re Lining Everything Up
+          </div>
         </div>
 
         <div className="mb-3 text-[#8bc34a] font-medium">
@@ -2388,8 +2334,8 @@ const WeAreLinning = () => {
         </div>
 
         <p className="text-gray-600 mb-4">
-          We're wrapping up final details and approvals. Installation will be
-          scheduled soon, and we'll keep you informed along the way.
+          We&apos;re wrapping up final details and approvals. Installation will
+          be scheduled soon, and we&apos;ll keep you informed along the way.
         </p>
 
         <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
@@ -2504,7 +2450,7 @@ const ReportConsaltation = ({ ReportConsultation }) => {
           <div className="flex items-center">
             <FileSpreadsheet size={24} className="text-[#8bc34a] mr-2" />
             <div className="font-medium text-lg">
-              Your Results Are In — Let's Talk
+              Your Results Are In — Let&apos;s Talk
             </div>
           </div>
           <div className="flex gap-3 items-center">
@@ -2531,9 +2477,10 @@ const ReportConsaltation = ({ ReportConsultation }) => {
         </div>
 
         <p className="text-gray-600 mb-4">
-          We've completed your audit and reviewed your home's performance. Now
-          it's time to schedule a consultation with your Ciel Home Performance
-          Consultant to walk through the findings and talk about what's next.
+          We&apos;ve completed your audit and reviewed your home&apos;s
+          performance. Now it&apos;s time to schedule a consultation with your
+          Ciel Home Performance Consultant to walk through the findings and talk
+          about what&apos;s next.
         </p>
 
         <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
@@ -2628,9 +2575,9 @@ const EnergyAudit = ({ BookingDetails, onClick }) => {
         </div>
 
         <p className="text-gray-600 mb-4">
-          We're preparing for an in-home visit to evaluate how your home uses
-          energy. Your Ciel Home Energy Auditor will collect important details
-          to help us understand how your home is performing.
+          We&apos;re preparing for an in-home visit to evaluate how your home
+          uses energy. Your Ciel Home Energy Auditor will collect important
+          details to help us understand how your home is performing.
         </p>
 
         <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
