@@ -70,7 +70,7 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-[#a6d66b] flex flex-col">
+    <div className="w-64 bg-[#a6d66b] flex flex-col overflow-y-auto ">
       <div className="p-6">
         <div className="flex items-center">
           <img
