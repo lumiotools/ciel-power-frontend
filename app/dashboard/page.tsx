@@ -2307,7 +2307,7 @@ const ProjectPlansReady = ({ ProposalDetails }) => {
             <span className="text-[#8bc34a] font-medium">Complete</span>
           </div>
         </div>
-        <Link href="/project-plans-ready">
+        <Link href="/dashboard/project-plans-ready">
           <button className="text-[#007BFF] text-sm font-medium">
             View Details
           </button>

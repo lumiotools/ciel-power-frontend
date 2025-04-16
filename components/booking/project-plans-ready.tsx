@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
+import { BOOKING_CONTEXT } from "@/providers/booking";
 import {
   LogOut,
   FileText,
@@ -15,98 +17,14 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useContext } from "react";
+import BookingProgress from "../component/booking-progress";
 
 export default function ProjectPlansReady() {
+  const { bookingDetails } = useContext(BOOKING_CONTEXT);
+
   return (
     <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      <div className="w-64 bg-[#a6d66b] flex flex-col">
-        <div className="p-6">
-          <div className="flex items-center">
-            <Image
-              src="/ciel-power-logo.png"
-              alt="Ciel Power Logo"
-              width={130}
-              height={50}
-              className="mt-2"
-            />
-          </div>
-        </div>
-
-        {/* Sidebar buttons */}
-        <div className="flex-1 flex flex-col gap-4 px-4 mt-4">
-          <Link href="/dashboard">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <LayoutDashboard size={20} />
-              <span className="font-medium">Dashboard</span>
-            </button>
-          </Link>
-
-          <Link href="/report">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <FileText size={20} />
-              <span className="font-medium">Your Report</span>
-            </button>
-          </Link>
-
-          <Link href="/pearl-certification">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Award size={20} />
-              <span className="font-medium">Pearl Certification</span>
-            </button>
-          </Link>
-
-          <Link href="/incentives">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <DollarSign size={20} />
-              <span className="font-medium">Incentives</span>
-            </button>
-          </Link>
-
-          <Link href="/tax-credits">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Percent size={20} />
-              <span className="font-medium">Tax Credits</span>
-            </button>
-          </Link>
-
-          <Link href="/document-portal">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <FileCheck size={20} />
-              <span className="font-medium">Document Portal</span>
-            </button>
-          </Link>
-
-          <Link href="/knowledge-base">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Zap size={20} />
-              <span className="font-medium">Knowledge Base</span>
-            </button>
-          </Link>
-
-          <Link href="/about-us">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Home size={20} />
-              <span className="font-medium">About Us</span>
-            </button>
-          </Link>
-
-          <Link href="/affiliate-program">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Leaf size={20} />
-              <span className="font-medium">Affiliate Program</span>
-            </button>
-          </Link>
-        </div>
-
-        <div className="p-6 mt-auto">
-          <button className="flex items-center gap-2 text-white">
-            <LogOut size={20} />
-            <span className="font-medium">Log Out</span>
-          </button>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-8 bg-white">
         {/* Header */}
@@ -130,62 +48,38 @@ export default function ProjectPlansReady() {
           </div>
         </div>
 
-        {/* Progress Tracker */}
-        <div className="flex justify-between items-center mb-8 relative">
-          {/* Line connecting all steps */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[#8bc34a] -z-10 transform -translate-y-1/2"></div>
-
-          {/* Step 1 - Booking Created */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Booking Created</span>
-          </div>
-
-          {/* Step 2 */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Utility Bills Uploaded</span>
-          </div>
-
-          {/* Step 3 */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Audit Performed</span>
-          </div>
-
-          {/* Step 4 */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Follow Up Scheduled</span>
-          </div>
-
-          {/* Step 5 - Current */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Report Generated</span>
-          </div>
-        </div>
+        {/* Progress Tracker - Using BookingProgress component */}
+        <BookingProgress className="mb-8" />
 
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-3">May 6, 9:00 AM</h2>
+            <h2 className="text-2xl font-bold mb-3">
+              {bookingDetails?.bookingDetails?.startTime
+                ? new Date(
+                    bookingDetails.bookingDetails.startTime
+                  ).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  }) +
+                  ", " +
+                  new Date(
+                    bookingDetails.bookingDetails.startTime
+                  ).toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })
+                : "May 6, 9:00 AM"}
+            </h2>
             <h3 className="text-xl font-semibold mb-6">
-              Ciel Power Home Energy Audit
+              {bookingDetails?.bookingDetails?.serviceName ||
+                "Ciel Power Home Energy Audit"}
             </h3>
 
             <p className="text-gray-600 mb-6">
-              532 lafayette road, harrington park, New Jersey 07640
+              {bookingDetails?.bookingDetails?.address
+                ? `${bookingDetails.bookingDetails.address.line1}, ${bookingDetails.bookingDetails.address.city}, ${bookingDetails.bookingDetails.address.province} ${bookingDetails.bookingDetails.address.postalCode}`
+                : "532 lafayette road, harrington park, New Jersey 07640"}
             </p>
 
             <div className="mb-6">
@@ -346,13 +240,19 @@ export default function ProjectPlansReady() {
                 <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden">
                   <Image
                     src="/mark-johnson.png"
-                    alt="Mark Johnson"
+                    alt={
+                      bookingDetails?.bookingDetails?.auditor?.name ||
+                      "Mark Johnson"
+                    }
                     width={96}
                     height={96}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h4 className="font-medium text-lg">Mark Johnson</h4>
+                <h4 className="font-medium text-lg">
+                  {bookingDetails?.bookingDetails?.auditor?.name ||
+                    "Mark Johnson"}
+                </h4>
               </div>
             </div>
 
@@ -365,6 +265,33 @@ export default function ProjectPlansReady() {
                 Contact Us
               </button>
             </div>
+
+            {/* Display proposal information if available */}
+            {bookingDetails?.proposalDetails &&
+              bookingDetails.proposalDetails.count > 0 && (
+                <div className="mt-4 bg-[#f5f9ed] rounded-lg p-6">
+                  <h3 className="text-lg font-medium text-center mb-4">
+                    Your Project Proposals
+                  </h3>
+                  <p className="text-center text-gray-700 mb-4">
+                    {bookingDetails.proposalDetails.count}{" "}
+                    {bookingDetails.proposalDetails.count === 1
+                      ? "proposal"
+                      : "proposals"}{" "}
+                    available
+                  </p>
+                  {bookingDetails.proposalDetails.completedContractLink && (
+                    <Link
+                      href={
+                        bookingDetails.proposalDetails.completedContractLink
+                      }
+                      className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-3 rounded-md transition-colors text-sm flex-1 block text-center"
+                    >
+                      Review Proposals
+                    </Link>
+                  )}
+                </div>
+              )}
           </div>
         </div>
       </div>
