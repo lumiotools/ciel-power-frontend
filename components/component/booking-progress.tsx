@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import { BadgeX } from "lucide-react";
 import type React from "react"; // Import React
+import { useContext } from "react";
+import { BOOKING_CONTEXT } from "@/providers/booking";
 
 interface Step {
   label: string;
@@ -8,7 +10,6 @@ interface Step {
 }
 
 interface BookingProgressProps {
-  steps: Step[];
   className?: string;
 }
 
@@ -39,9 +40,53 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
   );
 
 export const BookingProgress: React.FC<BookingProgressProps> = ({
-  steps,
   className,
 }) => {
+  const { bookingDetails } = useContext(BOOKING_CONTEXT);
+
+  // Determine current stage based on available data
+  const currentStage = () => {
+    if (
+      bookingDetails?.proposalDetails &&
+      bookingDetails.proposalDetails.count > 0
+    )
+      return 5;
+    if (bookingDetails?.consultationDetails?.startTime) return 4;
+    if (bookingDetails?.reportConsultation?.consultationBookingUrl) return 3;
+    if (
+      bookingDetails?.utilityBillDetails &&
+      bookingDetails.utilityBillDetails.count > 0
+    )
+      return 2;
+    return 1; // Default: Booking Created
+  };
+
+  const stage = currentStage();
+
+  // Define booking progress steps
+  const steps: Step[] = [
+    {
+      label: "Booking Created",
+      status: stage >= 1 ? "completed" : "upcoming",
+    },
+    {
+      label: "Utility Bills Uploaded",
+      status: stage >= 2 ? "completed" : stage === 1 ? "current" : "upcoming",
+    },
+    {
+      label: "Audit Performed",
+      status: stage >= 3 ? "completed" : stage === 2 ? "current" : "upcoming",
+    },
+    {
+      label: "Follow Up Scheduled",
+      status: stage >= 4 ? "completed" : stage === 3 ? "current" : "upcoming",
+    },
+    {
+      label: "Report Generated",
+      status: stage >= 5 ? "completed" : stage === 4 ? "current" : "upcoming",
+    },
+  ];
+
   return (
     <div className={cn("relative w-full mt-4", className)}>
       <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
@@ -60,7 +105,7 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
                     "h-[2px] w-8 sm:w-12 md:w-16",
                     step.status === "completed"
                       ? "bg-[#5ea502]"
-                      : "bg-[#d1d5db]",
+                      : "bg-[#d1d5db]"
                   )}
                   aria-hidden="true"
                 />

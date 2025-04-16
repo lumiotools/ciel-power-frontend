@@ -18,28 +18,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useContext } from "react";
+import BookingProgress from "../component/booking-progress";
 
 export default function BookingDetails() {
   const { bookingDetails } = useContext(BOOKING_CONTEXT);
-
-  // Calculate the current stage based on available data
-  const currentStage = () => {
-    if (
-      bookingDetails?.proposalDetails &&
-      bookingDetails.proposalDetails.count > 0
-    )
-      return 5;
-    if (bookingDetails?.consultationDetails?.startTime) return 4;
-    if (bookingDetails?.reportConsultation?.consultationBookingUrl) return 3;
-    if (
-      bookingDetails?.utilityBillDetails &&
-      bookingDetails.utilityBillDetails.count > 0
-    )
-      return 2;
-    return 1; // Default: Booking Created
-  };
-
-  const stage = currentStage();
 
   return (
     <div className="flex h-screen bg-white">
@@ -69,61 +51,8 @@ export default function BookingDetails() {
           </div>
         </div>
 
-        {/* Progress Tracker */}
-        <div className="flex justify-between items-center mb-8 relative">
-          {/* Line connecting all steps */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[#8bc34a] -z-10 transform -translate-y-1/2"></div>
-
-          {/* Step 1 - Booking Created */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full ${stage >= 1 ? "bg-[#8bc34a]" : "bg-gray-200"} mb-2 z-10 flex items-center justify-center`}
-            >
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Booking Created</span>
-          </div>
-
-          {/* Step 2 - Utility Bills Uploaded */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full ${stage >= 2 ? "bg-[#8bc34a]" : stage === 1 ? "bg-[#d9e9c3]" : "bg-gray-200"} mb-2 z-10 flex items-center justify-center`}
-            >
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Utility Bills Uploaded</span>
-          </div>
-
-          {/* Step 3 - Audit Performed */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full ${stage >= 3 ? "bg-[#8bc34a]" : stage === 2 ? "bg-[#d9e9c3]" : "bg-gray-200"} mb-2 z-10 flex items-center justify-center`}
-            >
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Audit Performed</span>
-          </div>
-
-          {/* Step 4 - Follow Up Scheduled */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full ${stage >= 4 ? "bg-[#8bc34a]" : stage === 3 ? "bg-[#d9e9c3]" : "bg-gray-200"} mb-2 z-10 flex items-center justify-center`}
-            >
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Follow Up Scheduled</span>
-          </div>
-
-          {/* Step 5 - Report Generated */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full ${stage >= 5 ? "bg-[#8bc34a]" : stage === 4 ? "bg-[#d9e9c3]" : "bg-gray-200"} mb-2 z-10 flex items-center justify-center`}
-            >
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Report Generated</span>
-          </div>
-        </div>
+        {/* Progress Tracker - Now using BookingProgress component */}
+        <BookingProgress className="mb-8" />
 
         <div className="flex gap-8">
           {/* Main Content */}
