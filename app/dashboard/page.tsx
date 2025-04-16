@@ -2432,7 +2432,7 @@ const ConsultationDerails = ({
             <span className="text-[#8bc34a] font-medium">Complete</span>
           </div>
         </div>
-        <Link href="/audit-results">
+        <Link href="/dashboard/audit-results">
           <button className="text-[#007BFF] text-sm font-medium">
             View Details
           </button>
@@ -2489,7 +2489,7 @@ const ReportConsaltation = ({ ReportConsultation }) => {
             <span className="text-[#8bc34a] font-medium">Audit Complete</span>
           </div>
         </div>
-        <Link href="/results-lets-talk">
+        <Link href="/dashboard/results-lets-talk">
           <button className="text-[#007BFF] text-sm font-medium">
             View Details
           </button>
