@@ -83,6 +83,7 @@ const BookingProvider = ({ children }: { children: React.ReactNode }) => {
             getBookingDetails(userDetails.bookingNumber),
             getRecommendedVideos(userDetails.bookingNumber),
           ]);
+        console.log("recommended videos", recommendedVideosResponse);
 
         setBookingDetails(bookingDetailsResponse);
         setRecommendedVideos(recommendedVideosResponse || []);
