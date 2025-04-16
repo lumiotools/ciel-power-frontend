@@ -66,7 +66,7 @@ export default function AIChatbot() {
     }, 1500);
 
     const retrievingTimer = setTimeout(() => {
-      setLoadingState("Retrieving response...");
+      setLoadingState("Retrieving information...");
     }, 3000);
 
     try {
