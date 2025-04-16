@@ -198,7 +198,16 @@ export default function AIChatbot() {
                               : "prose bg-white shadow-sm border border-gray-100 rounded-bl-none"
                           }`}
                         >
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                          <ReactMarkdown
+                            components={{
+                              a: ({ node, ...props }) => (
+                                <a {...props} target="_blank" />
+                              ),
+                            }}
+                            remarkPlugins={[remarkGfm]}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
                         </div>
                       </div>
                       {isLastUserMessage && <div ref={messagesEndRef} />}
