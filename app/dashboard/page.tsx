@@ -2534,7 +2534,7 @@ const UtilityBills = ({ UtilityBillDetails }) => {
         </div>
 
         <div className="mt-4">
-          <Link href="/utility-bills-details">
+          <Link href="/dashboard/utility-bills-details">
             <button className="text-[#007BFF] text-sm font-medium">
               View Details
             </button>
