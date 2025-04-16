@@ -1,23 +1,24 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import VideoPlayer from "./VideoPlayer";
+import React, { useState, useContext } from "react";
 import Link from "next/link";
+import { BOOKING_CONTEXT } from "@/providers/booking";
+import VideoModal from "@/components/component/video-modal";
+
+interface RecommendedVideo {
+  videoId: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  url: string;
+}
 
 const AllRecommendation = () => {
-  const [data, setData] = useState([]);
-
+  const { recommendedVideos } = useContext(BOOKING_CONTEXT);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState(null);
-
-  useEffect(() => {
-    const getRecommendatoinData = localStorage.getItem("recommendation");
-    if (getRecommendatoinData) {
-      const parsedData = JSON.parse(getRecommendatoinData);
-      console.log("parsedData", parsedData);
-      setData(parsedData);
-    }
-  }, []);
+  const [selectedVideo, setSelectedVideo] = useState<RecommendedVideo | null>(
+    null
+  );
 
   return (
     <div className="flex-1 overflow-auto p-8 bg-white relative">
@@ -49,7 +50,7 @@ const AllRecommendation = () => {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data?.map((item, idx) => {
+        {recommendedVideos?.map((item, idx) => {
           return (
             <div
               key={idx}
@@ -104,27 +105,11 @@ const AllRecommendation = () => {
         })}
       </div>
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
-          <div className=" h-[80vh] w-[50vw] overflow-y-auto bg-white rounded-xl p-3 space-y-3">
-            <div className=" flex justify-between items-center">
-              <p className=" text-xl font-bold">Youtube Video</p>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className=" bg-red-600 rounded-xl text-white shadow-lg py-2 px-3"
-              >
-                Close
-              </button>
-            </div>
-
-            {selectedVideo && <VideoPlayer content={selectedVideo} />}
-          </div>
-
-          {/* <IoMdClose
-                    size={24}
-                    className=" absolute top-3 right-3"
-                    onClick={() => setIsModalOpen(false)}
-                  /> */}
-        </div>
+        <VideoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          videoUrl={selectedVideo?.url}
+        />
       )}
     </div>
   );

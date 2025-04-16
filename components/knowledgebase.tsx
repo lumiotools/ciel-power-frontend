@@ -7,10 +7,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Play,
-  X,
 } from "lucide-react";
 import Image from "next/image";
-import VideoPlayer from "./component/video-player";
+import VideoModal from "./component/video-modal";
 
 interface YouTubeVideo {
   videoId: string;
@@ -134,23 +133,13 @@ const KnowledgeBase = () => {
     <div className="flex-1 overflow-auto p-8 bg-white">
       <h1 className="text-2xl font-bold mb-6">Knowledge Base</h1>
 
+      {/* Video Modal */}
       {showVideoPlayer && selectedVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full relative">
-            <button
-              onClick={closeVideoPlayer}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
-            >
-              <X size={24} />
-            </button>
-            <div className="p-4">
-              <h2 className="text-xl font-bold text-[#8bc34a] mb-2">
-                {selectedVideo.title}
-              </h2>
-              <VideoPlayer content={selectedVideo} />
-            </div>
-          </div>
-        </div>
+        <VideoModal
+          isOpen={showVideoPlayer}
+          onClose={closeVideoPlayer}
+          videoUrl={selectedVideo.url}
+        />
       )}
 
       {loading && (
