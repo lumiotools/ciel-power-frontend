@@ -55,7 +55,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (
       !isLoading &&
       !isLoggedIn &&
-      (pathname.includes("/dashboard") || pathname.includes("/admin"))
+      (pathname.includes("/dashboard") || pathname.includes("/admin") || ["/document-portal", "/knowledge-base"].includes(pathname))
     ) {
       router.replace("/login");
     }
@@ -64,7 +64,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       !isLoading &&
       isLoggedIn &&
       userDetails?.admin &&
-      pathname.includes("/dashboard")
+      pathname.includes("/dashboard") &&
+      ["/document-portal", "/knowledge-base"].includes(pathname)
     ) {
       router.replace("/admin");
     }
