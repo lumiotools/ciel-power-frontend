@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from "@/providers/auth";
 import { Toaster } from "sonner";
+import AIChatbot from "@/components/chatbot/chatbot";
 
 export const metadata: Metadata = {
   title: "Ciel Power",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <AuthProvider>
           <Toaster />
           {children}
+          <AIChatbot/>
         </AuthProvider>
       </body>
     </html>

@@ -10,7 +10,6 @@ import BookingProgress from "@/components/component/booking-progress";
 // import CountdownTimer from "@/components/component/CountdownTimer";
 import { Clock, AlertCircle, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { ChatBot } from "@/components/modal/ChatBot";
 import Link from "next/link";
 import { FAQDetails, FAQQuestions } from "./_comp/utils";
 import Image from "next/image";
@@ -641,7 +640,6 @@ export default function DashboardPage() {
 
           {/* Google review */}
           <GoogleReview />
-          <ChatBot />
 
           {/* FAQs Section */}
           {/* <div className="flex justify-between items-center mt-5">
