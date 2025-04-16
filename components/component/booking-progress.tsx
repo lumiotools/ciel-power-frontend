@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { BadgeX } from "lucide-react";
-import type React from "react"; // Import React
+import type React from "react";
 import { useContext } from "react";
 import { BOOKING_CONTEXT } from "@/providers/booking";
 
@@ -25,9 +25,8 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={cn("transition-colors", {
-          "text-[#5ea502]": status === "completed" || status === "current",
-          // "text-[#b9dd8b]": status === "current",
-          "text-[#d1d5db]": status === "upcoming",
+          "text-[#5ea502]": status === "completed",
+          "text-[#d1d5db]": status === "current" || status === "upcoming",
         })}
       >
         <circle cx="16" cy="16" r="16" fill="white" />
@@ -44,24 +43,50 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
 }) => {
   const { bookingDetails } = useContext(BOOKING_CONTEXT);
 
+  // Log the booking data for debugging
+  console.log("Booking data:", bookingDetails);
+
   // Determine current stage based on available data
   const currentStage = () => {
-    if (
-      bookingDetails?.proposalDetails &&
-      bookingDetails.proposalDetails.count > 0
-    )
+    if (!bookingDetails) return 1;
+
+    // Step 6: Payment Complete
+    if (bookingDetails.paymentDetails?.status === "Paid") {
+      console.log("Payment is complete");
+      return 6;
+    }
+
+    // Step 5: Proposals Signed
+    if (bookingDetails.proposalDetails?.completedContractLink) {
+      console.log("Proposal has been signed");
       return 5;
-    if (bookingDetails?.consultationDetails?.startTime) return 4;
-    if (bookingDetails?.reportConsultation?.consultationBookingUrl) return 3;
-    if (
-      bookingDetails?.utilityBillDetails &&
-      bookingDetails.utilityBillDetails.count > 0
-    )
+    }
+
+    // Step 4: Consultation Scheduled
+    if (bookingDetails.consultationDetails?.startTime) {
+      console.log("Consultation has been scheduled");
+      return 4;
+    }
+
+    // Step 3: Audit Performed
+    if (bookingDetails.reportConsultation) {
+      console.log("Audit has been performed");
+      return 3;
+    }
+
+    // Step 2: Utility Bills Uploaded
+    if (bookingDetails.utilityBillDetails?.count > 0) {
+      console.log("Utility bills have been uploaded");
       return 2;
-    return 1; // Default: Booking Created
+    }
+
+    // Step 1: Booking Created (default)
+    console.log("Booking has been created (default)");
+    return 1;
   };
 
   const stage = currentStage();
+  console.log("Current stage determined:", stage);
 
   // Define booking progress steps
   const steps: Step[] = [
@@ -78,12 +103,16 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
       status: stage >= 3 ? "completed" : stage === 2 ? "current" : "upcoming",
     },
     {
-      label: "Follow Up Scheduled",
+      label: "Consultation Scheduled",
       status: stage >= 4 ? "completed" : stage === 3 ? "current" : "upcoming",
     },
     {
-      label: "Report Generated",
+      label: "Proposals Signed",
       status: stage >= 5 ? "completed" : stage === 4 ? "current" : "upcoming",
+    },
+    {
+      label: "Payment Complete",
+      status: stage >= 6 ? "completed" : stage === 5 ? "current" : "upcoming",
     },
   ];
 
