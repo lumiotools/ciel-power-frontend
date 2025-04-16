@@ -1,23 +1,24 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState, useContext } from "react";
 import VideoPlayer from "./VideoPlayer";
 import Link from "next/link";
+import { BOOKING_CONTEXT } from "@/providers/booking";
+
+interface RecommendedVideo {
+  videoId: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  url: string;
+}
 
 const AllRecommendation = () => {
-  const [data, setData] = useState([]);
-
+  const { recommendedVideos } = useContext(BOOKING_CONTEXT);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState(null);
-
-  useEffect(() => {
-    const getRecommendatoinData = localStorage.getItem("recommendation");
-    if (getRecommendatoinData) {
-      const parsedData = JSON.parse(getRecommendatoinData);
-      console.log("parsedData", parsedData);
-      setData(parsedData);
-    }
-  }, []);
+  const [selectedVideo, setSelectedVideo] = useState<RecommendedVideo | null>(
+    null
+  );
 
   return (
     <div className="flex-1 overflow-auto p-8 bg-white relative">
@@ -49,7 +50,7 @@ const AllRecommendation = () => {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data?.map((item, idx) => {
+        {recommendedVideos?.map((item, idx) => {
           return (
             <div
               key={idx}
@@ -104,26 +105,47 @@ const AllRecommendation = () => {
         })}
       </div>
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
-          <div className=" h-[80vh] w-[50vw] overflow-y-auto bg-white rounded-xl p-3 space-y-3">
-            <div className=" flex justify-between items-center">
-              <p className=" text-xl font-bold">Youtube Video</p>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className=" bg-red-600 rounded-xl text-white shadow-lg py-2 px-3"
-              >
-                Close
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-xl font-bold">Youtube Video</h3>
+              <div className="flex gap-2">
+                <a
+                  href={selectedVideo?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#8bc34a] text-white rounded-md py-2 px-4 flex items-center gap-1 hover:bg-[#7cb342] transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-external-link"
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                  Open in New Tab
+                </a>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-md py-2 px-4 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
-
-            {selectedVideo && <VideoPlayer content={selectedVideo} />}
+            <div className="p-4">
+              {selectedVideo && <VideoPlayer content={selectedVideo} />}
+            </div>
           </div>
-
-          {/* <IoMdClose
-                    size={24}
-                    className=" absolute top-3 right-3"
-                    onClick={() => setIsModalOpen(false)}
-                  /> */}
         </div>
       )}
     </div>

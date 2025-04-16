@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
+import { BOOKING_CONTEXT } from "@/providers/booking";
 import {
   LogOut,
   FileText,
@@ -23,9 +25,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import BookingProgress from "../component/booking-progress";
 
 export default function AuditResults() {
+  const { bookingDetails } = useContext(BOOKING_CONTEXT);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
 
@@ -44,94 +48,6 @@ export default function AuditResults() {
 
   return (
     <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      <div className="w-64 bg-[#a6d66b] flex flex-col">
-        <div className="p-6">
-          <div className="flex items-center">
-            <Image
-              src="/ciel-power-logo.png"
-              alt="Ciel Power Logo"
-              width={130}
-              height={50}
-              className="mt-2"
-            />
-          </div>
-        </div>
-
-        {/* Sidebar buttons */}
-        <div className="flex-1 flex flex-col gap-4 px-4 mt-4">
-          <Link href="/dashboard">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <LayoutDashboard size={20} />
-              <span className="font-medium">Dashboard</span>
-            </button>
-          </Link>
-
-          <Link href="/report">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <FileText size={20} />
-              <span className="font-medium">Your Report</span>
-            </button>
-          </Link>
-
-          <Link href="/pearl-certification">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Award size={20} />
-              <span className="font-medium">Pearl Certification</span>
-            </button>
-          </Link>
-
-          <Link href="/incentives">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <DollarSign size={20} />
-              <span className="font-medium">Incentives</span>
-            </button>
-          </Link>
-
-          <Link href="/tax-credits">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Percent size={20} />
-              <span className="font-medium">Tax Credits</span>
-            </button>
-          </Link>
-
-          <Link href="/document-portal">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <FileCheck size={20} />
-              <span className="font-medium">Document Portal</span>
-            </button>
-          </Link>
-
-          <Link href="/knowledge-base">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Zap size={20} />
-              <span className="font-medium">Knowledge Base</span>
-            </button>
-          </Link>
-
-          <Link href="/about-us">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Home size={20} />
-              <span className="font-medium">About Us</span>
-            </button>
-          </Link>
-
-          <Link href="/affiliate-program">
-            <button className="w-full flex items-center gap-3 text-white p-3 pl-6 text-left">
-              <Leaf size={20} />
-              <span className="font-medium">Affiliate Program</span>
-            </button>
-          </Link>
-        </div>
-
-        <div className="p-6 mt-auto">
-          <button className="flex items-center gap-2 text-white">
-            <LogOut size={20} />
-            <span className="font-medium">Log Out</span>
-          </button>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-8 bg-white">
         {/* Header */}
@@ -155,51 +71,8 @@ export default function AuditResults() {
           </div>
         </div>
 
-        {/* Progress Tracker */}
-        <div className="flex justify-between items-center mb-8 relative">
-          {/* Line connecting all steps */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[#8bc34a] -z-10 transform -translate-y-1/2"></div>
-
-          {/* Step 1 - Booking Created */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Booking Created</span>
-          </div>
-
-          {/* Step 2 */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Utility Bills Uploaded</span>
-          </div>
-
-          {/* Step 3 - Current */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Audit Performed</span>
-          </div>
-
-          {/* Step 4 */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#8bc34a] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Follow Up Scheduled</span>
-          </div>
-
-          {/* Step 5 */}
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-[#d9e9c3] mb-2 z-10 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xs text-center">Report Generated</span>
-          </div>
-        </div>
+        {/* Progress Tracker - Now using BookingProgress component */}
+        <BookingProgress className="mb-8" />
 
         <div className="flex gap-8">
           {/* Main Content */}
@@ -523,10 +396,29 @@ export default function AuditResults() {
 
                 <p className="text-gray-700 text-center mb-4 flex items-center justify-center gap-2">
                   <Calendar size={16} className="text-[#8bc34a]" />
-                  <span className="font-medium">Wed 31 Jan</span>
+                  <span className="font-medium">
+                    {bookingDetails?.consultationDetails?.startTime
+                      ? new Date(
+                          bookingDetails.consultationDetails.startTime
+                        ).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "Wed 31 Jan"}
+                  </span>
                   <span className="mx-1">•</span>
                   <Clock size={16} className="text-[#8bc34a]" />
-                  <span className="font-medium">2:00 PM</span>
+                  <span className="font-medium">
+                    {bookingDetails?.consultationDetails?.startTime
+                      ? new Date(
+                          bookingDetails.consultationDetails.startTime
+                        ).toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })
+                      : "2:00 PM"}
+                  </span>
                 </p>
                 <p className="text-gray-700 text-center mb-6 italic w-full">
                   This session will take place virtually, so you can join from
@@ -536,8 +428,14 @@ export default function AuditResults() {
                   Need to reschedule? No problem.
                 </p>
                 <button
-                  onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
+                  onClick={() =>
+                    openRescheduleModal(
+                      bookingDetails?.consultationDetails?.rescheduleLink ||
+                        "AUDIT-RESULTS-123"
+                    )
+                  }
                   className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-4 rounded-md transition-colors w-full"
+                  disabled={bookingDetails?.consultationDetails?.isCancelled}
                 >
                   Reschedule
                 </button>
