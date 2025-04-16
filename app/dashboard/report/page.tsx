@@ -7,9 +7,10 @@ import { HeatingContent } from "@/components/report/HeatingContent"
 import { InsulationContent } from "@/components/report/InsulationContent"
 import { ReportSummary } from "@/components/report/ReportSummary"
 import { FutureUpgradesAndCertificates } from "@/components/report/FutureUpgradesAndCertificates"
-import { useRef, useState, useEffect, use } from "react"
+import { useRef, useState, useEffect, use, useContext } from "react"
 import { Download, Share2 } from "lucide-react"
 import { toast } from "sonner"
+import { AUTH_CONTEXT } from "@/providers/auth"
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -81,8 +82,8 @@ const ReportPage = ({
   params: Promise<{ bookingNumber: string }>
 }) => {
   // Unwrap the params Promise using React.use()
-  const unwrappedParams = use(params)
-  const bookingNumber = unwrappedParams.bookingNumber
+  const { userDetails } = useContext(AUTH_CONTEXT);
+  const bookingNumber = userDetails?.bookingNumber;
 
   // Define tab colors for the underlines
   const tabColors = {
@@ -99,7 +100,7 @@ const ReportPage = ({
   const [overview, setOverview] = useState(true)
   const [reportUrl, setReportUrl] = useState("")
   const [reportData, setReportData] = useState<ReportData>({})
-  const [reportStatus, setReportStatus] = useState(false)
+  const [reportStatus, setReportStatus] = useState<"NONE" | "STATIC" | "AUTOMATED">("NONE")
   const [loading, setLoading] = useState(false)
   const [imgOfUser, SetImageOfUser] = useState([])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -113,12 +114,14 @@ const ReportPage = ({
 
   const fetchReportDetails = async () => {
     setLoading(true)
+    console.log("Booking Number:", bookingNumber)
     try {
       const response = await fetch(`/api/user/bookings/${bookingNumber}/report`)
 
       if (!response.ok) {
         const errorData = await response.json()
         toast.error(errorData.detail || "Failed to fetch report details")
+        setReportStatus("NONE") // Set status to NONE on failure
         return
       }
 
@@ -128,13 +131,15 @@ const ReportPage = ({
         console.log("Report data:", data.data)
         setReportData(data.data.reportData || {})
         setReportUrl(data.data.reportUrl || "")
-        setReportStatus(data.data.displayReport || "NONE")
+        setReportStatus(data.data.displayReport || "NONE") // Ensure it matches "NONE", "STATIC", or "AUTOMATED"
       } else {
         toast.error(data.message || "Failed to fetch report details")
+        setReportStatus("NONE") // Set status to NONE on failure
       }
     } catch (error) {
       console.error("Error fetching report details:", error)
       toast.error("An error occurred while fetching report details")
+      setReportStatus("NONE") // Set status to NONE on error
     } finally {
       setLoading(false)
     }
@@ -212,22 +217,48 @@ const ReportPage = ({
   }
 
   const renderContent = () => {
-    switch (activeSubMenu) {
-      case "overview":
-        return <Overview />
-      case "air-leakage":
-        return <AirLeakageContent data={reportData.airLeakage} />
-      case "insulation":
-        return <InsulationContent data={reportData.insulation} driveImages={imgOfUser} />
-      case "heating":
-        return <HeatingContent data={getHeatingData()} driveImages={imgOfUser} />
-      case "cooling":
-        return <CoolingContent data={getCoolingData()} driveImages={imgOfUser} />
-      case "summary":
-        return <ReportSummary data={reportData} />
-      default:
-        return <Overview />
+    if (reportStatus === "NONE") {
+      return (
+        <div className="text-center text-gray-600 py-10">
+          <h2 className="text-xl font-semibold">Your Report Has Not Been Generated</h2>
+          <p>Please check back later or contact support for assistance.</p>
+        </div>
+      )
     }
+
+    if (reportStatus === "STATIC") {
+      return (
+        <div className="py-10">
+          <iframe
+            src={reportUrl}
+            title="Static Report"
+            className="w-full h-screen border-0"
+          ></iframe>
+        </div>
+      )
+    }
+
+    if (reportStatus === "AUTOMATED") {
+      // Render the existing structure for automated reports
+      switch (activeSubMenu) {
+        case "overview":
+          return <Overview />
+        case "air-leakage":
+          return <AirLeakageContent data={reportData.airLeakage} />
+        case "insulation":
+          return <InsulationContent data={reportData.insulation} driveImages={imgOfUser} />
+        case "heating":
+          return <HeatingContent data={getHeatingData()} driveImages={imgOfUser} />
+        case "cooling":
+          return <CoolingContent data={getCoolingData()} driveImages={imgOfUser} />
+        case "summary":
+          return <ReportSummary data={reportData} />
+        default:
+          return <Overview />
+      }
+    }
+
+    return null
   }
 
   const handleDownloadReport = () => {

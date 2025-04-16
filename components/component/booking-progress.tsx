@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import { BadgeX } from "lucide-react";
-import type React from "react"; // Import React
+import type React from "react";
+import { useContext } from "react";
+import { BOOKING_CONTEXT } from "@/providers/booking";
 
 interface Step {
   label: string;
@@ -8,7 +10,6 @@ interface Step {
 }
 
 interface BookingProgressProps {
-  steps: Step[];
   className?: string;
 }
 
@@ -24,9 +25,8 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={cn("transition-colors", {
-          "text-[#5ea502]": status === "completed" || status === "current",
-          // "text-[#b9dd8b]": status === "current",
-          "text-[#d1d5db]": status === "upcoming",
+          "text-[#5ea502]": status === "completed",
+          "text-[#d1d5db]": status === "current" || status === "upcoming",
         })}
       >
         <circle cx="16" cy="16" r="16" fill="white" />
@@ -39,9 +39,83 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
   );
 
 export const BookingProgress: React.FC<BookingProgressProps> = ({
-  steps,
   className,
 }) => {
+  const { bookingDetails } = useContext(BOOKING_CONTEXT);
+
+  // Log the booking data for debugging
+  console.log("Booking data:", bookingDetails);
+
+  // Determine current stage based on available data
+  const currentStage = () => {
+    if (!bookingDetails) return 1;
+
+    // Step 6: Payment Complete
+    if (bookingDetails.paymentDetails?.status === "Paid") {
+      console.log("Payment is complete");
+      return 6;
+    }
+
+    // Step 5: Proposals Signed
+    if (bookingDetails.proposalDetails?.completedContractLink) {
+      console.log("Proposal has been signed");
+      return 5;
+    }
+
+    // Step 4: Consultation Scheduled
+    if (bookingDetails.consultationDetails?.startTime) {
+      console.log("Consultation has been scheduled");
+      return 4;
+    }
+
+    // Step 3: Audit Performed
+    if (bookingDetails.reportConsultation) {
+      console.log("Audit has been performed");
+      return 3;
+    }
+
+    // Step 2: Utility Bills Uploaded
+    if (bookingDetails.utilityBillDetails?.count > 0) {
+      console.log("Utility bills have been uploaded");
+      return 2;
+    }
+
+    // Step 1: Booking Created (default)
+    console.log("Booking has been created (default)");
+    return 1;
+  };
+
+  const stage = currentStage();
+  console.log("Current stage determined:", stage);
+
+  // Define booking progress steps
+  const steps: Step[] = [
+    {
+      label: "Booking Created",
+      status: stage >= 1 ? "completed" : "upcoming",
+    },
+    {
+      label: "Utility Bills Uploaded",
+      status: stage >= 2 ? "completed" : stage === 1 ? "current" : "upcoming",
+    },
+    {
+      label: "Report Generated",
+      status: stage >= 3 ? "completed" : stage === 2 ? "current" : "upcoming",
+    },
+    {
+      label: "Consultation Scheduled",
+      status: stage >= 4 ? "completed" : stage === 3 ? "current" : "upcoming",
+    },
+    {
+      label: "Proposals Signed",
+      status: stage >= 5 ? "completed" : stage === 4 ? "current" : "upcoming",
+    },
+    {
+      label: "Payment Complete",
+      status: stage >= 6 ? "completed" : stage === 5 ? "current" : "upcoming",
+    },
+  ];
+
   return (
     <div className={cn("relative w-full mt-4", className)}>
       <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
@@ -60,7 +134,7 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
                     "h-[2px] w-8 sm:w-12 md:w-16",
                     step.status === "completed"
                       ? "bg-[#5ea502]"
-                      : "bg-[#d1d5db]",
+                      : "bg-[#d1d5db]"
                   )}
                   aria-hidden="true"
                 />

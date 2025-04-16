@@ -84,14 +84,13 @@ export function ChatBot() {
     setIsTyping(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/chatbot/chat`,
+      const response = await fetch("/api/user/chat",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: inputValue }),
+          body: JSON.stringify({ user_message: inputValue, chat_history: messages }),
         },
       );
 
@@ -99,12 +98,12 @@ export function ChatBot() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log("Response data:", data.response);
+      const responseJson = await response.json();
+      console.log("Response data:", responseJson.data);
 
       const aiMessage: Message = {
         role: "assistant",
-        content: data.response || "Sorry, I couldn't process that request.",
+        content: responseJson.data.response || "Sorry, I couldn't process that request.",
         timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
       };
 

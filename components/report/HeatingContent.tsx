@@ -808,7 +808,7 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem, driveImage
       console.log("Data received:", data.data)
       const heatingItem = data.data.filter((item) => !item?.name?.toLowerCase()?.includes("water"))
 
-      console.log("heating item", heatingItem)
+      console.log("heating item", heatingItem);
 
       const waterItem = data.data.find((item) => item?.name?.toLowerCase().includes("water"))
 
