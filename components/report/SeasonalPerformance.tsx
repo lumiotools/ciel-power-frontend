@@ -1,27 +1,23 @@
-"use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function SeasonalPerformance() {
   return (
-    <div className="space-y-8">
-      <Card className="h-full flex flex-col">
-        {" "}
-        {/* Adjusted height to match Technical Aspects */}
-        <CardHeader className="bg-teal-50 dark:bg-teal-900/20">
-          <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">
-            Seasonal Performance
-          </CardTitle>
+    <div>
+      <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden h-[450px] flex flex-col">
+        <CardHeader className="bg-[#E0F7F5] py-4 px-5 border-b border-gray-100">
+          <CardTitle className="text-lg font-medium text-[#256C68]">Seasonal Performance</CardTitle>
         </CardHeader>
-        <CardContent className="p-6 flex-grow flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center justify-center">
+        <CardContent className="p-5 flex-grow flex items-center justify-center">
+          <div className="w-full flex items-center justify-center">
             <img
               src="https://i.postimg.cc/ZYG3nQCs/Screenshot-2024-11-25-003635.png"
               alt="House insulation diagram showing seasonal performance"
-              className="w-10/12 mx-auto object-contain rounded-lg"
+              className="w-full max-w-md mx-auto object-contain"
             />
           </div>
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

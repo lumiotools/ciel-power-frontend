@@ -21,6 +21,7 @@ export interface UserDetails {
   lastName: string;
   emailAddress: string;
   admin?: boolean | undefined;
+  bookingNumber?: string | undefined;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { Overview } from "@/components/report/Overview";
 import { AirLeakageContent } from "@/components/report/AirLeakageContent";
 import { CoolingContent } from "@/components/report/CoolingContent";
 import { HeatingContent } from "@/components/report/HeatingContent";
@@ -26,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { set } from "date-fns";
 import { DefaultReportData } from "./utils";
+import { useDebouncedCallback } from "use-debounce";
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -39,6 +41,7 @@ interface InsulationItem {
   material: string;
   name: string;
   rValue: number;
+  image: string;
 }
 
 interface InsulationData {
@@ -92,8 +95,6 @@ interface ReportData {
   [key: string]: any;
 }
 
-const REPORT_DATA_KEY = "report_data";
-
 const ReportPage = ({
   params,
 }: {
@@ -103,13 +104,14 @@ const ReportPage = ({
   const unwrappedParams = use(params);
   const bookingNumber = unwrappedParams.bookingNumber;
 
-  const [activeSubMenu, setActiveSubMenu] = useState("air-leakage");
+  const [activeSubMenu, setActiveSubMenu] = useState("overview");
   const [overview, setOverview] = useState(true);
   const [reportUrl, setReportUrl] = useState("");
   const [reportData, setReportData] = useState<ReportData>({});
   const [reportStatus, setReportStatus] = useState(false);
   const [isChangesSaved, setIsChangesSaved] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [imgOfUser, SetImageOfUser] = useState([]);
@@ -131,6 +133,46 @@ const ReportPage = ({
       setActiveSubMenu(menu);
     }
   };
+
+  // Debounced save function to avoid too many API calls
+  const debouncedSaveReportData = useDebouncedCallback(async (data: ReportData) => {
+    if (!isAdmin) return;
+    
+    setIsSaving(true);
+    try {
+      // Use the previous API format and endpoint
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reportData: data,
+          reportUrl: reportUrl || ""
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save report data');
+      }
+
+      const responseData = await response.json();
+      if (responseData.success) {
+        setIsChangesSaved(true);
+        // Subtle toast for auto-save success
+        toast.success("Changes saved automatically", { duration: 2000 });
+      } else {
+        throw new Error(responseData.message || 'Failed to save report data');
+      }
+    } catch (error) {
+      console.error('Error saving report data:', error);
+      toast.error("Failed to save changes automatically. Please try again.");
+      setIsChangesSaved(false);
+    } finally {
+      setIsSaving(false);
+    }
+  }, 2000); // 2 second debounce
 
   useEffect(() => {
     const fetchData = async () => {
@@ -184,29 +226,35 @@ const ReportPage = ({
       if (data.success) {
         const fetchedReportData = data.data.reportData || DefaultReportData;
 
-        if (!fetchedReportData.insulation.missingDataZones) {
+        // Ensure all required arrays exist to avoid TypeScript errors
+        if (!fetchedReportData.insulation) {
+          fetchedReportData.insulation = {
+            data: [],
+            missingDataZones: [],
+            missingZones: [],
+            title: "Insulation",
+          };
+        } else if (!fetchedReportData.insulation.missingDataZones) {
           fetchedReportData.insulation.missingDataZones = [];
+        }
+        
+        if (!fetchedReportData.insulation.missingZones) {
+          fetchedReportData.insulation.missingZones = [];
+        }
+
+        // Ensure all insulation items have an image property
+        if (fetchedReportData.insulation.data) {
+          fetchedReportData.insulation.data = fetchedReportData.insulation.data.map((item: Partial<InsulationItem>) => ({
+            ...item,
+            image: item.image || "" // Provide empty string default for missing image properties
+          }));
         }
 
         // Save to state
         setReportData(fetchedReportData);
         setReportUrl(data.data.reportUrl || "");
         setReportStatus(data.data.displayReport || "NONE");
-
-        const IsAdmin =
-          typeof window !== "undefined" &&
-          window.location.href.includes("admin");
-        // Save to localStorage only for admin users
-        if (IsAdmin) {
-          try {
-            localStorage.setItem(
-              `${REPORT_DATA_KEY}_${bookingNumber}`,
-              JSON.stringify(fetchedReportData),
-            );
-          } catch (e) {
-            console.error("Error saving report data to localStorage:", e);
-          }
-        }
+        setIsChangesSaved(true);
       } else {
         toast.error(data.message || "Failed to fetch report details");
       }
@@ -219,42 +267,25 @@ const ReportPage = ({
   };
 
   useEffect(() => {
-    // Admin users can load from localStorage, otherwise always fetch fresh
-    const IsAdmin =
-      typeof window !== "undefined" && window.location.href.includes("admin");
-    if (IsAdmin) {
-      const savedData = localStorage.getItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-      );
-
-      if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-
-          setReportData(parsedData);
-        } catch (e) {
-          console.error("Error parsing saved report data:", e);
-          // If parsing fails, fetch fresh data
-
-          if (bookingNumber) {
-            fetchReportDetails();
-          }
-        }
-      } else if (bookingNumber) {
-        // If no data in localStorage, fetch from API
-
-        fetchReportDetails();
-      }
-    } else if (bookingNumber) {
-      // Customer users always fetch fresh data
-
+    if (bookingNumber) {
       fetchReportDetails();
     }
   }, [bookingNumber]);
 
+  // Common function to update report data and trigger autosave
+  const updateReportDataField = (updatedData: ReportData) => {
+    if (!isAdmin) return;
+    
+    setReportData(updatedData);
+    setIsChangesSaved(false);
+    
+    // Trigger debounced save
+    debouncedSaveReportData(updatedData);
+  };
+
   // Update functions for each section
   const updateAirLeakage = (newValue: string) => {
-    if (!isAdmin) return; // Only admin can update
+    if (!isAdmin) return;
 
     // Handle the case where airLeakage might not exist or might be incomplete
     const currentAirLeakage = reportData.airLeakage || {
@@ -276,40 +307,48 @@ const ReportPage = ({
       airLeakage: updatedAirLeakage,
     };
 
-    setReportData(newData);
-
-    setIsChangesSaved(false);
-
-    // Save to localStorage
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(newData),
-      );
-    } catch (e) {
-      console.error("Error saving updated report data to localStorage:", e);
-    }
+    updateReportDataField(newData);
   };
 
   const updateInsulationItem = (updatedItem: InsulationItem) => {
     if (!isAdmin) return;
 
+    console.log("ReportPage: updateInsulationItem called with:", updatedItem);
+
     if (!reportData.insulation?.data) {
-      setReportData({
+      const initializedData = {
         ...reportData,
         insulation: {
-          ...reportData.insulation,
           data: [],
+          missingDataZones: [],
+          missingZones: [],
+          title: "Insulation",
         },
-      });
+      };
+      updateReportDataField(initializedData);
       return;
     }
 
+    // Ensure image property exists
+    const itemWithImage = {
+      ...updatedItem,
+      image: updatedItem.image || "" // Provide empty string default for missing image properties
+    };
+
+    console.log("ReportPage: Processing insulation item update:", itemWithImage);
+
     const newData = [...reportData.insulation.data];
-    const index = newData.findIndex((item) => item.name === updatedItem.name);
+    const index = newData.findIndex((item) => item.name === itemWithImage.name);
 
     if (index !== -1) {
-      newData[index] = updatedItem;
+      // Update existing item
+      // Preserve any properties from the original item that aren't being updated
+      newData[index] = {
+        ...newData[index],
+        ...itemWithImage,
+      };
+
+      console.log("ReportPage: Updated item at index", index, "New data:", newData[index]);
 
       const updatedReportData = {
         ...reportData,
@@ -319,45 +358,23 @@ const ReportPage = ({
         },
       };
 
-      setReportData(updatedReportData);
-
-      setIsChangesSaved(false);
-
-      // Save to localStorage
-      try {
-        localStorage.setItem(
-          `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData),
-        );
-      } catch (e) {
-        console.error("Error saving insulation data to localStorage:", e);
-      }
+      updateReportDataField(updatedReportData);
     } else {
+      // Add new item
+      console.log("ReportPage: Item not found, adding new item");
+      
       const updatedReportData = {
         ...reportData,
         insulation: {
           ...reportData.insulation,
-          data: [...newData, updatedItem],
+          data: [...newData, itemWithImage],
         },
       };
 
-      setReportData(updatedReportData);
-      setIsChangesSaved(false);
-
-      // Save to localStorage
-      try {
-        localStorage.setItem(
-          `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData),
-        );
-      } catch (e) {
-        console.error("Error saving insulation data to localStorage:", e);
-      }
+      updateReportDataField(updatedReportData);
     }
   };
 
-  // Replace the existing updateHeatingItem function with this one
-  // Replace the existing updateHeatingItem function with this one
   const updateHeatingItem = (updatedItem: HeatingCoolingItem) => {
     console.log(
       "ReportPage.updateHeatingItem called with:",
@@ -495,20 +512,8 @@ const ReportPage = ({
       }
     }
 
-    // Now update the state with our carefully constructed new data
-    setReportData(newReportData);
-    setIsChangesSaved(false);
-
-    // Save to localStorage
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(newReportData),
-      );
-      console.log("New report data saved to localStorage:", newReportData);
-    } catch (e) {
-      console.error("Error saving updated report data to localStorage:", e);
-    }
+    // Now update with our carefully constructed new data
+    updateReportDataField(newReportData);
   };
 
   // Improved updateCoolingItem function to ensure state preservation
@@ -579,16 +584,7 @@ const ReportPage = ({
       },
     };
 
-    setReportData(updatedReportData);
-    setIsChangesSaved(false);
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
-      );
-    } catch (e) {
-      console.error("Error saving heating data to localStorage:", e);
-    }
+    updateReportDataField(updatedReportData);
   };
 
   const updateConcerns = (newConcerns: any) => {
@@ -615,20 +611,7 @@ const ReportPage = ({
         },
       };
 
-      setReportData(updatedReportData);
-      setIsChangesSaved(false);
-
-      // Save to localStorage
-      try {
-        localStorage.setItem(
-          `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData),
-        );
-        console.log("Initialized and saved concerns data structure");
-      } catch (e) {
-        console.error("Error saving concerns to localStorage:", e);
-      }
-
+      updateReportDataField(updatedReportData);
       return;
     }
 
@@ -653,20 +636,7 @@ const ReportPage = ({
         },
       };
 
-      setReportData(updatedReportData);
-      setIsChangesSaved(false);
-
-      // Save to localStorage
-      try {
-        localStorage.setItem(
-          `${REPORT_DATA_KEY}_${bookingNumber}`,
-          JSON.stringify(updatedReportData),
-        );
-        console.log("Initialized and saved concerns data array");
-      } catch (e) {
-        console.error("Error saving concerns to localStorage:", e);
-      }
-
+      updateReportDataField(updatedReportData);
       return;
     }
 
@@ -712,19 +682,7 @@ const ReportPage = ({
       },
     };
 
-    setReportData(updatedReportData);
-    setIsChangesSaved(false);
-
-    // Save to localStorage
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
-      );
-      console.log("Updated concerns in localStorage");
-    } catch (e) {
-      console.error("Error saving concerns to localStorage:", e);
-    }
+    updateReportDataField(updatedReportData);
   };
 
   const updateRecommendations = (newRecommendations: any[]) => {
@@ -738,19 +696,7 @@ const ReportPage = ({
       },
     };
 
-    setReportData(updatedReportData);
-
-    setIsChangesSaved(false);
-
-    // Save to localStorage
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
-      );
-    } catch (e) {
-      console.error("Error saving recommendations to localStorage:", e);
-    }
+    updateReportDataField(updatedReportData);
   };
 
   const updateFinancials = (newFinancials: FinancialData) => {
@@ -761,19 +707,7 @@ const ReportPage = ({
       financialSummary: newFinancials,
     };
 
-    setReportData(updatedReportData);
-
-    setIsChangesSaved(false);
-
-    // Save to localStorage
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
-      );
-    } catch (e) {
-      console.error("Error saving financials to localStorage:", e);
-    }
+    updateReportDataField(updatedReportData);
   };
 
   const updateTaxCredits = (newTaxCredits: any) => {
@@ -784,19 +718,7 @@ const ReportPage = ({
       federalTaxCredits: newTaxCredits,
     };
 
-    setReportData(updatedReportData);
-
-    setIsChangesSaved(false);
-
-    // Save to localStorage
-    try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
-      );
-    } catch (e) {
-      console.error("Error saving tax credits to localStorage:", e);
-    }
+    updateReportDataField(updatedReportData);
   };
 
   const updateEnvironmentalImpact = (newEnvironmentalData: any) => {
@@ -807,21 +729,44 @@ const ReportPage = ({
       environmentalImpact: newEnvironmentalData,
     };
 
-    setReportData(updatedReportData);
+    updateReportDataField(updatedReportData);
+  };
 
-    setIsChangesSaved(false);
-
-    // Save to localStorage
+  // Manual save function for the save button
+  const handleManualSave = async () => {
+    if (!isAdmin) return;
+    
+    setIsSaving(true);
     try {
-      localStorage.setItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-        JSON.stringify(updatedReportData),
-      );
-    } catch (e) {
-      console.error(
-        "Error saving environmental impact data to localStorage:",
-        e,
-      );
+      // Use the previous API format and endpoint
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reportData: reportData,
+          reportUrl: reportUrl || ""
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save report data');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setIsChangesSaved(true);
+        toast.success("All changes saved successfully");
+      } else {
+        throw new Error(data.message || 'Failed to save report data');
+      }
+    } catch (error) {
+      console.error('Error saving report data:', error);
+      toast.error("Failed to save changes. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -913,14 +858,17 @@ const ReportPage = ({
   };
 
   const renderContent = () => {
+    console.log(activeSubMenu);
     switch (activeSubMenu) {
+      case "overview":
+        return <Overview />;
       case "air-leakage":
         return (
           <AirLeakageContent
             data={reportData.airLeakage}
             isAdmin={isAdmin}
             onUpdateValue={updateAirLeakage}
-            onSave={() => setIsChangesSaved(true)}
+            onSave={handleManualSave}
           />
         );
       case "insulation":
@@ -930,7 +878,7 @@ const ReportPage = ({
             driveImages={imgOfUser}
             isAdmin={isAdmin}
             onUpdateItem={updateInsulationItem}
-            onSave={() => setIsChangesSaved(true)}
+            onSave={handleManualSave}
           />
         );
       case "heating":
@@ -940,7 +888,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateItem={updateHeatingItem}
             driveImages={imgOfUser}
-            onSave={() => setIsChangesSaved(true)}
+            onSave={handleManualSave}
           />
         );
       case "cooling":
@@ -950,7 +898,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             onUpdateItem={updateCoolingItem}
             driveImages={imgOfUser}
-            onSave={() => setIsChangesSaved(true)}
+            onSave={handleManualSave}
           />
         );
       case "summary":
@@ -963,20 +911,11 @@ const ReportPage = ({
             onUpdateFinancials={updateFinancials}
             onUpdateTaxCredits={updateTaxCredits}
             onUpdateEnvironmentalImpact={updateEnvironmentalImpact}
-            onSave={() => setIsChangesSaved(true)}
+            onSave={handleManualSave}
           />
         );
-      case "future solutions and certifications":
-        return <FutureUpgradesAndCertificates />;
       default:
-        return (
-          <AirLeakageContent
-            data={reportData.airLeakage}
-            isAdmin={isAdmin}
-            onUpdateValue={updateAirLeakage}
-            onSave={() => setIsChangesSaved(true)}
-          />
-        );
+        return <Overview />;
     }
   };
 
@@ -1013,121 +952,62 @@ const ReportPage = ({
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Booking Details
         </Button>
+        
+        {isAdmin && !isChangesSaved && (
+          <div className="flex items-center gap-2">
+            {isSaving ? (
+              <span className="text-yellow-600 text-sm">Saving changes...</span>
+            ) : (
+              <span className="text-orange-600 text-sm">Unsaved changes</span>
+            )}
+            <Button 
+              onClick={handleManualSave}
+              disabled={isSaving || isChangesSaved}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isSaving ? "Saving..." : "Save All Changes"}
+            </Button>
+          </div>
+        )}
       </div>
-      {overview ? (
-        <div className="container mx-auto p-4">
-          <div className="space-y-12">
-            {/* Section 1 - About Ciel Power */}
-            <Card className="overflow-hidden">
-              <CardHeader className="bg-green-50 dark:bg-lime-500/50 pb-6">
-                <CardTitle className="text-2xl text-black dark:text-lime-200">
-                  About Ciel Power
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 space-y-8">
-                <div className="space-y-6 text-gray-600 dark:text-gray-300">
-                  <p className="leading-relaxed">
-                    We are a participating contractor in the New Jersey Home
-                    Performance with Energy Star Program and a Building
-                    Performance Institute Goldstar Contractor.
-                  </p>
-                  <p className="leading-relaxed">
-                    Today&apos;s new home buyers expect energy efficiency to be
-                    part of the package. What if your home was built before
-                    today&apos;s energy-efficiency standards?
-                  </p>
-                  <p className="leading-relaxed">
-                    From insulation to high-efficiency air-conditioning,
-                    heating, and hot water systems, our products and services
-                    deliver today&apos;s energy-efficiency solutions to
-                    yesterday&apos;s homes for a more comfortable and affordable
-                    homeownership experience.
-                  </p>
-                </div>
 
-                {/* How it Works Section */}
-                <div className="pt-6">
-                  <h3 className="text-2xl font-semibold mb-8 text-black dark:text-lime-200">
-                    How it Works
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {howItWorksSteps.map((step, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        className="p-6 bg-green-50 dark:bg-lime-500/50 rounded-xl flex flex-col items-center text-center"
-                      >
-                        <div className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center mb-6">
-                          <step.icon className="h-8 w-8 text-lime-500" />
-                        </div>
-                        <h4 className="text-xl font-semibold text-black dark:text-lime-200 mb-4">
-                          {step.title}
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          {step.description}
-                        </p>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+      <div className="container mx-auto p-4" ref={scrollRef}>
+        <div className="bg-gradient-to-r from-lime-400 to-lime-400 py-4 px-6 rounded-t-lg shadow-md">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-white">Reports</h1>
+          </div>
+        </div>
 
-            {/* Additional sections omitted for brevity */}
-
-            {/* Call to Action Button */}
-            <div className="text-center">
+        <div className="bg-white rounded-b-lg shadow-md">
+          <div className="flex border-b border-gray-200">
+            {[
+              "overview",
+              "air-leakage",
+              "insulation",
+              "heating",
+              "cooling",
+              "summary",
+            ].map((tab) => (
               <button
-                onClick={handleScrollToTop}
-                className="bg-lime-500 text-white px-8 py-3 rounded-full hover:bg-green-700 transition-colors duration-200 font-medium"
-              >
-                View Detailed Reports
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="container mx-auto p-4" ref={scrollRef}>
-          <div className="bg-gradient-to-r from-lime-400 to-lime-400 py-4 px-6 rounded-t-lg shadow-md">
-            <div className="flex justify-between items-center">
-              <h1 className="text-3xl font-bold text-white">Reports</h1>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-b-lg shadow-md">
-            <div className="flex border-b border-gray-200">
-              {[
-                "air-leakage",
-                "insulation",
-                "heating",
-                "cooling",
-                "summary",
-                "future solutions and certifications",
-              ].map((tab) => (
-                <button
-                  key={tab}
-                  className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                    activeSubMenu === tab
-                      ? "border-b-2 border-lime-500 text-lime-500"
-                      : "text-gray-600 hover:text-lime-500"
+                key={tab}
+                className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${activeSubMenu === tab
+                    ? "border-b-2 border-lime-500 text-lime-500"
+                    : "text-gray-600 hover:text-lime-500"
                   }`}
-                  onClick={() => handleChangeActiveSubMenu(tab)}
-                >
-                  {["air-leakage", "insulation", "heating", "cooling"].includes(
-                    tab,
-                  )
-                    ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
-                    : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-6">{renderContent()}</div>
+                onClick={() => handleChangeActiveSubMenu(tab)}
+              >
+                {["air-leakage", "insulation", "heating", "cooling"].includes(
+                  tab,
+                )
+                  ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
+                  : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
           </div>
+
+          <div className="p-6">{renderContent()}</div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -1,389 +1,615 @@
-// Completely isolated CoolingSystemCard that uses ref to preserve state
-import React, { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, Zap, Sun } from "lucide-react";
-import { ImageUpload } from "./ImageUpload";
-import { ImageCustomer } from "@/components/report/ImageCustomer";
-import { driveImages } from "@/utils/image-utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+"use client"
+
+import type React from "react"
+
+import { useRef, useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Zap, Sun, AlertCircle, Edit2, Check, X, Pencil } from "lucide-react"
+import { ImageUpload } from "./ImageUpload"
+import { ImageCustomer } from "@/components/report/ImageCustomer"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import PercentageGauge from "@/components/report/PercentageGauge"
 
 // Only include the necessary interfaces
 interface HeatingCoolingItem {
-  condition: string;
-  name: string;
-  parameter: string;
-  type: string;
-  value: number | string;
-  year?: number;
-  image?: string;
+  condition: string
+  name: string
+  parameter: string
+  type: string
+  value: number | string
+  year?: number
+  image?: string
 }
 
 interface CoolingSystemCardProps {
-  item: HeatingCoolingItem;
-  index: number;
-  isAdmin: boolean;
-  onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
-  driveImages?: any[];
+  item: HeatingCoolingItem
+  index: number
+  isAdmin: boolean
+  onUpdateItem?: (updatedItem: HeatingCoolingItem) => void
+  driveImages?: any[]
 }
 
-const CoolingSystemCard = ({
-  item,
-  index,
-  isAdmin,
-  onUpdateItem,
-  driveImages,
-}: CoolingSystemCardProps) => {
-  // Use a ref to store the full item state to prevent any loss between renders
-  const itemRef = useRef<HeatingCoolingItem>({ ...item });
+interface EditableFieldProps {
+  value: string
+  onSave: (value: string) => void
+  type: "text" | "select" | "number"
+  options?: string[]
+  min?: number
+  max?: number
+}
 
-  // Use state only for triggering re-renders when fields change
-  const [, forceRender] = useState(0);
+interface EditableSEERProps {
+  value: number
+  onChange: (value: number) => void
+  label?: string
+}
 
-  // Animation state
-  const [animate, setAnimate] = useState(false);
-  const elemRef = useRef(null);
+interface InPlaceEditProps {
+  initialValue: string
+  isAdmin: boolean
+  onUpdate: (value: string) => void
+  label?: string | null
+}
 
-  // Update our ref with any initial changes from parent
+// Enhanced EditableSEER component with better UI and validation
+const EditableSEER: React.FC<EditableSEERProps> = ({ value, onChange, label = "" }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState(value)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Keep local state in sync with props
   useEffect(() => {
-    // Only update ref on first render to avoid losing local changes
-    if (JSON.stringify(itemRef.current) === JSON.stringify({ ...item })) {
-      itemRef.current = { ...item };
+    setEditValue(value)
+  }, [value])
+
+  // Auto-focus the input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
     }
-  }, [item]);
+  }, [isEditing])
+
+  const handleSave = () => {
+    // Ensure we have a valid number
+    const numValue = Number(editValue)
+    if (!isNaN(numValue)) {
+      onChange(numValue)
+      setIsEditing(false)
+    } else {
+      // Reset to original value if invalid input
+      setEditValue(value)
+      setIsEditing(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSave()
+    } else if (e.key === "Escape") {
+      setEditValue(value)
+      setIsEditing(false)
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRef}
+          type="number"
+          value={editValue}
+          onChange={(e) => setEditValue(Number(e.target.value))}
+          onKeyDown={handleKeyDown}
+          onBlur={handleSave}
+          className="border border-amber-300 rounded px-2 py-1 w-20 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          min={0}
+          max={30}
+          step="0.1"
+        />
+        <span className="text-gray-500">{label}</span>
+        <button
+          onClick={handleSave}
+          className="p-1 bg-green-100 hover:bg-green-200 rounded text-green-600 transition-colors"
+          title="Save"
+        >
+          <Check className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => {
+            setEditValue(value)
+            setIsEditing(false)
+          }}
+          className="p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 transition-colors"
+          title="Cancel"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 group">
+      <p className="text-xl font-bold" style={{ color: "#D62501" }}>
+        {value}
+        {label}
+      </p>
+      <button
+        onClick={() => setIsEditing(true)}
+        className="p-1 opacity-0 group-hover:opacity-100 hover:bg-amber-100 rounded transition-all"
+        title="Edit value"
+      >
+        <Pencil className="w-4 h-4" style={{ color: "#B18C2E" }} />
+      </button>
+    </div>
+  )
+}
+
+// Original EditableField component
+const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, options = [], min, max }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState(value)
+
+  const handleSave = () => {
+    onSave(editValue)
+    setIsEditing(false)
+  }
+
+  const handleCancel = () => {
+    setEditValue(value)
+    setIsEditing(false)
+  }
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <span>{value}</span>
+        <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-gray-100 rounded">
+          <Edit2 className="w-4 h-4" />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {type === "number" ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={editValue}
+            min={min}
+            max={max}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="border rounded px-2 py-1 w-32"
+          />
+          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
+            <Check className="w-4 h-4" />
+          </button>
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : type === "select" ? (
+        <div className="flex items-center gap-2">
+          <Select
+            value={editValue}
+            onValueChange={(value) => {
+              setEditValue(value)
+              onSave(value)
+              setIsEditing(false)
+            }}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue>{editValue}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="border rounded px-2 py-1 w-32"
+          />
+          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
+            <Check className="w-4 h-4" />
+          </button>
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// InPlaceEdit component
+const InPlaceEdit: React.FC<InPlaceEditProps> = ({ initialValue, isAdmin, onUpdate, label = null }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [value, setValue] = useState(initialValue)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isEditing])
+
+  const handleClick = () => {
+    if (isAdmin) {
+      setIsEditing(true)
+    }
+  }
+
+  const handleBlur = () => {
+    setIsEditing(false)
+    if (value !== initialValue) {
+      onUpdate(value)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      setIsEditing(false)
+      if (value !== initialValue) {
+        onUpdate(value)
+      }
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        className="text-2xl font-bold bg-transparent border-b outline-none"
+        style={{ color: "#B18C2E", borderBottomColor: "#B18C2E" }}
+      />
+    )
+  }
+
+  return (
+    <div
+      className="text-2xl font-bold flex items-center cursor-pointer"
+      onClick={handleClick}
+      style={{ color: "#B18C2E" }}
+    >
+      {value}
+      {label ? ` ${label}` : ""}
+      {isAdmin && <Pencil className="ml-2 h-5 w-5 text-gray-400" />}
+    </div>
+  )
+}
+
+const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: CoolingSystemCardProps) => {
+  const [systemData, setSystemData] = useState({
+    type: item?.type ?? "null",
+    condition: item?.condition ?? "null",
+    value: typeof item?.value === "number" ? item.value : 0,
+    parameterName: item?.parameter ?? "SEER",
+    year: item?.year,
+    image: item?.image,
+  })
+
+  const [animate, setAnimate] = useState(false)
+  const itemRef = useRef(null)
 
   // Set up intersection observer for animation
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setAnimate(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.5 },
-    );
-
-    if (elemRef.current) observer.observe(elemRef.current);
-    return () => elemRef.current && observer.unobserve(elemRef.current);
-  }, []);
-
-  // Update a field while preserving all other values
-  const updateField = (field: keyof HeatingCoolingItem, value: any) => {
-    // First update our ref
-    itemRef.current = {
-      ...itemRef.current,
-      [field]: value,
-    };
-
-    // Force render to reflect changes
-    forceRender((prev) => prev + 1);
-
-    // Notify parent (only if provided)
-    if (onUpdateItem) {
-      console.log(`Updating ${field} to:`, value);
-      console.log("Full updated item:", itemRef.current);
-      onUpdateItem(itemRef.current);
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.5,
     }
-  };
 
-  // Get the current value to display (numeric or string)
-  const getSeerValue = () => {
-    return typeof itemRef.current.value === "number"
-      ? itemRef.current.value
-      : 0;
-  };
+    const observerCallback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setAnimate(true)
+          observer.unobserve(entry.target)
+        }
+      })
+    }
 
-  // Create description text based on current values
+    const observer = new IntersectionObserver(observerCallback, observerOptions)
+
+    if (itemRef.current) observer.observe(itemRef.current)
+
+    return () => {
+      if (itemRef.current) observer.unobserve(itemRef.current)
+    }
+  }, [])
+
+  // Update state when props change
+  useEffect(() => {
+    setSystemData({
+      type: item.type || "null",
+      condition: item.condition || "null",
+      value: typeof item.value === "number" ? item.value : 0,
+      parameterName: item.parameter || "SEER",
+      year: item.year,
+      image: item?.image,
+    })
+  }, [item])
+
+  // Update local state and propagate changes to parent component
+  const updateSystemData = (field: keyof typeof systemData, value: any) => {
+    console.log("System Data", systemData)
+    const updatedData = {
+      ...systemData,
+      [field]: value,
+    }
+
+    setSystemData(updatedData)
+
+    console.log("Item: ", item)
+
+    // Only call onUpdateItem if it exists
+    if (onUpdateItem) {
+      const updatedItem = {
+        ...item,
+        type: field === "type" ? value : item.type,
+        condition: field === "condition" ? value : item.condition,
+        value: field === "value" ? value : item.value,
+        parameter: field === "parameterName" ? value : item.parameter,
+        year: field === "year" ? value : item.year,
+        image: field === "image" ? value : item.image,
+      }
+
+      onUpdateItem(updatedItem)
+    }
+  }
+
+  // Helper function to determine if we should show a numeric gauge chart
+  const shouldShowGaugeChart = () => {
+    return typeof systemData.value === "number" && systemData.value > 0
+  }
+
+  const renderValue = () => {
+    if (typeof systemData.value === "number") {
+      return systemData.value
+    } else if (systemData.value === "") {
+      return "N/A"
+    } else {
+      return systemData.value
+    }
+  }
+
+  // Get description text based on item type
   const getDescriptionText = () => {
-    const seerValue = getSeerValue();
-    const recommendedSEER = 16;
+    const seerValue = typeof systemData.value === "number" ? systemData.value : 0
+    const recommendedSEER = 16
 
-    return `Your air conditioner's current ${itemRef.current.parameter} rating of ${seerValue} means it's operating ${
+    return `Your ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${seerValue}. ${
       seerValue < recommendedSEER
-        ? ` below optimal efficiency. Upgrading to a high-efficiency model with ${recommendedSEER} ${itemRef.current.parameter} could result in significant energy savings.`
-        : ` at an efficient level that meets or exceeds recommended standards.`
-    }`;
-  };
+        ? `Upgrading to a high-efficiency model with ${recommendedSEER} ${systemData.parameterName} could result in significant energy savings.`
+        : `This is an efficient unit that meets or exceeds recommended standards.`
+    }`
+  }
+
+  // Common heading style for section headings
+  const sectionHeadingStyle = {
+    fontFamily: "Poppins",
+    fontWeight: 500,
+    fontSize: "16px",
+    lineHeight: "100%",
+    letterSpacing: "0%",
+    color: "#B18C2E",
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="mb-8"
     >
-      <Card className="overflow-hidden border-amber-100">
-        <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
-          <CardTitle className="text-xl text-amber-600 dark:text-amber-200 flex items-center gap-2">
-            <Sun className="h-6 w-6" />
-            {/* Name field */}
-            <div className="text-xl font-bold text-amber-700 flex items-center">
-              {isAdmin ? (
-                <input
-                  type="text"
-                  value={itemRef.current.name}
-                  onChange={(e) => updateField("name", e.target.value)}
-                  className="bg-transparent border-b border-amber-700 outline-none"
-                />
-              ) : (
-                itemRef.current.name
-              )}
-            </div>
-            -{/* Parameter field */}
-            <div className="text-xl font-bold text-amber-700 flex items-center">
-              {isAdmin ? (
-                <input
-                  type="text"
-                  value={itemRef.current.parameter}
-                  onChange={(e) => updateField("parameter", e.target.value)}
-                  className="bg-transparent border-b border-amber-700 outline-none"
-                />
-              ) : (
-                itemRef.current.parameter
-              )}
-            </div>
-            Rating
+      <Card className="rounded-xl border border-amber-100 shadow-sm overflow-hidden mb-8">
+        <CardHeader className="py-4 px-6" style={{ backgroundColor: "#FFFCF3" }}>
+          <CardTitle
+            className="flex items-center gap-3"
+            style={{
+              fontFamily: "Poppins",
+              fontWeight: 500,
+              fontSize: "16px",
+              lineHeight: "100%",
+              letterSpacing: "0%",
+              color: "#B18C2E",
+            }}
+          >
+            <Sun style={{ color: "#B18C2E" }} className="h-6 w-6" />
+            {item.name}
           </CardTitle>
         </CardHeader>
-
-        <CardContent className="p-6 bg-amber-50/50">
+        <CardContent className="p-6" style={{ backgroundColor: "#FFFFFF" }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left column - Current Performance and Type/Condition/Year/SEER */}
             <div className="space-y-6">
+              {/* Current Performance Box */}
               <div
-                ref={elemRef}
-                className="relative bg-[#fffbeb] dark:bg-amber-900/20 rounded-lg p-6"
+                ref={itemRef}
+                className="rounded-lg p-6"
+                style={{ backgroundColor: "#FFFCF3", border: "0.5px solid #FDC02529" }}
               >
-                <div
-                  className="absolute inset-0 bg-gradient-to-r from-red-500 via-amber-500 to-green-500 opacity-5 rounded-lg"
-                  style={{
-                    mixBlendMode: "overlay",
-                  }}
-                />
-                <h3 className="relative text-2xl font-semibold text-amber-600 dark:text-amber-300 mb-6">
+                <h3 className="flex items-center mb-6" style={sectionHeadingStyle}>
                   Current Performance
                 </h3>
 
-                {/* Gauge visualization */}
-                <div className="relative w-full max-w-[400px] mx-auto">
-                  <svg viewBox="-10 0 220 110" className="w-full">
-                    <path
-                      d="M 0 110 A 100 100 0 0 1 200 110"
-                      fill="none"
-                      stroke="#f1f5f9"
-                      strokeWidth="16"
-                      strokeLinecap="round"
+                {shouldShowGaugeChart() ? (
+                  <div className="space-y-6">
+                    <PercentageGauge
+                      value={systemData.value as number}
+                      maxValue={20} // Set max to 20 SEER
+                      title={systemData.parameterName}
+                      showCard={false}
+                      width="100%"
                     />
-                    <defs>
-                      <linearGradient
-                        id={`gauge-gradient-cooling-${index}`}
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="0%"
-                      >
-                        <stop offset="0%" stopColor="#dc2626" />
-                        <stop offset="25%" stopColor="#ea580c" />
-                        <stop offset="50%" stopColor="#d97706" />
-                        <stop offset="75%" stopColor="#ca8a04" />
-                        <stop offset="100%" stopColor="#65a30d" />
-                      </linearGradient>
-                    </defs>
-                    <motion.path
-                      d="M 0 110 A 100 100 0 0 1 200 110"
-                      fill="none"
-                      stroke={`url(#gauge-gradient-cooling-${index})`}
-                      strokeWidth="16"
-                      strokeLinecap="round"
-                      initial={{ strokeDasharray: "0, 314" }}
-                      animate={
-                        animate
-                          ? {
-                              strokeDasharray: `${(getSeerValue() / 20) * 100 * 3.14}, 314`,
-                            }
-                          : { strokeDasharray: "0, 314" }
-                      }
-                      transition={{ duration: 1, ease: "easeOut" }}
-                    />
-                    <text
-                      x="100"
-                      y="95"
-                      textAnchor="middle"
-                      className="text-4xl font-bold"
-                      fill="#b45309"
-                    >
-                      {getSeerValue()}
-                    </text>
-                  </svg>
-                </div>
 
-                <div className="mt-8 grid grid-cols-2 gap-8">
-                  <div>
-                    <p className="text-base text-gray-600 dark:text-gray-400">
-                      Current {itemRef.current.parameter}
-                    </p>
-                    {isAdmin ? (
-                      <input
-                        type="number"
-                        value={getSeerValue()}
-                        onChange={(e) =>
-                          updateField("value", Number(e.target.value))
-                        }
-                        className="text-3xl font-bold text-[#b45309] bg-transparent border-b border-amber-700 outline-none w-24"
-                        min={0}
-                        max={40}
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Current {systemData.parameterName}</p>
+                        <p className="text-2xl font-bold" style={{ color: "#D62501" }}>
+                          {systemData.value}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">BPI Recommends</p>
+                        <p className="text-2xl font-bold" style={{ color: "#22C80F" }}>
+                          16
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-40">
+                    {isAdmin && onUpdateItem ? (
+                      <InPlaceEdit
+                        initialValue={renderValue().toString()}
+                        isAdmin={Boolean(isAdmin && onUpdateItem)}
+                        onUpdate={(newValue) => {
+                          const numValue = Number(newValue)
+                          const isNumeric = !isNaN(numValue)
+                          updateSystemData("value", isNumeric ? numValue : newValue)
+                        }}
                       />
                     ) : (
-                      <p className="text-3xl font-bold text-[#b45309] dark:text-amber-400">
-                        {getSeerValue()}
+                      <p className="text-4xl font-bold" style={{ color: "#D62501" }}>
+                        {renderValue()}
                       </p>
                     )}
                   </div>
-                  <div>
-                    <p className="text-base text-gray-600 dark:text-gray-400">
-                      BPI Recommends
-                    </p>
-                    <p className="text-3xl font-bold text-[#65a30d] dark:text-green-400">
-                      16
-                    </p>
-                  </div>
+                )}
+              </div>
+
+              {/* Type and Condition Grid */}
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Type</p>
+                  <p className="font-medium">
+                    {isAdmin ? (
+                      <EditableField
+                        value={systemData.type}
+                        onSave={(value) => updateSystemData("type", value)}
+                        type="text"
+                      />
+                    ) : (
+                      systemData.type || "Standard"
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Condition</p>
+                  <p className="font-medium">
+                    {isAdmin ? (
+                      <EditableField
+                        value={systemData.condition}
+                        onSave={(value) => updateSystemData("condition", value)}
+                        type="select"
+                        options={["Poor", "Fair", "Good", "Excellent"]}
+                      />
+                    ) : (
+                      systemData.condition
+                    )}
+                  </p>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-6">
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Info className="h-5 w-5 text-amber-600" />
-                  <h3 className="text-lg font-semibold text-amber-700 dark:text-amber-300">
-                    System Details
-                  </h3>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {getDescriptionText()}
-                </p>
-
-                {/* System details section */}
-                <div className="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800 rounded-lg p-4">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Type
-                    </p>
+              {/* Year and SEER Grid */}
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Year</p>
+                  <p className="font-medium">
                     {isAdmin ? (
-                      <input
-                        type="text"
-                        value={itemRef.current.type || ""}
-                        onChange={(e) => updateField("type", e.target.value)}
-                        className="border-b border-amber-700 bg-transparent outline-none"
-                      />
-                    ) : (
-                      <p className="font-medium">
-                        {itemRef.current.type || "Central"}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Condition
-                    </p>
-                    {isAdmin ? (
-                      <Select
-                        value={itemRef.current.condition}
-                        onValueChange={(value) =>
-                          updateField("condition", value)
-                        }
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue>{itemRef.current.condition}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Poor", "Fair", "Good", "Excellent", "N/A"].map(
-                            (option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <p className="font-medium">{itemRef.current.condition}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Year
-                    </p>
-                    {isAdmin ? (
-                      <input
+                      <EditableField
+                        value={`${systemData.year || new Date().getFullYear()}`}
+                        onSave={(value) => updateSystemData("year", Number(value))}
                         type="number"
-                        value={itemRef.current.year || new Date().getFullYear()}
-                        onChange={(e) =>
-                          updateField("year", Number(e.target.value))
-                        }
-                        className="border-b border-amber-700 bg-transparent outline-none"
                         min={1900}
                         max={new Date().getFullYear()}
                       />
                     ) : (
-                      <p className="font-medium">{itemRef.current.year}</p>
+                      systemData.year || new Date().getFullYear()
                     )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      SEER
-                    </p>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{systemData.parameterName}</p>
+                  <p className="font-medium">
                     {isAdmin ? (
-                      <input
-                        type="number"
-                        value={getSeerValue()}
-                        onChange={(e) =>
-                          updateField("value", Number(e.target.value))
-                        }
-                        className="border-b border-amber-700 bg-transparent outline-none"
-                        min={0}
+                      <EditableSEER
+                        value={typeof systemData.value === "number" ? systemData.value : 0}
+                        onChange={(value) => updateSystemData("value", value)}
                       />
+                    ) : typeof systemData.value === "number" ? (
+                      systemData.value
                     ) : (
-                      <p className="font-medium">{getSeerValue()}</p>
+                      systemData.value
                     )}
-                  </div>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right column - System Details and Image */}
+            <div className="space-y-6">
+              <div className="rounded-lg p-6" style={{ backgroundColor: "#FFFCF3", border: "0.5px solid #FDC02529" }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertCircle className="h-6 w-6" style={{ color: "#B18C2E" }} />
+                  <h3 style={sectionHeadingStyle}>System Details</h3>
                 </div>
 
-                <div className="flex items-center space-x-2 text-amber-600 mt-4">
+                <p className="text-gray-700 mb-4">{getDescriptionText()}</p>
+
+                <div className="flex items-center space-x-3 mt-4 py-2" style={{ color: "#B18C2E" }}>
                   <Zap className="h-5 w-5" />
-                  <span className="text-sm">
-                    *SEER = Seasonal Energy Efficiency Ratio
-                  </span>
+                  <span className="text-sm">*Estimated based on Age & Type</span>
                 </div>
               </div>
 
               {/* Image section */}
-              {isAdmin ? (
-                <ImageUpload
-                  image={itemRef.current.image || ""}
-                  onImageChange={(newImage) => updateField("image", newImage)}
-                  driveImages={driveImages}
-                />
-              ) : (
-                <ImageCustomer
-                  image={itemRef.current.image}
-                  driveImages={driveImages}
-                />
-              )}
+              <div className="rounded-lg overflow-hidden">
+                {isAdmin && onUpdateItem ? (
+                  <ImageUpload
+                    image={systemData.image ?? ""}
+                    onImageChange={(newImage) => updateSystemData("image", newImage)}
+                    driveImages={driveImages}
+                  />
+                ) : (
+                  <div className="relative">
+                    <ImageCustomer image={systemData.image} driveImages={driveImages} />
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 text-xs rounded">
+                      Example of a {systemData.type.toLowerCase() || "standard"} {item.name.toLowerCase()}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
     </motion.div>
-  );
-};
+  )
+}
 
-export default CoolingSystemCard;
+export default CoolingSystemCard

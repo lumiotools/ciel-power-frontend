@@ -1,98 +1,82 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit2, Check, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ImageUpload } from "./ImageUpload";
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Edit2, Check, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ImageUpload } from "./ImageUpload"
 
 interface EditableFieldProps {
-  value: string;
-  onSave: (value: string) => void;
-  type: "text" | "select" | "number";
-  options?: string[];
-  min?: number;
-  max?: number;
+  value: string
+  onSave: (value: string) => void
+  type: "text" | "select" | "number"
+  options?: string[]
+  min?: number
+  max?: number
 }
 
 interface CrawlspaceData {
-  material: string;
-  condition: string;
-  rValue: number;
-  recommendedValue: number;
-  maxValue: number;
-  efficiency: number;
-  image: string;
+  material: string
+  condition: string
+  rValue: number
+  recommendedValue: number
+  maxValue: number
+  efficiency: number
+  image: string
 }
 
-// New interface for the data coming from reportData
 interface InsulationItemData {
-  condition: string;
-  material: string;
-  name: string;
-  rValue: number;
+  condition: string
+  material: string
+  name: string
+  rValue: number
+  image?: string
 }
 
 interface CrawlspaceAssessmentProps {
-  data?: InsulationItemData | null;
-  isAdmin?: boolean;
-  onUpdate?: (updatedItem: InsulationItemData) => void;
-  driveImages?: string[];
+  data?: InsulationItemData | null
+  isAdmin?: boolean
+  onUpdate?: (updatedItem: InsulationItemData) => void
+  driveImages?: string[]
 }
 
 interface FieldItem {
-  label: string;
-  value: string;
-  field: keyof CrawlspaceData;
-  type: "text" | "select" | "number";
-  options?: string[];
+  label: string
+  value: string
+  field: keyof CrawlspaceData
+  type: "text" | "select" | "number"
+  options?: string[]
 }
 
-const EditableField: React.FC<EditableFieldProps> = ({
-  value,
-  onSave,
-  type,
-  options = [],
-  min,
-  max,
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, options = [], min, max }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState(value)
 
   useEffect(() => {
-    setEditValue(value);
-  }, [value]);
+    setEditValue(value)
+  }, [value])
 
   const handleSave = () => {
-    onSave(editValue);
-    setIsEditing(false);
-  };
+    onSave(editValue)
+    setIsEditing(false)
+  }
 
   const handleCancel = () => {
-    setEditValue(value);
-    setIsEditing(false);
-  };
+    setEditValue(value)
+    setIsEditing(false)
+  }
 
   if (!isEditing) {
     return (
       <div className="flex items-center gap-2">
         <span>{value}</span>
-        <button
-          onClick={() => setIsEditing(true)}
-          className="p-1 hover:bg-gray-100 rounded"
-        >
+        <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-gray-100 rounded">
           <Edit2 className="w-4 h-4" />
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -107,16 +91,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button
-            onClick={handleSave}
-            className="p-1 hover:bg-green-100 rounded text-green-600"
-          >
+          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
             <Check className="w-4 h-4" />
           </button>
-          <button
-            onClick={handleCancel}
-            className="p-1 hover:bg-red-100 rounded text-red-600"
-          >
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -125,9 +103,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <Select
             value={editValue}
             onValueChange={(value) => {
-              setEditValue(value);
-              onSave(value);
-              setIsEditing(false);
+              setEditValue(value)
+              onSave(value)
+              setIsEditing(false)
             }}
           >
             <SelectTrigger className="w-32">
@@ -141,10 +119,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
               ))}
             </SelectContent>
           </Select>
-          <button
-            onClick={handleCancel}
-            className="p-1 hover:bg-red-100 rounded text-red-600"
-          >
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -156,98 +131,19 @@ const EditableField: React.FC<EditableFieldProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button
-            onClick={handleSave}
-            className="p-1 hover:bg-green-100 rounded text-green-600"
-          >
+          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
             <Check className="w-4 h-4" />
           </button>
-          <button
-            onClick={handleCancel}
-            className="p-1 hover:bg-red-100 rounded text-red-600"
-          >
+          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-// const ImageUpload: React.FC<{
-//   src: string;
-//   onImageChange: (newImage: string) => void;
-// }> = ({ src, onImageChange }) => {
-//   const fileInputRef = React.useRef<HTMLInputElement>(null);
-//   const [isEditing, setIsEditing] = useState(false);
-
-//   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = event.target.files?.[0];
-//     if (file) {
-//       const imageUrl = URL.createObjectURL(file);
-//       onImageChange(imageUrl);
-//       setIsEditing(false);
-//     }
-//   };
-
-//   return (
-//     <motion.div
-//       whileHover={{ scale: 1.02 }}
-//       className="relative aspect-video rounded-lg overflow-hidden"
-//     >
-//       <img
-//         src={src || "/placeholder.svg"}
-//         alt="Crawlspace wall"
-//         className="object-cover w-full"
-//       />
-//       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-//       <div className="absolute bottom-4 left-4 text-white">
-//         <h3 className="font-semibold mb-1">Current Condition</h3>
-//         <p className="text-sm">Uninsulated crawlspace walls</p>
-//       </div>
-//       {isEditing && (
-//         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-//           <div className="bg-white p-4 rounded">
-//             <input
-//               type="file"
-//               ref={fileInputRef}
-//               onChange={handleFileChange}
-//               accept="image/*"
-//               className="hidden"
-//             />
-//             <button
-//               onClick={() => fileInputRef.current?.click()}
-//               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-//             >
-//               Choose New Image
-//             </button>
-//             <button
-//               onClick={() => setIsEditing(false)}
-//               className="ml-2 px-4 py-2 rounded border hover:bg-gray-100"
-//             >
-//               Cancel
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//       {!isEditing && (
-//         <button
-//           onClick={() => setIsEditing(true)}
-//           className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg"
-//         >
-//           <Edit2 className="w-4 h-4" />
-//         </button>
-//       )}
-//     </motion.div>
-//   );
-// };
-
-export function CrawlspaceAssessment({
-  data,
-  isAdmin = false,
-  driveImages,
-  onUpdate,
-}: CrawlspaceAssessmentProps) {
+export function CrawlspaceAssessment({ data, isAdmin = false, driveImages, onUpdate }: CrawlspaceAssessmentProps) {
   // Default data to use if no report data is provided
   const defaultCrawlspaceData: CrawlspaceData = {
     material: "None",
@@ -257,11 +153,11 @@ export function CrawlspaceAssessment({
     maxValue: 15,
     efficiency: 0,
     image: "https://i.postimg.cc/SQ7Hv3LP/Screenshot-2024-11-25-033547.png",
-  };
+  }
 
   // Process the provided data into the format expected by our component
   const processCrawlspaceData = (): CrawlspaceData => {
-    if (!data) return defaultCrawlspaceData;
+    if (!data) return defaultCrawlspaceData
 
     return {
       material: data.material || "None",
@@ -270,55 +166,48 @@ export function CrawlspaceAssessment({
       recommendedValue: 10, // Standard recommendation for crawlspace
       maxValue: 15, // Standard max value for scale
       efficiency: data.rValue ? Math.round((data.rValue / 10) * 100) : 0,
-      image: "https://i.postimg.cc/SQ7Hv3LP/Screenshot-2024-11-25-033547.png",
-    };
-  };
+      // Use the image from data if available, otherwise use default
+      image: data.image || defaultCrawlspaceData.image,
+    }
+  }
 
-  const [crawlspaceData, setCrawlspaceData] = useState<CrawlspaceData>(
-    processCrawlspaceData(),
-  );
+  const [crawlspaceData, setCrawlspaceData] = useState<CrawlspaceData>(processCrawlspaceData())
 
   useEffect(() => {
     // Update crawlspace data if report data changes
-    setCrawlspaceData(processCrawlspaceData());
-  }, [data]);
+    setCrawlspaceData(processCrawlspaceData())
+  }, [data])
 
-  const updateCrawlspaceData = (
-    field: keyof CrawlspaceData,
-    value: string | number,
-  ) => {
+  const updateCrawlspaceData = (field: keyof CrawlspaceData, value: string | number) => {
+    console.log(`CrawlspaceAssessment: updateCrawlspaceData called with field=${field}, value=`, value);
+    
     setCrawlspaceData((prev) => {
-      const newData = { ...prev, [field]: value };
+      const newData = { ...prev, [field]: value }
 
-      let updatedField: Partial<InsulationItemData> = {};
+      const updatedField: Partial<InsulationItemData> = {}
 
       if (field === "rValue") {
-        const numericValue =
-          typeof value === "string"
-            ? Number.parseInt(value.replace("R", ""))
-            : value;
+        const numericValue = typeof value === "string" ? Number.parseInt(value.replace("R", "")) : value
 
         if (!isNaN(numericValue)) {
-          newData.rValue = numericValue;
-          newData.efficiency = Math.round(
-            (numericValue / newData.recommendedValue) * 100,
-          );
-          updatedField.rValue = numericValue;
+          newData.rValue = numericValue
+          newData.efficiency = Math.round((numericValue / newData.recommendedValue) * 100)
+          updatedField.rValue = numericValue
         }
       } else if (field === "efficiency") {
-        const numericValue =
-          typeof value === "string" ? Number.parseInt(value) : value;
+        const numericValue = typeof value === "string" ? Number.parseInt(value) : value
 
         if (!isNaN(numericValue)) {
-          newData.efficiency = numericValue;
-          const calculatedRValue = Math.round(
-            (numericValue * newData.recommendedValue) / 100,
-          );
-          newData.rValue = calculatedRValue;
-          updatedField.rValue = calculatedRValue;
+          newData.efficiency = numericValue
+          const calculatedRValue = Math.round((numericValue * newData.recommendedValue) / 100)
+          newData.rValue = calculatedRValue
+          updatedField.rValue = calculatedRValue
         }
       } else if (field === "material" || field === "condition") {
-        updatedField[field] = value as string;
+        updatedField[field] = value as string
+      } else if (field === "image") {
+        console.log("CrawlspaceAssessment: Updating image to:", value);
+        updatedField.image = value as string
       }
 
       // Call onUpdate only when a change is relevant
@@ -326,214 +215,175 @@ export function CrawlspaceAssessment({
         const updatedItem: InsulationItemData = {
           ...(data ?? { name: "Your Home's Crawlspace Wall Insulation" }),
           ...updatedField,
-        };
-        onUpdate(updatedItem);
+        }
+        console.log("CrawlspaceAssessment: Calling onUpdate with:", updatedItem);
+        onUpdate(updatedItem)
       }
 
-      return newData;
-    });
-  };
+      return newData
+    })
+  }
 
   // Determine description text based on crawlspace data
   const getDescriptionText = () => {
     if (crawlspaceData.rValue < 3) {
-      return "Uninsulated crawlspace walls";
+      return "Uninsulated crawlspace walls"
     } else if (crawlspaceData.rValue < crawlspaceData.recommendedValue) {
-      return "Partially insulated crawlspace walls";
+      return "Partially insulated crawlspace walls"
     } else {
-      return "Well-insulated crawlspace walls";
+      return "Well-insulated crawlspace walls"
     }
-  };
+  }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <Card>
-        <CardHeader className="bg-teal-50 dark:bg-teal-900/20">
-          <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">
-            Your Home&apos;s Crawlspace Wall Insulation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                {(
-                  [
-                    {
-                      label: "Material",
-                      value: crawlspaceData.material,
-                      field: "material" as const,
-                      type: "text" as const,
-                    },
-                    {
-                      label: "Condition",
-                      value: crawlspaceData.condition,
-                      field: "condition" as const,
-                      type: "select" as const,
-                      options: ["N/A", "Poor", "Fair", "Good", "Excellent"],
-                    },
-                    {
-                      label: "Current R-Value",
-                      value: `R${crawlspaceData.rValue}`,
-                      field: "rValue" as const,
-                      type: "text" as const,
-                    },
-                    {
-                      label: "Recommended",
-                      value: `R${crawlspaceData.recommendedValue}`,
-                      field: "recommendedValue" as const,
-                      type: "text" as const,
-                    },
-                  ] satisfies FieldItem[]
-                ).map((item, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {item.label}
-                      </div>
-                      <div className="font-medium mt-1 text-gray-900 dark:text-gray-100">
-                        {isAdmin ? (
-                          <EditableField
-                            value={item.value}
-                            onSave={(value) => {
-                              if (
-                                item.field === "rValue" ||
-                                item.field === "recommendedValue"
-                              ) {
-                                updateCrawlspaceData(
-                                  item.field,
-                                  Number.parseInt(value.replace("R", "")),
-                                );
-                              } else {
-                                updateCrawlspaceData(item.field, value);
-                              }
-                            }}
-                            type={item.type}
-                            options={item.options}
-                          />
-                        ) : (
-                          item.value
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+    <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+      <CardHeader className="bg-[#E0F7F5] py-4 px-5 border-b border-gray-100">
+        <CardTitle className="text-lg font-medium text-[#256C68]">
+          Your Home&apos;s Crawlspace Wall Insulation
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Left Column */}
+          <div className="p-5">
+            <div className="grid grid-cols-2 gap-y-4 mt-3">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Material</p>
+                <p className="text-[#256C68] font-medium">
+                  {isAdmin ? (
+                    <EditableField
+                      value={crawlspaceData.material}
+                      onSave={(value) => updateCrawlspaceData("material", value)}
+                      type="text"
+                    />
+                  ) : (
+                    crawlspaceData.material
+                  )}
+                </p>
               </div>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Current Efficiency
-                    </span>
-                    <span className="text-gray-900 dark:text-gray-100">
-                      {isAdmin ? (
-                        <EditableField
-                          value={`${Math.round((crawlspaceData.rValue / crawlspaceData.recommendedValue) * 100)}`}
-                          onSave={(value) => {
-                            const efficiency = Number.parseInt(value);
-                            if (!isNaN(efficiency)) {
-                              updateCrawlspaceData("efficiency", efficiency);
-                            }
-                          }}
-                          type="number"
-                          min={0}
-                          max={100}
-                        />
-                      ) : (
-                        `${Math.round((crawlspaceData.rValue / crawlspaceData.recommendedValue) * 100)}%`
-                      )}
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      (crawlspaceData.rValue / crawlspaceData.maxValue) * 100
-                    }
-                    className="h-2 bg-teal-100 dark:bg-teal-700"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="bg-teal-50 dark:bg-teal-900/30 border-teal-200 dark:border-teal-700">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-teal-600 dark:text-teal-300">
-                    BPI Recommendation
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    BPI recommends Crawlspace Walls be insulated to R
-                    {crawlspaceData.recommendedValue} for optimal energy
-                    efficiency and moisture control.
-                  </p>
-                </CardContent>
-              </Card>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Condition</p>
+                <p className="text-[#256C68] font-medium">
+                  {isAdmin ? (
+                    <EditableField
+                      value={crawlspaceData.condition}
+                      onSave={(value) => updateCrawlspaceData("condition", value)}
+                      type="select"
+                      options={["N/A", "Poor", "Fair", "Good", "Excellent"]}
+                    />
+                  ) : (
+                    crawlspaceData.condition
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Current R-Value</p>
+                <p className="text-[#256C68] font-medium">
+                  {isAdmin ? (
+                    <EditableField
+                      value={`R${crawlspaceData.rValue}`}
+                      onSave={(value) => {
+                        const numericValue = Number.parseInt(value.replace("R", ""))
+                        if (!isNaN(numericValue)) {
+                          updateCrawlspaceData("rValue", numericValue)
+                        }
+                      }}
+                      type="text"
+                    />
+                  ) : (
+                    `R${crawlspaceData.rValue}`
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Recommended</p>
+                <p className="text-[#256C68] font-medium">{`R${crawlspaceData.recommendedValue}`}</p>
+              </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="mt-5">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-700">Efficiency Impact</span>
+                <span className="text-[#256C68] font-medium">
+                  {Math.round((crawlspaceData.rValue / crawlspaceData.recommendedValue) * 100)}%
+                </span>
+              </div>
+              <Progress
+                value={(crawlspaceData.rValue / crawlspaceData.maxValue) * 100}
+                className="h-1.5 bg-[#44BFB83D]"
+              />
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="p-5">
+            <div className="relative rounded-md overflow-hidden h-[200px] w-full">
               {isAdmin ? (
                 <ImageUpload
-                  src={crawlspaceData.image || "/placeholder.svg"}
+                  image={crawlspaceData.image || "/placeholder.svg"}
                   driveImages={driveImages}
-                  onImageChange={(newImage) =>
-                    updateCrawlspaceData("image", newImage)
-                  }
+                  onImageChange={(newImage) => updateCrawlspaceData("image", newImage)}
                 />
               ) : (
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="relative aspect-video rounded-lg overflow-hidden"
-                >
+                <div className="relative rounded-md overflow-hidden h-full w-full">
                   <img
                     src={crawlspaceData.image || "/placeholder.svg"}
                     alt="Crawlspace wall"
-                    className="object-cover w-full"
+                    className="object-cover w-full h-full"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="font-semibold mb-1">Current Condition</h3>
                     <p className="text-sm">{getDescriptionText()}</p>
                   </div>
-                </motion.div>
+                </div>
               )}
-
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
-                    Impact Analysis
-                  </h3>
-                  {crawlspaceData.rValue < crawlspaceData.recommendedValue ? (
-                    <>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {crawlspaceData.rValue < 3
-                          ? "Uninsulated"
-                          : "Inadequately insulated"}{" "}
-                        crawlspace walls can lead to:
-                      </p>
-                      <ul className="mt-2 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                        <li>• Increased energy costs</li>
-                        <li>• Cold floors above the crawlspace</li>
-                        <li>• Potential moisture issues</li>
-                        <li>• Reduced comfort in rooms above</li>
-                      </ul>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Your well-insulated crawlspace provides these benefits:
-                      </p>
-                      <ul className="mt-2 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                        <li>• Lower energy costs</li>
-                        <li>• Warmer floors above the crawlspace</li>
-                        <li>• Better moisture control</li>
-                        <li>• Improved comfort throughout your home</li>
-                      </ul>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Impact Analysis */}
+          <div className="p-5">
+            <h3 className="font-medium text-gray-900 mb-2">Impact Analysis</h3>
+            {crawlspaceData.rValue < crawlspaceData.recommendedValue ? (
+              <>
+                <p className="text-gray-700 text-sm mb-2">
+                  Uninsulated crawlspace walls can lead to:
+                </p>
+                <ul className="space-y-1 text-gray-700 text-sm">
+                  <li>• Increased energy costs</li>
+                  <li>• Cold floors above the crawlspace</li>
+                  <li>• Potential moisture issues</li>
+                  <li>• Reduced comfort in rooms above</li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <p className="text-gray-700 text-sm mb-2">
+                  Your well-insulated crawlspace provides these benefits:
+                </p>
+                <ul className="space-y-1 text-gray-700 text-sm">
+                  <li>• Lower energy costs</li>
+                  <li>• Warmer floors above the crawlspace</li>
+                  <li>• Better moisture control</li>
+                  <li>• Improved comfort throughout your home</li>
+                </ul>
+              </>
+            )}
+          </div>
+
+          {/* BPI Recommendation */}
+          <div className="p-5">
+            <div className="bg-[#F7FDFC] rounded-md p-4 h-full">
+              <h3 className="font-medium mb-2 text-[#256C68]">BPI Recommendation</h3>
+              <p className="text-gray-700 text-sm">
+                BPI recommends Crawlspace Walls be insulated to R{crawlspaceData.recommendedValue} for optimal energy efficiency and moisture control.
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
