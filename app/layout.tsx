@@ -3,6 +3,7 @@ import "./globals.css";
 import AuthProvider from "@/providers/auth";
 import { Toaster } from "sonner";
 import BookingProvider from "@/providers/booking";
+import AIChatbot from "@/components/chatbot/chatbot";
 
 export const metadata: Metadata = {
   title: "Ciel Power",
@@ -21,6 +22,7 @@ export default function RootLayout({
           <BookingProvider>
             <Toaster />
             {children}
+            <AIChatbot/>
           </BookingProvider>
         </AuthProvider>
       </body>
