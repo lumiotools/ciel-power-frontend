@@ -99,7 +99,7 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
       status: stage >= 2 ? "completed" : stage === 1 ? "current" : "upcoming",
     },
     {
-      label: "Audit Performed",
+      label: "Report Generated",
       status: stage >= 3 ? "completed" : stage === 2 ? "current" : "upcoming",
     },
     {
