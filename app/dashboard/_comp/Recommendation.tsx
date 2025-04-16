@@ -1,4 +1,4 @@
-import VideoPlayer from "@/app/recommendations/VideoPlayer";
+import VideoModal from "@/components/component/video-modal";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -7,6 +7,7 @@ interface RecommendationItem {
   title: string;
   thumbnail: string;
   description: string;
+  url?: string;
 }
 
 const Recommendation = ({ data }: { data: RecommendationItem[] }) => {
@@ -97,22 +98,13 @@ const Recommendation = ({ data }: { data: RecommendationItem[] }) => {
           })}
         </div>
       </div>
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-blend-saturation bg-opacity-50 flex items-center justify-center z-50">
-          <div className=" h-[80vh] w-[50vw] overflow-y-auto bg-white rounded-xl p-3 space-y-3">
-            <div className=" flex justify-between items-center">
-              <p className=" text-xl font-bold">Youtube Video</p>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className=" bg-red-600 rounded-xl text-white shadow-lg py-2 px-3"
-              >
-                Close
-              </button>
-            </div>
 
-            {selectedVideo && <VideoPlayer content={selectedVideo} />}
-          </div>
-        </div>
+      {isModalOpen && (
+        <VideoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          videoUrl={selectedVideo?.url}
+        />
       )}
     </>
   );
