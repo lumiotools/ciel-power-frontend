@@ -2628,7 +2628,7 @@ const EnergyAudit = ({ BookingDetails, onClick }) => {
           </div>
         </div>
 
-        <Link href="/audit-details">
+        <Link href="/dashboard/audit-details">
           <button className="text-[#007BFF] text-sm font-medium">
             View Details
           </button>
