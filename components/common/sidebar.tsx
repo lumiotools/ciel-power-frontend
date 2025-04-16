@@ -43,7 +43,7 @@ export function Sidebar() {
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
     },
-    { name: "Your Report", href: "/report", icon: <FileText size={20} /> },
+    { name: "Your Report", href: "/dashboard/report", icon: <FileText size={20} /> },
     {
       name: "Pearl Certification",
       href: "/pearl-certification",

@@ -337,6 +337,8 @@ export default function DashboardPage() {
   const { userDetails } = useContext(AUTH_CONTEXT);
   console.log("User Details:", userDetails);
 
+  console.log("Booking Number = ", userDetails?.bookingNumber);
+
   // const getServices = useCallback(async () => {
   //   try {
   //     const response = await fetch(`/api/booking/services`, {
