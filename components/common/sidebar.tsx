@@ -43,12 +43,16 @@ export function Sidebar() {
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
     },
-    { name: "Your Report", href: "/report", icon: <FileText size={20} /> },
     {
-      name: "Pearl Certification",
-      href: "/pearl-certification",
-      icon: <Award size={20} />,
+      name: "Your Report",
+      href: "/dashboard/report",
+      icon: <FileText size={20} />,
     },
+    // {
+    //   name: "Pearl Certification",
+    //   href: "/pearl-certification",
+    //   icon: <Award size={20} />,
+    // },
     { name: "Incentives", href: "/incentives", icon: <DollarSign size={20} /> },
     { name: "Tax Credits", href: "/tax-credits", icon: <Percent size={20} /> },
     {

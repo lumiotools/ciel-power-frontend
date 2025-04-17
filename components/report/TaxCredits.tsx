@@ -1,40 +1,40 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lightbulb, Pencil, Check, X, Trash2 } from "lucide-react";
-import { motion } from "framer-motion";
-import { toast } from "sonner";
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { Activity, Pencil, Check, X, Trash2 } from "lucide-react"
+import { motion } from "framer-motion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Define the interfaces for our data
 interface TaxCreditItem {
-  title: string;
-  amount: string;
-  note?: string;
+  title: string
+  amount: string
+  note?: string
 }
 
 interface TaxCreditsData {
-  title: string;
-  data: TaxCreditItem[];
+  title: string
+  data: TaxCreditItem[]
 }
 
 // This component will be part of ReportSummary which is in ReportPage
 interface FederalTaxCreditsProps {
-  data?: TaxCreditsData;
-  isAdmin?: boolean;
-  onUpdate?: (data: TaxCreditsData) => void;
-  bookingNumber?: string;
-  reportData?: any; // Access to the overall report data if needed
+  data?: TaxCreditsData
+  isAdmin?: boolean
+  onUpdate?: (data: TaxCreditsData) => void
+  bookingNumber?: string
+  reportData?: any // Access to the overall report data if needed
 }
 
 // In-place edit component
 interface InPlaceEditProps {
-  initialValue?: string;
-  isAdmin: boolean;
-  onUpdate: (value: string) => void;
-  multiline?: boolean;
-  placeholder?: string;
-  isAmount?: boolean;
+  initialValue?: string
+  isAdmin: boolean
+  onUpdate: (value: string) => void
+  multiline?: boolean
+  placeholder?: string
+  isAmount?: boolean
 }
 
 const InPlaceEdit: React.FC<InPlaceEditProps> = ({
@@ -45,54 +45,50 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
   placeholder = "Enter text",
   isAmount = false,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(initialValue || "");
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const [isEditing, setIsEditing] = useState(false)
+  const [value, setValue] = useState(initialValue || "")
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    setValue(initialValue || "");
-  }, [initialValue]);
+    setValue(initialValue || "")
+  }, [initialValue])
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, [isEditing]);
+  }, [isEditing])
 
   const handleClick = () => {
     if (isAdmin) {
-      setIsEditing(true);
+      setIsEditing(true)
     }
-  };
+  }
 
   const handleSave = () => {
-    setIsEditing(false);
+    setIsEditing(false)
     if (value !== initialValue) {
-      onUpdate(value);
+      onUpdate(value)
     }
-  };
+  }
 
   const handleCancel = () => {
-    setValue(initialValue || "");
-    setIsEditing(false);
-  };
+    setValue(initialValue || "")
+    setIsEditing(false)
+  }
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!multiline && e.key === "Enter") {
-      handleSave();
+      handleSave()
     }
-  };
+  }
 
   if (isEditing) {
     return (
       <div className="flex items-center gap-2">
         {isAmount ? (
           <div className="flex items-center">
-            <span className="p-2 text-gray-700 bg-gray-200 border border-gray-300 rounded-l">
-              $
-            </span>
+            <span className="p-2 text-gray-700 bg-gray-200 border border-gray-300 rounded-l">$</span>
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               type="text"
@@ -100,7 +96,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="0"
-              className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded-r focus:outline-none focus:border-green-500"
+              className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded-r focus:outline-none focus:border-[#67B502]"
             />
           </div>
         ) : multiline ? (
@@ -109,7 +105,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={placeholder}
-            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-green-500"
+            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-[#67B502]"
             rows={4}
           />
         ) : (
@@ -120,23 +116,17 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-green-500"
+            className="w-full p-2 text-gray-700 bg-white bg-opacity-20 border border-gray-300 rounded focus:outline-none focus:border-[#67B502]"
           />
         )}
-        <button
-          onClick={handleSave}
-          className="p-1 hover:bg-green-100 rounded text-green-600 transition-colors"
-        >
+        <button onClick={handleSave} className="p-1 hover:bg-[#67B5021A] rounded text-[#67B502] transition-colors">
           <Check className="w-4 h-4" />
         </button>
-        <button
-          onClick={handleCancel}
-          className="p-1 hover:bg-red-100 rounded text-red-600 transition-colors"
-        >
+        <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600 transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -145,7 +135,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
       onClick={handleClick}
     >
       {isAmount ? (
-        <span>{value.startsWith("$") ? value : `$${value}`}</span>
+        <span>{value.startsWith("$") ? value : `${value}`}</span>
       ) : (
         value || (!isAdmin ? "No content" : placeholder)
       )}
@@ -153,8 +143,8 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({
         <Pencil className="ml-2 h-4 w-4 inline-block text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
       )}
     </div>
-  );
-};
+  )
+}
 
 export function FederalTaxCredits({
   data,
@@ -166,50 +156,36 @@ export function FederalTaxCredits({
   const [taxCredits, setTaxCredits] = useState<TaxCreditsData>({
     title: "Federal Tax Credits",
     data: [
-      { title: "Insulation", amount: "0" },
+      { title: "Insulation", amount: "1200.00" },
       {
         title: "Mechanical Equipment",
         amount: "0",
         note: "*after installing proposed upgrades",
       },
     ],
-  });
+  })
 
-  const REPORT_DATA_KEY = "report_data";
+  const REPORT_DATA_KEY = "report_data"
 
   // Load data from props or create default
   useEffect(() => {
     if (data) {
-      setTaxCredits(data);
+      setTaxCredits(data)
     } else if (bookingNumber) {
       // Try to load from localStorage if no data was passed
-      const savedData = localStorage.getItem(
-        `${REPORT_DATA_KEY}_${bookingNumber}`,
-      );
+      const savedData = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`)
       if (savedData) {
         try {
-          const parsedData = JSON.parse(savedData);
+          const parsedData = JSON.parse(savedData)
           if (parsedData.federalTaxCredits) {
-            setTaxCredits(parsedData.federalTaxCredits);
+            setTaxCredits(parsedData.federalTaxCredits)
           }
         } catch (e) {
-          console.error("Error parsing tax credits data from localStorage:", e);
+          console.error("Error parsing tax credits data from localStorage:", e)
         }
       }
     }
-  }, [data, bookingNumber]);
-
-  const formatCurrency = (amount: string): string => {
-    // Convert to number, format, then back to string
-    const numericValue = parseFloat(amount);
-    if (isNaN(numericValue)) return "$0.00";
-    console.log(amount, numericValue)
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(numericValue);
-  };
+  }, [data, bookingNumber])
 
   const updateTaxCreditItem = (
     index: number,
@@ -218,250 +194,250 @@ export function FederalTaxCredits({
   ) => {
     if (!isAdmin) return;
 
-    const newData = [...taxCredits.data];
+    const newData = [...taxCredits.data]
     if (newData[index]) {
       // If this is an amount field, make sure it doesn't include a dollar sign
       if (field === "amount") {
-        console.log("hahaha", value, formatCurrency(value))
         value = formatCurrency(value);
         // If value is empty, set to "0"
         if (!value.trim()) {
-          value = "0";
+          value = "0"
         }
       }
 
       newData[index] = {
         ...newData[index],
         [field]: value,
-      };
+      }
 
       const updatedTaxCredits = {
         ...taxCredits,
         data: newData,
-      };
-
-      setTaxCredits(updatedTaxCredits);
-
-      // Save to localStorage if bookingNumber is available
-      if (bookingNumber) {
-        try {
-          const savedData = localStorage.getItem(
-            `${REPORT_DATA_KEY}_${bookingNumber}`,
-          );
-          if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            const updatedData = {
-              ...parsedData,
-              federalTaxCredits: updatedTaxCredits,
-            };
-
-            localStorage.setItem(
-              `${REPORT_DATA_KEY}_${bookingNumber}`,
-              JSON.stringify(updatedData),
-            );
-            console.log("Saved tax credits data to localStorage");
-          }
-        } catch (e) {
-          console.error("Error saving tax credits data to localStorage:", e);
-        }
       }
+
+      setTaxCredits(updatedTaxCredits)
 
       // Call the onUpdate prop if provided
       if (onUpdate) {
-        onUpdate(updatedTaxCredits);
+        onUpdate(updatedTaxCredits)
       }
     }
-  };
+  }
 
   const addTaxCreditItem = () => {
-    if (!isAdmin) return;
+    if (!isAdmin) return
 
-    const newItem: TaxCreditItem = { title: "New Tax Credit", amount: "0" };
+    const newItem: TaxCreditItem = { title: "New Tax Credit", amount: "0" }
     const updatedTaxCredits = {
       ...taxCredits,
       data: [...taxCredits.data, newItem],
-    };
-
-    setTaxCredits(updatedTaxCredits);
-
-    // Save to localStorage if bookingNumber is available
-    if (bookingNumber) {
-      try {
-        const savedData = localStorage.getItem(
-          `${REPORT_DATA_KEY}_${bookingNumber}`,
-        );
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          const updatedData = {
-            ...parsedData,
-            federalTaxCredits: updatedTaxCredits,
-          };
-
-          localStorage.setItem(
-            `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedData),
-          );
-          console.log("Added new tax credit item to localStorage");
-        }
-      } catch (e) {
-        console.error("Error adding tax credit item to localStorage:", e);
-      }
     }
+
+    setTaxCredits(updatedTaxCredits)
 
     // Call the onUpdate prop if provided
     if (onUpdate) {
-      onUpdate(updatedTaxCredits);
+      onUpdate(updatedTaxCredits)
     }
-  };
+  }
 
   const deleteTaxCreditItem = (index: number) => {
-    if (!isAdmin) return;
+    if (!isAdmin) return
 
-    const newData = taxCredits.data.filter((_, i) => i !== index);
+    const newData = taxCredits.data.filter((_, i) => i !== index)
     const updatedTaxCredits = {
       ...taxCredits,
       data: newData,
-    };
-
-    setTaxCredits(updatedTaxCredits);
-
-    // Save to localStorage if bookingNumber is available
-    if (bookingNumber) {
-      try {
-        const savedData = localStorage.getItem(
-          `${REPORT_DATA_KEY}_${bookingNumber}`,
-        );
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          const updatedData = {
-            ...parsedData,
-            federalTaxCredits: updatedTaxCredits,
-          };
-
-          localStorage.setItem(
-            `${REPORT_DATA_KEY}_${bookingNumber}`,
-            JSON.stringify(updatedData),
-          );
-          console.log("Deleted tax credit item from localStorage");
-        }
-      } catch (e) {
-        console.error("Error deleting tax credit item from localStorage:", e);
-      }
     }
+
+    setTaxCredits(updatedTaxCredits)
 
     // Call the onUpdate prop if provided
     if (onUpdate) {
-      onUpdate(updatedTaxCredits);
+      onUpdate(updatedTaxCredits)
     }
-  };
+  }
+
+  const formatCurrency = (amount: string): string => {
+    // Convert to number, format, then back to string
+    const numericValue = Number.parseFloat(amount)
+    if (isNaN(numericValue)) return "$0.00"
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(numericValue)
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.6 }}
-    >
-      <Card className="border-green-100">
-        <CardHeader className="bg-green-50 dark:bg-green-900/20">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl text-green-600 dark:text-green-200 flex items-center gap-2">
-              <Lightbulb className="h-6 w-6" />
-              Federal Tax Credits
-            </CardTitle>
-
-            {isAdmin && (
-              <div className="flex space-x-2">
-                <button
-                  onClick={addTaxCreditItem}
-                  className="px-3 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 text-sm font-medium transition-colors"
-                  type="button"
-                >
-                  + Add Item
-                </button>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-4 bg-green-50/50">
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+    <Card className="rounded-xl border shadow-sm overflow-hidden">
+      <CardHeader className="py-4 px-6" style={{ backgroundColor: "#67B5021A" }}>
+        <CardTitle 
+          className="flex items-center gap-2" 
+          style={{ 
+            fontFamily: "Poppins", 
+            fontWeight: 500, 
+            fontSize: 16, 
+            color: "#67B502" 
+          }}
+        >
+          <Activity className="h-5 w-5" style={{ color: "#67B502" }} />
+          Federal Tax Credits
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6" style={{ backgroundColor: "#ffffff" }}>
+        {/* Static introduction text */}
+        <div className="mb-5 p-5 rounded-lg" style={{ backgroundColor: "#67B5020A" }}>
+          <div className="space-y-2">
+            <div 
+              className="text-lg font-medium text-gray-800" 
+              style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: 16 }}
+            >
               Energy Efficient Home Improvement Federal Tax Credit
-            </h3>
-            <p className="text-gray-600 text-sm mb-6 italic">
-              If you make qualified energy-efficient improvements to your home
-              after Jan. 1, 2023, you may qualify for a tax credit up to $3,200.
-            </p>
+            </div>
+            <div 
+              className="text-gray-700 italic" 
+              style={{ fontFamily: "Poppins", fontWeight: 400, fontSize: 14 }}
+            >
+              If you make qualified energy-efficient improvements to your home after Jan. 1, 2023, you may qualify for a
+              tax credit up to $3,200.
+            </div>
+          </div>
+        </div>
 
-            <div className="space-y-4">
-              {taxCredits.data.map((item, index) => (
-                <div
-                  key={`tax-credit-${index}`}
-                  className="flex justify-between items-center py-2 border-b"
-                >
-                  <div>
-                    <div className="font-medium">
-                      <InPlaceEdit
-                        initialValue={item.title}
-                        isAdmin={isAdmin}
-                        onUpdate={(value) =>
-                          updateTaxCreditItem(index, "title", value)
-                        }
-                        placeholder="Enter title"
-                      />
+        <div className="space-y-4">
+          {taxCredits.data.length > 0 ? (
+            taxCredits.data.map((item, index) => (
+              <motion.div
+                key={`tax-credit-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
+                className="p-5 rounded-lg"
+                style={{ backgroundColor: "#67B5020A" }}
+              >
+                <div className="flex items-start gap-3">
+                  <div 
+                    className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
+                    style={{ backgroundColor: "#67B5021A" }}
+                  >
+                    <Activity className="h-5 w-5" style={{ color: "#67B502" }} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div className="font-medium mb-1" style={{ color: "#67B502" }}>
+                        {isAdmin ? (
+                          <InPlaceEdit
+                            initialValue={item.title}
+                            isAdmin={isAdmin}
+                            onUpdate={(value) => updateTaxCreditItem(index, "title", value)}
+                            placeholder="Enter title"
+                          />
+                        ) : (
+                          item.title
+                        )}
+                      </div>
+                      <div className="flex items-center font-semibold" style={{ color: "#67B502" }}>
+                        {isAdmin ? (
+                          <InPlaceEdit
+                            initialValue={item.amount}
+                            isAdmin={isAdmin}
+                            onUpdate={(value) => updateTaxCreditItem(index, "amount", value)}
+                            placeholder="0"
+                            isAmount={true}
+                          />
+                        ) : item.amount === "0" ? (
+                          "--"
+                        ) : (
+                          formatCurrency(item.amount)
+                        )}
+                        {isAdmin && (
+                          <button
+                            onClick={() => deleteTaxCreditItem(index)}
+                            className="ml-2 text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
+                            type="button"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {item.note && (
-                      <p className="text-xs text-gray-500">
-                        <InPlaceEdit
-                          initialValue={item.note}
-                          isAdmin={isAdmin}
-                          onUpdate={(value) =>
-                            updateTaxCreditItem(index, "note", value)
-                          }
-                          placeholder="Enter note"
-                        />
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center">
-                    <div className="text-green-600 font-semibold">
-                      <InPlaceEdit
-                        initialValue={item.amount}
-                        isAdmin={isAdmin}
-                        onUpdate={(value) =>
-                          updateTaxCreditItem(index, "amount", value)
-                        }
-                        placeholder="0"
-                        isAmount={true}
-                      />
-                    </div>
-                    {isAdmin && (
-                      <button
-                        onClick={() => deleteTaxCreditItem(index)}
-                        className="ml-2 text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
-                        type="button"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="text-gray-700 text-sm">
+                        {isAdmin ? (
+                          <InPlaceEdit
+                            initialValue={item.note}
+                            isAdmin={isAdmin}
+                            onUpdate={(value) => updateTaxCreditItem(index, "note", value)}
+                            placeholder="Enter note"
+                          />
+                        ) : (
+                          item.note
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
+              </motion.div>
+            ))
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="p-5 rounded-lg"
+              style={{ backgroundColor: "#67B5020A" }}
+            >
+              <div className="flex items-start gap-3">
+                <div 
+                  className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
+                  style={{ backgroundColor: "#67B5021A" }}
+                >
+                  <Activity className="h-5 w-5" style={{ color: "#67B502" }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium" style={{ color: "#67B502" }}>No Tax Credits</h3>
+                  <p className="text-gray-700 text-sm mt-1">No tax credits have been added yet.</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-            <div className="mt-8 bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-gray-800 mb-2">
-                How to claim the Energy Efficient Home Improvement Credit
-              </h4>
-              <p className="text-gray-600 text-sm">
-                File Form 5695, Residential Energy Credits Part II, with your
-                tax return to claim the credit. You must claim the credit for
-                the tax year when the property is installed, not merely
-                purchased.
-              </p>
+          {/* Add new item button for admin */}
+          {isAdmin && (
+            <div className="flex justify-end p-4">
+              <button
+                onClick={addTaxCreditItem}
+                className="px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1"
+                style={{ backgroundColor: "#67B5021A", color: "#67B502" }}
+                type="button"
+              >
+                + Add Tax Credit
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Static instructions text */}
+        <div className="mt-5 p-5 rounded-lg" style={{ backgroundColor: "#67B5020A" }}>
+          <div className="space-y-2">
+            <div 
+              className="text-lg font-medium text-gray-800" 
+              style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: 16 }}
+            >
+              How to claim the Energy Efficient Home Improvement Credit
+            </div>
+            <div 
+              className="text-gray-700" 
+              style={{ fontFamily: "Poppins", fontWeight: 400, fontSize: 14 }}
+            >
+              File Form 5695, Residential Energy Credits Part II, with your tax return to claim the credit. You must
+              claim the credit for the tax year when the property is installed, not merely purchased.
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+        </div>
+      </CardContent>
+    </Card>
+  )
 }

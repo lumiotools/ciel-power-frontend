@@ -43,7 +43,7 @@ interface InsulationContentProps {
 // Helper function to find the best matching item for a specific component type
 const findBestMatchingItem = (
   data: InsulationDataItem[] | undefined,
-  type: string,
+  type: string
 ): InsulationDataItem | null => {
   if (!data || data.length === 0) return null;
 
@@ -113,7 +113,7 @@ const findBestMatchingItem = (
     "Matching items:",
     matchingItems,
     "its length:",
-    matchingItems.length,
+    matchingItems.length
   );
   // If we found matches, pick the best one (prioritize non-zero R-values, better condition)
   if (matchingItems.length > 0) {
@@ -127,7 +127,7 @@ const findBestMatchingItem = (
     const knownConditionItems = matchingItems.filter(
       (item) =>
         item.condition?.toLowerCase() !== "unknown" &&
-        item.material?.toLowerCase() !== "unknown",
+        item.material?.toLowerCase() !== "unknown"
     );
     if (knownConditionItems.length > 0) {
       return knownConditionItems[0]; // Return the first item with known condition
@@ -176,7 +176,7 @@ export function InsulationContent({
         (item) =>
           item.name === matchingItem.name &&
           item.material === matchingItem.material &&
-          item.condition === matchingItem.condition,
+          item.condition === matchingItem.condition
       );
       if (index !== -1) {
         usedDataIndices.add(index);
@@ -190,60 +190,21 @@ export function InsulationContent({
 
   // Function to update an insulation item
   const handleUpdateInsulationItem = (updatedItem: InsulationDataItem) => {
-    console.log("Updated item:", updatedItem);
+    console.log(
+      "InsulationContent: handleUpdateInsulationItem called with:",
+      updatedItem
+    );
     if (isAdmin && onUpdateItem) {
+      console.log("InsulationContent: Calling parent onUpdateItem");
       onUpdateItem(updatedItem);
     }
   };
 
-  const onSumit = async () => {
-    const REPORT_DATA_KEY = "report_data";
-    let updatedReportData;
-    try {
-      const data = localStorage.getItem(`${REPORT_DATA_KEY}_${bookingNumber}`);
-      console.log("Data from localStorage:", data);
-
-      if (!data) {
-        console.error("No insulation data found in localStorage");
-        return;
-      }
-      // updatedReportData=data;
-      updatedReportData = JSON.parse(data, null, 2);
-      updatedReportData = {
-        reportData: updatedReportData,
-        reportUrl: "",
-      };
-
-      console.log("Saved insulation data to localStorage");
-    } catch (e) {
-      console.error("Error getting insulation data to localStorage:", e);
-    }
-
-    try {
-      console.log("Submitting data:", updatedReportData);
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/report/update`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedReportData),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.detail || "Failed to fetch report details");
-        return;
-      }
-
-      const data = await response.json();
-      toast.success("Data submitted successfully!");
-      console.log("Data submitted successfully:", data);
+  // Use the parent's onSave callback directly instead of handling API calls
+  const handleSubmit = () => {
+    if (onSave) {
       onSave();
-    } catch (error) {
-      console.error("Error submitting data:", error);
+      toast.success("Insulation data saved successfully!");
     }
   };
 
@@ -252,102 +213,123 @@ export function InsulationContent({
       {isAdmin && (
         <div className="flex justify-end items-center">
           <button
-            onClick={onSumit}
-            className=" px-4 py-2 rounded-full bg-primary text-white font-bold "
+            onClick={handleSubmit}
+            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
           >
             Save
           </button>
         </div>
       )}
+      <div id="insulation-overview">
+        <InsulationOverview />
+      </div>
 
-      <InsulationOverview />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        id="technical-aspects"
+      >
         <TechnicalAspects />
         <SeasonalPerformance />
       </div>
 
-      <Benefits />
+      <div id="insulation-benefits">
+        <Benefits />
+      </div>
 
       {/* Standard components that have specialized UI */}
       {/* {!!findBestMatchingItem(data?.data, "kneewall") && ( */}
-      <KneewallAssessment
-        data={findBestMatchingItem(data?.data, "kneewall") ?? []}
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
-      {/* )} */}
-      {/* {!!findBestMatchingItem(data?.data, "rim joist") && ( */}
-      <RimJoistAssessment
-        data={findBestMatchingItem(data?.data, "rim joist")}
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
-      {/* )} */}
-      {/* {!!findBestMatchingItem(data?.data, "crawlspace") && ( */}
-      <CrawlspaceAssessment
-        data={findBestMatchingItem(data?.data, "crawlspace wall")}
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
+      <div id="insulation-kneewall">
+        <KneewallAssessment
+          data={findBestMatchingItem(data?.data, "kneewall")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
+
       {/* )} */}
       {/* {!!findBestMatchingItem(data?.data, "exterior wall") && ( */}
-      <ExteriorWallAssessment
-        data={findBestMatchingItem(data?.data, "exterior wall")}
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
+      <div id="insulation-exterior-wall">
+        <ExteriorWallAssessment
+          data={findBestMatchingItem(data?.data, "exterior wall")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
+      {/* )} */}
+      {/* {!!findBestMatchingItem(data?.data, "crawlspace") && ( */}
+      <div id="insulation-crawlspace">
+        <CrawlspaceAssessment
+          data={findBestMatchingItem(data?.data, "crawlspace")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
+      {/* )} */}
+      {/* {!!findBestMatchingItem(data?.data, "rim joist") && ( */}
+      <div id="insulation-rim-joist">
+        <RimJoistAssessment
+          data={findBestMatchingItem(data?.data, "rim joist")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
       {/* )} */}
       {/* {findBestMatchingItem(data?.data, "overhang") && ( */}
-      <OverhangAssessment
-        data={findBestMatchingItem(data?.data, "overhang")}
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
+      <div id="insulation-overhang">
+        <OverhangAssessment
+          data={findBestMatchingItem(data?.data, "overhang")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
       {/* )} */}
-
-      <InsulationZoneAssessment
-        data={
-          findBestMatchingItem(data?.data, "crawlspace ceiling") ?? {
-            name: "crawlspace ceiling",
-            condition: "unknown",
-            material: "unknown",
-            rValue: 0,
-            image: "",
-            
+      <div key={`insulation-zone-001`} id={`insulation-zone-001`}>
+        <InsulationZoneAssessment
+          data={
+            findBestMatchingItem(data?.data, "crawlspace ceiling") ?? {
+              name: "crawlspace ceiling",
+              condition: "unknown",
+              material: "unknown",
+              rValue: 0,
+              image: "",
+            }
           }
-        }
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
 
-      <InsulationZoneAssessment
-        data={findBestMatchingItem(data?.data, "garage ceiling")}
-        isAdmin={isAdmin}
-        onUpdate={handleUpdateInsulationItem}
-        driveImages={driveImages}
-      />
+      <div key={`insulation-zone-002`} id={`insulation-zone-002`}>
+        <InsulationZoneAssessment
+          data={findBestMatchingItem(data?.data, "garage ceiling")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
 
       {/* Display remaining items using the generic component */}
       {remainingItems.length > 0 && (
         <>
-          <h2 className="text-2xl font-semibold text-teal-700 dark:text-teal-300 mt-10">
-            Additional Insulation Zones
-          </h2>
           {remainingItems.map((item, index) => (
-            <InsulationZoneAssessment
-              key={`${item.name}-${index}`}
-              data={item}
-              isAdmin={isAdmin}
-              onUpdate={handleUpdateInsulationItem}
-              driveImages={driveImages}
-            />
+            <div
+              key={`insulation-zone-${index}`}
+              id={`insulation-zone-${index}`}
+            >
+              <InsulationZoneAssessment
+                key={`${item.name}-${index}`}
+                data={item}
+                isAdmin={isAdmin}
+                onUpdate={handleUpdateInsulationItem}
+                driveImages={driveImages}
+              />
+            </div>
           ))}
         </>
       )}

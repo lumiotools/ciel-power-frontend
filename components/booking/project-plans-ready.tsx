@@ -239,7 +239,7 @@ export default function ProjectPlansReady() {
               <div className="flex flex-col items-center">
                 <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden">
                   <Image
-                    src="/mark-johnson.png"
+                    src="/profileDummy.png"
                     alt={
                       bookingDetails?.bookingDetails?.auditor?.name ||
                       "Mark Johnson"
@@ -282,9 +282,7 @@ export default function ProjectPlansReady() {
                   </p>
                   {bookingDetails.proposalDetails.completedContractLink && (
                     <Link
-                      href={
-                        bookingDetails.proposalDetails.completedContractLink
-                      }
+                      href="/document-portal#review-plans"
                       className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-3 rounded-md transition-colors text-sm flex-1 block text-center"
                     >
                       Review Proposals

@@ -150,7 +150,7 @@ export default function ResultsLetsTalk() {
                         <Calendar className="text-white" size={18} />
                         <span>
                           {bookingDetails?.consultationDetails?.startTime
-                            ? "Already Booked"
+                            ? "Booked"
                             : "Book Consultation"}
                         </span>
                       </button>
@@ -214,13 +214,15 @@ export default function ResultsLetsTalk() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2"
-                        onClick={() => {}}
-                      >
-                        <FileText className="text-white" size={18} />
-                        <span>Go to Your Bills</span>
-                      </button>
+                      <Link href="/document-portal#upload-utility-bills">
+                        <button
+                          className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2"
+                          onClick={() => {}}
+                        >
+                          <FileText className="text-white" size={18} />
+                          <span>Go to Your Bills</span>
+                        </button>
+                      </Link>
                       <button onClick={() => toggleSection("utility")}>
                         <ChevronRight
                           className={`text-[#8bc34a] flex-shrink-0 transition-transform duration-200 ${openSection === "utility" ? "rotate-90" : ""}`}
