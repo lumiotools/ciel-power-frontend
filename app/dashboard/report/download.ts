@@ -19,16 +19,23 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper function to switch to a specific tab
 const switchToTab = async (tabName: string): Promise<void> => {
+  console.log(`Attempting to switch to tab: ${tabName}`);
   const tabButtons = document.querySelectorAll(
     "button[class*='relative py-4 px-6']"
   );
 
+  console.log(`Found ${tabButtons.length} tab buttons`);
+
   for (const button of tabButtons) {
-    if (button.textContent?.toLowerCase().includes(tabName.toLowerCase())) {
+    const buttonText = button.textContent?.trim() || "";
+    console.log(`Button text: "${buttonText}"`);
+
+    if (buttonText.toLowerCase().includes(tabName.toLowerCase())) {
+      console.log(`Found matching tab: ${buttonText}`);
       // Click the button to switch to this tab
       button.click();
       // Wait for the tab content to render
-      await wait(300);
+      await wait(1000); // Increased wait time for content to fully render
       return;
     }
   }
@@ -38,8 +45,14 @@ const switchToTab = async (tabName: string): Promise<void> => {
 
 // Helper function to capture an element as an image
 const captureElement = async (
-  elementId: string
+  elementId: string,
+  waitTime = 500
 ): Promise<HTMLCanvasElement | null> => {
+  console.log(`Attempting to capture element with ID: ${elementId}`);
+
+  // Wait for animations to complete
+  await wait(waitTime);
+
   const element = document.getElementById(elementId);
   if (!element) {
     console.warn(`Element with ID "${elementId}" not found`);
@@ -53,6 +66,13 @@ const captureElement = async (
       element.style.display = "block";
     }
 
+    // Ensure animations are complete
+    if (elementId === "summary-of-concerns" || elementId.includes("motion")) {
+      console.log(`Waiting extra time for animated element: ${elementId}`);
+      await wait(2000); // Extra wait for animated elements
+    }
+
+    console.log(`Capturing element: ${elementId}`);
     const canvas = await html2canvas(element, {
       scale: 2, // Higher scale for better quality
       useCORS: true, // Enable CORS for images
@@ -66,6 +86,7 @@ const captureElement = async (
       element.style.display = "none";
     }
 
+    console.log(`Successfully captured element: ${elementId}`);
     return canvas;
   } catch (error) {
     console.error(`Error capturing element with ID "${elementId}":`, error);
@@ -92,30 +113,6 @@ const addSectionHeading = (pdf: jsPDF, title: string): void => {
   // Reset font to normal
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(12);
-};
-
-// Helper function to capture a section of the report
-const captureSection = async (
-  sectionName: string,
-  elementIds: string[]
-): Promise<HTMLCanvasElement[]> => {
-  // Switch to the appropriate tab
-  await switchToTab(sectionName);
-
-  // Wait for content to fully render
-  await wait(500);
-
-  // Capture each element
-  const canvases: HTMLCanvasElement[] = [];
-
-  for (const id of elementIds) {
-    const canvas = await captureElement(id);
-    if (canvas) {
-      canvases.push(canvas);
-    }
-  }
-
-  return canvases;
 };
 
 // Helper function to add multiple canvases to a single PDF page
@@ -188,6 +185,7 @@ const formatSectionName = (section: string): string => {
     case "overview":
       return "Overview";
     case "airLeakage":
+    case "air-leakage":
       return "Air Leakage";
     case "insulation":
       return "Insulation";
@@ -195,6 +193,27 @@ const formatSectionName = (section: string): string => {
       return "Heating Systems";
     case "cooling":
       return "Cooling Systems";
+    case "summary":
+      return "Report Summary";
+    default:
+      return section.charAt(0).toUpperCase() + section.slice(1);
+  }
+};
+
+// Get the actual tab name as it appears in the UI
+const getTabDisplayName = (section: string): string => {
+  switch (section) {
+    case "overview":
+      return "Overview";
+    case "airLeakage":
+    case "air-leakage":
+      return "Air Leakage Reports";
+    case "insulation":
+      return "Insulation Reports";
+    case "heating":
+      return "Heating Reports";
+    case "cooling":
+      return "Cooling Reports";
     case "summary":
       return "Report Summary";
     default:
@@ -254,7 +273,7 @@ const handleDownloadReport = async (): Promise<void> => {
     });
 
     // Define the report structure based on the specified requirements
-    // Updated section names to match actual tab names
+    // Updated section names to match actual tab names and reorganized pages
     const reportStructure = [
       // Overview
       {
@@ -270,12 +289,11 @@ const handleDownloadReport = async (): Promise<void> => {
         ],
       },
 
-      // Air Leakage - Updated to match actual tab name
+      // Air Leakage - Updated to include air-changes-per-hour on first page
       {
         section: "airLeakage",
         pages: [
-          { ids: ["introduction", "air-flow-rates"] },
-          { ids: ["air-changes-per-hour"] },
+          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] },
           { ids: ["common-air-leak-points"] },
         ],
       },
@@ -315,13 +333,12 @@ const handleDownloadReport = async (): Promise<void> => {
         ],
       },
 
-      // Report Summary
+      // Report Summary - Updated to group solutions and future solutions
       {
         section: "summary",
         pages: [
           { ids: ["summary-of-concerns"] },
-          { ids: ["solutions-and-recommendations"] },
-          { ids: ["future-solutions"] },
+          { ids: ["solutions-and-recommendations", "future-solutions"] },
           { ids: ["environmental-impact"] },
           { ids: ["project-costs"] },
           { ids: ["tax-credits"] },
@@ -339,11 +356,12 @@ const handleDownloadReport = async (): Promise<void> => {
         progressElement.textContent = `Processing ${formatSectionName(section.section)} section...`;
       }
 
-      // Switch to the section tab
-      await switchToTab(formatSectionName(section.section));
+      // Switch to the section tab using the display name
+      console.log(`Switching to section: ${section.section}`);
+      await switchToTab(getTabDisplayName(section.section));
 
       // Wait for content to render
-      await wait(500);
+      await wait(1500); // Increased wait time
 
       // Process each page in the section
       for (const page of section.pages) {
@@ -355,7 +373,9 @@ const handleDownloadReport = async (): Promise<void> => {
         // Capture elements for this page
         const canvases: HTMLCanvasElement[] = [];
         for (const id of page.ids) {
-          const canvas = await captureElement(id);
+          // Use longer wait time for summary section elements
+          const waitTime = section.section === "summary" ? 2000 : 500;
+          const canvas = await captureElement(id, waitTime);
           if (canvas) {
             canvases.push(canvas);
           }
@@ -387,6 +407,10 @@ const handleDownloadReport = async (): Promise<void> => {
         // Handle insulation zones (2 per page)
         const insulationZoneElements = document.querySelectorAll(
           '[id^="insulation-zone-"]'
+        );
+
+        console.log(
+          `Found ${insulationZoneElements.length} insulation zone elements`
         );
 
         for (let i = 0; i < insulationZoneElements.length; i += 2) {
@@ -427,12 +451,18 @@ const handleDownloadReport = async (): Promise<void> => {
           await wait(100);
         }
       } else if (section.section === "heating") {
+        console.log("Processing heating systems");
+
         // Handle heating systems (2 per page)
         const heatingSystems = document.querySelectorAll(
           '[id^="heating-system-"]:not([id="heating-system-1"])'
         );
         const waterHeater = document.getElementById(
           "heating-system-water-heater"
+        );
+
+        console.log(
+          `Found ${heatingSystems.length} heating systems and water heater: ${waterHeater ? "yes" : "no"}`
         );
 
         // Group systems (2 per page)
@@ -446,15 +476,20 @@ const handleDownloadReport = async (): Promise<void> => {
 
           // First system
           if (heatingSystems[i]) {
+            console.log(`Capturing heating system: ${heatingSystems[i].id}`);
             const canvas = await captureElement(heatingSystems[i].id);
             if (canvas) systemCanvases.push(canvas);
           }
 
           // Second system or water heater
           if (i + 1 < heatingSystems.length) {
+            console.log(
+              `Capturing heating system: ${heatingSystems[i + 1].id}`
+            );
             const canvas = await captureElement(heatingSystems[i + 1].id);
             if (canvas) systemCanvases.push(canvas);
           } else if (waterHeater && i + 1 >= heatingSystems.length) {
+            console.log("Capturing water heater system");
             const canvas = await captureElement("heating-system-water-heater");
             if (canvas) systemCanvases.push(canvas);
           }
@@ -477,6 +512,7 @@ const handleDownloadReport = async (): Promise<void> => {
 
         // If water heater wasn't added and exists
         if (waterHeater && heatingSystems.length % 2 === 0) {
+          console.log("Capturing standalone water heater system");
           const canvas = await captureElement("heating-system-water-heater");
           if (canvas) {
             pdf.addPage();
@@ -491,10 +527,14 @@ const handleDownloadReport = async (): Promise<void> => {
           }
         }
       } else if (section.section === "cooling") {
+        console.log("Processing cooling systems");
+
         // Handle cooling systems (2 per page, first one on its own page)
         const coolingSystems = document.querySelectorAll(
           '[id^="cooling-system-"]'
         );
+
+        console.log(`Found ${coolingSystems.length} cooling systems`);
 
         // First cooling system on its own page (if exists)
         if (coolingSystems.length > 0) {
@@ -503,6 +543,7 @@ const handleDownloadReport = async (): Promise<void> => {
             progressElement.textContent = `Processing cooling system 1...`;
           }
 
+          console.log(`Capturing cooling system: ${coolingSystems[0].id}`);
           const canvas = await captureElement(coolingSystems[0].id);
           if (canvas) {
             pdf.addPage();
@@ -527,12 +568,16 @@ const handleDownloadReport = async (): Promise<void> => {
 
             // First system
             if (coolingSystems[i]) {
+              console.log(`Capturing cooling system: ${coolingSystems[i].id}`);
               const canvas = await captureElement(coolingSystems[i].id);
               if (canvas) systemCanvases.push(canvas);
             }
 
             // Second system
             if (i + 1 < coolingSystems.length) {
+              console.log(
+                `Capturing cooling system: ${coolingSystems[i + 1].id}`
+              );
               const canvas = await captureElement(coolingSystems[i + 1].id);
               if (canvas) systemCanvases.push(canvas);
             }
