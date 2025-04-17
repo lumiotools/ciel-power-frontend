@@ -306,7 +306,7 @@ const ReportPage = ({
   }
 
   return (
-    <div className="container mx-auto p-4" ref={scrollRef}>
+    <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-2xl font-bold text-gray-800">View Report</h1>
