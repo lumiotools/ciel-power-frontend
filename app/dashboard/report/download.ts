@@ -1,3 +1,42 @@
+// Helper function to add a section bookmark for subsections
+const addSubSectionBookmark = (
+  pdf: jsPDF,
+  mainSection: string,
+  subSection: string,
+  mainSectionBookmark: any
+): void => {
+  // Format subsection title - remove the ">" prefix and clean up the ID
+  const formattedTitle = subSection
+    .replace(/^insulation-|^heating-|^cooling-/, "") // Remove prefixes
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .trim(); // Ensure no trailing spaces
+
+  // Add bookmark for this subsection (as a child of the main section)
+  const currentPage = pdf.internal.getNumberOfPages() - 1;
+  addBookmarkToDocument(pdf, formattedTitle, currentPage, mainSectionBookmark);
+}; // Helper function for adding bookmarks with compatibility across jsPDF versions
+const addBookmarkToDocument = (
+  pdf: jsPDF,
+  title: string,
+  page: number,
+  parent: any = null,
+  options: any = {}
+): any => {
+  // Check which bookmark API is supported
+  if (typeof pdf.outline?.add === "function") {
+    // Modern jsPDF versions use outline.add
+    const opts = { ...options, pageNumber: page };
+    return pdf.outline.add(parent, title, opts);
+  } else if (typeof pdf.addBookmark === "function") {
+    // Some versions have direct addBookmark method
+    return pdf.addBookmark(title, page, parent);
+  } else {
+    console.warn("PDF bookmarking not supported in this jsPDF version");
+    return null;
+  }
+};
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -122,12 +161,9 @@ const getSectionColor = (
   }
 };
 
-// Helper function to add a section heading to the PDF
-const addSectionHeading = (
-  pdf: jsPDF,
-  title: string,
-  section: string
-): void => {
+// Helper function to add a section heading to the PDF with bookmark
+const addSectionHeading = (pdf: jsPDF, title: string, section: string): any => {
+  // Return the bookmark object for potential parent-child relationships
   const pageWidth = pdf.internal.pageSize.getWidth();
 
   // Get section color
@@ -145,10 +181,16 @@ const addSectionHeading = (
   pdf.setDrawColor(color.r, color.g, color.b);
   pdf.line(20, 15.5, pageWidth - 20, 15.5); // Reduced from 18
 
+  // Add a bookmark for this section using our compatibility function
+  const currentPage = pdf.internal.getNumberOfPages() - 1;
+  const bookmark = addBookmarkToDocument(pdf, title, currentPage);
+
   // Reset font to normal
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(11); // Slightly smaller than original 12
   pdf.setTextColor(0, 0, 0);
+
+  return bookmark; // Return the bookmark for use as a parent
 };
 
 // Helper function to add an image to the PDF
@@ -248,13 +290,16 @@ const handleDownloadReport = async (): Promise<void> => {
     `;
     document.body.appendChild(loadingDiv);
 
-    // Initialize PDF
+    // Initialize PDF with outlines (bookmarks) enabled
     const pdf = new jsPDF({
       orientation: PAGE_CONFIG.orientation as any,
       unit: PAGE_CONFIG.unit,
       format: PAGE_CONFIG.format,
       compress: true, // Enable compression for smaller file size
     });
+
+    // Enable bookmarking
+    pdf.setDisplayMode("fullwidth");
 
     // Set PDF properties
     pdf.setProperties({
@@ -370,7 +415,7 @@ const handleDownloadReport = async (): Promise<void> => {
       }
 
       // Add the section heading
-      addSectionHeading(
+      const sectionBookmark = addSectionHeading(
         pdf,
         formatSectionName(section.section),
         section.section
@@ -397,13 +442,31 @@ const handleDownloadReport = async (): Promise<void> => {
         // Current Y position for adding elements
         let currentY = 18; // Reduced from 22 to save vertical space
 
-        // Capture and add each element for this page
+        // Capture and add each element for this page with bookmarks for ALL sections
         for (const id of page.ids) {
           updateProgress(`Processing ${id}...`);
 
           const canvas = await captureElement(id);
           if (canvas) {
             currentY = addImageToPDF(pdf, canvas, currentY);
+
+            // Add subsection bookmarks for all sections, not just certain ones
+            // This ensures Overview and Air Leakage sections also get proper bookmarks
+            // Format the element ID into a readable title
+            const formattedTitle = id
+              .replace(/^about-|^air-|^goals-of-the-/, "") // Remove common prefixes
+              .split("-")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ");
+
+            // Add bookmark for this element
+            const currentPage = pdf.internal.getNumberOfPages() - 1;
+            addBookmarkToDocument(
+              pdf,
+              formattedTitle,
+              currentPage,
+              sectionBookmark
+            );
           }
         }
 
@@ -506,6 +569,14 @@ const handleDownloadReport = async (): Promise<void> => {
             if (canvas) {
               // Add to the current page (which should have the heating-header)
               currentY = addImageToPDF(pdf, canvas, currentY);
+
+              // Add bookmark for this heating system
+              addSubSectionBookmark(
+                pdf,
+                "Heating Systems",
+                "heating-system-0",
+                sectionBookmark
+              );
             }
           }
 
@@ -529,6 +600,14 @@ const handleDownloadReport = async (): Promise<void> => {
 
               // Add to the page
               currentY = addImageToPDF(pdf, canvas, currentY);
+
+              // Add bookmark for this heating system
+              addSubSectionBookmark(
+                pdf,
+                "Heating Systems",
+                "heating-system-1",
+                sectionBookmark
+              );
             }
           }
 
@@ -579,6 +658,14 @@ const handleDownloadReport = async (): Promise<void> => {
               if (canvas) {
                 currentY = addImageToPDF(pdf, canvas, currentY);
                 currentPageSystems++;
+
+                // Add bookmark for this heating system
+                addSubSectionBookmark(
+                  pdf,
+                  "Heating Systems",
+                  element.id,
+                  sectionBookmark
+                );
               }
             }
           }
@@ -601,6 +688,14 @@ const handleDownloadReport = async (): Promise<void> => {
             const canvas = await captureElement("heating-system-water-heater");
             if (canvas) {
               currentY = addImageToPDF(pdf, canvas, currentY);
+
+              // Add bookmark for water heater
+              addSubSectionBookmark(
+                pdf,
+                "Heating Systems",
+                "water-heater",
+                sectionBookmark
+              );
             }
           }
         } else if (section.section === "cooling" && pageIndex === 0) {
@@ -628,6 +723,14 @@ const handleDownloadReport = async (): Promise<void> => {
             if (canvas) {
               // Add to the current page (which should have the cooling-header)
               currentY = addImageToPDF(pdf, canvas, currentY);
+
+              // Add bookmark for this cooling system
+              addSubSectionBookmark(
+                pdf,
+                "Cooling Systems",
+                "cooling-system-0",
+                sectionBookmark
+              );
             }
           }
 
@@ -648,6 +751,14 @@ const handleDownloadReport = async (): Promise<void> => {
               }
 
               currentY = addImageToPDF(pdf, canvas, currentY);
+
+              // Add bookmark for this cooling system
+              addSubSectionBookmark(
+                pdf,
+                "Cooling Systems",
+                "cooling-system-1",
+                sectionBookmark
+              );
             }
           }
 
@@ -687,6 +798,14 @@ const handleDownloadReport = async (): Promise<void> => {
             if (canvas) {
               currentY = addImageToPDF(pdf, canvas, currentY);
               currentPageSystems++;
+
+              // Add bookmark for this cooling system
+              addSubSectionBookmark(
+                pdf,
+                "Cooling Systems",
+                element.id,
+                sectionBookmark
+              );
             }
           }
         }
