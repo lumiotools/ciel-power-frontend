@@ -1,62 +1,51 @@
-// Helper function to add a section bookmark for subsections
-const addSubSectionBookmark = (
-  pdf: jsPDF,
-  mainSection: string,
-  subSection: string,
-  mainSectionBookmark: any
-): void => {
-  // Format subsection title - remove the ">" prefix and clean up the ID
-  const formattedTitle = subSection
-    .replace(/^insulation-|^heating-|^cooling-/, "") // Remove prefixes
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
-    .trim(); // Ensure no trailing spaces
-
-  // Add bookmark for this subsection (as a child of the main section)
-  const currentPage = pdf.internal.getNumberOfPages() - 1;
-  addBookmarkToDocument(pdf, formattedTitle, currentPage, mainSectionBookmark);
-}; // Helper function for adding bookmarks with compatibility across jsPDF versions
-const addBookmarkToDocument = (
-  pdf: jsPDF,
-  title: string,
-  page: number,
-  parent: any = null,
-  options: any = {}
-): any => {
-  // Check which bookmark API is supported
-  if (typeof pdf.outline?.add === "function") {
-    // Modern jsPDF versions use outline.add
-    const opts = { ...options, pageNumber: page };
-    return pdf.outline.add(parent, title, opts);
-  } else if (typeof pdf.addBookmark === "function") {
-    // Some versions have direct addBookmark method
-    return pdf.addBookmark(title, page, parent);
-  } else {
-    console.warn("PDF bookmarking not supported in this jsPDF version");
-    return null;
-  }
-};
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-// Define page configuration
-const PAGE_CONFIG = {
+// Define report section types
+export type ReportSection =
+  | "overview"
+  | "airLeakage"
+  | "insulation"
+  | "heating"
+  | "cooling"
+  | "summary";
+
+// Report configuration interface
+export interface ReportConfig {
+  selectedSections?: ReportSection[];
+  customFileName?: string;
+  includePageNumbers?: boolean;
+  includeBookmarks?: boolean;
+}
+
+// Define page configuration with proper TypeScript types
+const PAGE_CONFIG: {
+  format: string;
+  orientation: "portrait" | "landscape";
+  unit: "mm" | "cm" | "in" | "px" | "pt" | "pc" | "em" | "ex";
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+} = {
   format: "a4",
   orientation: "portrait",
   unit: "mm",
   margins: {
-    top: 8, // Reduced from 10
-    right: 8, // Reduced from 10
-    bottom: 12, // Reduced from 15
-    left: 8, // Reduced from 10
+    top: 8,
+    right: 8,
+    bottom: 12,
+    left: 8,
   },
 };
 
 // Helper function to wait for a specified time
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-// Helper function to switch to a specific tab with optimized wait times
+// Helper function to switch to a specific tab
 const switchToTab = async (tabName: string): Promise<void> => {
   console.log(`Switching to tab: ${tabName}`);
   const tabButtons = document.querySelectorAll(
@@ -68,11 +57,11 @@ const switchToTab = async (tabName: string): Promise<void> => {
     if (buttonText.toLowerCase().includes(tabName.toLowerCase())) {
       button.click();
       // Wait for the tab content to render - reduced for better performance
-      await wait(800); // Reduced from 1000ms
+      await wait(800);
 
       // Add a small additional wait for more complex tabs that might need more time
       if (tabName === "Insulation Reports" || tabName === "Report Summary") {
-        await wait(200); // These tabs might need a bit more time to fully render
+        await wait(200);
       }
 
       return;
@@ -88,7 +77,7 @@ const captureElement = async (
 ): Promise<HTMLCanvasElement | null> => {
   try {
     // Reduced wait time for better performance
-    await wait(300); // Reduced from 500ms
+    await wait(300);
 
     const element = document.getElementById(elementId);
     if (!element) {
@@ -101,11 +90,10 @@ const captureElement = async (
 
     // Scroll the element into view
     element.scrollIntoView({ behavior: "auto", block: "start" });
-    await wait(200); // Reduced from 300ms
+    await wait(200);
 
     // Dynamically adjust scale based on element size for better fit
-    // Smaller elements get a slightly reduced scale to save space
-    let scaleValue = 1.4; // Default scale, reduced from 1.5
+    let scaleValue = 1.4; // Default scale
 
     // If element is very tall, reduce scale further to fit more per page
     const elementHeight = element.offsetHeight;
@@ -161,38 +149,6 @@ const getSectionColor = (
   }
 };
 
-// Helper function to add a section heading to the PDF with bookmark
-const addSectionHeading = (pdf: jsPDF, title: string, section: string): any => {
-  // Return the bookmark object for potential parent-child relationships
-  const pageWidth = pdf.internal.pageSize.getWidth();
-
-  // Get section color
-  const color = getSectionColor(section);
-
-  // Set font style for heading - slightly smaller for better space usage
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(14); // Reduced from 16
-
-  // Add heading text positioned slightly higher
-  pdf.setTextColor(color.r, color.g, color.b);
-  pdf.text(title, pageWidth / 2, 13, { align: "center" }); // Reduced from 15
-
-  // Add underline closer to the text
-  pdf.setDrawColor(color.r, color.g, color.b);
-  pdf.line(20, 15.5, pageWidth - 20, 15.5); // Reduced from 18
-
-  // Add a bookmark for this section using our compatibility function
-  const currentPage = pdf.internal.getNumberOfPages() - 1;
-  const bookmark = addBookmarkToDocument(pdf, title, currentPage);
-
-  // Reset font to normal
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(11); // Slightly smaller than original 12
-  pdf.setTextColor(0, 0, 0);
-
-  return bookmark; // Return the bookmark for use as a parent
-};
-
 // Helper function to add an image to the PDF
 const addImageToPDF = (
   pdf: jsPDF,
@@ -225,12 +181,12 @@ const addImageToPDF = (
       pdf.addPage();
       startY = margins.top;
       // Add page number to the new page
-      addPageNumber(pdf);
+      addPageNumber(pdf, true);
     }
   }
 
   // Add the image with compression for smaller file size
-  const imgData = canvas.toDataURL("image/jpeg", 0.85); // Use JPEG with 85% quality - balanced for size/quality
+  const imgData = canvas.toDataURL("image/jpeg", 0.85); // Use JPEG with 85% quality
   pdf.addImage(
     imgData,
     "JPEG",
@@ -243,15 +199,17 @@ const addImageToPDF = (
   );
 
   // Return the new Y position with minimal gap
-  return startY + scaledHeight + 3; // Reduced gap from 5 to 3
+  return startY + scaledHeight + 3; // Reduced gap
 };
 
 // Helper function to add page number
-const addPageNumber = (pdf: jsPDF): void => {
+const addPageNumber = (pdf: jsPDF, includePageNumbers = true): void => {
+  if (!includePageNumbers) return;
+
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  const pageNum = pdf.internal.getNumberOfPages();
+  const pageNum = pdf.getNumberOfPages();
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   pdf.setTextColor(100, 100, 100); // Gray color for page numbers
@@ -260,9 +218,82 @@ const addPageNumber = (pdf: jsPDF): void => {
   });
 };
 
+// Helper function to add a section heading to the PDF with bookmark
+const addSectionHeading = (
+  pdf: jsPDF,
+  title: string,
+  section: string,
+  includeBookmarks: boolean = true
+): void => {
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  // Get section color
+  const color = getSectionColor(section);
+
+  // Set font style for heading - slightly smaller for better space usage
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+
+  // Add heading text positioned slightly higher
+  pdf.setTextColor(color.r, color.g, color.b);
+  pdf.text(title, pageWidth / 2, 13, { align: "center" });
+
+  // Add underline closer to the text
+  pdf.setDrawColor(color.r, color.g, color.b);
+  pdf.line(20, 15.5, pageWidth - 20, 15.5);
+
+  // Add bookmark for the section if bookmarks are enabled
+  if (includeBookmarks && pdf.outline && pdf.outline.add) {
+    pdf.outline.add(null, title, { pageNumber: pdf.getNumberOfPages() });
+  }
+
+  // Reset font to normal
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+  pdf.setTextColor(0, 0, 0);
+};
+
+// Format section name for display
+const formatSectionName = (section: string): string => {
+  switch (section) {
+    case "overview":
+      return "Overview";
+    case "airLeakage":
+    case "air-leakage":
+      return "Air Leakage";
+    case "insulation":
+      return "Insulation";
+    case "heating":
+      return "Heating Systems";
+    case "cooling":
+      return "Cooling Systems";
+    case "summary":
+      return "Report Summary";
+    default:
+      return section.charAt(0).toUpperCase() + section.slice(1);
+  }
+};
+
 // Main function to generate the PDF report
-const handleDownloadReport = async (): Promise<void> => {
+const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
   try {
+    // Default configuration if none provided
+    const reportConfig: Required<ReportConfig> = {
+      selectedSections: config?.selectedSections || [
+        "overview",
+        "airLeakage",
+        "insulation",
+        "heating",
+        "cooling",
+        "summary",
+      ],
+      customFileName:
+        config?.customFileName ||
+        `Ciel_Power_Energy_Audit_Report_${new Date().toISOString().split("T")[0]}`,
+      includePageNumbers: config?.includePageNumbers !== false, // Default to true
+      includeBookmarks: config?.includeBookmarks !== false, // Default to true
+    };
+
     // Create loading indicator
     const loadingDiv = document.createElement("div");
     loadingDiv.style.position = "fixed";
@@ -290,15 +321,21 @@ const handleDownloadReport = async (): Promise<void> => {
     `;
     document.body.appendChild(loadingDiv);
 
-    // Initialize PDF with outlines (bookmarks) enabled
+    // Initialize PDF
     const pdf = new jsPDF({
-      orientation: PAGE_CONFIG.orientation as any,
+      orientation: PAGE_CONFIG.orientation,
       unit: PAGE_CONFIG.unit,
       format: PAGE_CONFIG.format,
       compress: true, // Enable compression for smaller file size
+      putOnlyUsedFonts: true, // Optimize font embedding
     });
 
-    // Enable bookmarking
+    // Enable bookmarks if specified in config
+    if (reportConfig.includeBookmarks) {
+      pdf.outline = { createNamedDestinations: true };
+    }
+
+    // Enable display mode
     pdf.setDisplayMode("fullwidth");
 
     // Set PDF properties
@@ -310,7 +347,7 @@ const handleDownloadReport = async (): Promise<void> => {
     });
 
     // Update progress indicator
-    const updateProgress = (message: string) => {
+    const updateProgress = (message: string): void => {
       const progressElement = document.getElementById("pdf-progress");
       if (progressElement) {
         progressElement.textContent = message;
@@ -319,10 +356,10 @@ const handleDownloadReport = async (): Promise<void> => {
 
     // Define the report structure based on the specified requirements
     // Using the exact groupings as specified
-    const reportStructure = [
+    const allReportSections = [
       // Overview - Regrouped elements as requested
       {
-        section: "overview",
+        section: "overview" as ReportSection,
         tabName: "Overview",
         pages: [
           { ids: ["about-ciel-power", "goals-of-the-audit"] },
@@ -337,17 +374,17 @@ const handleDownloadReport = async (): Promise<void> => {
 
       // Air Leakage - Combined introduction with air-flow-rates
       {
-        section: "airLeakage",
+        section: "airLeakage" as ReportSection,
         tabName: "Air Leakage Reports",
         pages: [
-          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] }, // Combined all three
+          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] },
           { ids: ["common-air-leak-points"] },
         ],
       },
 
       // Insulation - Regrouped elements as requested
       {
-        section: "insulation",
+        section: "insulation" as ReportSection,
         tabName: "Insulation Reports",
         pages: [
           {
@@ -359,39 +396,40 @@ const handleDownloadReport = async (): Promise<void> => {
           },
           { ids: ["insulation-kneewall", "insulation-exterior-wall"] },
           { ids: ["insulation-crawlspace", "insulation-rim-joist"] },
-          { ids: ["insulation-overhang"] }, // The first insulation zone will be added to this page
+          { ids: ["insulation-overhang"] },
         ],
       },
 
       // Heating - Include header with system-1 only
       {
-        section: "heating",
+        section: "heating" as ReportSection,
         tabName: "Heating Reports",
-        pages: [
-          { ids: ["heating-header"] }, // The first heating system will be added to this page
-        ],
+        pages: [{ ids: ["heating-header"] }],
       },
 
       // Cooling - Include header with first cooling system
       {
-        section: "cooling",
+        section: "cooling" as ReportSection,
         tabName: "Cooling Reports",
-        pages: [
-          { ids: ["cooling-header"] }, // The first cooling system will be added to this page
-        ],
+        pages: [{ ids: ["cooling-header"] }],
       },
 
       // Report Summary - Combined more elements and put project-costs and tax-credits on the same page
       {
-        section: "summary",
+        section: "summary" as ReportSection,
         tabName: "Report Summary",
         pages: [
-          { ids: ["summary-of-concerns", "solutions-and-recommendations"] }, // Combined these two
-          { ids: ["future-solutions", "environmental-impact"] }, // Combined these two
-          { ids: ["project-costs", "tax-credits"] }, // Combined project-costs and tax-credits on the same page
+          { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
+          { ids: ["future-solutions", "environmental-impact"] },
+          { ids: ["project-costs", "tax-credits"] },
         ],
       },
     ];
+
+    // Filter sections based on configuration
+    const reportStructure = allReportSections.filter((section) =>
+      reportConfig.selectedSections.includes(section.section)
+    );
 
     let pageCount = 0;
 
@@ -407,7 +445,7 @@ const handleDownloadReport = async (): Promise<void> => {
       await switchToTab(section.tabName);
 
       // Wait for content to render - reduced for better performance
-      await wait(600); // Reduced from 1000ms
+      await wait(600);
 
       // Add section heading only once at the beginning of the section
       if (pageCount > 0) {
@@ -415,15 +453,16 @@ const handleDownloadReport = async (): Promise<void> => {
       }
 
       // Add the section heading
-      const sectionBookmark = addSectionHeading(
+      addSectionHeading(
         pdf,
         formatSectionName(section.section),
-        section.section
+        section.section,
+        reportConfig.includeBookmarks
       );
 
-      // Add page number to the first page
-      if (pageCount === 0) {
-        addPageNumber(pdf);
+      // Add page number to the first page if page numbers are enabled
+      if (pageCount === 0 && reportConfig.includePageNumbers) {
+        addPageNumber(pdf, reportConfig.includePageNumbers);
       }
 
       pageCount++;
@@ -435,44 +474,28 @@ const handleDownloadReport = async (): Promise<void> => {
         // If this isn't the first page in the section, add a new page
         if (pageIndex > 0) {
           pdf.addPage();
-          addPageNumber(pdf);
+          if (reportConfig.includePageNumbers) {
+            addPageNumber(pdf, reportConfig.includePageNumbers);
+          }
           pageCount++;
         }
 
         // Current Y position for adding elements
-        let currentY = 18; // Reduced from 22 to save vertical space
+        let currentY = 18; // Reduced to save vertical space
 
-        // Capture and add each element for this page with bookmarks for ALL sections
+        // Capture and add each element for this page
         for (const id of page.ids) {
           updateProgress(`Processing ${id}...`);
 
           const canvas = await captureElement(id);
           if (canvas) {
             currentY = addImageToPDF(pdf, canvas, currentY);
-
-            // Add subsection bookmarks for all sections, not just certain ones
-            // This ensures Overview and Air Leakage sections also get proper bookmarks
-            // Format the element ID into a readable title
-            const formattedTitle = id
-              .replace(/^about-|^air-|^goals-of-the-/, "") // Remove common prefixes
-              .split("-")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" ");
-
-            // Add bookmark for this element
-            const currentPage = pdf.internal.getNumberOfPages() - 1;
-            addBookmarkToDocument(
-              pdf,
-              formattedTitle,
-              currentPage,
-              sectionBookmark
-            );
           }
         }
 
         // Handle special cases for dynamic content
         if (section.section === "insulation" && pageIndex === 3) {
-          // Handle insulation zones (first one with insulation-overhang, then 2 per page)
+          // Handle insulation zones
           const insulationZoneElements = document.querySelectorAll(
             '[id^="insulation-zone-"]'
           );
@@ -482,7 +505,7 @@ const handleDownloadReport = async (): Promise<void> => {
           );
 
           if (insulationZoneElements.length > 0) {
-            // Handle the first insulation zone - add it to the page with insulation-overhang
+            // Handle the first insulation zone
             updateProgress(`Processing first insulation zone...`);
 
             // Capture the first zone
@@ -490,34 +513,53 @@ const handleDownloadReport = async (): Promise<void> => {
               insulationZoneElements[0].id
             );
             if (firstZoneCanvas) {
-              // Add to the current page (which should be the one with insulation-overhang)
+              // Add to the current page
               currentY = addImageToPDF(pdf, firstZoneCanvas, currentY);
             }
           }
 
-          // Process remaining zones in groups of 2 per page
+          // Process remaining zones in optimized groups
           if (insulationZoneElements.length > 1) {
-            // Process zones in groups of 2
-            for (let i = 1; i < insulationZoneElements.length; i += 2) {
+            // Process zones more efficiently
+            let i = 1; // Start from the second zone
+
+            while (i < insulationZoneElements.length) {
               // Add a new page
               pdf.addPage();
-              addPageNumber(pdf);
+              if (reportConfig.includePageNumbers) {
+                addPageNumber(pdf, reportConfig.includePageNumbers);
+              }
               pageCount++;
 
-              currentY = 16; // Reduced from 20 to start elements higher on new pages
+              currentY = 16; // Start higher on the page
 
+              // Check the heights of the zones to determine how many can fit on one page
+              // Measure first zone to analyze
+              const firstZoneElement = insulationZoneElements[i];
+              const firstZoneHeight = firstZoneElement
+                ? firstZoneElement.getBoundingClientRect().height
+                : 0;
+
+              // Decide how many zones to put on this page based on height
+              let zonesPerPage = 2; // Default
+
+              // If zones are small enough, put 3 on a page
+              if (firstZoneHeight < 350) {
+                zonesPerPage = 3;
+              } else if (firstZoneHeight > 700) {
+                // If zones are very large, just put 1 on a page
+                zonesPerPage = 1;
+              }
+
+              // Capture the zones for this page
               const zoneCanvases: HTMLCanvasElement[] = [];
-
-              // Capture up to 2 zones for this page
               for (
                 let j = 0;
-                j < 2 && i + j < insulationZoneElements.length;
+                j < zonesPerPage && i + j < insulationZoneElements.length;
                 j++
               ) {
-                // Update progress
                 updateProgress(`Processing insulation zone ${i + j + 1}...`);
 
-                // Capture zone
                 const canvas = await captureElement(
                   insulationZoneElements[i + j].id
                 );
@@ -526,10 +568,13 @@ const handleDownloadReport = async (): Promise<void> => {
                 }
               }
 
-              // Add the zones to the page
+              // Add the zones to the page with minimal spacing
               for (const canvas of zoneCanvases) {
                 currentY = addImageToPDF(pdf, canvas, currentY);
               }
+
+              // Move to the next group of zones
+              i += zonesPerPage;
             }
           }
         } else if (section.section === "heating" && pageIndex === 0) {
@@ -551,7 +596,7 @@ const handleDownloadReport = async (): Promise<void> => {
           );
 
           // Collect all heating system IDs to ensure we don't miss any
-          const heatingSystemIds = [];
+          const heatingSystemIds: string[] = [];
           for (const el of regularHeatingElements) {
             heatingSystemIds.push(el.id);
           }
@@ -567,16 +612,8 @@ const handleDownloadReport = async (): Promise<void> => {
             // Capture system-0
             const canvas = await captureElement("heating-system-0");
             if (canvas) {
-              // Add to the current page (which should have the heating-header)
+              // Add to the current page
               currentY = addImageToPDF(pdf, canvas, currentY);
-
-              // Add bookmark for this heating system
-              addSubSectionBookmark(
-                pdf,
-                "Heating Systems",
-                "heating-system-0",
-                sectionBookmark
-              );
             }
           }
 
@@ -593,42 +630,24 @@ const handleDownloadReport = async (): Promise<void> => {
               if (currentY > 180) {
                 // If we're already too far down the page
                 pdf.addPage();
-                addPageNumber(pdf);
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
+                }
                 pageCount++;
                 currentY = 16;
               }
 
               // Add to the page
               currentY = addImageToPDF(pdf, canvas, currentY);
-
-              // Add bookmark for this heating system
-              addSubSectionBookmark(
-                pdf,
-                "Heating Systems",
-                "heating-system-1",
-                sectionBookmark
-              );
             }
           }
 
-          // Process remaining heating systems (start from index 2 since we've handled 0 and 1)
+          // Process remaining heating systems
           let currentPageSystems = (system0 ? 1 : 0) + (system1 ? 1 : 0); // Count how many systems we've already added
           let systemsRemaining =
             regularHeatingElements.length - currentPageSystems;
 
           if (systemsRemaining > 0) {
-            // Start processing from system-2 or the next available system
-            let nextIndex = 2;
-
-            // If we didn't find system-0 or system-1, we might need to start from a different index
-            if (!system0 && !system1) {
-              const firstSystemId = regularHeatingElements[0]?.id;
-              const match = firstSystemId?.match(/heating-system-(\d+)/);
-              if (match) {
-                nextIndex = parseInt(match[1], 10);
-              }
-            }
-
             for (let i = 0; i < regularHeatingElements.length; i++) {
               const element = regularHeatingElements[i];
               const idMatch = element.id.match(/heating-system-(\d+)/);
@@ -645,9 +664,10 @@ const handleDownloadReport = async (): Promise<void> => {
 
               // If we need to start a new page
               if (currentPageSystems >= 2 || currentY > 200) {
-                // If we have 2+ systems or we're far down the page
                 pdf.addPage();
-                addPageNumber(pdf);
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
+                }
                 pageCount++;
                 currentY = 16;
                 currentPageSystems = 0;
@@ -658,27 +678,21 @@ const handleDownloadReport = async (): Promise<void> => {
               if (canvas) {
                 currentY = addImageToPDF(pdf, canvas, currentY);
                 currentPageSystems++;
-
-                // Add bookmark for this heating system
-                addSubSectionBookmark(
-                  pdf,
-                  "Heating Systems",
-                  element.id,
-                  sectionBookmark
-                );
               }
             }
           }
 
-          // Handle water heater - add to current page if it has space, otherwise create a new page
+          // Handle water heater
           if (waterHeater) {
             // Update progress
             updateProgress(`Processing water heating system...`);
 
-            // If we're already at 2 systems on the current page or far down the page, add a new page
+            // If we're already at 2 systems on the current page, add a new page
             if (currentPageSystems >= 2 || currentY > 180) {
               pdf.addPage();
-              addPageNumber(pdf);
+              if (reportConfig.includePageNumbers) {
+                addPageNumber(pdf, reportConfig.includePageNumbers);
+              }
               pageCount++;
               currentY = 16;
               currentPageSystems = 0;
@@ -688,18 +702,10 @@ const handleDownloadReport = async (): Promise<void> => {
             const canvas = await captureElement("heating-system-water-heater");
             if (canvas) {
               currentY = addImageToPDF(pdf, canvas, currentY);
-
-              // Add bookmark for water heater
-              addSubSectionBookmark(
-                pdf,
-                "Heating Systems",
-                "water-heater",
-                sectionBookmark
-              );
             }
           }
         } else if (section.section === "cooling" && pageIndex === 0) {
-          // Handle cooling systems - ensure we get ALL cooling systems
+          // Handle cooling systems
           const coolingSystemElements = document.querySelectorAll(
             '[id^="cooling-system-"]'
           );
@@ -707,7 +713,7 @@ const handleDownloadReport = async (): Promise<void> => {
           console.log(`Found ${coolingSystemElements.length} cooling systems`);
 
           // Collect all cooling system IDs to ensure we don't miss any
-          const coolingSystemIds = [];
+          const coolingSystemIds: string[] = [];
           for (const el of coolingSystemElements) {
             coolingSystemIds.push(el.id);
           }
@@ -721,16 +727,8 @@ const handleDownloadReport = async (): Promise<void> => {
 
             const canvas = await captureElement("cooling-system-0");
             if (canvas) {
-              // Add to the current page (which should have the cooling-header)
+              // Add to the current page
               currentY = addImageToPDF(pdf, canvas, currentY);
-
-              // Add bookmark for this cooling system
-              addSubSectionBookmark(
-                pdf,
-                "Cooling Systems",
-                "cooling-system-0",
-                sectionBookmark
-              );
             }
           }
 
@@ -745,20 +743,14 @@ const handleDownloadReport = async (): Promise<void> => {
               if (currentY > 180) {
                 // If we're already too far down the page
                 pdf.addPage();
-                addPageNumber(pdf);
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
+                }
                 pageCount++;
                 currentY = 16;
               }
 
               currentY = addImageToPDF(pdf, canvas, currentY);
-
-              // Add bookmark for this cooling system
-              addSubSectionBookmark(
-                pdf,
-                "Cooling Systems",
-                "cooling-system-1",
-                sectionBookmark
-              );
             }
           }
 
@@ -787,7 +779,9 @@ const handleDownloadReport = async (): Promise<void> => {
             // If we need to start a new page
             if (currentPageSystems >= 2 || currentY > 200) {
               pdf.addPage();
-              addPageNumber(pdf);
+              if (reportConfig.includePageNumbers) {
+                addPageNumber(pdf, reportConfig.includePageNumbers);
+              }
               pageCount++;
               currentY = 16;
               currentPageSystems = 0;
@@ -798,14 +792,6 @@ const handleDownloadReport = async (): Promise<void> => {
             if (canvas) {
               currentY = addImageToPDF(pdf, canvas, currentY);
               currentPageSystems++;
-
-              // Add bookmark for this cooling system
-              addSubSectionBookmark(
-                pdf,
-                "Cooling Systems",
-                element.id,
-                sectionBookmark
-              );
             }
           }
         }
@@ -815,8 +801,8 @@ const handleDownloadReport = async (): Promise<void> => {
     // Update progress
     updateProgress("Finalizing PDF...");
 
-    // Save the PDF
-    const fileName = `Ciel_Power_Energy_Audit_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+    // Save the PDF with custom filename if provided
+    const fileName = `${reportConfig.customFileName}.pdf`;
     pdf.save(fileName);
 
     // Remove loading indicator
@@ -836,27 +822,6 @@ const handleDownloadReport = async (): Promise<void> => {
 
     // Return to the overview tab even if there was an error
     await switchToTab("Overview");
-  }
-};
-
-// Format section name for display
-const formatSectionName = (section: string): string => {
-  switch (section) {
-    case "overview":
-      return "Overview";
-    case "airLeakage":
-    case "air-leakage":
-      return "Air Leakage";
-    case "insulation":
-      return "Insulation";
-    case "heating":
-      return "Heating Systems";
-    case "cooling":
-      return "Cooling Systems";
-    case "summary":
-      return "Report Summary";
-    default:
-      return section.charAt(0).toUpperCase() + section.slice(1);
   }
 };
 
