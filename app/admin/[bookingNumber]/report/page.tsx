@@ -1090,9 +1090,9 @@ const ReportPage = ({
         </div>
       ) : (
         <div className="container mx-auto p-4" ref={scrollRef}>
-          <div className="bg-gradient-to-r from-lime-400 to-lime-400 py-4 px-6 rounded-t-lg shadow-md">
+          <div className="py-4 px-6 rounded-t-lg shadow-md">
             <div className="flex justify-between items-center">
-              <h1 className="text-3xl font-bold text-white">Reports</h1>
+              <h1 className="text-3xl font-bold">Edit Report</h1>
             </div>
           </div>
 

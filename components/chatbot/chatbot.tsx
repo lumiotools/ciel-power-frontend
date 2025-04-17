@@ -121,7 +121,7 @@ export default function AIChatbot() {
     }
   };
 
-  if (["/login", "/register"].includes(pathname)) {
+  if (["/login", "/register"].includes(pathname) || pathname.includes("/admin")) {
     return <></>;
   }
 

@@ -199,6 +199,18 @@ export function FederalTaxCredits({
     }
   }, [data, bookingNumber]);
 
+  const formatCurrency = (amount: string): string => {
+    // Convert to number, format, then back to string
+    const numericValue = parseFloat(amount);
+    if (isNaN(numericValue)) return "$0.00";
+    console.log(amount, numericValue)
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(numericValue);
+  };
+
   const updateTaxCreditItem = (
     index: number,
     field: keyof TaxCreditItem,
@@ -210,7 +222,8 @@ export function FederalTaxCredits({
     if (newData[index]) {
       // If this is an amount field, make sure it doesn't include a dollar sign
       if (field === "amount") {
-        value = value.replace(/^\$/, "");
+        console.log("hahaha", value, formatCurrency(value))
+        value = formatCurrency(value);
         // If value is empty, set to "0"
         if (!value.trim()) {
           value = "0";

@@ -691,7 +691,7 @@ export function ReportSummary({
         <div className="top-4 flex justify-end">
           <button
             onClick={onSubmit}
-            className=" px-4 py-2 rounded-full bg-green-500 text-white font-bold "
+            className=" px-4 py-2 rounded-full bg-primary text-white font-bold "
           >
             Save
           </button>
