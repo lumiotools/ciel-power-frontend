@@ -501,7 +501,7 @@ export function ExteriorWallAssessment({
             </div>
 
             <div className="space-y-4">
-              <div className="relative aspect-square rounded-lg overflow-hidden">
+              <div className="relative rounded-lg overflow-hidden">
                 {isAdmin ? (
                   <ImageUpload
                     driveImages={driveImages}

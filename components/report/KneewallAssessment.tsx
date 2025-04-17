@@ -408,15 +408,26 @@ export function KneewallAssessment({
       material: data.material || "Not specified",
       condition: data.condition || "Not assessed",
       rValue: data.rValue ? `R${data.rValue}` : "Not assessed",
-      recommendation: data.name?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
+      recommendation: (data.name || "Your Kneewall Insulation")?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
       currentValue: data.rValue,
-      maxValue: data.name?.toLowerCase().includes("flat") ? 60 : 13,
+      maxValue: (data.name || "Your Kneewall Insulation")?.toLowerCase().includes("flat") ? 60 : 13,
+      image: data?.image ?? "/placeholder.jpg", // Default image
+    };
+
+    const kneewallFlatItem: KneewallData = {
+      title: data.name || "Your Kneewall Flat Insulation",
+      material: data.material || "Not specified",
+      condition: data.condition || "Not assessed",
+      rValue: data.rValue ? `R${data.rValue}` : "Not assessed",
+      recommendation: (data.name || "Your Kneewall Flat Insulation")?.toLowerCase().includes("flat") ? "R60" : "R13", // Default recommendations based on type
+      currentValue: data.rValue,
+      maxValue: (data.name || "Your Kneewall Flat Insulation")?.toLowerCase().includes("flat") ? 60 : 13,
       image: data?.image ?? "/placeholder.jpg", // Default image
     };
 
     // If we have data for a single kneewall, return it as a single item array
     // Otherwise, return the default data
-    return [kneewallItem];
+    return [kneewallItem, kneewallFlatItem];
   };
 
   const [kneewallData, setKneewallData] = useState<KneewallData[]>(

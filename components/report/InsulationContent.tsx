@@ -61,20 +61,26 @@ const findBestMatchingItem = (
     matchingItems = data.filter(
       (item) =>
         item.name.toLowerCase().includes("kneewall") ||
-        item.name.toLowerCase().includes("knee wall"),
+        item.name.toLowerCase().includes("knee wall")
+    );
+  } else if (typeLower === "kneewall flat") {
+    matchingItems = data.filter(
+      (item) =>
+        item.name.toLowerCase().includes("kneewall flat") ||
+        item.name.toLowerCase().includes("knee wall flat")
     );
   } else if (typeLower === "exterior wall") {
     matchingItems = data.filter(
       (item) =>
         item.name.toLowerCase().includes("exterior wall") ||
         (item.name.toLowerCase().includes("wall") &&
-          !item.name.toLowerCase().includes("kneewall")),
+          !item.name.toLowerCase().includes("kneewall"))
     );
-  } else if (typeLower === "crawlspace") {
+  } else if (typeLower === "crawlspace wall") {
     matchingItems = data.filter(
       (item) =>
-        item.name.toLowerCase().includes("crawlspace") ||
-        item.name.toLowerCase().includes("crawl space"),
+        item.name.toLowerCase().includes("crawlspace wall") ||
+        item.name.toLowerCase().includes("crawl space wall")
     );
   } else if (typeLower === "rim joist") {
     matchingItems = data.filter(
@@ -82,14 +88,24 @@ const findBestMatchingItem = (
         item.name.toLowerCase().includes("rim joist") ||
         item.name.toLowerCase().includes("basement rj") ||
         (item.name.toLowerCase().includes("basement") &&
-          item.name.toLowerCase().includes("rj")),
+          item.name.toLowerCase().includes("rj"))
     );
   } else if (typeLower === "overhang") {
     matchingItems = data.filter(
       (item) =>
         item.name.toLowerCase().includes("overhang") ||
         item.name.toLowerCase().includes("over hang") ||
-        item.name.toLowerCase().includes("oh"),
+        item.name.toLowerCase().includes("oh")
+    );
+  } else if (typeLower === "crawlspace ceiling") {
+    matchingItems = data.filter(
+      (item) =>
+        item.name.toLowerCase().includes("crawlspace ceiling") ||
+        item.name.toLowerCase().includes("crawl space ceiling")
+    );
+  } else if (typeLower === "garage ceiling") {
+    matchingItems = data.filter((item) =>
+      item.name.toLowerCase().includes("garage ceiling")
     );
   }
 
@@ -140,10 +156,13 @@ export function InsulationContent({
   // Define the standard components we want to show
   const standardTypes = [
     "kneewall",
+    "kneewall flat",
     "exterior wall",
-    "crawlspace",
+    "crawlspace wall",
     "rim joist",
     "overhang",
+    "crawlspace ceiling",
+    "garage ceiling",
   ];
 
   // Keep track of which data items have been displayed in the standard components
@@ -259,9 +278,9 @@ export function InsulationContent({
         driveImages={driveImages}
       />
       {/* )} */}
-      {/* {!!findBestMatchingItem(data?.data, "exterior wall") && ( */}
-      <ExteriorWallAssessment
-        data={findBestMatchingItem(data?.data, "exterior wall")}
+      {/* {!!findBestMatchingItem(data?.data, "rim joist") && ( */}
+      <RimJoistAssessment
+        data={findBestMatchingItem(data?.data, "rim joist")}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
         driveImages={driveImages}
@@ -269,15 +288,15 @@ export function InsulationContent({
       {/* )} */}
       {/* {!!findBestMatchingItem(data?.data, "crawlspace") && ( */}
       <CrawlspaceAssessment
-        data={findBestMatchingItem(data?.data, "crawlspace")}
+        data={findBestMatchingItem(data?.data, "crawlspace wall")}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
         driveImages={driveImages}
       />
       {/* )} */}
-      {/* {!!findBestMatchingItem(data?.data, "rim joist") && ( */}
-      <RimJoistAssessment
-        data={findBestMatchingItem(data?.data, "rim joist")}
+      {/* {!!findBestMatchingItem(data?.data, "exterior wall") && ( */}
+      <ExteriorWallAssessment
+        data={findBestMatchingItem(data?.data, "exterior wall")}
         isAdmin={isAdmin}
         onUpdate={handleUpdateInsulationItem}
         driveImages={driveImages}
@@ -291,6 +310,29 @@ export function InsulationContent({
         driveImages={driveImages}
       />
       {/* )} */}
+
+      <InsulationZoneAssessment
+        data={
+          findBestMatchingItem(data?.data, "crawlspace ceiling") ?? {
+            name: "crawlspace ceiling",
+            condition: "unknown",
+            material: "unknown",
+            rValue: 0,
+            image: "",
+            
+          }
+        }
+        isAdmin={isAdmin}
+        onUpdate={handleUpdateInsulationItem}
+        driveImages={driveImages}
+      />
+
+      <InsulationZoneAssessment
+        data={findBestMatchingItem(data?.data, "garage ceiling")}
+        isAdmin={isAdmin}
+        onUpdate={handleUpdateInsulationItem}
+        driveImages={driveImages}
+      />
 
       {/* Display remaining items using the generic component */}
       {remainingItems.length > 0 && (
