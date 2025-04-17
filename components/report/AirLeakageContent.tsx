@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { Home, ArrowUp, ArrowDown, Info, Pencil, Check, X } from "lucide-react"
 import { toast } from "sonner"
 import { useParams } from "next/navigation"
-import AirChangesGauge from "@/components/report/AirChangesGauge"
+import { AirChangesGauge } from "@/components/report/AirChangesGauge"
 
 interface AirLeakageData {
   parameter: string
@@ -83,8 +83,8 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue, onSave
     }
   }
 
-  // Custom card style to ensure shadow on all sides
-  const cardStyle = "rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.1)] border border-gray-100 mb-2"
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
 
   return (
     <div className="space-y-8">
@@ -100,7 +100,7 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue, onSave
       )}
       {/* Introduction Section */}
       <motion.div {...fadeInUp} id="introduction">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 mb-6">
+        <div className={cardStyle}>
           <div className="py-3 px-5" style={{ backgroundColor: "#031A821A" }}>
             <h2 className="font-medium" style={{ color: "#031A82" }}>BPI Approach to Air Sealing</h2>
           </div>
@@ -132,7 +132,7 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue, onSave
 
       {/* Air Flow Rates Section */}
       <motion.div {...fadeInUp} id="air-flow-rates">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 mb-6">
+        <div className={cardStyle}>
           <div className="py-3 px-5" style={{ backgroundColor: "#031A821A" }}>
             <h2 className="font-medium" style={{ color: "#031A82" }}>Understanding Air Flow Rates</h2>
           </div>
@@ -164,13 +164,13 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue, onSave
 
       {/* Air Changes Per Hour Section */}
       <motion.div {...fadeInUp} id="air-changes-per-hour">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 mb-6">
+        <div className={cardStyle}>
           <div className="py-3 px-5" style={{ backgroundColor: "#031A821A" }}>
             <h2 className="font-medium" style={{ color: "#031A82" }}>Your Home's Air Changes Per Hour (ACH)</h2>
           </div>
           <div className="p-6">
             <p className="text-gray-700 mb-6">
-              A measure of how many times the air within a dened space is replaced. This is determined based on the
+              A measure of how many times the air within a defined space is replaced. This is determined based on the
               blower door reading of the space and the volume of the space.
             </p>
             
@@ -238,18 +238,7 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue, onSave
               <div className="h-[260px] flex flex-col items-center"> {/* Reduced height */}
                 <AirChangesGauge
                   value={value}
-                  title="Your Air Changes"
-                  subtitle="per Hour (ACH)"
-                  showCard={false}
-                  width="100%"
-                  height="220px" // Adjusted height for better alignment
                 />
-                {/* Text directly below the gauge */}
-                <div className="text-center mt-[-50px]"> {/* Negative margin to bring text closer */}
-                  <p className="text-lg font-bold" style={{ color: "#031A82" }}>{value.toFixed(2)} ACH</p>
-                  <p className="text-lg font-bold" style={{ color: "#031A82" }}>Your Air Changes</p>
-                  <p className="text-sm text-gray-600">per Hour (ACH)</p>
-                </div>
               </div>
             </div>
           </div>
@@ -258,7 +247,7 @@ export function AirLeakageContent({ data, isAdmin = false, onUpdateValue, onSave
 
       {/* Common Air Leak Points */}
       <motion.div {...fadeInUp} id="common-air-leak-points">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 mb-6">
+        <div className={cardStyle}>
           <div className="py-3 px-5" style={{ backgroundColor: "#031A821A" }}>
             <h3 className="font-medium" style={{ color: "#031A82" }}>Common Air Leak Points</h3>
           </div>

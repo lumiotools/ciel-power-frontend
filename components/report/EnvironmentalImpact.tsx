@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Leaf, Pencil, Check, X } from "lucide-react"
 import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Define the interfaces for our data
 interface FootprintData {
@@ -205,118 +204,119 @@ export function EnvironmentalImpact({
     }
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
-    <Card className="rounded-xl border shadow-sm overflow-hidden">
-      <CardHeader className="bg-[#67B5021A] dark:bg-green-900/20 py-4 px-6">
-        <CardTitle className="text-xl text-[#67B502] dark:text-[#67B502] flex items-center gap-2" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: 16}}>
+    <div className={cardStyle}>
+      <div className="py-3 px-5 bg-[#67B5021A] dark:bg-green-900/20">
+        <h2 className="flex items-center gap-2 font-medium text-[#67B502] dark:text-[#67B502]">
           <Leaf className="h-5 w-5 text-[#67B502]" />
           Environmental Impact
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0 bg-[#67B5021A]/30">
-        <div className="bg-white p-6">
-          <div className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex justify-between items-center py-2 border-b"
-            >
-              <div className="flex items-start gap-3">
-                <div className="bg-[#67B5021A] dark:bg-green-900/20 rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
-                  <Leaf className="h-5 w-5 text-[#67B502]" />
-                </div>
-                <div>
-                  <span className="font-medium text-[#67B502] dark:text-[#67B502]">Household Carbon Footprint</span>
-                  <p className="text-xs text-gray-500">*based on the Utility Bills provided (annually)</p>
-                </div>
+        </h2>
+      </div>
+      <div className="p-6 bg-white">
+        <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-between items-center py-2 border-b"
+          >
+            <div className="flex items-start gap-3">
+              <div className="bg-[#67B5021A] dark:bg-green-900/20 rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
+                <Leaf className="h-5 w-5 text-[#67B502]" />
               </div>
-              <div className="text-[#67B502] font-semibold">
-                <ValueWithUnit
-                  data={environmentalData.currentFootprint}
-                  isAdmin={isAdmin}
-                  onUpdate={(value) => updateMetricField("currentFootprint", "value", value)}
-                  placeholder="Enter value"
-                />
+              <div>
+                <span className="font-medium text-[#67B502] dark:text-[#67B502]">Household Carbon Footprint</span>
+                <p className="text-xs text-gray-500">*based on the Utility Bills provided (annually)</p>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex justify-between items-center py-2 border-b"
-            >
-              <div className="flex items-start gap-3">
-                <div className="bg-[#67B5021A] dark:bg-green-900/20 rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
-                  <Leaf className="h-5 w-5 text-[#67B502]" />
-                </div>
-                <span className="font-medium text-[#67B502] dark:text-[#67B502]">Projected Total Energy Savings</span>
-              </div>
-              <div className="text-[#67B502] font-semibold">
-                <ValueWithUnit
-                  data={environmentalData.projectedSavings}
-                  isAdmin={isAdmin}
-                  onUpdate={(value) => updateMetricField("projectedSavings", "value", value)}
-                  placeholder="Enter value"
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex justify-between items-center py-2 border-b"
-            >
-              <div className="flex items-start gap-3">
-                <div className="bg-[#67B5021A] dark:bg-green-900/20 rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
-                  <Leaf className="h-5 w-5 text-[#67B502]" />
-                </div>
-                <div>
-                  <span className="font-medium text-[#67B502] dark:text-[#67B502]">Projected Carbon Footprint</span>
-                  <p className="text-xs text-gray-500">*after installing proposed upgrades</p>
-                </div>
-              </div>
-              <div className="text-[#67B502] font-semibold">
-                <ValueWithUnit
-                  data={environmentalData.projectedFootprint}
-                  isAdmin={isAdmin}
-                  onUpdate={(value) => updateMetricField("projectedFootprint", "value", value)}
-                  placeholder="Enter value"
-                />
-              </div>
-            </motion.div>
-          </div>
+            </div>
+            <div className="text-[#67B502] font-semibold">
+              <ValueWithUnit
+                data={environmentalData.currentFootprint}
+                isAdmin={isAdmin}
+                onUpdate={(value) => updateMetricField("currentFootprint", "value", value)}
+                placeholder="Enter value"
+              />
+            </div>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-8 bg-[#67B5021A] p-6 rounded-lg"
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex justify-between items-center py-2 border-b"
           >
-            <div className="flex justify-between items-center">
-              <div className="flex items-start gap-3">
-                <div className="bg-white rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
-                  <Leaf className="h-5 w-5 text-[#67B502]" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-[#67B502] dark:text-[#67B502]">Projected CO2 Reduction</h4>
-                  <p className="text-xs text-gray-500">*Over a 10 year period</p>
-                </div>
+            <div className="flex items-start gap-3">
+              <div className="bg-[#67B5021A] dark:bg-green-900/20 rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
+                <Leaf className="h-5 w-5 text-[#67B502]" />
               </div>
-              <div className="text-[#67B502] text-xl font-bold">
-                <ValueWithUnit
-                  data={environmentalData.totalReduction}
-                  isAdmin={isAdmin}
-                  onUpdate={(value) => updateMetricField("totalReduction", "value", value)}
-                  placeholder="Enter value"
-                />
+              <span className="font-medium text-[#67B502] dark:text-[#67B502]">Projected Total Energy Savings</span>
+            </div>
+            <div className="text-[#67B502] font-semibold">
+              <ValueWithUnit
+                data={environmentalData.projectedSavings}
+                isAdmin={isAdmin}
+                onUpdate={(value) => updateMetricField("projectedSavings", "value", value)}
+                placeholder="Enter value"
+              />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex justify-between items-center py-2 border-b"
+          >
+            <div className="flex items-start gap-3">
+              <div className="bg-[#67B5021A] dark:bg-green-900/20 rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
+                <Leaf className="h-5 w-5 text-[#67B502]" />
               </div>
+              <div>
+                <span className="font-medium text-[#67B502] dark:text-[#67B502]">Projected Carbon Footprint</span>
+                <p className="text-xs text-gray-500">*after installing proposed upgrades</p>
+              </div>
+            </div>
+            <div className="text-[#67B502] font-semibold">
+              <ValueWithUnit
+                data={environmentalData.projectedFootprint}
+                isAdmin={isAdmin}
+                onUpdate={(value) => updateMetricField("projectedFootprint", "value", value)}
+                placeholder="Enter value"
+              />
             </div>
           </motion.div>
         </div>
-      </CardContent>
-    </Card>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-8 bg-[#67B5021A] p-6 rounded-lg"
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-start gap-3">
+              <div className="bg-white rounded-md flex items-center justify-center aspect-square w-10 md:w-12">
+                <Leaf className="h-5 w-5 text-[#67B502]" />
+              </div>
+              <div>
+                <h4 className="font-medium text-[#67B502] dark:text-[#67B502]">Projected CO2 Reduction</h4>
+                <p className="text-xs text-gray-500">*Over a 10 year period</p>
+              </div>
+            </div>
+            <div className="text-[#67B502] text-xl font-bold">
+              <ValueWithUnit
+                data={environmentalData.totalReduction}
+                isAdmin={isAdmin}
+                onUpdate={(value) => updateMetricField("totalReduction", "value", value)}
+                placeholder="Enter value"
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
   )
 }

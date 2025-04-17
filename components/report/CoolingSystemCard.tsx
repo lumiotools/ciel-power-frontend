@@ -4,12 +4,12 @@ import type React from "react"
 
 import { useRef, useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Zap, Sun, AlertCircle, Edit2, Check, X, Pencil } from "lucide-react"
 import { ImageUpload } from "./ImageUpload"
 import { ImageCustomer } from "@/components/report/ImageCustomer"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import PercentageGauge from "@/components/report/PercentageGauge"
+import ValueGauge from "./ValueGauge"
 
 // Only include the necessary interfaces
 interface HeatingCoolingItem {
@@ -419,30 +419,23 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
     color: "#B18C2E",
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
-      <Card className="rounded-xl border border-amber-100 shadow-sm overflow-hidden mb-8">
-        <CardHeader className="py-4 px-6" style={{ backgroundColor: "#FFFCF3" }}>
-          <CardTitle
-            className="flex items-center gap-3"
-            style={{
-              fontFamily: "Poppins",
-              fontWeight: 500,
-              fontSize: "16px",
-              lineHeight: "100%",
-              letterSpacing: "0%",
-              color: "#B18C2E",
-            }}
-          >
+      <div className={cardStyle}>
+        <div className="py-3 px-5" style={{ backgroundColor: "#FFFCF3" }}>
+          <h2 className="flex items-center gap-3 font-medium" style={{ color: "#B18C2E" }}>
             <Sun style={{ color: "#B18C2E" }} className="h-6 w-6" />
             {item.name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6" style={{ backgroundColor: "#FFFFFF" }}>
+          </h2>
+        </div>
+        <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left column - Current Performance and Type/Condition/Year/SEER */}
             <div className="space-y-6">
@@ -458,12 +451,11 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
 
                 {shouldShowGaugeChart() ? (
                   <div className="space-y-6">
-                    <PercentageGauge
-                      value={systemData.value as number}
-                      maxValue={20} // Set max to 20 SEER
+                    <ValueGauge
+                      value={systemData.value}
+                      minValue={0}
+                      maxValue={16}
                       title={systemData.parameterName}
-                      showCard={false}
-                      width="100%"
                     />
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
@@ -606,8 +598,8 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   )
 }

@@ -5,7 +5,6 @@ import type React from "react"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Clock, DollarSign, Zap, ShoppingCart, Droplet } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface SolutionItem {
   title: string
@@ -51,23 +50,21 @@ export function FutureSolutions({ data }: FutureSolutionsProps) {
     ],
   )
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
-    <Card className="rounded-xl border shadow-sm overflow-hidden">
-      <CardHeader className="py-4 px-6" style={{ backgroundColor: "#67B5021A" }}>
-        <CardTitle 
-          className="flex items-center gap-2" 
-          style={{ 
-            fontFamily: "Poppins", 
-            fontWeight: 500, 
-            fontSize: 16, 
-            color: "#67B502" 
-          }}
+    <div className={cardStyle}>
+      <div className="py-3 px-5" style={{ backgroundColor: "#67B5021A" }}>
+        <h2 
+          className="flex items-center gap-2 font-medium" 
+          style={{ color: "#67B502" }}
         >
           <Clock className="h-5 w-5" style={{ color: "#67B502" }} />
           Other Future Solutions
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6" style={{ backgroundColor: "#ffffff" }}>
+        </h2>
+      </div>
+      <div className="p-6">
         <div className="space-y-4">
           {solutions.map((solution, index) => (
             <motion.div
@@ -93,7 +90,7 @@ export function FutureSolutions({ data }: FutureSolutionsProps) {
             </motion.div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
