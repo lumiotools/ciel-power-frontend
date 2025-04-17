@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useContext } from "react";
-import { AUTH_CONTEXT, UserDetails } from "../../providers/auth"; // Adjust the import path as necessary
+import { AUTH_CONTEXT, type UserDetails } from "../../providers/auth"; // Adjust the import path as necessary
 import { Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import GoogleReview from "./_comp/Google-review";
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import RescheduleModal from "@/components/component/reshedule-modal";
 import PaymentModal from "@/components/payment/modal";
-import { BOOKING_CONTEXT, BookingDetails } from "@/providers/booking";
+import { BOOKING_CONTEXT, type BookingDetails } from "@/providers/booking";
 
 interface PaymentDetailsProps {
   PaymentDetails:
@@ -132,15 +132,12 @@ const formatTime = (dateStr?: string): string => {
 };
 
 export default function DashboardPage() {
-  // const router = useRouter();
-  // const [services, setServices = useState<Service[]>([]);
   const { isLoading, bookingDetails, recommendedVideos, refreshBookingData } =
     useContext(BOOKING_CONTEXT);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   // State to track if timeline is expanded or collapsed
-  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
   // State for reschedule modal
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [currentBookingId, setCurrentBookingId] = useState("");
@@ -161,73 +158,17 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // Your existing code that doesn't involve data fetching can stay here
     if (bookingDetails) {
-      for (let i = 0; i < State.length; i++) {
+      for (let i = State.length - 1; i >= 0; i--) {
         const key = State[i];
         if (bookingDetails[key]) {
-          console.log("bookings[key]:", bookingDetails[key]);
-          console.log("State[i]:", key);
           setLatestState(key);
-        } else {
           break;
         }
       }
-      console.log("latestState", latestState);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingDetails]);
 
-  const CloseModalContent = () => {
-    switch (latestState) {
-      case "bookingDetails":
-        return (
-          <EnergyAudit
-            BookingDetails={bookingDetails?.bookingDetails}
-            onClick={() => openRescheduleModal("AUDIT-345678")}
-          />
-        );
-      case "utilityBillDetails":
-        return (
-          <UtilityBills
-            UtilityBillDetails={bookingDetails?.utilityBillDetails}
-          />
-        );
-      case "reportConsultation":
-        return bookingDetails?.reportConsultation ? (
-          <ReportConsaltation
-            ReportConsultation={bookingDetails?.reportConsultation}
-          />
-        ) : null;
-
-      case "consultationDetails":
-        return bookingDetails?.consultationDetails ? (
-          <ConsultationDerails
-            BookingDetails={bookingDetails.bookingDetails}
-            ConsultationDetails={bookingDetails.consultationDetails}
-            onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
-          />
-        ) : null;
-
-      case "proposalDetails":
-        return isOneAndHalfHourAhead(
-          bookingDetails?.bookingDetails?.startTime
-        ) ? (
-          <WeAreLinning />
-        ) : null;
-
-      case "paymentDetails":
-        return (
-          <PaymentDetails
-            PaymentDetails={bookingDetails?.paymentDetails}
-            userDetails={userDetails}
-            onClick={() => setIsModalOpen(true)}
-          />
-        );
-      default:
-        return "";
-    }
-  };
   // Open reschedule modal
   const openRescheduleModal = (bookingId: string) => {
     setCurrentBookingId(bookingId);
@@ -243,9 +184,53 @@ export default function DashboardPage() {
   };
 
   const { userDetails } = useContext(AUTH_CONTEXT);
-  console.log("User Details:", userDetails);
 
-  console.log("Booking Number = ", userDetails?.bookingNumber);
+  // Function to render the latest state component
+  const renderLatestStateComponent = () => {
+    switch (latestState) {
+      case "paymentDetails":
+        return bookingDetails?.paymentDetails ? (
+          <PaymentDetails
+            PaymentDetails={bookingDetails.paymentDetails}
+            userDetails={userDetails}
+            onClick={() => setIsModalOpen(true)}
+          />
+        ) : null;
+      case "proposalDetails":
+        return bookingDetails?.proposalDetails ? (
+          <ProjectPlansReady ProposalDetails={bookingDetails.proposalDetails} />
+        ) : null;
+      case "consultationDetails":
+        return bookingDetails?.consultationDetails ? (
+          <ConsultationDerails
+            BookingDetails={bookingDetails.bookingDetails}
+            ConsultationDetails={bookingDetails.consultationDetails}
+            onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
+          />
+        ) : null;
+      case "reportConsultation":
+        return bookingDetails?.reportConsultation ? (
+          <ReportConsaltation
+            ReportConsultation={bookingDetails.reportConsultation}
+          />
+        ) : null;
+      case "utilityBillDetails":
+        return bookingDetails?.utilityBillDetails ? (
+          <UtilityBills
+            UtilityBillDetails={bookingDetails.utilityBillDetails}
+          />
+        ) : null;
+      case "bookingDetails":
+        return bookingDetails?.bookingDetails ? (
+          <EnergyAudit
+            BookingDetails={bookingDetails.bookingDetails}
+            onClick={() => openRescheduleModal("AUDIT-345678")}
+          />
+        ) : null;
+      default:
+        return null;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -285,52 +270,66 @@ export default function DashboardPage() {
                 )}
               </button>
 
-              <div className="timeline-container relative overflow-hidden">
-                {/* Card Stack Effect when collapsed */}
-                {!isTimelineExpanded && <>{CloseModalContent()}</>}
+              <div className="timeline-container relative">
+                {/* Show only the latest state component when collapsed */}
+                {!isTimelineExpanded && renderLatestStateComponent()}
 
-                {/* The rest of the timeline items - only shown when expanded */}
-                <div
-                  className={`timeline-items-container transition-all duration-500 ease-in-out overflow-hidden ${
-                    isTimelineExpanded
-                      ? "max-h-[5000px] opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <ProjectPlansReady
-                    ProposalDetails={bookingDetails?.proposalDetails}
-                  />
+                {/* Show all timeline items when expanded */}
+                {isTimelineExpanded && (
+                  <div className="timeline-items-container">
+                    {/* Payment Details */}
+                    {bookingDetails?.paymentDetails && (
+                      <PaymentDetails
+                        PaymentDetails={bookingDetails?.paymentDetails}
+                        userDetails={userDetails}
+                        onClick={() => setIsModalOpen(true)}
+                      />
+                    )}
 
-                  {/* Timeline Item - We&apos;re Lining Everything Up */}
-                  {isOneAndHalfHourAhead(
-                    bookingDetails?.bookingDetails?.startTime
-                  ) && <WeAreLinning />}
+                    {/* Project Plans Ready */}
+                    {bookingDetails?.proposalDetails && (
+                      <ProjectPlansReady
+                        ProposalDetails={bookingDetails?.proposalDetails}
+                      />
+                    )}
 
-                  {/* Timeline Item - Your Audit Results are in - MOVED HERE */}
-                  {bookingDetails?.consultationDetails && (
-                    <ConsultationDerails
-                      BookingDetails={bookingDetails.bookingDetails}
-                      ConsultationDetails={bookingDetails.consultationDetails}
-                      onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
-                    />
-                  )}
+                    {/* Timeline Item - We're Lining Everything Up */}
+                    {isOneAndHalfHourAhead(
+                      bookingDetails?.bookingDetails?.startTime
+                    ) && <WeAreLinning />}
 
-                  {/* Timeline Item - Your Results Are In — Let&apos;s Talk */}
-                  {bookingDetails?.reportConsultation && (
-                    <ReportConsaltation
-                      ReportConsultation={bookingDetails?.reportConsultation}
-                    />
-                  )}
+                    {/* Timeline Item - Your Audit Results are in */}
+                    {bookingDetails?.consultationDetails && (
+                      <ConsultationDerails
+                        BookingDetails={bookingDetails.bookingDetails}
+                        ConsultationDetails={bookingDetails.consultationDetails}
+                        onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
+                      />
+                    )}
 
-                  <UtilityBills
-                    UtilityBillDetails={bookingDetails?.utilityBillDetails}
-                  />
+                    {/* Timeline Item - Your Results Are In — Let's Talk */}
+                    {bookingDetails?.reportConsultation && (
+                      <ReportConsaltation
+                        ReportConsultation={bookingDetails?.reportConsultation}
+                      />
+                    )}
 
-                  <EnergyAudit
-                    BookingDetails={bookingDetails?.bookingDetails}
-                    onClick={() => openRescheduleModal("AUDIT-345678")}
-                  />
-                </div>
+                    {/* Timeline Item - Upload Your Utility Bills */}
+                    {bookingDetails?.utilityBillDetails && (
+                      <UtilityBills
+                        UtilityBillDetails={bookingDetails?.utilityBillDetails}
+                      />
+                    )}
+
+                    {/* Timeline Item - Professional Home Energy Audit */}
+                    {bookingDetails?.bookingDetails && (
+                      <EnergyAudit
+                        BookingDetails={bookingDetails?.bookingDetails}
+                        onClick={() => openRescheduleModal("AUDIT-345678")}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -372,7 +371,6 @@ const PaymentDetails = ({
   onClick,
 }: PaymentDetailsProps) => {
   if (!PaymentDetails) return null;
-  // {bookings?.paymentDetails && (
   return (
     <div className="timeline-item mb-6 relative">
       <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -457,12 +455,10 @@ const PaymentDetails = ({
         </div>
       </div>
     </div>
-    // )}
   );
 };
 
 const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
-  // bookings?.proposalDetails &&
   if (!ProposalDetails) return null;
   return (
     <div className="timeline-item mb-6 relative">
@@ -505,7 +501,6 @@ const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
         </Link>
       </div>
     </div>
-    // )}
   );
 };
 
@@ -535,7 +530,7 @@ const WeAreLinning = () => {
             <span className="text-[#8bc34a] font-medium">Processing</span>
           </div>
         </div>
-        <Link href="/lining-everything-up">
+        <Link href="/dashboard/lining-everything-up">
           <button className="text-[#007BFF] text-sm font-medium">
             View Details
           </button>
@@ -550,8 +545,6 @@ const ConsultationDerails = ({
   BookingDetails,
   onClick,
 }: ConsultationDetailsProps) => {
-  // () =>
-  //   openRescheduleModal("AUDIT-RESULTS-123")
   return (
     <div className="timeline-item mb-6 relative">
       <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -578,7 +571,6 @@ const ConsultationDerails = ({
               )}
               className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
             >
-              {" "}
               <Clock size={18} />
               Reschedule
             </button>
@@ -651,7 +643,7 @@ const ReportConsaltation = ({
               <Link
                 target="_blank"
                 href={ReportConsultation.consultationBookingUrl}
-                className={` bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
+                className={`bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
               >
                 <Calendar size={18} />
                 Book Consultation
@@ -661,7 +653,6 @@ const ReportConsaltation = ({
                 disabled={true}
                 className={`opacity-35 bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
               >
-                {" "}
                 <Calendar size={18} />
                 Book Consultation
               </button>
@@ -762,7 +753,9 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
           <button
             onClick={onClick}
             disabled={!BookingDetails?.rescheduleAvailable}
-            className={`${!BookingDetails?.rescheduleAvailable ? "opacity-35" : ""} bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors`}
+            className={`${
+              !BookingDetails?.rescheduleAvailable ? "opacity-35" : ""
+            } bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors`}
           >
             <Clock size={18} />
             Reschedule
@@ -817,7 +810,7 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
                 : ""}
             </span>
           </div>
-          <div className="flex items-center gap-1 ml-auto">
+          <div className="flex items-center gap-1">
             <span className="font-medium">Status:</span>
             <span className="text-[#8bc34a] font-medium">Scheduled</span>
           </div>
