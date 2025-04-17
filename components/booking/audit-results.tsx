@@ -427,18 +427,19 @@ export default function AuditResults() {
                 <p className="text-gray-600 text-center text-sm mb-4">
                   Need to reschedule? No problem.
                 </p>
-                <button
-                  onClick={() =>
-                    openRescheduleModal(
+                <div className="flex justify-center items-center w-full">
+                  <a
+                    href={
                       bookingDetails?.consultationDetails?.rescheduleLink ||
-                        "AUDIT-RESULTS-123"
-                    )
-                  }
-                  className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-4 rounded-md transition-colors w-full"
-                  disabled={bookingDetails?.consultationDetails?.isCancelled}
-                >
-                  Reschedule
-                </button>
+                      "AUDIT-RESULTS-123"
+                    }
+                    className={`bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-4 rounded-md transition-colors ${bookingDetails?.consultationDetails?.isCancelled ? "opacity-50 pointer-events-none" : ""}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Reschedule
+                  </a>
+                </div>
               </div>
             </div>
           </div>

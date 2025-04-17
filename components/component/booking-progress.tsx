@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { BadgeX } from "lucide-react";
 import type React from "react";
@@ -13,20 +15,23 @@ interface BookingProgressProps {
   className?: string;
 }
 
-const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
-  status === "cancelled" ? (
-    <BadgeX className="size-11 fill-destructive text-white" />
-  ) : (
-    <div className="relative w-8 h-8">
+const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) => {
+  if (status === "cancelled") {
+    return <BadgeX className="size-11 fill-destructive text-white" />;
+  }
+
+  return (
+    <div className="relative w-10 h-10">
       <svg
-        width="32"
-        height="32"
+        width="40"
+        height="40"
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={cn("transition-colors", {
           "text-[#5ea502]": status === "completed",
-          "text-[#d1d5db]": status === "current" || status === "upcoming",
+          "text-[#8bc34a]": status === "current",
+          "text-[#d1d5db]": status === "upcoming",
         })}
       >
         <circle cx="16" cy="16" r="16" fill="white" />
@@ -37,14 +42,12 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
       </svg>
     </div>
   );
+};
 
 export const BookingProgress: React.FC<BookingProgressProps> = ({
   className,
 }) => {
   const { bookingDetails } = useContext(BOOKING_CONTEXT);
-
-  // Log the booking data for debugging
-  console.log("Booking data:", bookingDetails);
 
   // Determine current stage based on available data
   const currentStage = () => {
@@ -52,41 +55,34 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
 
     // Step 6: Payment Complete
     if (bookingDetails.paymentDetails?.status === "Paid") {
-      console.log("Payment is complete");
       return 6;
     }
 
     // Step 5: Proposals Signed
     if (bookingDetails.proposalDetails?.completedContractLink) {
-      console.log("Proposal has been signed");
       return 5;
     }
 
     // Step 4: Consultation Scheduled
     if (bookingDetails.consultationDetails?.startTime) {
-      console.log("Consultation has been scheduled");
       return 4;
     }
 
     // Step 3: Audit Performed
     if (bookingDetails.reportConsultation) {
-      console.log("Audit has been performed");
       return 3;
     }
 
     // Step 2: Utility Bills Uploaded
     if (bookingDetails.utilityBillDetails?.count > 0) {
-      console.log("Utility bills have been uploaded");
       return 2;
     }
 
     // Step 1: Booking Created (default)
-    console.log("Booking has been created (default)");
     return 1;
   };
 
   const stage = currentStage();
-  console.log("Current stage determined:", stage);
 
   // Define booking progress steps
   const steps: Step[] = [
@@ -118,23 +114,25 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({
 
   return (
     <div className={cn("relative w-full mt-4", className)}>
-      <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
-        <div className="flex flex-nowrap items-center">
+      <div className="overflow-x-auto md:overflow-x-visible scrollbar-hide">
+        <div className="flex flex-nowrap items-center justify-between min-w-max md:min-w-0">
           {steps.map((step, index) => (
-            <div key={step.label} className="flex items-center flex-none">
-              <div className="flex flex-col items-center text-center min-w-[120px] sm:min-w-[100px]">
+            <div key={step.label} className="flex items-center">
+              <div className="flex flex-col items-center text-center min-w-[100px]">
                 <StatusIcon status={step.status} />
-                <span className="text-[14px] sm:text-[12px] text-black font-medium mt-2 ">
+                <span className="text-xs text-black font-medium mt-2 max-w-[80px]">
                   {step.label}
                 </span>
               </div>
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    "h-[2px] w-8 sm:w-12 md:w-16",
+                    "h-[2px] w-16 md:w-24 lg:w-32",
                     step.status === "completed"
                       ? "bg-[#5ea502]"
-                      : "bg-[#d1d5db]"
+                      : steps[index + 1].status === "current"
+                        ? "bg-[#5ea502]"
+                        : "bg-[#d1d5db]"
                   )}
                   aria-hidden="true"
                 />
