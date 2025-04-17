@@ -137,7 +137,7 @@ export default function DashboardPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   // State to track if timeline is expanded or collapsed
-  const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
   // State for reschedule modal
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [currentBookingId, setCurrentBookingId] = useState("");
