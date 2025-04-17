@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, useContext } from "react";
-import { AUTH_CONTEXT } from "../../providers/auth"; // Adjust the import path as necessary
+import { AUTH_CONTEXT, UserDetails } from "../../providers/auth"; // Adjust the import path as necessary
 import { Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { FAQDetails, FAQQuestions } from "./_comp/utils";
 import GoogleReview from "./_comp/Google-review";
 import Recommendation from "./_comp/Recommendation";
 
@@ -22,50 +21,86 @@ import {
 } from "lucide-react";
 import RescheduleModal from "@/components/component/reshedule-modal";
 import PaymentModal from "@/components/payment/modal";
-import { BOOKING_CONTEXT } from "@/providers/booking";
+import { BOOKING_CONTEXT, BookingDetails } from "@/providers/booking";
 
-interface AllBookings {
-  bookingDetails: {
-    serviceName: string;
-    startTime: string;
-    endTime: string;
-    address: {
-      line1: string;
-      line2: string;
-      city: string;
-      province: string;
-      countryCode: string;
-      postalCode: string;
-    };
-    auditor: {
-      name: string;
-    };
-    rescheduleAvailable: boolean;
-  };
-  utilityBillDetails: {
-    count: number;
-  };
-
-  reportConsultation: {
-    consultationBookingUrl: string;
-  };
-  consultationDetails: {
-    startTime: string;
-    endTime: string;
-    isCancelled: boolean;
-    rescheduleLink: string;
-  };
-  proposalDetails: {
-    count: number;
-    completedContractLink: string;
-  };
-  paymentDetails: {
-    amount: number;
-    status: string;
-  };
+interface PaymentDetailsProps {
+  PaymentDetails:
+    | {
+        amount: number;
+        status: string;
+      }
+    | undefined;
+  userDetails: UserDetails | undefined;
+  onClick: () => void;
 }
 
-const isOneAndHalfHourAhead = (startTime: string): boolean => {
+interface ProjectPlansReadyProps {
+  ProposalDetails:
+    | {
+        count: number;
+        completedContractLink: string;
+      }
+    | undefined;
+}
+
+interface ReportConsultationProps {
+  ReportConsultation:
+    | {
+        consultationBookingUrl: string | null;
+      }
+    | undefined;
+}
+
+interface UtilityBillsProps {
+  UtilityBillDetails:
+    | {
+        count: number;
+      }
+    | undefined;
+}
+
+interface EnergyAuditProps {
+  BookingDetails:
+    | {
+        serviceName: string;
+        startTime: string;
+        endTime: string;
+        address: {
+          line1: string;
+          line2: string;
+          city: string;
+          province: string;
+          countryCode: string;
+          postalCode: string;
+        };
+        auditor: {
+          name: string;
+        };
+        rescheduleAvailable: boolean;
+      }
+    | undefined;
+  onClick: () => void;
+}
+
+interface ConsultationDetailsProps {
+  ConsultationDetails:
+    | {
+        startTime: string;
+        endTime: string;
+        isCancelled: boolean;
+        rescheduleLink: string;
+      }
+    | undefined;
+  BookingDetails:
+    | {
+        startTime: string;
+      }
+    | undefined;
+  onClick: () => void;
+}
+
+const isOneAndHalfHourAhead = (startTime?: string): boolean => {
+  if (!startTime) return false;
   const startDate = new Date(startTime);
   const currentDate = new Date();
   if (currentDate < startDate) return false;
@@ -74,7 +109,7 @@ const isOneAndHalfHourAhead = (startTime: string): boolean => {
   return diffInHours >= 1.5;
 };
 
-const formatDate = (dateStr: string): string => {
+const formatDate = (dateStr?: string): string => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
   return new Intl.DateTimeFormat("en-US", {
@@ -85,7 +120,7 @@ const formatDate = (dateStr: string): string => {
   }).format(date);
 };
 
-const formatTime = (dateStr: string): string => {
+const formatTime = (dateStr?: string): string => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
   return new Intl.DateTimeFormat("en-US", {
@@ -98,7 +133,7 @@ const formatTime = (dateStr: string): string => {
 
 export default function DashboardPage() {
   // const router = useRouter();
-  // const [services, setServices] = useState<Service[]>([]);
+  // const [services, setServices = useState<Service[]>([]);
   const { isLoading, bookingDetails, recommendedVideos, refreshBookingData } =
     useContext(BOOKING_CONTEXT);
 
@@ -111,7 +146,7 @@ export default function DashboardPage() {
   const [currentBookingId, setCurrentBookingId] = useState("");
   const [latestState, setLatestState] = useState("");
 
-  const State: Array<keyof AllBookings> = [
+  const State: Array<keyof BookingDetails> = [
     "bookingDetails",
     "utilityBillDetails",
     "reportConsultation",
@@ -186,7 +221,7 @@ export default function DashboardPage() {
           <PaymentDetails
             PaymentDetails={bookingDetails?.paymentDetails}
             userDetails={userDetails}
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => setIsModalOpen(true)}
           />
         );
       default:
@@ -250,7 +285,7 @@ export default function DashboardPage() {
                 )}
               </button>
 
-              <div className="timeline-container relative">
+              <div className="timeline-container relative overflow-hidden">
                 {/* Card Stack Effect when collapsed */}
                 {!isTimelineExpanded && <>{CloseModalContent()}</>}
 
@@ -319,7 +354,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Recommended for you */}
-          <Recommendation data={recommendedVideos} />
+          {recommendedVideos && recommendedVideos.length > 0 && (
+            <Recommendation data={recommendedVideos} />
+          )}
 
           {/* Google review */}
           <GoogleReview />
@@ -329,7 +366,11 @@ export default function DashboardPage() {
   );
 }
 
-const PaymentDetails = ({ PaymentDetails, userDetails, onClick }) => {
+const PaymentDetails = ({
+  PaymentDetails,
+  userDetails,
+  onClick,
+}: PaymentDetailsProps) => {
   if (!PaymentDetails) return null;
   // {bookings?.paymentDetails && (
   return (
@@ -343,9 +384,9 @@ const PaymentDetails = ({ PaymentDetails, userDetails, onClick }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             className="lucide lucide-pen-tool text-[#8bc34a] mr-2"
           >
             <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path>
@@ -369,9 +410,9 @@ const PaymentDetails = ({ PaymentDetails, userDetails, onClick }) => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="lucide lucide-dollar-sign text-[#8bc34a] mr-2 mt-1"
             >
               <line x1="12" x2="12" y1="2" y2="22"></line>
@@ -420,7 +461,7 @@ const PaymentDetails = ({ PaymentDetails, userDetails, onClick }) => {
   );
 };
 
-const ProjectPlansReady = ({ ProposalDetails }) => {
+const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
   // bookings?.proposalDetails &&
   if (!ProposalDetails) return null;
   return (
@@ -508,7 +549,7 @@ const ConsultationDerails = ({
   ConsultationDetails,
   BookingDetails,
   onClick,
-}) => {
+}: ConsultationDetailsProps) => {
   // () =>
   //   openRescheduleModal("AUDIT-RESULTS-123")
   return (
@@ -531,10 +572,10 @@ const ConsultationDerails = ({
             </Link>
           ) : (
             <button
-              disabled={
+              disabled={Boolean(
                 isOneAndHalfHourAhead(BookingDetails?.startTime) &&
-                ConsultationDetails?.rescheduleLink
-              }
+                  ConsultationDetails?.rescheduleLink
+              )}
               className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
             >
               {" "}
@@ -568,11 +609,11 @@ const ConsultationDerails = ({
           </div>
           <div className="flex items-center gap-1">
             <Calendar size={16} className="text-[#8bc34a]" />
-            <span>{formatDate(ConsultationDetails.startTime)}</span>
+            <span>{formatDate(ConsultationDetails?.startTime)}</span>
           </div>
           <div className="flex items-center gap-1">
             <Clock size={16} className="text-[#8bc34a]" />
-            <span>{formatTime(ConsultationDetails.startTime)}</span>
+            <span>{formatTime(ConsultationDetails?.startTime)}</span>
           </div>
         </div>
 
@@ -592,7 +633,9 @@ const ConsultationDerails = ({
   );
 };
 
-const ReportConsaltation = ({ ReportConsultation }) => {
+const ReportConsaltation = ({
+  ReportConsultation,
+}: ReportConsultationProps) => {
   return (
     <div className="timeline-item mb-6 relative">
       <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -607,7 +650,7 @@ const ReportConsaltation = ({ ReportConsultation }) => {
             {ReportConsultation?.consultationBookingUrl ? (
               <Link
                 target="_blank"
-                href={ReportConsultation?.consultationBookingUrl}
+                href={ReportConsultation.consultationBookingUrl}
                 className={` bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
               >
                 <Calendar size={18} />
@@ -649,7 +692,7 @@ const ReportConsaltation = ({ ReportConsultation }) => {
   );
 };
 
-const UtilityBills = ({ UtilityBillDetails }) => {
+const UtilityBills = ({ UtilityBillDetails }: UtilityBillsProps) => {
   return (
     <div className="timeline-item mb-6 relative">
       <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -677,7 +720,9 @@ const UtilityBills = ({ UtilityBillDetails }) => {
             <div className="flex items-center gap-1">
               <span className="font-medium">Status:</span>
               <span className="text-[#8bc34a] font-medium">
-                {UtilityBillDetails?.count > 0 ? "Completed" : "Pending"}
+                {UtilityBillDetails && UtilityBillDetails.count > 0
+                  ? "Completed"
+                  : "Pending"}
               </span>
             </div>
           </div>
@@ -695,7 +740,7 @@ const UtilityBills = ({ UtilityBillDetails }) => {
   );
 };
 
-const EnergyAudit = ({ BookingDetails, onClick }) => {
+const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
   return (
     <div className="timeline-item mb-6 relative">
       <div className="bg-white rounded-lg p-6 border border-gray-200">
