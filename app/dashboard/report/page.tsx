@@ -12,7 +12,8 @@ import { useRef, useState, useEffect, use, useContext } from "react";
 import { Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { AUTH_CONTEXT } from "@/providers/auth";
-import handleDownloadReport from "./download";
+import handleDownloadReport, { ReportSection } from "./download";
+import DownloadModal from "./downloadModal";
 
 // Define interfaces for specific data types
 interface AirLeakageData {
@@ -108,7 +109,16 @@ const ReportPage = ({
   const [loading, setLoading] = useState(false);
   const [imgOfUser, SetImageOfUser] = useState([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-
+  // Add these state variables near your other useState declarations
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [selectedSections, setSelectedSections] = useState<ReportSection[]>([
+    "overview",
+    "airLeakage",
+    "insulation",
+    "heating",
+    "cooling",
+    "summary",
+  ]);
   useEffect(() => {
     // Fetch report data when component mounts
     if (bookingNumber) {
@@ -313,7 +323,7 @@ const ReportPage = ({
           <div className="flex gap-2">
             <button
               className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
-              onClick={handleDownloadReport}
+              onClick={() => setShowDownloadModal(true)} // Change this line to open the modal
             >
               <Download className="h-5 w-5" />
               <span>Download Report</span>
@@ -334,7 +344,13 @@ const ReportPage = ({
           <span>{getCurrentBreadcrumb()}</span>
         </div>
       </div>
-
+      <DownloadModal
+        showDownloadModal={showDownloadModal}
+        setShowDownloadModal={setShowDownloadModal}
+        selectedSections={selectedSections}
+        setSelectedSections={setSelectedSections}
+        handleDownloadReport={handleDownloadReport}
+      />
       <div>
         <div className="flex overflow-x-auto border-b border-gray-100">
           {[

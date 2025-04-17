@@ -9,10 +9,10 @@ export const ImageCustomer = ({
   driveImages?: { id: string; thumbnailLink: string }[] | undefined;
 }) => {
   const imageFromDB = driveImages?.find(
-    (img) => img.id === image,
+    (img) => img.id === image
   )?.thumbnailLink;
-  console.log("Image id:", image);
-  console.log("Drive Images:", driveImages);
+  // console.log("Image id:", image);
+  // console.log("Drive Images:", driveImages);
 
   return (
     <div className="relative">
