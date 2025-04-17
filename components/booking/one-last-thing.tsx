@@ -1,27 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { BOOKING_CONTEXT } from "@/providers/booking";
-import {
-  LogOut,
-  FileText,
-  Award,
-  LayoutDashboard,
-  Home,
-  ChevronRight,
-  Percent,
-  FileCheck,
-  Zap,
-  DollarSign,
-  Leaf,
-} from "lucide-react";
+import { FileText, Home, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useContext } from "react";
 import BookingProgress from "../component/booking-progress";
+import { useState } from "react";
+import PaymentModal from "../payment/modal";
 
-export default function ProjectPlansReady() {
-  const { bookingDetails } = useContext(BOOKING_CONTEXT);
+export default function OneLastThing() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const bookingNumber = "BK-23456"; // You can replace this with your actual booking number variable
 
   return (
     <div className="flex h-screen bg-white">
@@ -42,44 +30,24 @@ export default function ProjectPlansReady() {
               Audit Details
             </Link>
             <ChevronRight size={16} className="mx-2" />
-            <span>Your Project Plans Are Ready</span>
+            <span>One Last Thing</span>
             <ChevronRight size={16} className="mx-2" />
             <span>View Details</span>
           </div>
         </div>
 
-        {/* Progress Tracker - Using BookingProgress component */}
-        <BookingProgress className="mb-8" />
+        <BookingProgress />
 
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-3">
-              {bookingDetails?.bookingDetails?.startTime
-                ? new Date(
-                    bookingDetails.bookingDetails.startTime
-                  ).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  }) +
-                  ", " +
-                  new Date(
-                    bookingDetails.bookingDetails.startTime
-                  ).toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })
-                : "May 6, 9:00 AM"}
-            </h2>
+            <h2 className="text-2xl font-bold mb-3">May 6, 9:00 AM</h2>
             <h3 className="text-xl font-semibold mb-6">
-              {bookingDetails?.bookingDetails?.serviceName ||
-                "Ciel Power Home Energy Audit"}
+              Ciel Power Home Energy Audit
             </h3>
 
             <p className="text-gray-600 mb-6">
-              {bookingDetails?.bookingDetails?.address
-                ? `${bookingDetails.bookingDetails.address.line1}, ${bookingDetails.bookingDetails.address.city}, ${bookingDetails.bookingDetails.address.province} ${bookingDetails.bookingDetails.address.postalCode}`
-                : "532 lafayette road, harrington park, New Jersey 07640"}
+              532 lafayette road, harrington park, New Jersey 07640
             </p>
 
             <div className="mb-6">
@@ -240,59 +208,38 @@ export default function ProjectPlansReady() {
                 <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden">
                   <Image
                     src="/mark-johnson.png"
-                    alt={
-                      bookingDetails?.bookingDetails?.auditor?.name ||
-                      "Mark Johnson"
-                    }
+                    alt="Mark Johnson"
                     width={96}
                     height={96}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h4 className="font-medium text-lg">
-                  {bookingDetails?.bookingDetails?.auditor?.name ||
-                    "Mark Johnson"}
-                </h4>
+                <h4 className="font-medium text-lg">Mark Johnson</h4>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="hidden flex gap-3 mt-4 justify-between">
-              <button className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-3 rounded-md transition-colors text-sm flex-1">
-                Review Proposals
+            <div className="flex gap-3 mt-4 justify-between">
+              <button
+                className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-3 rounded-md transition-colors text-sm flex-1"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Make Payment
               </button>
               <button className="bg-white border border-gray-300 text-gray-600 font-medium py-2 px-3 rounded-md hover:bg-gray-50 transition-colors text-sm flex-1">
                 Contact Us
               </button>
             </div>
-
-            {/* Display proposal information if available */}
-            {bookingDetails?.proposalDetails &&
-              bookingDetails.proposalDetails.count > 0 && (
-                <div className="mt-4 bg-[#f5f9ed] rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-center mb-4">
-                    Your Project Proposals
-                  </h3>
-                  <p className="text-center text-gray-700 mb-4">
-                    {bookingDetails.proposalDetails.count}{" "}
-                    {bookingDetails.proposalDetails.count === 1
-                      ? "proposal"
-                      : "proposals"}{" "}
-                    available
-                  </p>
-                  {bookingDetails.proposalDetails.completedContractLink && (
-                    <Link
-                      href="/document-portal#review-plans"
-                      className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-3 rounded-md transition-colors text-sm flex-1 block text-center"
-                    >
-                      Review Proposals
-                    </Link>
-                  )}
-                </div>
-              )}
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        bookingNumber={bookingNumber}
+      />
     </div>
   );
 }

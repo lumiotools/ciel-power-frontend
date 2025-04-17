@@ -441,7 +441,7 @@ const PaymentDetails = ({
           )}
         </div>
         <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
-          <a href="/one-last-thing">
+          <a href="/dashboard/one-last-thing">
             <button className="text-[#007BFF] text-sm font-medium">
               View Details
             </button>
