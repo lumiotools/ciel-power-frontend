@@ -217,8 +217,48 @@ const addPageNumber = (pdf: jsPDF, includePageNumbers = true): void => {
     align: "center",
   });
 };
+const addBookmark = (
+  pdf: jsPDF,
+  title: string,
+  includeBookmarks: boolean = true
+): void => {
+  if (!includeBookmarks) return;
 
+  try {
+    // Get current page number
+    const currentPage = pdf.getNumberOfPages();
+
+    // Method 1: Using outline.add (newer versions)
+    if (pdf.outline && typeof pdf.outline.add === "function") {
+      pdf.outline.add(null, title, { pageNumber: currentPage });
+      console.log(`Added bookmark '${title}' using outline.add method`);
+      return;
+    }
+
+    // Method 2: Using addBookmark (some versions)
+    if (typeof (pdf as any).addBookmark === "function") {
+      (pdf as any).addBookmark(title, currentPage - 1);
+      console.log(`Added bookmark '${title}' using addBookmark method`);
+      return;
+    }
+
+    // Method 3: Using bookmark plugin (older versions)
+    if (typeof (pdf as any).bookmark === "function") {
+      (pdf as any).bookmark(title, { pageNumber: currentPage });
+      console.log(`Added bookmark '${title}' using bookmark plugin method`);
+      return;
+    }
+
+    // If we get here, couldn't add bookmark
+    console.warn(
+      `Could not add bookmark '${title}': No compatible method found`
+    );
+  } catch (error) {
+    console.error(`Error adding bookmark '${title}':`, error);
+  }
+};
 // Helper function to add a section heading to the PDF with bookmark
+// Updated addSectionHeading function
 const addSectionHeading = (
   pdf: jsPDF,
   title: string,
@@ -230,7 +270,7 @@ const addSectionHeading = (
   // Get section color
   const color = getSectionColor(section);
 
-  // Set font style for heading - slightly smaller for better space usage
+  // Set font style for heading
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(14);
 
@@ -243,9 +283,8 @@ const addSectionHeading = (
   pdf.line(20, 15.5, pageWidth - 20, 15.5);
 
   // Add bookmark for the section if bookmarks are enabled
-  if (includeBookmarks && pdf.outline && pdf.outline.add) {
-    pdf.outline.add(null, title, { pageNumber: pdf.getNumberOfPages() });
-  }
+  // Use the new dedicated bookmark function
+  addBookmark(pdf, title, includeBookmarks);
 
   // Reset font to normal
   pdf.setFont("helvetica", "normal");
@@ -321,7 +360,9 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
     `;
     document.body.appendChild(loadingDiv);
 
-    // Initialize PDF
+    // Inside handleDownloadReport function:
+
+    // Initialize PDF with proper options
     const pdf = new jsPDF({
       orientation: PAGE_CONFIG.orientation,
       unit: PAGE_CONFIG.unit,
@@ -329,14 +370,6 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       compress: true, // Enable compression for smaller file size
       putOnlyUsedFonts: true, // Optimize font embedding
     });
-
-    // Enable bookmarks if specified in config
-    if (reportConfig.includeBookmarks) {
-      pdf.outline = { createNamedDestinations: true };
-    }
-
-    // Enable display mode
-    pdf.setDisplayMode("fullwidth");
 
     // Set PDF properties
     pdf.setProperties({
@@ -346,6 +379,26 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       creator: "Ciel Power Report Generator",
     });
 
+    // Enable display mode for better viewing
+    pdf.setDisplayMode("fullwidth");
+
+    // Explicitly initialize the outline for bookmarks if enabled
+    if (reportConfig.includeBookmarks) {
+      // Different versions of jsPDF might use different methods
+      // Try both common approaches
+
+      // Method 1: For newer jsPDF versions
+      if (typeof pdf.outline === "undefined") {
+        pdf.outline = { createNamedDestinations: true };
+      }
+
+      // Method 2: For some versions that need explicit initialization
+      if (typeof pdf.initOutline === "function") {
+        pdf.initOutline();
+      }
+
+      console.log("PDF bookmarks enabled and initialized");
+    }
     // Update progress indicator
     const updateProgress = (message: string): void => {
       const progressElement = document.getElementById("pdf-progress");
@@ -353,6 +406,9 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         progressElement.textContent = message;
       }
     };
+    // Add this as a separate function
+
+    // Helper function to add bookmarks that works with multiple jsPDF versions
 
     // Define the report structure based on the specified requirements
     // Using the exact groupings as specified
@@ -451,11 +507,14 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       if (pageCount > 0) {
         pdf.addPage();
       }
+      // Add the section title
+      const sectionTitle = formatSectionName(section.section);
+      console.log(`Adding section heading and bookmark: ${sectionTitle}`);
 
-      // Add the section heading
+      // Add the section heading with bookmark option from config
       addSectionHeading(
         pdf,
-        formatSectionName(section.section),
+        sectionTitle,
         section.section,
         reportConfig.includeBookmarks
       );
@@ -800,7 +859,27 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
     // Update progress
     updateProgress("Finalizing PDF...");
+    // Finalize bookmarks if enabled
+    if (reportConfig.includeBookmarks) {
+      try {
+        // Method 1: For versions that need to finalize outlines
+        if (pdf.outline && typeof pdf.outline.createOutline === "function") {
+          pdf.outline.createOutline();
+          console.log("Finalized bookmarks using createOutline method");
+        }
 
+        // Method 2: For versions that use a different finalization method
+        if (typeof (pdf as any).finalizeOutlines === "function") {
+          (pdf as any).finalizeOutlines();
+          console.log("Finalized bookmarks using finalizeOutlines method");
+        }
+
+        console.log("Bookmark processing completed");
+      } catch (error) {
+        console.error("Error finalizing bookmarks:", error);
+        // Continue anyway to ensure the PDF is saved
+      }
+    }
     // Save the PDF with custom filename if provided
     const fileName = `${reportConfig.customFileName}.pdf`;
     pdf.save(fileName);
