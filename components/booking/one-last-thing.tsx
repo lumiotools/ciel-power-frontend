@@ -207,7 +207,7 @@ export default function OneLastThing() {
               <div className="flex flex-col items-center">
                 <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden">
                   <Image
-                    src="/mark-johnson.png"
+                    src="/profileDummy.png"
                     alt="Mark Johnson"
                     width={96}
                     height={96}

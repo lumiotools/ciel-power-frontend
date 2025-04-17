@@ -19,6 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useContext } from "react";
 import BookingProgress from "../component/booking-progress";
+import EnergyAuditAccordions from "./energy-audit-accordion";
 
 export default function BookingDetails() {
   const { bookingDetails } = useContext(BOOKING_CONTEXT);
@@ -96,121 +97,7 @@ export default function BookingDetails() {
             </div>
 
             {/* Accordion Sections */}
-            <div className="mt-8 space-y-4">
-              {/* Section 1: What You'll Gain from Your Audit */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <FileText className="text-[#8bc34a]" size={24} />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        What You&apos;ll Gain from Your Audit
-                      </h3>
-                      <p className="text-gray-600">
-                        Comfort, savings, and peace of mind — your audit is the
-                        first step toward a better home.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Section 2: What Happens During the Audit */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <div className="text-[#8bc34a]">
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M17 18C17 16.3431 14.7614 15 12 15C9.23858 15 7 16.3431 7 18"
-                            stroke="#8bc34a"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                          <circle
-                            cx="10"
-                            cy="10"
-                            r="2"
-                            stroke="#8bc34a"
-                            strokeWidth="2"
-                          />
-                          <circle
-                            cx="14"
-                            cy="10"
-                            r="2"
-                            stroke="#8bc34a"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        What Happens During the Audit
-                      </h3>
-                      <p className="text-gray-600">
-                        We&apos;re here to help, not to disrupt — here&apos;s
-                        how we&apos;ll move through your home and what
-                        we&apos;ll be looking for.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Section 3: How To Prepare */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <FileText className="text-[#8bc34a]" size={24} />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        How To Prepare
-                      </h3>
-                      <p className="text-gray-600">
-                        We&apos;ll come prepared — this is simply to keep you in
-                        the loop and avoid surprises.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Section 4: Frequently Asked Questions(FAQ) */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <div className="text-[#8bc34a] text-xl font-bold">?</div>
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        Frequently Asked Questions(FAQ)
-                      </h3>
-                      <p className="text-gray-600">
-                        Have questions? You&apos;re not alone — here are answers
-                        to the things most homeowners want to know.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-            </div>
+            <EnergyAuditAccordions />
           </div>
 
           {/* Right Sidebar */}
@@ -223,7 +110,7 @@ export default function BookingDetails() {
               <div className="flex flex-col items-center">
                 <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden">
                   <Image
-                    src="/mark-johnson.png"
+                    src="/profileDummy.png"
                     alt="Mark Johnson"
                     width={96}
                     height={96}
