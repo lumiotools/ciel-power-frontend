@@ -269,7 +269,7 @@ export function InsulationContent({
       {remainingItems.length > 0 && (
         <>
           {remainingItems.map((item, index) => (
-            <div id={`insulation-zone-${index}`}>
+            <div key={`insulation-zone-${index}`} id={`insulation-zone-${index}`}>
               <InsulationZoneAssessment
                 key={`${item.name}-${index}`}
                 data={item}
