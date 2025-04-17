@@ -543,7 +543,6 @@ const WeAreLinning = () => {
 const ConsultationDerails = ({
   ConsultationDetails,
   BookingDetails,
-  onClick,
 }: ConsultationDetailsProps) => {
   return (
     <div className="timeline-item mb-6 relative">
@@ -557,7 +556,8 @@ const ConsultationDerails = ({
           ConsultationDetails?.rescheduleLink ? (
             <Link
               href={ConsultationDetails?.rescheduleLink}
-              onClick={onClick}
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
             >
               <Clock size={18} />
