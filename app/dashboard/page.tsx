@@ -586,7 +586,7 @@ const ConsultationDerails = ({
         </p>
 
         <div className="mb-4">
-          <Link href="/report">
+          <Link href="/dashboard/report">
             <button className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
               <FileText size={18} />
               Go to Your Report
@@ -670,7 +670,7 @@ const ReportConsaltation = ({
         <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
           <div className="flex items-center gap-1 ml-auto">
             <span className="font-medium">Status:</span>
-            <span className="text-[#8bc34a] font-medium">Audit Complete</span>
+            <span className="text-[#8bc34a] font-medium">Complete</span>
           </div>
         </div>
         <Link href="/dashboard/results-lets-talk">
