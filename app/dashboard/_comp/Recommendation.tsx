@@ -16,6 +16,11 @@ const Recommendation = ({ data }: { data: RecommendationItem[] }) => {
     null
   );
 
+  // Don't render anything if data is not present or empty
+  if (!data || data.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <div className="mt-12">
@@ -43,7 +48,7 @@ const Recommendation = ({ data }: { data: RecommendationItem[] }) => {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {data?.slice(0, 4)?.map((item, idx) => {
+          {data.slice(0, 4).map((item, idx) => {
             return (
               <div
                 key={idx}

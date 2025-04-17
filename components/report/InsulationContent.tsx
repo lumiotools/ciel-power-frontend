@@ -43,7 +43,7 @@ interface InsulationContentProps {
 // Helper function to find the best matching item for a specific component type
 const findBestMatchingItem = (
   data: InsulationDataItem[] | undefined,
-  type: string,
+  type: string
 ): InsulationDataItem | null => {
   if (!data || data.length === 0) return null;
 
@@ -61,20 +61,26 @@ const findBestMatchingItem = (
     matchingItems = data.filter(
       (item) =>
         item.name.toLowerCase().includes("kneewall") ||
-        item.name.toLowerCase().includes("knee wall"),
+        item.name.toLowerCase().includes("knee wall")
+    );
+  } else if (typeLower === "kneewall flat") {
+    matchingItems = data.filter(
+      (item) =>
+        item.name.toLowerCase().includes("kneewall flat") ||
+        item.name.toLowerCase().includes("knee wall flat")
     );
   } else if (typeLower === "exterior wall") {
     matchingItems = data.filter(
       (item) =>
         item.name.toLowerCase().includes("exterior wall") ||
         (item.name.toLowerCase().includes("wall") &&
-          !item.name.toLowerCase().includes("kneewall")),
+          !item.name.toLowerCase().includes("kneewall"))
     );
-  } else if (typeLower === "crawlspace") {
+  } else if (typeLower === "crawlspace wall") {
     matchingItems = data.filter(
       (item) =>
-        item.name.toLowerCase().includes("crawlspace") ||
-        item.name.toLowerCase().includes("crawl space"),
+        item.name.toLowerCase().includes("crawlspace wall") ||
+        item.name.toLowerCase().includes("crawl space wall")
     );
   } else if (typeLower === "rim joist") {
     matchingItems = data.filter(
@@ -82,14 +88,24 @@ const findBestMatchingItem = (
         item.name.toLowerCase().includes("rim joist") ||
         item.name.toLowerCase().includes("basement rj") ||
         (item.name.toLowerCase().includes("basement") &&
-          item.name.toLowerCase().includes("rj")),
+          item.name.toLowerCase().includes("rj"))
     );
   } else if (typeLower === "overhang") {
     matchingItems = data.filter(
       (item) =>
         item.name.toLowerCase().includes("overhang") ||
         item.name.toLowerCase().includes("over hang") ||
-        item.name.toLowerCase().includes("oh"),
+        item.name.toLowerCase().includes("oh")
+    );
+  } else if (typeLower === "crawlspace ceiling") {
+    matchingItems = data.filter(
+      (item) =>
+        item.name.toLowerCase().includes("crawlspace ceiling") ||
+        item.name.toLowerCase().includes("crawl space ceiling")
+    );
+  } else if (typeLower === "garage ceiling") {
+    matchingItems = data.filter((item) =>
+      item.name.toLowerCase().includes("garage ceiling")
     );
   }
 
@@ -97,7 +113,7 @@ const findBestMatchingItem = (
     "Matching items:",
     matchingItems,
     "its length:",
-    matchingItems.length,
+    matchingItems.length
   );
   // If we found matches, pick the best one (prioritize non-zero R-values, better condition)
   if (matchingItems.length > 0) {
@@ -111,7 +127,7 @@ const findBestMatchingItem = (
     const knownConditionItems = matchingItems.filter(
       (item) =>
         item.condition?.toLowerCase() !== "unknown" &&
-        item.material?.toLowerCase() !== "unknown",
+        item.material?.toLowerCase() !== "unknown"
     );
     if (knownConditionItems.length > 0) {
       return knownConditionItems[0]; // Return the first item with known condition
@@ -140,10 +156,13 @@ export function InsulationContent({
   // Define the standard components we want to show
   const standardTypes = [
     "kneewall",
+    "kneewall flat",
     "exterior wall",
-    "crawlspace",
+    "crawlspace wall",
     "rim joist",
     "overhang",
+    "crawlspace ceiling",
+    "garage ceiling",
   ];
 
   // Keep track of which data items have been displayed in the standard components
@@ -157,7 +176,7 @@ export function InsulationContent({
         (item) =>
           item.name === matchingItem.name &&
           item.material === matchingItem.material &&
-          item.condition === matchingItem.condition,
+          item.condition === matchingItem.condition
       );
       if (index !== -1) {
         usedDataIndices.add(index);
@@ -171,7 +190,10 @@ export function InsulationContent({
 
   // Function to update an insulation item
   const handleUpdateInsulationItem = (updatedItem: InsulationDataItem) => {
-    console.log("InsulationContent: handleUpdateInsulationItem called with:", updatedItem);
+    console.log(
+      "InsulationContent: handleUpdateInsulationItem called with:",
+      updatedItem
+    );
     if (isAdmin && onUpdateItem) {
       console.log("InsulationContent: Calling parent onUpdateItem");
       onUpdateItem(updatedItem);
@@ -202,8 +224,10 @@ export function InsulationContent({
         <InsulationOverview />
       </div>
 
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="technical-aspects">
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        id="technical-aspects"
+      >
         <TechnicalAspects />
         <SeasonalPerformance />
       </div>
@@ -264,12 +288,40 @@ export function InsulationContent({
         />
       </div>
       {/* )} */}
+      <div key={`insulation-zone-001`} id={`insulation-zone-001`}>
+        <InsulationZoneAssessment
+          data={
+            findBestMatchingItem(data?.data, "crawlspace ceiling") ?? {
+              name: "crawlspace ceiling",
+              condition: "unknown",
+              material: "unknown",
+              rValue: 0,
+              image: "",
+            }
+          }
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
+
+      <div key={`insulation-zone-002`} id={`insulation-zone-002`}>
+        <InsulationZoneAssessment
+          data={findBestMatchingItem(data?.data, "garage ceiling")}
+          isAdmin={isAdmin}
+          onUpdate={handleUpdateInsulationItem}
+          driveImages={driveImages}
+        />
+      </div>
 
       {/* Display remaining items using the generic component */}
       {remainingItems.length > 0 && (
         <>
           {remainingItems.map((item, index) => (
-            <div key={`insulation-zone-${index}`} id={`insulation-zone-${index}`}>
+            <div
+              key={`insulation-zone-${index}`}
+              id={`insulation-zone-${index}`}
+            >
               <InsulationZoneAssessment
                 key={`${item.name}-${index}`}
                 data={item}

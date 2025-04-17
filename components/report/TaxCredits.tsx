@@ -186,14 +186,18 @@ export function FederalTaxCredits({
     }
   }, [data, bookingNumber])
 
-  const updateTaxCreditItem = (index: number, field: keyof TaxCreditItem, value: string) => {
-    if (!isAdmin) return
+  const updateTaxCreditItem = (
+    index: number,
+    field: keyof TaxCreditItem,
+    value: string,
+  ) => {
+    if (!isAdmin) return;
 
     const newData = [...taxCredits.data]
     if (newData[index]) {
       // If this is an amount field, make sure it doesn't include a dollar sign
       if (field === "amount") {
-        value = value.replace(/^\$/, "")
+        value = formatCurrency(value);
         // If value is empty, set to "0"
         if (!value.trim()) {
           value = "0"

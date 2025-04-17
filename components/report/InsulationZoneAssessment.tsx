@@ -135,16 +135,16 @@ export function InsulationZoneAssessment({ data, isAdmin = false, onUpdate, driv
   function getRecommendedValue(zoneName: string): number {
     const name = zoneName.toLowerCase()
 
-    if (name.includes("attic") || name.includes("ceiling")) {
-      return 49 // High R-value for attics/ceilings
+    if (name.includes("attic")) {
+      return 49; // High R-value for attics/ceilings
     } else if (name.includes("wall") && !name.includes("knee")) {
-      return 13 // Standard for walls
+      return 13; // Standard for walls
+    } else if (name.includes("garage") || name.includes("ceiling")) {
+      return 30; // Standard for garage areas
     } else if (name.includes("basement") || name.includes("crawl")) {
       return 10 // Standard for basements
     } else if (name.includes("knee") || name.includes("kw")) {
-      return 13 // Standard for kneewalls
-    } else if (name.includes("garage")) {
-      return 13 // Standard for garage areas
+      return 13; // Standard for kneewalls
     } else {
       return 13 // Default value if no specific match
     }

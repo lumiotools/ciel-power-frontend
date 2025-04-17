@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { AUTH_CONTEXT } from "./auth";
 import { getBookingDetails, getRecommendedVideos } from "@/utils/booking";
 
-interface BookingDetails {
+export interface BookingDetails {
   bookingDetails: {
     serviceName: string;
     startTime: string;
@@ -43,7 +43,7 @@ interface BookingDetails {
   };
 }
 
-interface RecommendedVideo {
+export interface RecommendedVideo {
   videoId: string;
   title: string;
   description: string;

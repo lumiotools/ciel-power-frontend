@@ -66,7 +66,7 @@ export default function AIChatbot() {
     }, 1500);
 
     const retrievingTimer = setTimeout(() => {
-      setLoadingState("Retrieving response...");
+      setLoadingState("Retrieving information...");
     }, 3000);
 
     try {
@@ -120,6 +120,10 @@ export default function AIChatbot() {
       setLoadingState(null);
     }
   };
+
+  if (["/login", "/register"].includes(pathname) || pathname.includes("/admin")) {
+    return <></>;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">

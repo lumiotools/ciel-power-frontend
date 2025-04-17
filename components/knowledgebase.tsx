@@ -6,10 +6,10 @@ import {
   ChevronLast,
   ChevronLeft,
   ChevronRight,
-  Play,
 } from "lucide-react";
 import Image from "next/image";
 import VideoModal from "./component/video-modal";
+import DisplayAllVideos from "./component/display-all-videos";
 
 interface YouTubeVideo {
   videoId: string;
@@ -39,10 +39,8 @@ const MAX_DESCRIPTION_WORDS = 25;
 
 const truncateDescription = (description: string, maxWords: number): string => {
   if (!description) return "";
-
   const words = description.split(" ");
   if (words.length <= maxWords) return description;
-
   return words.slice(0, maxWords).join(" ") + "...";
 };
 
@@ -143,8 +141,54 @@ const KnowledgeBase = () => {
       )}
 
       {loading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8bc34a]"></div>
+        <div className="mt-12 mb-8">
+          <h2 className="text-2xl font-bold mb-6">Services by Categories</h2>
+
+          {/* First category with blue loading skeletons */}
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-4">
+              <div className="h-6 bg-blue-100 rounded animate-pulse w-48"></div>
+              <div className="h-6 bg-blue-100 rounded animate-pulse w-24"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <div className="h-40 bg-blue-100 animate-pulse"></div>
+                  <div className="p-4">
+                    <div className="h-5 bg-blue-100 rounded animate-pulse mb-2"></div>
+                    <div className="h-4 bg-blue-50 rounded animate-pulse w-3/4 mb-1"></div>
+                    <div className="h-4 bg-blue-50 rounded animate-pulse w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Second category with green loading skeletons */}
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-4">
+              <div className="h-6 bg-green-100 rounded animate-pulse w-40"></div>
+              <div className="h-6 bg-green-100 rounded animate-pulse w-24"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <div className="h-40 bg-green-100 animate-pulse"></div>
+                  <div className="p-4">
+                    <div className="h-5 bg-green-100 rounded animate-pulse mb-2"></div>
+                    <div className="h-4 bg-green-50 rounded animate-pulse w-3/4 mb-1"></div>
+                    <div className="h-4 bg-green-50 rounded animate-pulse w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -181,46 +225,10 @@ const KnowledgeBase = () => {
                   of {selectedCategoryData.videos.length} videos
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {paginatedVideos.map((video, videoIndex) => (
-                    <div
-                      key={videoIndex}
-                      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
-                      onClick={() => handleVideoClick(video)}
-                    >
-                      <div className="relative h-40 overflow-hidden group">
-                        <Image
-                          src={video.thumbnail || "/placeholder.svg"}
-                          alt={video.title}
-                          width={300}
-                          height={200}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="w-16 h-16 rounded-full bg-[#8bc34a] bg-opacity-90 flex items-center justify-center">
-                            <Play size={30} className="text-white ml-1" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-[#8bc34a] font-medium">
-                            {video.title}
-                          </h3>
-                          <ChevronRight className="text-[#8bc34a]" />
-                        </div>
-                        {video.description && (
-                          <p className="text-sm text-gray-600">
-                            {truncateDescription(
-                              video.description,
-                              MAX_DESCRIPTION_WORDS
-                            )}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <DisplayAllVideos
+                  videos={paginatedVideos}
+                  onVideoSelect={handleVideoClick}
+                />
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
@@ -324,16 +332,18 @@ const KnowledgeBase = () => {
                     <h3 className="text-xl font-medium text-gray-700">
                       {categoryData.category}
                     </h3>
-                    {categoryData.videos.length > 3 && (
+                    {categoryData.videos.length > 4 && (
                       <button
                         onClick={() => handleViewMore(categoryData.category)}
                         className="flex items-center text-[#8bc34a] hover:underline"
                       >
-                        <span>View More</span>
+                        <span>View All</span>
                         <ChevronRight size={20} />
                       </button>
                     )}
                   </div>
+
+                  {/* Show only first 4 videos in category overview */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {categoryData.videos
                       .slice(0, 4)
@@ -353,7 +363,20 @@ const KnowledgeBase = () => {
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               <div className="w-16 h-16 rounded-full bg-[#8bc34a] bg-opacity-90 flex items-center justify-center">
-                                <Play size={30} className="text-white ml-1" />
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="30"
+                                  height="30"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="lucide lucide-play text-white ml-1"
+                                >
+                                  <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                                </svg>
                               </div>
                             </div>
                           </div>
