@@ -321,13 +321,33 @@ const ReportPage = ({
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-2xl font-bold text-gray-800">View Report</h1>
           <div className="flex gap-2">
-            <button
-              className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
-              onClick={() => setShowDownloadModal(true)} // Change this line to open the modal
-            >
-              <Download className="h-5 w-5" />
-              <span>Download Report</span>
-            </button>
+            {reportStatus === "NONE" ? (
+              <button
+                className="bg-gray-300 text-gray-500 py-2 px-4 rounded flex items-center gap-2 cursor-not-allowed"
+                disabled
+              >
+                <Download className="h-5 w-5" />
+                <span>Download Report</span>
+              </button>
+            ) : reportStatus === "STATIC" ? (
+              <a
+                href={reportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
+              >
+                <Download className="h-5 w-5" />
+                <span>Download Report</span>
+              </a>
+            ) : (
+              <button
+                className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
+                onClick={() => setShowDownloadModal(true)}
+              >
+                <Download className="h-5 w-5" />
+                <span>Download Report</span>
+              </button>
+            )}
             <button
               className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 p-2 rounded shadow-sm"
               onClick={handleShareReport}
@@ -352,33 +372,34 @@ const ReportPage = ({
         handleDownloadReport={handleDownloadReport}
       />
       <div>
-        <div className="flex overflow-x-auto border-b border-gray-100">
-          {[
-            "overview",
-            "airLeakage",
-            "insulation",
-            "heating",
-            "cooling",
-            "summary",
-          ].map((tab) => (
-            <button
-              key={tab}
-              className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
-                activeSubMenu === tab
-                  ? `text-${tab === "airLeakage" ? "blue" : tab === "insulation" ? "teal" : tab === "heating" || tab === "cooling" ? "amber" : tab === "summary" ? "orange" : "lime"}-600`
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
-              onClick={() => setActiveSubMenu(tab)}
-            >
-              {formatTabName(tab)}
-              {activeSubMenu === tab && (
-                <div
-                  className={`absolute bottom-0 left-0 right-0 h-1 ${tabColors[tab]}`}
-                ></div>
-              )}
-            </button>
-          ))}
-        </div>
+        {reportStatus === "AUTOMATED" && (
+          <div className="flex overflow-x-auto border-b border-gray-100">
+            {[
+              "overview",
+              "airLeakage",
+              "insulation",
+              "heating",
+              "cooling",
+              "summary",
+            ].map((tab) => (
+              <button
+                key={tab}
+                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                    ? `text-${tab === "airLeakage" ? "blue" : tab === "insulation" ? "teal" : tab === "heating" || tab === "cooling" ? "amber" : tab === "summary" ? "orange" : "lime"}-600`
+                    : "text-gray-600 hover:text-gray-800"
+                  }`}
+                onClick={() => setActiveSubMenu(tab)}
+              >
+                {formatTabName(tab)}
+                {activeSubMenu === tab && (
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 h-1 ${tabColors[tab]}`}
+                  ></div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="py-6">{renderContent()}</div>
       </div>
