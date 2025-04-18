@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { DollarSign, Pencil, Check, X, Trash2 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Interface for financial item
 interface FinancialItem {
@@ -483,23 +482,21 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
     }).format(numericValue)
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
-    <Card className="rounded-xl border shadow-sm overflow-hidden">
-      <CardHeader className="py-4 px-6" style={{ backgroundColor: "#67B5021A" }}>
-        <CardTitle 
-          className="flex items-center gap-2" 
-          style={{ 
-            fontFamily: "Poppins", 
-            fontWeight: 500, 
-            fontSize: 16, 
-            color: "#67B502" 
-          }}
+    <div className={cardStyle}>
+      <div className="py-3 px-5" style={{ backgroundColor: "#67B5021A" }}>
+        <h2 
+          className="flex items-center gap-2 font-medium" 
+          style={{ color: "#67B502" }}
         >
           <DollarSign className="h-5 w-5" style={{ color: "#67B502" }} />
           Project Costs
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6" style={{ backgroundColor: "#ffffff" }}>
+        </h2>
+      </div>
+      <div className="p-6">
         <div className="space-y-4">
           {/* Render all financial items */}
           {financialItems.map((item, index) => (
@@ -650,7 +647,7 @@ export function ProjectCosts({ data, isAdmin = false, bookingNumber = "", onUpda
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

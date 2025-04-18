@@ -1,431 +1,355 @@
-import jsPDF from "jspdf"
-import html2canvas from "html2canvas"
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
-// Define page configuration
-const PAGE_CONFIG = {
+// Define report section types
+export type ReportSection =
+  | "overview"
+  | "airLeakage"
+  | "insulation"
+  | "heating"
+  | "cooling"
+  | "summary";
+
+// Report configuration interface
+export interface ReportConfig {
+  selectedSections?: ReportSection[];
+  customFileName?: string;
+  includePageNumbers?: boolean;
+  includeBookmarks?: boolean;
+}
+
+// Define page configuration with proper TypeScript types
+const PAGE_CONFIG: {
+  format: string;
+  orientation: "portrait" | "landscape";
+  unit: "mm" | "cm" | "in" | "px" | "pt" | "pc" | "em" | "ex";
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+} = {
   format: "a4",
   orientation: "portrait",
   unit: "mm",
   margins: {
-    top: 5,
-    right: 5,
-    bottom: 5,
-    left: 5,
+    top: 8,
+    right: 8,
+    bottom: 12,
+    left: 8,
   },
-}
+};
 
 // Helper function to wait for a specified time
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper function to switch to a specific tab
 const switchToTab = async (tabName: string): Promise<void> => {
-  console.log(`Attempting to switch to tab: ${tabName}`)
-  const tabButtons = document.querySelectorAll("button[class*='relative py-4 px-6']")
-
-  console.log(`Found ${tabButtons.length} tab buttons`)
+  console.log(`Switching to tab: ${tabName}`);
+  const tabButtons = document.querySelectorAll(
+    "button[class*='relative py-4 px-6']"
+  );
 
   for (const button of tabButtons) {
-    const buttonText = button.textContent?.trim() || ""
-    console.log(`Button text: "${buttonText}"`)
-
+    const buttonText = button.textContent?.trim() || "";
     if (buttonText.toLowerCase().includes(tabName.toLowerCase())) {
-      console.log(`Found matching tab: ${buttonText}`)
-      // Click the button to switch to this tab
-      button.click()
-      // Wait for the tab content to render
-      await wait(1000) // Increased wait time for content to fully render
-      return
+      button.click();
+      // Wait for the tab content to render - reduced for better performance
+      await wait(800);
+
+      // Add a small additional wait for more complex tabs that might need more time
+      if (tabName === "Insulation Reports" || tabName === "Report Summary") {
+        await wait(200);
+      }
+
+      return;
     }
   }
 
-  console.warn(`Tab "${tabName}" not found`)
-}
+  console.warn(`Tab "${tabName}" not found`);
+};
 
-// Helper function to scroll to an element
-const scrollToElement = async (elementId: string): Promise<void> => {
-  const element = document.getElementById(elementId)
-  if (!element) {
-    console.warn(`Element with ID "${elementId}" not found for scrolling`)
-    return
-  }
-
-  // Scroll the element into view
-  element.scrollIntoView({ behavior: "auto", block: "start" })
-
-  // Wait for the scroll to complete
-  await wait(500)
-}
-
-// Helper function to capture an element as an image
-const captureElement = async (elementId: string, waitTime = 500): Promise<HTMLCanvasElement | null> => {
-  console.log(`Attempting to capture element with ID: ${elementId}`)
-
-  // Wait for animations to complete
-  await wait(waitTime)
-
-  // Scroll to the element to ensure it's in view
-  await scrollToElement(elementId)
-
-  const element = document.getElementById(elementId)
-  if (!element) {
-    console.warn(`Element with ID "${elementId}" not found`)
-    return null
-  }
-
+// Helper function to capture an element as an image with optimized dimensions
+const captureElement = async (
+  elementId: string
+): Promise<HTMLCanvasElement | null> => {
   try {
-    // Make sure the element is visible for capture
-    const originalDisplay = element.style.display
-    if (originalDisplay === "none") {
-      element.style.display = "block"
+    // Reduced wait time for better performance
+    await wait(300);
+
+    const element = document.getElementById(elementId);
+    if (!element) {
+      console.warn(`Element with ID "${elementId}" not found`);
+      return null;
     }
 
-    // Ensure animations are complete
-    if (elementId === "summary-of-concerns" || elementId.includes("motion")) {
-      console.log(`Waiting extra time for animated element: ${elementId}`)
-      await wait(2000) // Extra wait for animated elements
+    // Debug element found
+    console.log(`Element found: ${elementId}`);
+
+    // Scroll the element into view
+    element.scrollIntoView({ behavior: "auto", block: "start" });
+    await wait(200);
+
+    // Dynamically adjust scale based on element size for better fit
+    let scaleValue = 1.4; // Default scale
+
+    // If element is very tall, reduce scale further to fit more per page
+    const elementHeight = element.offsetHeight;
+    if (elementHeight > 800) {
+      scaleValue = 1.3;
+    } else if (elementHeight < 300) {
+      // For very small elements, we can maintain a slightly higher resolution
+      scaleValue = 1.45;
     }
 
-    console.log(`Capturing element: ${elementId}`)
+    console.log(
+      `Capturing ${elementId} with height ${elementHeight} and scale ${scaleValue}`
+    );
+
+    // Capture the element with optimized scale
     const canvas = await html2canvas(element, {
-      scale: 2, // Higher scale for better quality
-      useCORS: true, // Enable CORS for images
+      scale: scaleValue,
+      useCORS: true,
       allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
-    })
+      // Optimize image rendering
+      imageTimeout: 0, // Don't timeout on images
+      removeContainer: true, // Remove the temporary container to save memory
+    });
 
-    // Restore original display
-    if (originalDisplay === "none") {
-      element.style.display = "none"
-    }
-
-    console.log(`Successfully captured element: ${elementId}`)
-    return canvas
+    console.log(`Successfully captured ${elementId}`);
+    return canvas;
   } catch (error) {
-    console.error(`Error capturing element with ID "${elementId}":`, error)
-    return null
+    console.error(`Error capturing element with ID "${elementId}":`, error);
+    return null;
   }
-}
-
-// Helper function to capture the Home component inside air-changes-per-hour
-const captureAirChangesHome = async (): Promise<HTMLCanvasElement | null> => {
-  console.log("Attempting to capture Home component inside air-changes-per-hour")
-
-  // Make sure we're on the Air Leakage tab
-  await switchToTab("Air Leakage Reports")
-  await wait(1000)
-
-  // Find the air-changes-per-hour element
-  const airChangesElement = document.getElementById("air-changes-per-hour")
-  if (!airChangesElement) {
-    console.warn("air-changes-per-hour element not found")
-    return null
-  }
-
-  try {
-    // Create a new canvas element
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-
-    // Set canvas dimensions to match the element
-    const rect = airChangesElement.getBoundingClientRect()
-    canvas.width = rect.width * 2 // Higher resolution
-    canvas.height = rect.height * 2
-
-    if (!ctx) {
-      console.error("Could not get canvas context")
-      return null
-    }
-
-    // Fill with white background
-    ctx.fillStyle = "#ffffff"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    // First, capture the text content without the SVG
-    const textCanvas = await html2canvas(airChangesElement, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: "#ffffff",
-      ignoreElements: (element) => element.tagName.toLowerCase() === "svg",
-    })
-
-    // Draw the text content onto our canvas
-    ctx.drawImage(textCanvas, 0, 0)
-
-    // Find the position where the house icon should be
-    const centerX = canvas.width / 2
-    const centerY = canvas.height / 2
-
-    // Draw a house icon manually
-    // This is a simplified version of a house with up/down arrows
-    ctx.save()
-
-    // Draw house outline - using dark blue color
-    ctx.strokeStyle = "#0033A0" // Dark blue color
-    ctx.lineWidth = 6 // Thicker lines to match the image
-
-    // House outline
-    ctx.beginPath()
-    ctx.moveTo(centerX, centerY - 30) // Top point
-    ctx.lineTo(centerX - 30, centerY) // Left corner
-    ctx.lineTo(centerX - 30, centerY + 30) // Left bottom
-    ctx.lineTo(centerX + 30, centerY + 30) // Right bottom
-    ctx.lineTo(centerX + 30, centerY) // Right corner
-    ctx.lineTo(centerX, centerY - 30) // Back to top
-    ctx.stroke()
-
-    // Door
-    ctx.beginPath()
-    ctx.rect(centerX - 10, centerY + 10, 20, 20) // Door positioned in the lower part of the house
-    ctx.stroke()
-
-    // Up arrow - red
-    ctx.strokeStyle = "#FF0000" // Red color
-    ctx.fillStyle = "#FF0000"
-    ctx.lineWidth = 3
-    // Arrow stick
-    ctx.beginPath()
-    ctx.moveTo(centerX, centerY - 45) // Start point (below the arrowhead)
-    ctx.lineTo(centerX, centerY - 70) // End point (above the house)
-    ctx.stroke()
-    // Arrow head
-    ctx.beginPath()
-    ctx.moveTo(centerX, centerY - 70) // Arrow tip
-    ctx.lineTo(centerX - 8, centerY - 60) // Left corner
-    ctx.lineTo(centerX + 8, centerY - 60) // Right corner
-    ctx.closePath()
-    ctx.fill()
-
-    // Down arrow - green
-    ctx.strokeStyle = "#00CC00" // Green color
-    ctx.fillStyle = "#00CC00"
-    ctx.lineWidth = 3
-    // Arrow stick
-    ctx.beginPath()
-    ctx.moveTo(centerX, centerY + 45) // Start point (above the arrowhead)
-    ctx.lineTo(centerX, centerY + 70) // End point (below the house)
-    ctx.stroke()
-    // Arrow head
-    ctx.beginPath()
-    ctx.moveTo(centerX, centerY + 70) // Arrow tip
-    ctx.lineTo(centerX - 8, centerY + 60) // Left corner
-    ctx.lineTo(centerX + 8, centerY + 60) // Right corner
-    ctx.closePath()
-    ctx.fill()
-
-    ctx.restore()
-
-    // Draw the gauge
-    // Find the gauge element
-    const gaugeElement =
-      airChangesElement.querySelector(".gauge") ||
-      airChangesElement.querySelector("svg:not(.house-icon)") ||
-      airChangesElement.querySelectorAll("svg")[1]
-
-    if (gaugeElement) {
-      try {
-        const gaugeCanvas = await html2canvas(gaugeElement as HTMLElement, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "transparent",
-        })
-
-        // Draw the gauge on the right side
-        ctx.drawImage(gaugeCanvas, centerX + 50, centerY - gaugeCanvas.height / 2)
-      } catch (gaugeError) {
-        console.error("Error capturing gauge:", gaugeError)
-      }
-    }
-
-    console.log("Successfully created air-changes-per-hour canvas with manual house icon")
-    return canvas
-  } catch (error) {
-    console.error("Error creating air-changes-per-hour canvas:", error)
-
-    // Fallback to standard capture as last resort
-    try {
-      console.log("Falling back to standard capture")
-      return await html2canvas(airChangesElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-      })
-    } catch (fallbackError) {
-      console.error("Fallback capture also failed:", fallbackError)
-      return null
-    }
-  }
-}
+};
 
 // Get section color based on section name
-const getSectionColor = (section: string): { r: number; g: number; b: number } => {
-  switch (section) {
+const getSectionColor = (
+  section: string
+): { r: number; g: number; b: number } => {
+  switch (section.toLowerCase()) {
     case "overview":
-      return { r: 132, g: 204, b: 22 } // lime-500
-    case "airLeakage":
-    case "air-leakage":
-      return { r: 37, g: 99, b: 235 } // blue-600
+      return { r: 132, g: 204, b: 22 }; // lime-500
+    case "airleakage":
+      return { r: 37, g: 99, b: 235 }; // blue-600
     case "insulation":
-      return { r: 20, g: 184, b: 166 } // teal-500
+      return { r: 20, g: 184, b: 166 }; // teal-500
     case "heating":
     case "cooling":
-      return { r: 245, g: 158, b: 11 } // amber-500
+      return { r: 245, g: 158, b: 11 }; // amber-500
     case "summary":
-      return { r: 249, g: 115, b: 22 } // orange-500
+      return { r: 249, g: 115, b: 22 }; // orange-500
     default:
-      return { r: 0, g: 0, b: 0 } // black
+      return { r: 0, g: 0, b: 0 }; // black
   }
-}
+};
 
-// Helper function to add a section heading to the PDF
-const addSectionHeading = (pdf: jsPDF, title: string, section: string): void => {
-  const pageWidth = pdf.internal.pageSize.getWidth()
+// Helper function to add an image to the PDF
+const addImageToPDF = (
+  pdf: jsPDF,
+  canvas: HTMLCanvasElement,
+  startY = 20
+): number => {
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margins = PAGE_CONFIG.margins;
 
-  // Get section color
-  const color = getSectionColor(section)
+  // Calculate available width
+  const availableWidth = pageWidth - margins.left - margins.right;
 
-  // Set font style for heading
-  pdf.setFont("helvetica", "bold")
-  pdf.setFontSize(16)
+  // Calculate scale to fit width while maintaining aspect ratio
+  // Apply a slight reduction factor to ensure better fit
+  const widthRatio = (availableWidth / canvas.width) * 0.95;
+  const scaledWidth = canvas.width * widthRatio;
+  const scaledHeight = canvas.height * widthRatio;
 
-  // Add heading text
-  pdf.setTextColor(color.r, color.g, color.b) // Section color
-  pdf.text(title, pageWidth / 2, 15, { align: "center" })
+  // Center horizontally
+  const x = (pageWidth - scaledWidth) / 2;
 
-  // Add underline
-  pdf.setDrawColor(color.r, color.g, color.b) // Section color
-  pdf.line(20, 18, pageWidth - 20, 18)
-
-  // Reset font to normal
-  pdf.setFont("helvetica", "normal")
-  pdf.setFontSize(12)
-  pdf.setTextColor(0, 0, 0) // Reset to black
-}
-
-// Helper function to add multiple canvases to a single PDF page with minimal spacing
-const addCanvasesToPage = (pdf: jsPDF, canvases: HTMLCanvasElement[], startY = 20): void => {
-  if (canvases.length === 0) return
-
-  const pageWidth = pdf.internal.pageSize.getWidth()
-  const pageHeight = pdf.internal.pageSize.getHeight()
-
-  // Calculate margins in points
-  const margins = {
-    top: PAGE_CONFIG.margins.top,
-    right: PAGE_CONFIG.margins.right,
-    bottom: PAGE_CONFIG.margins.bottom,
-    left: PAGE_CONFIG.margins.left,
+  // Check if element would fit on current page with tighter tolerance
+  // Use 98% of available height to maximize space usage
+  const availableHeight = pageHeight - margins.bottom - startY;
+  if (scaledHeight > availableHeight * 0.98) {
+    // Only if the element is not too small, start a new page
+    // This prevents unnecessary page breaks for small elements
+    if (scaledHeight > 15) {
+      pdf.addPage();
+      startY = margins.top;
+      // Add page number to the new page
+      addPageNumber(pdf, true);
+    }
   }
 
-  // Calculate available width and height
-  const availableWidth = pageWidth - margins.left - margins.right
+  // Add the image with compression for smaller file size
+  const imgData = canvas.toDataURL("image/jpeg", 0.85); // Use JPEG with 85% quality
+  pdf.addImage(
+    imgData,
+    "JPEG",
+    x,
+    startY,
+    scaledWidth,
+    scaledHeight,
+    undefined,
+    "FAST"
+  );
 
-  // Reduced spacing between elements - even smaller now
-  const spacing = 2 // Reduced from 5 to 2
+  // Return the new Y position with minimal gap
+  return startY + scaledHeight + 3; // Reduced gap
+};
 
-  let currentY = startY
+// Helper function to add page number
+const addPageNumber = (pdf: jsPDF, includePageNumbers = true): void => {
+  if (!includePageNumbers) return;
 
-  // Add each canvas to the page
-  for (let i = 0; i < canvases.length; i++) {
-    const canvas = canvases[i]
-    const imgWidth = canvas.width
-    const imgHeight = canvas.height
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
-    // Calculate scale to fit width while maintaining aspect ratio
-    // Slightly smaller scale to fit more content
-    const widthRatio = (availableWidth - 5) / imgWidth // Reduced padding from 10 to 5
+  const pageNum = pdf.getNumberOfPages();
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(10);
+  pdf.setTextColor(100, 100, 100); // Gray color for page numbers
+  pdf.text(`Page ${pageNum}`, pageWidth / 2, pageHeight - 5, {
+    align: "center",
+  });
+};
+const addBookmark = (
+  pdf: jsPDF,
+  title: string,
+  includeBookmarks: boolean = true
+): void => {
+  if (!includeBookmarks) return;
 
-    // Scale height proportionally but with a slight compression to fit more content
-    const scaledWidth = imgWidth * widthRatio
-    const scaledHeight = imgHeight * widthRatio * 0.95 // Slight vertical compression
+  try {
+    // Get current page number
+    const currentPage = pdf.getNumberOfPages();
 
-    // Center horizontally - ensure proper margins on both sides
-    const x = (pageWidth - scaledWidth) / 2
-
-    // Check if we need to start a new page - more aggressive about fitting content
-    if (i > 0 && currentY + scaledHeight > pageHeight - margins.bottom - 2) {
-      // Reduced bottom margin buffer
-      pdf.addPage()
-      currentY = margins.top
+    // Method 1: Using outline.add (newer versions)
+    if (pdf.outline && typeof pdf.outline.add === "function") {
+      pdf.outline.add(null, title, { pageNumber: currentPage });
+      console.log(`Added bookmark '${title}' using outline.add method`);
+      return;
     }
 
-    const imgData = canvas.toDataURL("image/png")
-    pdf.addImage(imgData, "PNG", x, currentY, scaledWidth, scaledHeight, undefined, "FAST")
+    // Method 2: Using addBookmark (some versions)
+    if (typeof (pdf as any).addBookmark === "function") {
+      (pdf as any).addBookmark(title, currentPage - 1);
+      console.log(`Added bookmark '${title}' using addBookmark method`);
+      return;
+    }
 
-    // Update Y position for next canvas with minimal spacing
-    currentY += scaledHeight + spacing
+    // Method 3: Using bookmark plugin (older versions)
+    if (typeof (pdf as any).bookmark === "function") {
+      (pdf as any).bookmark(title, { pageNumber: currentPage });
+      console.log(`Added bookmark '${title}' using bookmark plugin method`);
+      return;
+    }
+
+    // If we get here, couldn't add bookmark
+    console.warn(
+      `Could not add bookmark '${title}': No compatible method found`
+    );
+  } catch (error) {
+    console.error(`Error adding bookmark '${title}':`, error);
   }
-}
+};
+// Helper function to add a section heading to the PDF with bookmark
+// Updated addSectionHeading function
+const addSectionHeading = (
+  pdf: jsPDF,
+  title: string,
+  section: string,
+  includeBookmarks: boolean = true
+): void => {
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  // Get section color
+  const color = getSectionColor(section);
+
+  // Set font style for heading
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+
+  // Add heading text positioned slightly higher
+  pdf.setTextColor(color.r, color.g, color.b);
+  pdf.text(title, pageWidth / 2, 13, { align: "center" });
+
+  // Add underline closer to the text
+  pdf.setDrawColor(color.r, color.g, color.b);
+  pdf.line(20, 15.5, pageWidth - 20, 15.5);
+
+  // Add bookmark for the section if bookmarks are enabled
+  // Use the new dedicated bookmark function
+  addBookmark(pdf, title, includeBookmarks);
+
+  // Reset font to normal
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+  pdf.setTextColor(0, 0, 0);
+};
 
 // Format section name for display
 const formatSectionName = (section: string): string => {
   switch (section) {
     case "overview":
-      return "Overview"
+      return "Overview";
     case "airLeakage":
     case "air-leakage":
-      return "Air Leakage"
+      return "Air Leakage";
     case "insulation":
-      return "Insulation"
+      return "Insulation";
     case "heating":
-      return "Heating Systems"
+      return "Heating Systems";
     case "cooling":
-      return "Cooling Systems"
+      return "Cooling Systems";
     case "summary":
-      return "Report Summary"
+      return "Report Summary";
     default:
-      return section.charAt(0).toUpperCase() + section.slice(1)
+      return section.charAt(0).toUpperCase() + section.slice(1);
   }
-}
-
-// Get the actual tab name as it appears in the UI
-const getTabDisplayName = (section: string): string => {
-  switch (section) {
-    case "overview":
-      return "Overview"
-    case "airLeakage":
-    case "air-leakage":
-      return "Air Leakage Reports"
-    case "insulation":
-      return "Insulation Reports"
-    case "heating":
-      return "Heating Reports"
-    case "cooling":
-      return "Cooling Reports"
-    case "summary":
-      return "Report Summary"
-    default:
-      return section.charAt(0).toUpperCase() + section.slice(1)
-  }
-}
+};
 
 // Main function to generate the PDF report
-const handleDownloadReport = async (): Promise<void> => {
-  // Store the current active tab to return to it later
-  const currentActiveTab =
-    document.querySelector("button[class*='relative py-4 px-6'][class*='text-']")?.textContent || "Overview"
-
+const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
   try {
+    // Default configuration if none provided
+    const reportConfig: Required<ReportConfig> = {
+      selectedSections: config?.selectedSections || [
+        "overview",
+        "airLeakage",
+        "insulation",
+        "heating",
+        "cooling",
+        "summary",
+      ],
+      customFileName:
+        config?.customFileName ||
+        `Ciel_Power_Energy_Audit_Report_${new Date().toISOString().split("T")[0]}`,
+      includePageNumbers: config?.includePageNumbers !== false, // Default to true
+      includeBookmarks: config?.includeBookmarks !== false, // Default to true
+    };
+
     // Create loading indicator
-    const loadingDiv = document.createElement("div")
-    loadingDiv.style.position = "fixed"
-    loadingDiv.style.top = "0"
-    loadingDiv.style.left = "0"
-    loadingDiv.style.width = "100%"
-    loadingDiv.style.height = "100%"
-    loadingDiv.style.backgroundColor = "rgba(255, 255, 255, 0.8)"
-    loadingDiv.style.display = "flex"
-    loadingDiv.style.justifyContent = "center"
-    loadingDiv.style.alignItems = "center"
-    loadingDiv.style.zIndex = "9999"
+    const loadingDiv = document.createElement("div");
+    loadingDiv.style.position = "fixed";
+    loadingDiv.style.top = "0";
+    loadingDiv.style.left = "0";
+    loadingDiv.style.width = "100%";
+    loadingDiv.style.height = "100%";
+    loadingDiv.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+    loadingDiv.style.display = "flex";
+    loadingDiv.style.justifyContent = "center";
+    loadingDiv.style.alignItems = "center";
+    loadingDiv.style.zIndex = "9999";
     loadingDiv.innerHTML = `
       <div style="text-align: center;">
         <div style="border: 4px solid #f3f3f3; border-top: 4px solid #5cb85c; border-radius: 50%; width: 50px; height: 50px; animation: spin 2s linear infinite; margin: 0 auto;"></div>
         <p style="margin-top: 10px; font-family: sans-serif;">Generating PDF report...</p>
-        <p style="font-family: sans-serif;" id="pdf-progress">Processing page 1...</p>
+        <p style="font-family: sans-serif;" id="pdf-progress">Processing...</p>
       </div>
       <style>
         @keyframes spin {
@@ -433,15 +357,19 @@ const handleDownloadReport = async (): Promise<void> => {
           100% { transform: rotate(360deg); }
         }
       </style>
-    `
-    document.body.appendChild(loadingDiv)
+    `;
+    document.body.appendChild(loadingDiv);
 
-    // Initialize PDF
+    // Inside handleDownloadReport function:
+
+    // Initialize PDF with proper options
     const pdf = new jsPDF({
-      orientation: PAGE_CONFIG.orientation as any,
+      orientation: PAGE_CONFIG.orientation,
       unit: PAGE_CONFIG.unit,
       format: PAGE_CONFIG.format,
-    })
+      compress: true, // Enable compression for smaller file size
+      putOnlyUsedFonts: true, // Optimize font embedding
+    });
 
     // Set PDF properties
     pdf.setProperties({
@@ -449,263 +377,480 @@ const handleDownloadReport = async (): Promise<void> => {
       subject: "Energy Audit Report",
       author: "Ciel Power",
       creator: "Ciel Power Report Generator",
-    })
+    });
+
+    // Enable display mode for better viewing
+    pdf.setDisplayMode("fullwidth");
+
+    // Explicitly initialize the outline for bookmarks if enabled
+    if (reportConfig.includeBookmarks) {
+      // Different versions of jsPDF might use different methods
+      // Try both common approaches
+
+      // Method 1: For newer jsPDF versions
+      if (typeof pdf.outline === "undefined") {
+        pdf.outline = { createNamedDestinations: true };
+      }
+
+      // Method 2: For some versions that need explicit initialization
+      if (typeof pdf.initOutline === "function") {
+        pdf.initOutline();
+      }
+
+      console.log("PDF bookmarks enabled and initialized");
+    }
+    // Update progress indicator
+    const updateProgress = (message: string): void => {
+      const progressElement = document.getElementById("pdf-progress");
+      if (progressElement) {
+        progressElement.textContent = message;
+      }
+    };
+    // Add this as a separate function
+
+    // Helper function to add bookmarks that works with multiple jsPDF versions
 
     // Define the report structure based on the specified requirements
-    // Updated section names to match actual tab names and reorganized pages to fit more content per page
-    const reportStructure = [
-      // Overview - Combined more elements per page
+    // Using the exact groupings as specified
+    const allReportSections = [
+      // Overview - Regrouped elements as requested
       {
-        section: "overview",
+        section: "overview" as ReportSection,
+        tabName: "Overview",
         pages: [
-          { ids: ["about-ciel-power", "goals-of-the-audit", "about-new-whole-home-energy-solutions-program"] },
-          { ids: ["house-system"] },
+          { ids: ["about-ciel-power", "goals-of-the-audit"] },
+          {
+            ids: [
+              "about-new-whole-home-energy-solutions-program",
+              "house-system",
+            ],
+          },
         ],
       },
 
       // Air Leakage - Combined introduction with air-flow-rates
       {
-        section: "airLeakage",
+        section: "airLeakage" as ReportSection,
+        tabName: "Air Leakage Reports",
         pages: [
-          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] }, // Combined all three
+          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] },
           { ids: ["common-air-leak-points"] },
         ],
       },
 
-      // Insulation - Combined more elements per page
+      // Insulation - Regrouped elements as requested
       {
-        section: "insulation",
+        section: "insulation" as ReportSection,
+        tabName: "Insulation Reports",
         pages: [
-          { ids: ["insulation-overview", "technical-aspects", "insulation-benefits"] },
-          { ids: ["insulation-kneewall", "insulation-exterior-wall", "insulation-crawlspace"] }, // Combined three elements
-          { ids: ["insulation-rim-joist", "insulation-overhang"] }, // Combined two elements
+          {
+            ids: [
+              "insulation-overview",
+              "technical-aspects",
+              "insulation-benefits",
+            ],
+          },
+          { ids: ["insulation-kneewall", "insulation-exterior-wall"] },
+          { ids: ["insulation-crawlspace", "insulation-rim-joist"] },
+          { ids: ["insulation-overhang"] },
         ],
       },
 
       // Heating - Include header with system-1 only
       {
-        section: "heating",
-        pages: [
-          { ids: ["heating-header", "heating-system-1"] }, // Only include heating-system-1 after header
-        ],
+        section: "heating" as ReportSection,
+        tabName: "Heating Reports",
+        pages: [{ ids: ["heating-header"] }],
       },
 
       // Cooling - Include header with first cooling system
       {
-        section: "cooling",
-        pages: [
-          { ids: ["cooling-header", "cooling-system-1"] }, // Include cooling-header with first cooling system
-        ],
+        section: "cooling" as ReportSection,
+        tabName: "Cooling Reports",
+        pages: [{ ids: ["cooling-header"] }],
       },
 
       // Report Summary - Combined more elements and put project-costs and tax-credits on the same page
       {
-        section: "summary",
+        section: "summary" as ReportSection,
+        tabName: "Report Summary",
         pages: [
-          { ids: ["summary-of-concerns", "solutions-and-recommendations"] }, // Combined these two
-          { ids: ["future-solutions", "environmental-impact"] }, // Combined these two
-          { ids: ["project-costs", "tax-credits"] }, // Combined project-costs and tax-credits on the same page
+          { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
+          { ids: ["future-solutions", "environmental-impact"] },
+          { ids: ["project-costs", "tax-credits"] },
         ],
       },
-    ]
+    ];
 
-    let pageCount = 0
+    // Filter sections based on configuration
+    const reportStructure = allReportSections.filter((section) =>
+      reportConfig.selectedSections.includes(section.section)
+    );
 
-    // Process each section in the report structure
+    let pageCount = 0;
+
+    // Process each section in the report structure with optimized rendering
     for (const section of reportStructure) {
       // Update progress indicator
-      const progressElement = document.getElementById("pdf-progress")
-      if (progressElement) {
-        progressElement.textContent = `Processing ${formatSectionName(section.section)} section...`
-      }
+      updateProgress(
+        `Processing ${formatSectionName(section.section)} section...`
+      );
 
       // Switch to the section tab using the display name
-      console.log(`Switching to section: ${section.section}`)
-      await switchToTab(getTabDisplayName(section.section))
+      console.log(`Switching to section: ${section.section}`);
+      await switchToTab(section.tabName);
 
-      // Wait for content to render
-      await wait(1500) // Increased wait time
+      // Wait for content to render - reduced for better performance
+      await wait(600);
 
       // Add section heading only once at the beginning of the section
       if (pageCount > 0) {
-        pdf.addPage()
+        pdf.addPage();
+      }
+      // Add the section title
+      const sectionTitle = formatSectionName(section.section);
+      console.log(`Adding section heading and bookmark: ${sectionTitle}`);
+
+      // Add the section heading with bookmark option from config
+      addSectionHeading(
+        pdf,
+        sectionTitle,
+        section.section,
+        reportConfig.includeBookmarks
+      );
+
+      // Add page number to the first page if page numbers are enabled
+      if (pageCount === 0 && reportConfig.includePageNumbers) {
+        addPageNumber(pdf, reportConfig.includePageNumbers);
       }
 
-      // Add the section heading
-      addSectionHeading(pdf, formatSectionName(section.section), section.section)
+      pageCount++;
 
       // Process each page in the section
       for (let pageIndex = 0; pageIndex < section.pages.length; pageIndex++) {
-        const page = section.pages[pageIndex]
-
-        // Update progress
-        if (progressElement) {
-          progressElement.textContent = `Processing ${formatSectionName(section.section)} page ${pageIndex + 1}...`
-        }
+        const page = section.pages[pageIndex];
 
         // If this isn't the first page in the section, add a new page
         if (pageIndex > 0) {
-          pdf.addPage()
-
-          // Don't add section heading for subsequent pages
+          pdf.addPage();
+          if (reportConfig.includePageNumbers) {
+            addPageNumber(pdf, reportConfig.includePageNumbers);
+          }
+          pageCount++;
         }
 
-        // Capture elements for this page
-        const pageCanvases: HTMLCanvasElement[] = []
+        // Current Y position for adding elements
+        let currentY = 18; // Reduced to save vertical space
 
+        // Capture and add each element for this page
         for (const id of page.ids) {
-          console.log(`Processing element with ID: ${id}`)
+          updateProgress(`Processing ${id}...`);
 
-          // Special handling for air-changes-per-hour
-          if (id === "air-changes-per-hour") {
-            console.log("Special handling for air-changes-per-hour")
-
-            // Use the specialized function to capture the Home component
-            const airChangesCanvas = await captureAirChangesHome()
-
-            if (airChangesCanvas) {
-              pageCanvases.push(airChangesCanvas)
-              console.log("Successfully added air-changes-per-hour to PDF")
-            } else {
-              console.error("Failed to capture air-changes-per-hour")
-            }
-
-            continue
-          }
-
-          // Use longer wait time for summary section elements
-          const waitTime = section.section === "summary" ? 2000 : 500
-          const canvas = await captureElement(id, waitTime)
+          const canvas = await captureElement(id);
           if (canvas) {
-            pageCanvases.push(canvas)
+            currentY = addImageToPDF(pdf, canvas, currentY);
           }
         }
 
-        // Add canvases for this page
-        if (pageCanvases.length > 0) {
-          addCanvasesToPage(pdf, pageCanvases, 22) // Reduced top margin from 25 to 22
-          pageCount++
-        }
-      }
+        // Handle special cases for dynamic content
+        if (section.section === "insulation" && pageIndex === 3) {
+          // Handle insulation zones
+          const insulationZoneElements = document.querySelectorAll(
+            '[id^="insulation-zone-"]'
+          );
 
-      // Handle special cases for dynamic content
-      if (section.section === "insulation") {
-        // Handle insulation zones (exactly 3 per page)
-        const insulationZoneElements = document.querySelectorAll('[id^="insulation-zone-"]')
+          console.log(
+            `Found ${insulationZoneElements.length} insulation zone elements`
+          );
 
-        console.log(`Found ${insulationZoneElements.length} insulation zone elements`)
+          if (insulationZoneElements.length > 0) {
+            // Handle the first insulation zone
+            updateProgress(`Processing first insulation zone...`);
 
-        if (insulationZoneElements.length > 0) {
-          // Add a subsection heading
-          pdf.addPage()
-          addSectionHeading(pdf, "Insulation Zones", section.section)
+            // Capture the first zone
+            const firstZoneCanvas = await captureElement(
+              insulationZoneElements[0].id
+            );
+            if (firstZoneCanvas) {
+              // Add to the current page
+              currentY = addImageToPDF(pdf, firstZoneCanvas, currentY);
+            }
+          }
 
-          // Process zones in groups of exactly 3
-          for (let i = 0; i < insulationZoneElements.length; i += 3) {
-            const zoneCanvases: HTMLCanvasElement[] = []
+          // Process remaining zones in optimized groups
+          if (insulationZoneElements.length > 1) {
+            // Process zones more efficiently
+            let i = 1; // Start from the second zone
 
-            // Capture up to 3 zones for this page
-            for (let j = 0; j < 3 && i + j < insulationZoneElements.length; j++) {
-              // Update progress
-              if (progressElement) {
-                progressElement.textContent = `Processing insulation zone ${i + j + 1}...`
+            while (i < insulationZoneElements.length) {
+              // Add a new page
+              pdf.addPage();
+              if (reportConfig.includePageNumbers) {
+                addPageNumber(pdf, reportConfig.includePageNumbers);
+              }
+              pageCount++;
+
+              currentY = 16; // Start higher on the page
+
+              // Check the heights of the zones to determine how many can fit on one page
+              // Measure first zone to analyze
+              const firstZoneElement = insulationZoneElements[i];
+              const firstZoneHeight = firstZoneElement
+                ? firstZoneElement.getBoundingClientRect().height
+                : 0;
+
+              // Decide how many zones to put on this page based on height
+              let zonesPerPage = 2; // Default
+
+              // If zones are small enough, put 3 on a page
+              if (firstZoneHeight < 350) {
+                zonesPerPage = 3;
+              } else if (firstZoneHeight > 700) {
+                // If zones are very large, just put 1 on a page
+                zonesPerPage = 1;
               }
 
-              // Capture zone
-              const canvas = await captureElement(insulationZoneElements[i + j].id)
-              if (canvas) {
-                zoneCanvases.push(canvas)
+              // Capture the zones for this page
+              const zoneCanvases: HTMLCanvasElement[] = [];
+              for (
+                let j = 0;
+                j < zonesPerPage && i + j < insulationZoneElements.length;
+                j++
+              ) {
+                updateProgress(`Processing insulation zone ${i + j + 1}...`);
+
+                const canvas = await captureElement(
+                  insulationZoneElements[i + j].id
+                );
+                if (canvas) {
+                  zoneCanvases.push(canvas);
+                }
               }
-            }
 
-            // Add the zones to the page
-            if (zoneCanvases.length > 0) {
-              addCanvasesToPage(pdf, zoneCanvases, 22) // Reduced top margin
-              pageCount++
-            }
+              // Add the zones to the page with minimal spacing
+              for (const canvas of zoneCanvases) {
+                currentY = addImageToPDF(pdf, canvas, currentY);
+              }
 
-            // Add a new page if there are more zones
-            if (i + 3 < insulationZoneElements.length) {
-              pdf.addPage()
+              // Move to the next group of zones
+              i += zonesPerPage;
             }
           }
-        }
-      } else if (section.section === "heating") {
-        console.log("Processing heating systems")
+        } else if (section.section === "heating" && pageIndex === 0) {
+          // Handle heating systems (ensure heating-system-0 is included)
+          const heatingSystemElements = document.querySelectorAll(
+            '[id^="heating-system-"]'
+          );
+          const waterHeater = document.getElementById(
+            "heating-system-water-heater"
+          );
 
-        // Find the first heating system after heating-system-1
-        const nextHeatingSystem = document.querySelector(
-          '[id^="heating-system-"]:not([id="heating-system-1"]):not([id="heating-system-water-heater"])',
-        ) as HTMLElement
+          // Filter out water heater from regular heating systems
+          const regularHeatingElements = Array.from(
+            heatingSystemElements
+          ).filter((el) => el.id !== "heating-system-water-heater");
 
-        if (nextHeatingSystem) {
-          // Add a new page for the next heating system
-          pdf.addPage()
+          console.log(
+            `Found ${regularHeatingElements.length} heating systems and ${waterHeater ? 1 : 0} water heaters`
+          );
 
-          // Update progress
-          if (progressElement) {
-            progressElement.textContent = `Processing additional heating system...`
+          // Collect all heating system IDs to ensure we don't miss any
+          const heatingSystemIds: string[] = [];
+          for (const el of regularHeatingElements) {
+            heatingSystemIds.push(el.id);
           }
 
-          // Capture the heating system
-          const canvas = await captureElement(nextHeatingSystem.id)
-          if (canvas) {
-            addCanvasesToPage(pdf, [canvas], 22) // Reduced top margin
-            pageCount++
-          }
-        }
+          console.log("Heating system IDs:", heatingSystemIds);
 
-        // Handle water heater separately
-        const waterHeater = document.getElementById("heating-system-water-heater")
-        if (waterHeater) {
-          // Add a new page for the water heater
-          pdf.addPage()
-          addSectionHeading(pdf, "Water Heating System", section.section)
-
-          // Update progress
-          if (progressElement) {
-            progressElement.textContent = `Processing water heating system...`
-          }
-
-          // Capture the water heater
-          const canvas = await captureElement("heating-system-water-heater")
-          if (canvas) {
-            addCanvasesToPage(pdf, [canvas], 22) // Reduced top margin
-            pageCount++
-          }
-        }
-      } else if (section.section === "cooling") {
-        console.log("Processing cooling systems")
-
-        // Find additional cooling systems (not the first one)
-        const additionalCoolingSystems = document.querySelectorAll(
-          '[id^="cooling-system-"]:not([id="cooling-system-1"])',
-        )
-
-        console.log(`Found ${additionalCoolingSystems.length} additional cooling systems`)
-
-        if (additionalCoolingSystems.length > 0) {
-          // Add a new page for additional cooling systems
-          pdf.addPage()
-          addSectionHeading(pdf, "Additional Cooling Systems", section.section)
-
-          // Process each additional cooling system
-          for (let i = 0; i < additionalCoolingSystems.length; i++) {
+          // First, check and capture heating-system-0 if it exists
+          const system0 = document.getElementById("heating-system-0");
+          if (system0) {
             // Update progress
-            if (progressElement) {
-              progressElement.textContent = `Processing additional cooling system ${i + 1}...`
+            updateProgress(`Processing primary heating system (system-0)...`);
+
+            // Capture system-0
+            const canvas = await captureElement("heating-system-0");
+            if (canvas) {
+              // Add to the current page
+              currentY = addImageToPDF(pdf, canvas, currentY);
+            }
+          }
+
+          // Next, capture heating-system-1 if it exists
+          const system1 = document.getElementById("heating-system-1");
+          if (system1) {
+            // Update progress
+            updateProgress(`Processing heating system 1...`);
+
+            // Capture the system
+            const canvas = await captureElement("heating-system-1");
+            if (canvas) {
+              // Check if we need a new page based on current position
+              if (currentY > 180) {
+                // If we're already too far down the page
+                pdf.addPage();
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
+                }
+                pageCount++;
+                currentY = 16;
+              }
+
+              // Add to the page
+              currentY = addImageToPDF(pdf, canvas, currentY);
+            }
+          }
+
+          // Process remaining heating systems
+          let currentPageSystems = (system0 ? 1 : 0) + (system1 ? 1 : 0); // Count how many systems we've already added
+          let systemsRemaining =
+            regularHeatingElements.length - currentPageSystems;
+
+          if (systemsRemaining > 0) {
+            for (let i = 0; i < regularHeatingElements.length; i++) {
+              const element = regularHeatingElements[i];
+              const idMatch = element.id.match(/heating-system-(\d+)/);
+
+              if (!idMatch) continue;
+
+              const systemIndex = parseInt(idMatch[1], 10);
+
+              // Skip system-0 and system-1 as we've already handled them
+              if (systemIndex < 2 && (system0 || system1)) continue;
+
+              // Update progress
+              updateProgress(`Processing heating system ${systemIndex}...`);
+
+              // If we need to start a new page
+              if (currentPageSystems >= 2 || currentY > 200) {
+                pdf.addPage();
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
+                }
+                pageCount++;
+                currentY = 16;
+                currentPageSystems = 0;
+              }
+
+              // Capture the heating system
+              const canvas = await captureElement(element.id);
+              if (canvas) {
+                currentY = addImageToPDF(pdf, canvas, currentY);
+                currentPageSystems++;
+              }
+            }
+          }
+
+          // Handle water heater
+          if (waterHeater) {
+            // Update progress
+            updateProgress(`Processing water heating system...`);
+
+            // If we're already at 2 systems on the current page, add a new page
+            if (currentPageSystems >= 2 || currentY > 180) {
+              pdf.addPage();
+              if (reportConfig.includePageNumbers) {
+                addPageNumber(pdf, reportConfig.includePageNumbers);
+              }
+              pageCount++;
+              currentY = 16;
+              currentPageSystems = 0;
+            }
+
+            // Capture the water heater
+            const canvas = await captureElement("heating-system-water-heater");
+            if (canvas) {
+              currentY = addImageToPDF(pdf, canvas, currentY);
+            }
+          }
+        } else if (section.section === "cooling" && pageIndex === 0) {
+          // Handle cooling systems
+          const coolingSystemElements = document.querySelectorAll(
+            '[id^="cooling-system-"]'
+          );
+
+          console.log(`Found ${coolingSystemElements.length} cooling systems`);
+
+          // Collect all cooling system IDs to ensure we don't miss any
+          const coolingSystemIds: string[] = [];
+          for (const el of coolingSystemElements) {
+            coolingSystemIds.push(el.id);
+          }
+
+          console.log("Cooling system IDs:", coolingSystemIds);
+
+          // First, check for cooling-system-0 and add it
+          const system0 = document.getElementById("cooling-system-0");
+          if (system0) {
+            updateProgress(`Processing primary cooling system (system-0)...`);
+
+            const canvas = await captureElement("cooling-system-0");
+            if (canvas) {
+              // Add to the current page
+              currentY = addImageToPDF(pdf, canvas, currentY);
+            }
+          }
+
+          // Next, check for cooling-system-1 and add it if it exists
+          const system1 = document.getElementById("cooling-system-1");
+          if (system1) {
+            updateProgress(`Processing cooling system 1...`);
+
+            const canvas = await captureElement("cooling-system-1");
+            if (canvas) {
+              // Check if we need a new page
+              if (currentY > 180) {
+                // If we're already too far down the page
+                pdf.addPage();
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
+                }
+                pageCount++;
+                currentY = 16;
+              }
+
+              currentY = addImageToPDF(pdf, canvas, currentY);
+            }
+          }
+
+          // Process all remaining cooling systems based on their IDs
+          let currentPageSystems = (system0 ? 1 : 0) + (system1 ? 1 : 0); // Count systems already added
+
+          // Process each cooling system by checking all possible IDs
+          for (let i = 0; i < coolingSystemElements.length; i++) {
+            const element = coolingSystemElements[i];
+            const idMatch = element.id.match(/cooling-system-(\d+)/);
+
+            if (!idMatch) continue;
+
+            const systemIndex = parseInt(idMatch[1], 10);
+
+            // Skip system-0 and system-1 as we've already handled them
+            if (
+              (systemIndex === 0 && system0) ||
+              (systemIndex === 1 && system1)
+            )
+              continue;
+
+            // Update progress
+            updateProgress(`Processing cooling system ${systemIndex}...`);
+
+            // If we need to start a new page
+            if (currentPageSystems >= 2 || currentY > 200) {
+              pdf.addPage();
+              if (reportConfig.includePageNumbers) {
+                addPageNumber(pdf, reportConfig.includePageNumbers);
+              }
+              pageCount++;
+              currentY = 16;
+              currentPageSystems = 0;
             }
 
             // Capture the cooling system
-            const canvas = await captureElement(additionalCoolingSystems[i].id)
+            const canvas = await captureElement(element.id);
             if (canvas) {
-              addCanvasesToPage(pdf, [canvas], 22) // Reduced top margin
-              pageCount++
-            }
-
-            // Add a new page if there are more cooling systems
-            if (i < additionalCoolingSystems.length - 1) {
-              pdf.addPage()
+              currentY = addImageToPDF(pdf, canvas, currentY);
+              currentPageSystems++;
             }
           }
         }
@@ -713,33 +858,50 @@ const handleDownloadReport = async (): Promise<void> => {
     }
 
     // Update progress
-    const progressElement = document.getElementById("pdf-progress")
-    if (progressElement) {
-      progressElement.textContent = "Finalizing PDF..."
-    }
+    updateProgress("Finalizing PDF...");
+    // Finalize bookmarks if enabled
+    if (reportConfig.includeBookmarks) {
+      try {
+        // Method 1: For versions that need to finalize outlines
+        if (pdf.outline && typeof pdf.outline.createOutline === "function") {
+          pdf.outline.createOutline();
+          console.log("Finalized bookmarks using createOutline method");
+        }
 
-    // Save the PDF
-    const fileName = `Ciel_Power_Energy_Audit_Report_${new Date().toISOString().split("T")[0]}.pdf`
-    pdf.save(fileName)
+        // Method 2: For versions that use a different finalization method
+        if (typeof (pdf as any).finalizeOutlines === "function") {
+          (pdf as any).finalizeOutlines();
+          console.log("Finalized bookmarks using finalizeOutlines method");
+        }
+
+        console.log("Bookmark processing completed");
+      } catch (error) {
+        console.error("Error finalizing bookmarks:", error);
+        // Continue anyway to ensure the PDF is saved
+      }
+    }
+    // Save the PDF with custom filename if provided
+    const fileName = `${reportConfig.customFileName}.pdf`;
+    pdf.save(fileName);
 
     // Remove loading indicator
-    document.body.removeChild(loadingDiv)
+    document.body.removeChild(loadingDiv);
 
     // Return to the overview tab
-    await switchToTab("Overview")
+    await switchToTab("Overview");
   } catch (error) {
-    console.error("Error generating PDF:", error)
-    alert("An error occurred while generating the PDF. Please try again.")
+    console.error("Error generating PDF:", error);
+    alert("An error occurred while generating the PDF. Please try again.");
 
     // Remove loading indicator if it exists
-    const loadingDiv = document.querySelector('div[style*="position: fixed"]')
+    const loadingDiv = document.querySelector('div[style*="position: fixed"]');
     if (loadingDiv && loadingDiv.parentNode) {
-      loadingDiv.parentNode.removeChild(loadingDiv)
+      loadingDiv.parentNode.removeChild(loadingDiv);
     }
 
     // Return to the overview tab even if there was an error
-    await switchToTab("Overview")
+    await switchToTab("Overview");
   }
-}
+};
 
-export default handleDownloadReport
+export default handleDownloadReport;

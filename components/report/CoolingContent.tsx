@@ -1,6 +1,7 @@
+// First, the updated CoolingContent component:
+
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Info, Sun } from "lucide-react"
 import { toast } from "sonner"
 import { useParams } from "next/navigation"
@@ -79,13 +80,16 @@ export function CoolingContent({ data, isAdmin = false, onUpdateItem, driveImage
     }
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
     <div className="space-y-8">
       {isAdmin && (
-        <div className="flex justify-end items-center">
+        <div className="flex justify-end items-center mb-4">
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 rounded-full bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors"
+            className="px-4 py-2 rounded-md bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors"
             style={{ backgroundColor: "#B18C2E" }}
           >
             Save
@@ -95,24 +99,14 @@ export function CoolingContent({ data, isAdmin = false, onUpdateItem, driveImage
 
       {/* Header card */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} id="cooling-header">
-        <Card className="rounded-xl border border-amber-100 shadow-sm overflow-hidden">
-          <CardHeader className="py-4 px-6" style={{ backgroundColor: "#FFFCF3" }}>
-            <CardTitle
-              className="flex items-center gap-3"
-              style={{
-                fontFamily: "Poppins",
-                fontWeight: 500,
-                fontSize: "16px",
-                lineHeight: "100%",
-                letterSpacing: "0%",
-                color: "#B18C2E",
-              }}
-            >
+        <div className={cardStyle}>
+          <div className="py-3 px-5" style={{ backgroundColor: "#FFFCF3" }}>
+            <h2 className="flex items-center gap-3 font-medium" style={{ color: "#B18C2E" }}>
               <Sun style={{ color: "#B18C2E" }} className="h-6 w-6" />
               Understanding Your Home&apos;s Cooling Systems
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6" style={{ backgroundColor: "#FFFFFF" }}>
+            </h2>
+          </div>
+          <div className="p-6">
             <p className="text-gray-700 mb-5 font-normal">
               During your Home Energy Assessment, our technician closely examined your cooling equipment to determine
               the efficiency level of the system.
@@ -124,8 +118,8 @@ export function CoolingContent({ data, isAdmin = false, onUpdateItem, driveImage
                 with the total electric energy input during the same period.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {coolingItems.map((item, index) => (

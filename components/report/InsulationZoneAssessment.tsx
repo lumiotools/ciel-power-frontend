@@ -384,9 +384,7 @@ export function InsulationZoneAssessment({ data, isAdmin = false, onUpdate, driv
                   <RValueGauge
                     value={zoneData.rValue}
                     maxValue={Math.max(zoneData.recommendedValue * 1.3, 40)}
-                    title=""
-                    showCard={false}
-                    width="100%"
+                    insulationZone={zoneData.name}
                   />
                 </div>
               </div>
