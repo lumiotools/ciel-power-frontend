@@ -81,7 +81,7 @@ export default function ForgotPassword() {
   };
 
   const inputClassName =
-    "focus:ring-2 focus:ring-[#b9dd8b] focus:border-[#b9dd8b] outline-none transition-colors duration-300 !important";
+    "focus:ring-2 focus:ring-[#b9dd8b] focus:border-[#b9dd8b] outline-none transition-colors duration-300 !important h-12";
   return (
     <div className="flex h-screen">
       <div className="hidden md:flex md:w-1/2 p-2">

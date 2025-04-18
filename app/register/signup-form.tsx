@@ -156,7 +156,7 @@ export default function SignUpForm() {
   };
 
   const inputClassName =
-    "focus:ring-2 focus:ring-[#5ea502] focus:border-[#5ea502] outline-none transition-colors duration-300 !important";
+    "h-12 focus:ring-2 focus:ring-[#5ea502] focus:border-[#5ea502] outline-none transition-colors duration-300 !important";
 
   return (
     <div className="flex h-screen">
