@@ -1,23 +1,11 @@
 export interface Booking {
   bookingNumber: string;
   startTime: string;
-  endTime: string;
   title: string;
-  canceled: boolean;
-  accepted?: boolean;
+  address: string;
   creationTime: string;
-  serviceName: string;
+  utilityBillsUploaded: boolean;
   currentStage: string;
-  customerId?: string;
-  googleDriveFolder?: string;
-  price?: {
-    totalGross: { amount: string; currency: string };
-    totalNet: { amount: string; currency: string };
-    totalTaxes: { amount: string; currency: string };
-    totalPaid: { amount: string; currency: string };
-    taxes: any[];
-  };
-  auditor?: string;
 }
 
 export interface ContractDetails {
@@ -50,6 +38,12 @@ export interface BookingResponse {
   message: string;
   data: {
     bookings: Booking[];
+    pagination: {
+      current_page: number;
+      total_pages: number;
+      total_records: number;
+      limit: number;
+    }
   };
 }
 

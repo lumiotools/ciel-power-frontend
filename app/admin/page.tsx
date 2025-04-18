@@ -7,7 +7,7 @@ import { BookingsTable } from "@/components/admin/BookingsTable";
 import { InviteCustomerDialog } from "@/components/admin/InviteCustomerDialog";
 import type { Booking, BookingResponse, NutshellLead } from "@/types/admin";
 import { toast } from "sonner";
-import { Settings } from "lucide-react";
+import { Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminPage() {
@@ -28,15 +28,22 @@ export default function AdminPage() {
   const [leadError, setLeadError] = useState<string | null>(null);
   const [hasSearchedLead, setHasSearchedLead] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalBookings, setTotalBookings] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const bookingsPerPage = 10;
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [currentPage]);
 
   const fetchBookings = async () => {
     setLoading(true);
+    setBookings([])
     try {
-      const response = await fetch("/api/admin/bookings");
+      const response = await fetch(`/api/admin/bookings?page=${currentPage}&limit=${bookingsPerPage}`);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -48,6 +55,8 @@ export default function AdminPage() {
 
       if (data.success) {
         setBookings(data.data.bookings);
+        setTotalBookings(data.data.pagination.total_records || 0);
+        setTotalPages(data.data.pagination.total_pages || 1);
       } else {
         toast.error(data.message || "Failed to fetch bookings");
       }
@@ -56,6 +65,18 @@ export default function AdminPage() {
       toast.error("An error occurred while fetching bookings");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
@@ -273,6 +294,31 @@ export default function AdminPage() {
           </div>
 
           <BookingsTable bookings={bookings} isLoading={loading} />
+          
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600">
+              Showing page {currentPage} of {totalPages} ({totalBookings} total bookings)
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handlePreviousPage} 
+                disabled={currentPage === 1 || loading}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleNextPage} 
+                disabled={currentPage === totalPages || loading}
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
 
