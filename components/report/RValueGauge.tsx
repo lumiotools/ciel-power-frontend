@@ -1,14 +1,14 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface RValueGaugeProps {
   value: number
   minValue?: number
   maxValue?: number
-  title?: string
-  subtitle?: string
+  insulationZone?: string
   showCard?: boolean
   width?: string
   height?: string
@@ -18,197 +18,217 @@ export default function RValueGauge({
   value,
   minValue = 0,
   maxValue = 60,
-  title = "Current R-Value",
-  subtitle = "",
+  insulationZone = "Wall",
   showCard = true,
   width = "100%",
   height = "auto",
 }: RValueGaugeProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [animatedValue, setAnimatedValue] = useState(0)
+  const [displayedValue, setDisplayedValue] = useState(maxValue)
+  const [showContent, setShowContent] = useState(false)
 
-  // Animate the value when it changes
   useEffect(() => {
-    const startValue = animatedValue
-    const endValue = Math.min(Math.max(value, minValue), maxValue)
-    const startTime = performance.now()
-    const duration = 1000 // 1 second animation
+    setShowContent(true)
+    const timer = setTimeout(() => {
+      setDisplayedValue(value)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [value])
 
-    const animateValue = (timestamp: number) => {
-      const elapsed = timestamp - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const easeProgress = 1 - Math.pow(1 - progress, 3)
-
-      const currentValue = startValue + (endValue - startValue) * easeProgress
-      setAnimatedValue(currentValue)
-
-      if (progress < 1) {
-        requestAnimationFrame(animateValue)
-      }
+  const calculateRotation = (value: number): number => {
+    // Define the angles for different R-values
+    const angles = {
+      0: 118.17,    // R0
+      7: 90,        // R7
+      15: 75,       // R15
+      30: 30,       // R30
+      60: -55.32    // R60+
     }
-
-    requestAnimationFrame(animateValue)
-  }, [value, minValue, maxValue])
-
-  // Draw the gauge
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    const dpr = window.devicePixelRatio || 1
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width * dpr
-    canvas.height = rect.height * dpr
-    ctx.scale(dpr, dpr)
-
-    ctx.clearRect(0, 0, rect.width, rect.height)
-
-    const centerX = rect.width / 2
-    const centerY = rect.height * 0.9 // Adjusted for taller gauge
-    const radius = Math.min(rect.width / 2, rect.height * 0.7) * 0.85 // Reduced to leave margin
-
-    drawGauge(ctx, centerX, centerY, radius, minValue, maxValue, animatedValue)
-  }, [animatedValue, minValue, maxValue])
-
-  const drawGauge = (
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number,
-    minValue: number,
-    maxValue: number,
-    currentValue: number,
-  ) => {
-    const startAngle = Math.PI
-    const endAngle = 2 * Math.PI
-    const totalAngle = endAngle - startAngle
-
-    const gradient = ctx.createConicGradient(0, centerX, centerY)
-    gradient.addColorStop(0.5, "#14b8a6")
-    gradient.addColorStop(0.6, "#2dd4bf")
-    gradient.addColorStop(0.7, "#eab308")
-    gradient.addColorStop(0.8, "#f97316")
-    gradient.addColorStop(0.9, "#ef4444")
-    gradient.addColorStop(1.0, "#dc2626")
-
-    ctx.beginPath()
-    ctx.lineWidth = radius * 0.2
-    ctx.strokeStyle = gradient
-    ctx.arc(centerX, centerY, radius * 0.9, startAngle, endAngle, false)
-    ctx.stroke()
-
-    drawTickMarks(ctx, centerX, centerY, radius, minValue, maxValue)
-
-    const valueRatio = currentValue / maxValue
-    const needleAngle = startAngle + totalAngle * (1 - valueRatio)
-
-    drawNeedle(ctx, centerX, centerY, radius, needleAngle)
-  }
-
-  const drawTickMarks = (
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number,
-    minValue: number,
-    maxValue: number,
-  ) => {
-    const startAngle = Math.PI
-    const endAngle = 2 * Math.PI
-    const totalAngle = endAngle - startAngle
-
-    let majorTicks: number[] = []
-
-    if (maxValue <= 15) {
-      majorTicks = [0, 3, 7, 10, 13]
-    } else {
-      majorTicks = [0, 15, 30, 45, 60]
+    
+    // Find the two closest R-values
+    const rValues = Object.keys(angles).map(Number)
+    const lowerRValue = Math.max(...rValues.filter(r => r <= value))
+    const upperRValue = Math.min(...rValues.filter(r => r >= value))
+    
+    // If value exactly matches a defined R-value, return its angle
+    if (lowerRValue === upperRValue) {
+      return angles[lowerRValue]
     }
-
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.fillStyle = "#000"
-    ctx.font = `${radius * 0.08}px Arial`
-
-    majorTicks.forEach((tick) => {
-      if (tick >= minValue && tick <= maxValue) {
-        const valueRatio = tick / maxValue
-        const tickAngle = startAngle + totalAngle * (1 - valueRatio)
-
-        const outerX = centerX + Math.cos(tickAngle) * (radius * 1.05)
-        const outerY = centerY + Math.sin(tickAngle) * (radius * 1.05)
-        const innerX = centerX + Math.cos(tickAngle) * (radius * 0.8)
-        const innerY = centerY + Math.sin(tickAngle) * (radius * 0.8)
-
-        ctx.beginPath()
-        ctx.lineWidth = 2
-        ctx.strokeStyle = "#fff"
-        ctx.moveTo(innerX, innerY)
-        ctx.lineTo(outerX, outerY)
-        ctx.stroke()
-
-        const labelX = centerX + Math.cos(tickAngle) * (radius * 1.2)
-        const labelY = centerY + Math.sin(tickAngle) * (radius * 1.2)
-
-        const tickLabel = `R${tick}`
-
-        ctx.fillText(tickLabel, labelX, labelY)
-      }
-    })
+    
+    // Interpolate between the two angles
+    const lowerAngle = angles[lowerRValue]
+    const upperAngle = angles[upperRValue]
+    const percentage = (value - lowerRValue) / (upperRValue - lowerRValue)
+    
+    return lowerAngle - ((lowerAngle - upperAngle) * percentage)
   }
 
-  const drawNeedle = (
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number,
-    angle: number,
-  ) => {
-    ctx.save()
-    ctx.translate(centerX, centerY)
-    ctx.rotate(angle)
+  const pointerRotation = calculateRotation(displayedValue)
 
-    const needleGradient = ctx.createLinearGradient(0, 0, radius, 0)
-    needleGradient.addColorStop(0, "#0d9488")
-    needleGradient.addColorStop(1, "#14b8a6")
+  return (
+    <Card className="border-none shadow-none bg-transparent">
+      <CardContent className="flex flex-col h-[213px] items-start justify-between relative p-0 w-[431px] bg-transparent">
+        <div className="flex flex-col w-[431px] items-start justify-center relative flex-[0_0_auto]">
+          <div className="relative w-[391px] h-[209px] -ml-20">
+            <div className="relative w-[454px] h-[453px] top-[-18px] -left-8">
+              <motion.div 
+                className="relative pt-8 overflow-hidden"
+                style={{ height: '240px' }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
+                <motion.img
+                  className="absolute w-[389px] h-[194px] top-8 left-[33px]"
+                  alt="Ellipse stroke"
+                  src="/inverted-ellipse.svg"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                />
 
-    ctx.beginPath()
-    ctx.moveTo(0, -radius * 0.05)
-    ctx.lineTo(radius * 0.9, 0)
-    ctx.lineTo(0, radius * 0.05)
-    ctx.fillStyle = needleGradient
-    ctx.fill()
+                <motion.img
+                  className="absolute w-[206px] h-[103px] top-[124px] left-[124px]"
+                  alt="Ellipse"
+                  src="/inverted-ellipse-dotted.svg"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                />
 
-    ctx.beginPath()
-    ctx.arc(0, 0, radius * 0.08, 0, Math.PI * 2)
-    ctx.fillStyle = "#0d9488"
-    ctx.fill()
-    ctx.strokeStyle = "#fff"
-    ctx.lineWidth = 1
-    ctx.stroke()
+                <div className="absolute w-[333px] h-[332px] top-[61px] left-[61px] rotate-[-30deg]">
+                  <div className="relative w-[551px] h-[551px] top-[-109px] left-[-109px]">
+                    <AnimatePresence>
+                      {showContent && (
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5, duration: 0.3 }}
+                            className="absolute w-[389px] h-[391px] top-20 left-[81px] rotate-[75deg]"
+                          >
+                            <img
+                              className="absolute w-[275px] h-[275px] top-[58px] left-[57px] -rotate-45"
+                              alt="Vector"
+                              src="/vector-46-3.svg"
+                            />
+                            <div className="top-[-21px] left-[182px] absolute font-medium text-foundationsecondaryblackblack-300 text-base text-center tracking-[0] leading-[normal] font-['Poppins',Helvetica]">
+                              R15
+                            </div>
+                          </motion.div>
 
-    ctx.restore()
-  }
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6, duration: 0.3 }}
+                            className="absolute w-[389px] h-[391px] top-20 left-[81px] rotate-[30deg]"
+                          >
+                            <div className="relative h-[411px] top-[-21px]">
+                              <img
+                                className="absolute w-[389px] h-[389px] top-[22px] left-0"
+                                alt="Vector"
+                                src="/vector-46-2.svg"
+                              />
+                              <div className="top-0 left-[184px] absolute font-medium text-foundationsecondaryblackblack-300 text-base text-center tracking-[0] leading-[normal] font-['Poppins',Helvetica]">
+                                R30
+                              </div>
+                            </div>
+                          </motion.div>
 
-  const canvasContent = (
-    <div
-      className="relative aspect-[4/3]" // Increased aspect ratio for larger height and width
-      style={{ width: "100%", height: "auto" }} // Ensures full width and dynamic height
-    >
-      <canvas ref={canvasRef} className="w-full h-full" style={{ touchAction: "none" }} />
-    </div>
+                          <motion.div 
+                            className="absolute w-[389px] h-[391px] top-20 left-[81px]"
+                            initial={{ rotate: calculateRotation(maxValue) }}
+                            animate={{ rotate: pointerRotation }}
+                            transition={{ delay: 0.6, duration: 1.5, ease: "easeInOut" }}
+                          >
+                            <div className="relative w-[466px] h-[466px] top-[-37px] left-[-38px]">
+                              <div className="absolute w-[466px] h-[466px] top-0 left-0">
+                                <img
+                                  className="absolute w-[371px] h-[371px] top-[47px] left-[47px] rotate-[-17.55deg]"
+                                  alt="Vector"
+                                  src="/vector-46.svg"
+                                />
+                                <img
+                                  className="absolute w-[318px] h-[318px] top-[102px] left-[74px] rotate-[-17.55deg]"
+                                  alt="Vector"
+                                  src="/vector-47.svg"
+                                />
+                              </div>
+                              <motion.div 
+                                className="top-4 left-[215px] absolute font-medium text-foundationsecondaryblackblack-300 text-base text-center tracking-[0] leading-[normal] font-['Poppins',Helvetica]"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1.2, duration: 0.3 }}
+                              >
+                                {/* R{displayedValue.toFixed(1)} */}
+                              </motion.div>
+                            </div>
+                          </motion.div>
+
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.7, duration: 0.3 }}
+                            className="absolute w-[389px] h-[391px] top-20 left-[81px] rotate-90"
+                          >
+                            <img
+                              className="absolute w-[337px] h-[337px] top-[27px] left-[26px] rotate-[-60deg]"
+                              alt="Vector"
+                              src="/vector-46-1.svg"
+                            />
+                            <div className="absolute top-[-21px] left-[177px] font-medium text-foundationsecondaryblackblack-300 text-base text-center tracking-[0] leading-[normal] font-['Poppins',Helvetica]">
+                              R7
+                            </div>
+                          </motion.div>
+
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8, duration: 0.3 }}
+                            className="absolute w-[389px] h-[391px] top-20 left-[81px] rotate-[-55.32deg]"
+                          >
+                            <div className="absolute top-[-21px] left-[177px] font-medium text-foundationsecondaryblackblack-300 text-base text-center tracking-[0] leading-[normal] font-['Poppins',Helvetica]">
+                              R60+
+                            </div>
+                          </motion.div>
+
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.9, duration: 0.3 }}
+                            className="absolute w-[389px] h-[391px] top-20 left-[81px] rotate-[118.17deg] pt-4"
+                          >
+                            <div className="absolute top-[-21px] left-[189px] font-medium text-foundationsecondaryblackblack-300 text-base text-center tracking-[0] leading-[normal] font-['Poppins',Helvetica]">
+                              R0
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        <motion.div 
+          className="relative w-[174.41px] mt-[-45.02px] ml-8 font-normal text-foundationsecondaryblackblack-300 text-base text-center tracking-[-0.32px] leading-[normal] font-['Poppins',Helvetica]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.5 }}
+        >
+          <span className="font-medium text-[#031a82] tracking-[-0.05px]">
+            Your {insulationZone} R-value
+          </span>
+          <span className="text-[#545454] tracking-[-0.05px]">
+            {" "}
+            is{" "}
+          </span>
+          <span className="font-medium text-[#031a82] tracking-[-0.05px]">
+            R{displayedValue.toFixed(1)}
+          </span>
+        </motion.div>
+      </CardContent>
+    </Card>
   )
-
-  if (showCard) {
-    return (
-      <Card className="w-full max-w-full mx-auto"> {/* Set max width to full */}
-        <CardContent className="p-16">{canvasContent}</CardContent> {/* Increased padding */}
-      </Card>
-    )
-  }
-
-  return canvasContent
 }

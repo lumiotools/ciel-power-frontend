@@ -330,10 +330,8 @@ export function KneewallAssessment({ data, isAdmin = false, onUpdate, driveImage
                 <div className="max-w-[250px] mx-auto mb-6">
                   <RValueGauge
                     value={item.currentValue}
-                    maxValue={item.maxValue}
-                    title=""
-                    showCard={false}
-                    width="100%"
+                    maxValue={13}
+                    insulationZone="Kneewall"
                   />
                 </div>
               </div>

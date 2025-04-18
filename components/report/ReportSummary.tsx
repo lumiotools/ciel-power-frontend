@@ -25,7 +25,6 @@ import { ProjectCosts } from "@/components/report/ProjectCosts"
 import { FederalTaxCredits } from "@/components/report/TaxCredits"
 import { EnvironmentalImpact } from "@/components/report/EnvironmentalImpact"
 import { toast } from "sonner"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Define interfaces for data types
 interface ConcernItem {
@@ -609,13 +608,16 @@ export function ReportSummary({
     }
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
     <div className="space-y-8">
       {isAdmin && (
-        <div className="top-4 flex justify-end">
+        <div className="flex justify-end items-center mb-4">
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 rounded-full bg-green-500 text-white font-bold hover:bg-green-600 transition-colors"
+            className="px-4 py-2 rounded-md bg-green-500 text-white font-bold hover:bg-green-600 transition-colors"
           >
             Save
           </button>
@@ -623,16 +625,21 @@ export function ReportSummary({
       )}
 
       {/* Summary of Concerns Section */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} id="summary-of-concerns">
-        <Card className="rounded-xl border shadow-sm overflow-hidden">
-          <CardHeader className="py-4 px-6" style={{ backgroundColor: "#FF67001A" }}>
-            <CardTitle className="text-xl flex items-center gap-2" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: 16, color: "#FF6700" }}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.5 }} 
+        id="summary-of-concerns"
+      >
+        <div className={cardStyle}>
+          <div className="py-3 px-5" style={{ backgroundColor: "#FF67001A" }}>
+            <h2 className="flex items-center gap-2 font-medium" style={{ color: "#FF6700" }}>
               <AlertTriangle className="h-5 w-5" style={{ color: "#FF6700" }} />
               Summary of Concerns
-            </CardTitle>
-          </CardHeader>
+            </h2>
+          </div>
 
-          <CardContent className="p-6 bg-white">
+          <div className="p-6">
             <div className="grid gap-4">
               {concerns.length > 0 ? (
                 <div>
@@ -749,8 +756,8 @@ export function ReportSummary({
                 </motion.div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Solutions & Recommended Upgrades Section */}
@@ -760,23 +767,15 @@ export function ReportSummary({
         transition={{ duration: 0.5, delay: 0.3 }}
         id="solutions-and-recommendations"
       >
-        <Card className="rounded-xl border shadow-sm overflow-hidden">
-          <CardHeader className="py-4 px-6" style={{ backgroundColor: "#67B5021A" }}>
-            <CardTitle
-              className="flex items-center gap-2"
-              style={{
-                fontFamily: "Poppins",
-                fontWeight: 500,
-                fontSize: 16,
-                color: "#67B502"
-              }}
-            >
+        <div className={cardStyle}>
+          <div className="py-3 px-5" style={{ backgroundColor: "#67B5021A" }}>
+            <h2 className="flex items-center gap-2 font-medium" style={{ color: "#67B502" }}>
               <Calculator className="h-5 w-5" style={{ color: "#67B502" }} />
               Solutions & Recommended Upgrades
-            </CardTitle>
-          </CardHeader>
+            </h2>
+          </div>
 
-          <CardContent className="p-6" style={{ backgroundColor: "#ffffff" }}>
+          <div className="p-6">
             <div className="space-y-4">
               {recommendations.length > 0 ? (
                 recommendations.map((recommendation, index) => {
@@ -887,8 +886,8 @@ export function ReportSummary({
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Future Solutions Section - Without styled wrapper */}

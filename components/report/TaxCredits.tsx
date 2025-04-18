@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Activity, Pencil, Check, X, Trash2 } from "lucide-react"
 import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Define the interfaces for our data
 interface TaxCreditItem {
@@ -270,36 +269,25 @@ export function FederalTaxCredits({
     }).format(numericValue)
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
-    <Card className="rounded-xl border shadow-sm overflow-hidden">
-      <CardHeader className="py-4 px-6" style={{ backgroundColor: "#67B5021A" }}>
-        <CardTitle 
-          className="flex items-center gap-2" 
-          style={{ 
-            fontFamily: "Poppins", 
-            fontWeight: 500, 
-            fontSize: 16, 
-            color: "#67B502" 
-          }}
-        >
+    <div className={cardStyle}>
+      <div className="py-3 px-5" style={{ backgroundColor: "#67B5021A" }}>
+        <h2 className="flex items-center gap-2 font-medium" style={{ color: "#67B502" }}>
           <Activity className="h-5 w-5" style={{ color: "#67B502" }} />
           Federal Tax Credits
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6" style={{ backgroundColor: "#ffffff" }}>
+        </h2>
+      </div>
+      <div className="p-6">
         {/* Static introduction text */}
         <div className="mb-5 p-5 rounded-lg" style={{ backgroundColor: "#67B5020A" }}>
           <div className="space-y-2">
-            <div 
-              className="text-lg font-medium text-gray-800" 
-              style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: 16 }}
-            >
+            <div className="text-lg font-medium text-gray-800">
               Energy Efficient Home Improvement Federal Tax Credit
             </div>
-            <div 
-              className="text-gray-700 italic" 
-              style={{ fontFamily: "Poppins", fontWeight: 400, fontSize: 14 }}
-            >
+            <div className="text-gray-700 italic">
               If you make qualified energy-efficient improvements to your home after Jan. 1, 2023, you may qualify for a
               tax credit up to $3,200.
             </div>
@@ -422,22 +410,16 @@ export function FederalTaxCredits({
         {/* Static instructions text */}
         <div className="mt-5 p-5 rounded-lg" style={{ backgroundColor: "#67B5020A" }}>
           <div className="space-y-2">
-            <div 
-              className="text-lg font-medium text-gray-800" 
-              style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: 16 }}
-            >
+            <div className="text-lg font-medium text-gray-800">
               How to claim the Energy Efficient Home Improvement Credit
             </div>
-            <div 
-              className="text-gray-700" 
-              style={{ fontFamily: "Poppins", fontWeight: 400, fontSize: 14 }}
-            >
+            <div className="text-gray-700">
               File Form 5695, Residential Energy Credits Part II, with your tax return to claim the credit. You must
               claim the credit for the tax year when the property is installed, not merely purchased.
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

@@ -360,9 +360,7 @@ export function OverhangAssessment({ data, isAdmin = false, onUpdate, driveImage
                   <RValueGauge
                     value={overhangData.rValue}
                     maxValue={overhangData.maxValue}
-                    title=""
-                    showCard={false}
-                    width="100%"
+                    insulationZone="Overhang"
                   />
                 </div>
               </div>

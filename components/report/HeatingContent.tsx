@@ -425,7 +425,7 @@ const SystemDetails: React.FC<SystemDetailsProps> = ({
   </div>
 )
 
-// Update the HeatingSystemCard component to match the new layout
+// Update the HeatingSystemCard component to use consistent border radius styling
 const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
   item,
   index,
@@ -556,30 +556,23 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
     color: "#B18C2E",
   }
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
-      <Card className="rounded-xl border border-amber-100 shadow-sm overflow-hidden mb-8">
-        <CardHeader className="py-4 px-6" style={{ backgroundColor: "#FFFCF3" }}>
-          <CardTitle
-            className="flex items-center gap-3"
-            style={{
-              fontFamily: "Poppins",
-              fontWeight: 500,
-              fontSize: "16px",
-              lineHeight: "100%",
-              letterSpacing: "0%",
-              color: "#B18C2E",
-            }}
-          >
+      <div className={cardStyle}>
+        <div className="py-3 px-5" style={{ backgroundColor: "#FFFCF3" }}>
+          <h2 className="flex items-center gap-3 font-medium" style={{ color: "#B18C2E" }}>
             <Flame style={{ color: "#B18C2E" }} className="h-6 w-6" />
             {item.name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6" style={{ backgroundColor: "#FFFFFF" }}>
+          </h2>
+        </div>
+        <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left column - Current Performance and Type/Condition/Year/AFUE */}
             <div className="space-y-6">
@@ -599,8 +592,6 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                       value={systemData.value as number}
                       maxValue={100}
                       title={systemData.parameterName}
-                      showCard={false}
-                      width="100%"
                     />
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
@@ -743,8 +734,8 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   )
 }
@@ -768,8 +759,7 @@ const DEFAULT_HEATING_ITEMS = [
   },
 ]
 
-// HeatingContent component with the ability to save data
-// Modified HeatingContent component with default data cards
+// HeatingContent component with the ability to save data and consistent styling
 export function HeatingContent({ data, isAdmin = false, onUpdateItem, driveImages, onSave }: HeatingContentProps) {
   const params = useParams()
   const bookingNumber = params.bookingNumber
@@ -845,13 +835,16 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem, driveImage
 
   console.log("heating system item", heatingSystemItem)
 
+  // Consistent card style matching Overview component
+  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+
   return (
     <div className="space-y-8">
       {isAdmin && (
-        <div className="flex justify-end items-center">
+        <div className="flex justify-end items-center mb-4">
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 rounded-full bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors"
+            className="px-4 py-2 rounded-md bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors"
             style={{ backgroundColor: "#B18C2E" }}
           >
             Save
@@ -861,27 +854,14 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem, driveImage
 
       {/* Header card */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} id="heating-header">
-        <Card
-          className="rounded-xl border border-amber-100 shadow-sm overflow-hidden"
-          style={{ backgroundColor: "#FFFCF3" }}
-        >
-          <CardHeader className="py-4 px-6" style={{ backgroundColor: "#FFFCF3" }}>
-            <CardTitle
-              className="flex items-center gap-3"
-              style={{
-                fontFamily: "Poppins",
-                fontWeight: 500,
-                fontSize: "16px",
-                lineHeight: "100%",
-                letterSpacing: "0%",
-                color: "#B18C2E",
-              }}
-            >
+        <div className={cardStyle}>
+          <div className="py-3 px-5" style={{ backgroundColor: "#FFFCF3" }}>
+            <h2 className="flex items-center gap-3 font-medium" style={{ color: "#B18C2E" }}>
               <Thermometer style={{ color: "#B18C2E" }} className="h-6 w-6" />
               Understanding Your Home&apos;s Heating Systems
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6" style={{ backgroundColor: "#FFFFFF" }}>
+            </h2>
+          </div>
+          <div className="p-6">
             <p className="text-gray-700 mb-5 font-normal">
               During your Home Energy Assessment, our technician closely examined the insulation levels in your home
             </p>
@@ -892,8 +872,8 @@ export function HeatingContent({ data, isAdmin = false, onUpdateItem, driveImage
                 transferred to the water
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Primary Heating System Card - always displayed */}
