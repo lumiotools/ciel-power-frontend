@@ -693,16 +693,14 @@ export default function BookingDetailsPage({
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Service</h3>
-                <p className="mt-1">{booking.serviceName}</p>
+                <h3 className="text-sm font-medium text-gray-500">Address</h3>
+                <p className="mt-1">{booking.address}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500">
-                  Current Stage
+                  Email Address
                 </h3>
-                <p className="mt-1">
-                  {STAGE_LABELS[booking.currentStage] || booking.currentStage}
-                </p>
+                <p className="mt-1">{booking.email}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500">
@@ -711,8 +709,12 @@ export default function BookingDetailsPage({
                 <p className="mt-1">{formatDate(booking.startTime)}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">End Time</h3>
-                <p className="mt-1">{formatDate(booking.endTime)}</p>
+                <h3 className="text-sm font-medium text-gray-500">
+                  Current Stage
+                </h3>
+                <p className="mt-1">
+                  {STAGE_LABELS[booking.currentStage] || booking.currentStage}
+                </p>
               </div>
             </div>
 

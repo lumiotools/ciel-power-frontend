@@ -3,9 +3,11 @@ export interface Booking {
   startTime: string;
   title: string;
   address: string;
+  email: string;
   creationTime: string;
   utilityBillsUploaded: boolean;
   currentStage: string;
+  googleDriveFolder?: string;
 }
 
 export interface ContractDetails {
