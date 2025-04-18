@@ -151,7 +151,7 @@ export default function AIChatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 ease-in-out">
+        <div className="absolute bottom-20 right-0 w-80 sm:w-96 md:w-[512px] lg:w-[720px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 ease-in-out">
           {/* Chat Header */}
           <div className="bg-gradient-to-r from-[#8bc34a] to-[#7cb342] text-white p-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -170,7 +170,7 @@ export default function AIChatbot() {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto max-h-[400px] bg-gray-50">
+          <div className="flex-1 p-4 overflow-y-auto min-h-[260px] max-h-[400px] lg:max-h-[512px] bg-gray-50">
             {messages.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <div className="bg-[#f0f4e8] p-3 rounded-full inline-flex mb-3">
@@ -206,6 +206,12 @@ export default function AIChatbot() {
                             components={{
                               a: ({ node, ...props }) => (
                                 <a {...props} target="_blank" />
+                              ),
+                              img: ({ node, ...props }) => (
+                                <img
+                                  {...props}
+                                  className="w-72 h-auto rounded-md"
+                                />
                               ),
                             }}
                             remarkPlugins={[remarkGfm]}
