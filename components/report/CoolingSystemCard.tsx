@@ -1,97 +1,107 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useRef, useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Zap, Sun, AlertCircle, Edit2, Check, X, Pencil } from "lucide-react"
-import { ImageUpload } from "./ImageUpload"
-import { ImageCustomer } from "@/components/report/ImageCustomer"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import PercentageGauge from "@/components/report/PercentageGauge"
-import ValueGauge from "./ValueGauge"
+import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Zap, Sun, AlertCircle, Edit2, Check, X, Pencil } from "lucide-react";
+import { ImageUpload } from "./ImageUpload";
+import { ImageCustomer } from "@/components/report/ImageCustomer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import PercentageGauge from "@/components/report/PercentageGauge";
+import ValueGauge from "./ValueGauge";
 
 // Only include the necessary interfaces
 interface HeatingCoolingItem {
-  condition: string
-  name: string
-  parameter: string
-  type: string
-  value: number | string
-  year?: number
-  image?: string
+  condition: string;
+  name: string;
+  parameter: string;
+  type: string;
+  value: number | string;
+  year?: number;
+  image?: string;
 }
 
 interface CoolingSystemCardProps {
-  item: HeatingCoolingItem
-  index: number
-  isAdmin: boolean
-  onUpdateItem?: (updatedItem: HeatingCoolingItem) => void
-  driveImages?: any[]
+  item: HeatingCoolingItem;
+  index: number;
+  isAdmin: boolean;
+  onUpdateItem?: (updatedItem: HeatingCoolingItem) => void;
+  driveImages?: any[];
 }
 
 interface EditableFieldProps {
-  value: string
-  onSave: (value: string) => void
-  type: "text" | "select" | "number"
-  options?: string[]
-  min?: number
-  max?: number
+  value: string;
+  onSave: (value: string) => void;
+  type: "text" | "select" | "number";
+  options?: string[];
+  min?: number;
+  max?: number;
 }
 
 interface EditableSEERProps {
-  value: number
-  onChange: (value: number) => void
-  label?: string
+  value: number;
+  onChange: (value: number) => void;
+  label?: string;
 }
 
 interface InPlaceEditProps {
-  initialValue: string
-  isAdmin: boolean
-  onUpdate: (value: string) => void
-  label?: string | null
+  initialValue: string;
+  isAdmin: boolean;
+  onUpdate: (value: string) => void;
+  label?: string | null;
 }
 
 // Enhanced EditableSEER component with better UI and validation
-const EditableSEER: React.FC<EditableSEERProps> = ({ value, onChange, label = "" }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState(value)
-  const inputRef = useRef<HTMLInputElement>(null)
+const EditableSEER: React.FC<EditableSEERProps> = ({
+  value,
+  onChange,
+  label = "",
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Keep local state in sync with props
   useEffect(() => {
-    setEditValue(value)
-  }, [value])
+    setEditValue(value);
+  }, [value]);
 
   // Auto-focus the input when entering edit mode
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
+      inputRef.current.focus();
+      inputRef.current.select();
     }
-  }, [isEditing])
+  }, [isEditing]);
 
   const handleSave = () => {
     // Ensure we have a valid number
-    const numValue = Number(editValue)
+    const numValue = Number(editValue);
     if (!isNaN(numValue)) {
-      onChange(numValue)
-      setIsEditing(false)
+      onChange(numValue);
+      setIsEditing(false);
     } else {
       // Reset to original value if invalid input
-      setEditValue(value)
-      setIsEditing(false)
+      setEditValue(value);
+      setIsEditing(false);
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      handleSave()
+      handleSave();
     } else if (e.key === "Escape") {
-      setEditValue(value)
-      setIsEditing(false)
+      setEditValue(value);
+      setIsEditing(false);
     }
-  }
+  };
 
   if (isEditing) {
     return (
@@ -118,8 +128,8 @@ const EditableSEER: React.FC<EditableSEERProps> = ({ value, onChange, label = ""
         </button>
         <button
           onClick={() => {
-            setEditValue(value)
-            setIsEditing(false)
+            setEditValue(value);
+            setIsEditing(false);
           }}
           className="p-1 bg-red-100 hover:bg-red-200 rounded text-red-600 transition-colors"
           title="Cancel"
@@ -127,7 +137,7 @@ const EditableSEER: React.FC<EditableSEERProps> = ({ value, onChange, label = ""
           <X className="w-4 h-4" />
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -144,33 +154,43 @@ const EditableSEER: React.FC<EditableSEERProps> = ({ value, onChange, label = ""
         <Pencil className="w-4 h-4" style={{ color: "#B18C2E" }} />
       </button>
     </div>
-  )
-}
+  );
+};
 
 // Original EditableField component
-const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, options = [], min, max }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState(value)
+const EditableField: React.FC<EditableFieldProps> = ({
+  value,
+  onSave,
+  type,
+  options = [],
+  min,
+  max,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
 
   const handleSave = () => {
-    onSave(editValue)
-    setIsEditing(false)
-  }
+    onSave(editValue);
+    setIsEditing(false);
+  };
 
   const handleCancel = () => {
-    setEditValue(value)
-    setIsEditing(false)
-  }
+    setEditValue(value);
+    setIsEditing(false);
+  };
 
   if (!isEditing) {
     return (
       <div className="flex items-center gap-2">
         <span>{value}</span>
-        <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-gray-100 rounded">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="p-1 hover:bg-gray-100 rounded"
+        >
           <Edit2 className="w-4 h-4" />
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -185,10 +205,16 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
+          <button
+            onClick={handleSave}
+            className="p-1 hover:bg-green-100 rounded text-green-600"
+          >
             <Check className="w-4 h-4" />
           </button>
-          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -197,9 +223,9 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
           <Select
             value={editValue}
             onValueChange={(value) => {
-              setEditValue(value)
-              onSave(value)
-              setIsEditing(false)
+              setEditValue(value);
+              onSave(value);
+              setIsEditing(false);
             }}
           >
             <SelectTrigger className="w-32">
@@ -213,7 +239,10 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
               ))}
             </SelectContent>
           </Select>
-          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -225,55 +254,66 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
             onChange={(e) => setEditValue(e.target.value)}
             className="border rounded px-2 py-1 w-32"
           />
-          <button onClick={handleSave} className="p-1 hover:bg-green-100 rounded text-green-600">
+          <button
+            onClick={handleSave}
+            className="p-1 hover:bg-green-100 rounded text-green-600"
+          >
             <Check className="w-4 h-4" />
           </button>
-          <button onClick={handleCancel} className="p-1 hover:bg-red-100 rounded text-red-600">
+          <button
+            onClick={handleCancel}
+            className="p-1 hover:bg-red-100 rounded text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 // InPlaceEdit component
-const InPlaceEdit: React.FC<InPlaceEditProps> = ({ initialValue, isAdmin, onUpdate, label = null }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [value, setValue] = useState(initialValue)
-  const inputRef = useRef<HTMLInputElement>(null)
+const InPlaceEdit: React.FC<InPlaceEditProps> = ({
+  initialValue,
+  isAdmin,
+  onUpdate,
+  label = null,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(initialValue);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
+    setValue(initialValue);
+  }, [initialValue]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [isEditing])
+  }, [isEditing]);
 
   const handleClick = () => {
     if (isAdmin) {
-      setIsEditing(true)
+      setIsEditing(true);
     }
-  }
+  };
 
   const handleBlur = () => {
-    setIsEditing(false)
+    setIsEditing(false);
     if (value !== initialValue) {
-      onUpdate(value)
+      onUpdate(value);
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      setIsEditing(false)
+      setIsEditing(false);
       if (value !== initialValue) {
-        onUpdate(value)
+        onUpdate(value);
       }
     }
-  }
+  };
 
   if (isEditing) {
     return (
@@ -287,7 +327,7 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({ initialValue, isAdmin, onUpda
         className="text-2xl font-bold bg-transparent border-b outline-none"
         style={{ color: "#B18C2E", borderBottomColor: "#B18C2E" }}
       />
-    )
+    );
   }
 
   return (
@@ -300,10 +340,16 @@ const InPlaceEdit: React.FC<InPlaceEditProps> = ({ initialValue, isAdmin, onUpda
       {label ? ` ${label}` : ""}
       {isAdmin && <Pencil className="ml-2 h-5 w-5 text-gray-400" />}
     </div>
-  )
-}
+  );
+};
 
-const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: CoolingSystemCardProps) => {
+const CoolingSystemCard = ({
+  item,
+  index,
+  isAdmin,
+  onUpdateItem,
+  driveImages,
+}: CoolingSystemCardProps) => {
   const [systemData, setSystemData] = useState({
     type: item?.type ?? "null",
     condition: item?.condition ?? "null",
@@ -311,10 +357,10 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
     parameterName: item?.parameter ?? "SEER",
     year: item?.year,
     image: item?.image,
-  })
+  });
 
-  const [animate, setAnimate] = useState(false)
-  const itemRef = useRef(null)
+  const [animate, setAnimate] = useState(false);
+  const itemRef = useRef(null);
 
   // Set up intersection observer for animation
   useEffect(() => {
@@ -322,25 +368,31 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
       root: null,
       rootMargin: "0px",
       threshold: 0.5,
-    }
+    };
 
-    const observerCallback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+    const observerCallback = (
+      entries: IntersectionObserverEntry[],
+      observer: IntersectionObserver
+    ) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          setAnimate(true)
-          observer.unobserve(entry.target)
+          setAnimate(true);
+          observer.unobserve(entry.target);
         }
-      })
-    }
+      });
+    };
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions)
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions
+    );
 
-    if (itemRef.current) observer.observe(itemRef.current)
+    if (itemRef.current) observer.observe(itemRef.current);
 
     return () => {
-      if (itemRef.current) observer.unobserve(itemRef.current)
-    }
-  }, [])
+      if (itemRef.current) observer.unobserve(itemRef.current);
+    };
+  }, []);
 
   // Update state when props change
   useEffect(() => {
@@ -351,20 +403,20 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
       parameterName: item.parameter || "SEER",
       year: item.year,
       image: item?.image,
-    })
-  }, [item])
+    });
+  }, [item]);
 
   // Update local state and propagate changes to parent component
   const updateSystemData = (field: keyof typeof systemData, value: any) => {
-    console.log("System Data", systemData)
+    console.log("System Data", systemData);
     const updatedData = {
       ...systemData,
       [field]: value,
-    }
+    };
 
-    setSystemData(updatedData)
+    setSystemData(updatedData);
 
-    console.log("Item: ", item)
+    console.log("Item: ", item);
 
     // Only call onUpdateItem if it exists
     if (onUpdateItem) {
@@ -376,38 +428,39 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
         parameter: field === "parameterName" ? value : item.parameter,
         year: field === "year" ? value : item.year,
         image: field === "image" ? value : item.image,
-      }
+      };
 
-      onUpdateItem(updatedItem)
+      onUpdateItem(updatedItem);
     }
-  }
+  };
 
   // Helper function to determine if we should show a numeric gauge chart
   const shouldShowGaugeChart = () => {
-    return typeof systemData.value === "number" && systemData.value > 0
-  }
+    return typeof systemData.value === "number" && systemData.value > 0;
+  };
 
   const renderValue = () => {
     if (typeof systemData.value === "number") {
-      return systemData.value
+      return systemData.value;
     } else if (systemData.value === "") {
-      return "N/A"
+      return "N/A";
     } else {
-      return systemData.value
+      return systemData.value;
     }
-  }
+  };
 
   // Get description text based on item type
   const getDescriptionText = () => {
-    const seerValue = typeof systemData.value === "number" ? systemData.value : 0
-    const recommendedSEER = 16
+    const seerValue =
+      typeof systemData.value === "number" ? systemData.value : 0;
+    const recommendedSEER = 16;
 
     return `Your ${item?.name?.toLowerCase()} has a ${systemData.parameterName} rating of ${seerValue}. ${
       seerValue < recommendedSEER
         ? `Upgrading to a high-efficiency model with ${recommendedSEER} ${systemData.parameterName} could result in significant energy savings.`
         : `This is an efficient unit that meets or exceeds recommended standards.`
-    }`
-  }
+    }`;
+  };
 
   // Common heading style for section headings
   const sectionHeadingStyle = {
@@ -417,10 +470,11 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
     lineHeight: "100%",
     letterSpacing: "0%",
     color: "#B18C2E",
-  }
+  };
 
   // Consistent card style matching Overview component
-  const cardStyle = "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
+  const cardStyle =
+    "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden";
 
   return (
     <motion.div
@@ -430,7 +484,10 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
     >
       <div className={cardStyle}>
         <div className="py-3 px-5" style={{ backgroundColor: "#FFFCF3" }}>
-          <h2 className="flex items-center gap-3 font-medium" style={{ color: "#B18C2E" }}>
+          <h2
+            className="flex items-center gap-3 font-medium"
+            style={{ color: "#B18C2E" }}
+          >
             <Sun style={{ color: "#B18C2E" }} className="h-6 w-6" />
             {item.name}
           </h2>
@@ -443,9 +500,12 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
               <div
                 ref={itemRef}
                 className="rounded-lg p-6"
-                style={{ backgroundColor: "#FFFCF3", border: "0.5px solid #FDC02529" }}
+                style={{
+                  backgroundColor: "#FFFCF3",
+                  border: "0.5px solid #FDC02529",
+                }}
               >
-                <h3 className="flex items-center mb-6" style={sectionHeadingStyle}>
+                <h3 className="flex items-center" style={sectionHeadingStyle}>
                   Current Performance
                 </h3>
 
@@ -460,14 +520,24 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Current {systemData.parameterName}</p>
-                        <p className="text-2xl font-bold" style={{ color: "#D62501" }}>
+                        <p className="text-xs text-gray-500 mb-1">
+                          Current {systemData.parameterName}
+                        </p>
+                        <p
+                          className="text-2xl font-bold"
+                          style={{ color: "#D62501" }}
+                        >
                           {systemData.value}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">BPI Recommends</p>
-                        <p className="text-2xl font-bold" style={{ color: "#22C80F" }}>
+                        <p className="text-xs text-gray-500 mb-1">
+                          BPI Recommends
+                        </p>
+                        <p
+                          className="text-2xl font-bold"
+                          style={{ color: "#22C80F" }}
+                        >
                           16
                         </p>
                       </div>
@@ -480,13 +550,19 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
                         initialValue={renderValue().toString()}
                         isAdmin={Boolean(isAdmin && onUpdateItem)}
                         onUpdate={(newValue) => {
-                          const numValue = Number(newValue)
-                          const isNumeric = !isNaN(numValue)
-                          updateSystemData("value", isNumeric ? numValue : newValue)
+                          const numValue = Number(newValue);
+                          const isNumeric = !isNaN(numValue);
+                          updateSystemData(
+                            "value",
+                            isNumeric ? numValue : newValue
+                          );
                         }}
                       />
                     ) : (
-                      <p className="text-4xl font-bold" style={{ color: "#D62501" }}>
+                      <p
+                        className="text-4xl font-bold"
+                        style={{ color: "#D62501" }}
+                      >
                         {renderValue()}
                       </p>
                     )}
@@ -535,7 +611,9 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
                     {isAdmin ? (
                       <EditableField
                         value={`${systemData.year || new Date().getFullYear()}`}
-                        onSave={(value) => updateSystemData("year", Number(value))}
+                        onSave={(value) =>
+                          updateSystemData("year", Number(value))
+                        }
                         type="number"
                         min={1900}
                         max={new Date().getFullYear()}
@@ -546,11 +624,17 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">{systemData.parameterName}</p>
+                  <p className="text-xs text-gray-500 mb-1">
+                    {systemData.parameterName}
+                  </p>
                   <p className="font-medium">
                     {isAdmin ? (
                       <EditableSEER
-                        value={typeof systemData.value === "number" ? systemData.value : 0}
+                        value={
+                          typeof systemData.value === "number"
+                            ? systemData.value
+                            : 0
+                        }
                         onChange={(value) => updateSystemData("value", value)}
                       />
                     ) : typeof systemData.value === "number" ? (
@@ -565,17 +649,31 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
 
             {/* Right column - System Details and Image */}
             <div className="space-y-6">
-              <div className="rounded-lg p-6" style={{ backgroundColor: "#FFFCF3", border: "0.5px solid #FDC02529" }}>
+              <div
+                className="rounded-lg p-6"
+                style={{
+                  backgroundColor: "#FFFCF3",
+                  border: "0.5px solid #FDC02529",
+                }}
+              >
                 <div className="flex items-center gap-3 mb-4">
-                  <AlertCircle className="h-6 w-6" style={{ color: "#B18C2E" }} />
+                  <AlertCircle
+                    className="h-6 w-6"
+                    style={{ color: "#B18C2E" }}
+                  />
                   <h3 style={sectionHeadingStyle}>System Details</h3>
                 </div>
 
                 <p className="text-gray-700 mb-4">{getDescriptionText()}</p>
 
-                <div className="flex items-center space-x-3 mt-4 py-2" style={{ color: "#B18C2E" }}>
+                <div
+                  className="flex items-center space-x-3 mt-4 py-2"
+                  style={{ color: "#B18C2E" }}
+                >
                   <Zap className="h-5 w-5" />
-                  <span className="text-sm">*Estimated based on Age & Type</span>
+                  <span className="text-sm">
+                    *Estimated based on Age & Type
+                  </span>
                 </div>
               </div>
 
@@ -584,14 +682,20 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
                 {isAdmin && onUpdateItem ? (
                   <ImageUpload
                     image={systemData.image ?? ""}
-                    onImageChange={(newImage) => updateSystemData("image", newImage)}
+                    onImageChange={(newImage) =>
+                      updateSystemData("image", newImage)
+                    }
                     driveImages={driveImages}
                   />
                 ) : (
                   <div className="relative">
-                    <ImageCustomer image={systemData.image} driveImages={driveImages} />
+                    <ImageCustomer
+                      image={systemData.image}
+                      driveImages={driveImages}
+                    />
                     <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 text-xs rounded">
-                      Example of a {systemData.type.toLowerCase() || "standard"} {item.name.toLowerCase()}
+                      Example of a {systemData.type.toLowerCase() || "standard"}{" "}
+                      {item.name.toLowerCase()}
                     </div>
                   </div>
                 )}
@@ -601,7 +705,7 @@ const CoolingSystemCard = ({ item, index, isAdmin, onUpdateItem, driveImages }: 
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default CoolingSystemCard
+export default CoolingSystemCard;
