@@ -662,10 +662,7 @@ const HeatingSystemCard: React.FC<HeatingSystemCardProps> = ({
                   border: "0.5px solid #FDC02529",
                 }}
               >
-                <h3
-                  className="flex items-center mb-6"
-                  style={sectionHeadingStyle}
-                >
+                <h3 className="flex items-center" style={sectionHeadingStyle}>
                   Current Performance
                 </h3>
 

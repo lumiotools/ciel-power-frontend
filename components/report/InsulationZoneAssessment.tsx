@@ -437,10 +437,10 @@ export function InsulationZoneAssessment({
           </div>
 
           {/* Right Column */}
-          <div className="p-5 space-y-5">
+          <div className="p-2 space-y-5">
             {/* Current Performance Box */}
             <div className="bg-[#F7FDFC] p-4 rounded-lg">
-              <h3 className="text-lg font-medium text-[#256C68] mb-5">
+              <h3 className="text-lg font-medium text-[#256C68]">
                 Current Performance
               </h3>
 

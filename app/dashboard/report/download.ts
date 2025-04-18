@@ -128,25 +128,61 @@ const captureElement = async (
   }
 };
 
-// Get section color based on section name
-const getSectionColor = (
-  section: string
-): { r: number; g: number; b: number } => {
+// Replace the existing getSectionColor function with the new one
+const getSectionColor = (section: string): string => {
   switch (section.toLowerCase()) {
     case "overview":
-      return { r: 132, g: 204, b: 22 }; // lime-500
+      return "#67B502"; // lime-500
     case "airleakage":
-      return { r: 37, g: 99, b: 235 }; // blue-600
+      return "#031A82"; // blue-600
     case "insulation":
-      return { r: 20, g: 184, b: 166 }; // teal-500
+      return "#256C68"; // teal-500
     case "heating":
     case "cooling":
-      return { r: 245, g: 158, b: 11 }; // amber-500
+      return "#B18C2E"; // amber-500
     case "summary":
-      return { r: 249, g: 115, b: 22 }; // orange-500
+      return "#FF6700"; // orange-500
     default:
-      return { r: 0, g: 0, b: 0 }; // black
+      return "#000000"; // black
   }
+};
+
+// Update the addSectionHeading function to use hex colors
+const addSectionHeading = (
+  pdf: jsPDF,
+  title: string,
+  section: string,
+  includeBookmarks = true
+): void => {
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  // Get section color as hex
+  const colorHex = getSectionColor(section);
+
+  // Convert hex to RGB for jsPDF
+  const r = Number.parseInt(colorHex.slice(1, 3), 16);
+  const g = Number.parseInt(colorHex.slice(3, 5), 16);
+  const b = Number.parseInt(colorHex.slice(5, 7), 16);
+
+  // Set font style for heading
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+
+  // Add heading text positioned slightly higher
+  pdf.setTextColor(r, g, b);
+  pdf.text(title, pageWidth / 2, 13, { align: "center" });
+
+  // Add underline closer to the text
+  pdf.setDrawColor(r, g, b);
+  pdf.line(20, 15.5, pageWidth - 20, 15.5);
+
+  // Add bookmark for the section if bookmarks are enabled
+  addBookmark(pdf, title, includeBookmarks);
+
+  // Reset font to normal
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+  pdf.setTextColor(0, 0, 0);
 };
 
 // Helper function to add an image to the PDF
@@ -202,25 +238,41 @@ const addImageToPDF = (
   return startY + scaledHeight + 3; // Reduced gap
 };
 
-// Helper function to add page number
+// Replace the existing addPageNumber function with this improved version
 const addPageNumber = (pdf: jsPDF, includePageNumbers = true): void => {
   if (!includePageNumbers) return;
 
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
+  // Get current page number
   const pageNum = pdf.getNumberOfPages();
+
+  // Save the current state
+  const currentFontSize = pdf.getFontSize();
+  const currentTextColor = pdf.getTextColor();
+  const currentFont = pdf.getFont();
+
+  // Set font style for page numbers
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   pdf.setTextColor(100, 100, 100); // Gray color for page numbers
+
+  // Add page number to the current page
+  pdf.setPage(pageNum);
   pdf.text(`Page ${pageNum}`, pageWidth / 2, pageHeight - 5, {
     align: "center",
   });
+
+  // Restore the previous state
+  pdf.setFontSize(currentFontSize);
+  pdf.setTextColor(currentTextColor);
+  pdf.setFont(currentFont.fontName, currentFont.fontStyle);
 };
 const addBookmark = (
   pdf: jsPDF,
   title: string,
-  includeBookmarks: boolean = true
+  includeBookmarks = true
 ): void => {
   if (!includeBookmarks) return;
 
@@ -256,40 +308,6 @@ const addBookmark = (
   } catch (error) {
     console.error(`Error adding bookmark '${title}':`, error);
   }
-};
-// Helper function to add a section heading to the PDF with bookmark
-// Updated addSectionHeading function
-const addSectionHeading = (
-  pdf: jsPDF,
-  title: string,
-  section: string,
-  includeBookmarks: boolean = true
-): void => {
-  const pageWidth = pdf.internal.pageSize.getWidth();
-
-  // Get section color
-  const color = getSectionColor(section);
-
-  // Set font style for heading
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(14);
-
-  // Add heading text positioned slightly higher
-  pdf.setTextColor(color.r, color.g, color.b);
-  pdf.text(title, pageWidth / 2, 13, { align: "center" });
-
-  // Add underline closer to the text
-  pdf.setDrawColor(color.r, color.g, color.b);
-  pdf.line(20, 15.5, pageWidth - 20, 15.5);
-
-  // Add bookmark for the section if bookmarks are enabled
-  // Use the new dedicated bookmark function
-  addBookmark(pdf, title, includeBookmarks);
-
-  // Reset font to normal
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(11);
-  pdf.setTextColor(0, 0, 0);
 };
 
 // Format section name for display
@@ -370,6 +388,46 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       compress: true, // Enable compression for smaller file size
       putOnlyUsedFonts: true, // Optimize font embedding
     });
+
+    // Add this function right after the PDF initialization
+    // Helper function to ensure page numbers are added to all pages
+    const ensurePageNumbers = (
+      pdf: jsPDF,
+      includePageNumbers: boolean
+    ): void => {
+      if (!includePageNumbers) return;
+
+      // Get the total number of pages
+      const totalPages = pdf.getNumberOfPages();
+
+      // Add page numbers to each page
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        // Save the current state
+        const currentFontSize = pdf.getFontSize();
+        const currentTextColor = pdf.getTextColor();
+        const currentFont = pdf.getFont();
+
+        // Set font style for page numbers
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100); // Gray color for page numbers
+
+        // Add page number
+        pdf.text(`Page ${i}`, pageWidth / 2, pageHeight - 5, {
+          align: "center",
+        });
+
+        // Restore the previous state
+        pdf.setFontSize(currentFontSize);
+        pdf.setTextColor(currentTextColor);
+        pdf.setFont(currentFont.fontName, currentFont.fontStyle);
+      }
+    };
 
     // Set PDF properties
     pdf.setProperties({
@@ -703,7 +761,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
           // Process remaining heating systems
           let currentPageSystems = (system0 ? 1 : 0) + (system1 ? 1 : 0); // Count how many systems we've already added
-          let systemsRemaining =
+          const systemsRemaining =
             regularHeatingElements.length - currentPageSystems;
 
           if (systemsRemaining > 0) {
@@ -713,7 +771,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
               if (!idMatch) continue;
 
-              const systemIndex = parseInt(idMatch[1], 10);
+              const systemIndex = Number.parseInt(idMatch[1], 10);
 
               // Skip system-0 and system-1 as we've already handled them
               if (systemIndex < 2 && (system0 || system1)) continue;
@@ -823,7 +881,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
             if (!idMatch) continue;
 
-            const systemIndex = parseInt(idMatch[1], 10);
+            const systemIndex = Number.parseInt(idMatch[1], 10);
 
             // Skip system-0 and system-1 as we've already handled them
             if (
@@ -880,6 +938,11 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         // Continue anyway to ensure the PDF is saved
       }
     }
+
+    // Add this line right after the bookmark finalization and before saving the PDF
+    // Ensure all pages have page numbers
+    ensurePageNumbers(pdf, reportConfig.includePageNumbers);
+
     // Save the PDF with custom filename if provided
     const fileName = `${reportConfig.customFileName}.pdf`;
     pdf.save(fileName);
