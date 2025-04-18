@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface BookingDetailsResponse {
   success: boolean;
@@ -746,35 +747,87 @@ export default function BookingDetailsPage({
             </div>
 
             {/* Report Management */}
-            <div className="pt-6 border-t">
-              <h3 className="text-lg font-medium mb-6">Report Management</h3>
-              <div className="space-y-4 max-w-2xl">
-                <div className="space-y-2">
-                  <Label htmlFor="reportUrl">Report URL</Label>
-                  <Input
-                    id="reportUrl"
-                    value={reportUrl}
-                    onChange={(e) => setReportUrl(e.target.value)}
-                    placeholder="Enter report URL"
-                    disabled={isSavingReport}
-                    className="bg-white"
-                  />
-                </div>
+            <div className="pt-6 border-t max-w-screen-md">
+              <h3 className="text-lg font-medium mb-2">Report Management</h3>
+              <p className="text-gray-600 mb-3 text-sm">
+                Manage your customers report from here. For static report,
+                kindly enter a URL of a pre-existing report. Automated report
+                has a pre-existing report template with data retrieved from the
+                auditor's Ciel Power Portal.
+              </p>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reportStatus">Report Display Status</Label>
-                  <Tabs
-                    defaultValue="NONE"
-                    value={reportStatus}
-                    onValueChange={setReportStatus}
-                  >
-                    <TabsList>
-                      <TabsTrigger value="NONE">None</TabsTrigger>
-                      <TabsTrigger value="STATIC">Static</TabsTrigger>
-                      <TabsTrigger value="AUTOMATED">Automated</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+              <ul className="list-disc pl-5 mb-6 text-sm text-gray-600 space-y-1">
+                <li>
+                  <span className="font-medium">None:</span> In case no report
+                  is to be displayed for this customer
+                </li>
+                <li>
+                  <span className="font-medium">Static:</span> Use a
+                  pre-existing report by providing its URL
+                </li>
+                <li>
+                  <span className="font-medium">Automated:</span> Automated
+                  report has a pre-existing report template with data retrieved
+                  from the auditor's Ciel Power Portal
+                </li>
+              </ul>
+
+              <div className="space-y-4 max-w-3xl">
+                <div className="space-y-2">
+                  <Label>Report Display Status</Label>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroup
+                      defaultValue="NONE"
+                      value={reportStatus}
+                      onValueChange={setReportStatus}
+                      className="flex space-x-2"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <RadioGroupItem value="NONE" id="none" />
+                        <Label htmlFor="none" className="cursor-pointer">
+                          None
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <RadioGroupItem value="STATIC" id="static" />
+                        <Label htmlFor="static" className="cursor-pointer">
+                          Static
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <RadioGroupItem value="AUTOMATED" id="automated" />
+                        <Label htmlFor="automated" className="cursor-pointer">
+                          Automated
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
                 </div>
+                {reportStatus != "AUTOMATED" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="reportUrl">Report URL</Label>
+                    <Input
+                      id="reportUrl"
+                      value={reportUrl}
+                      onChange={(e) => setReportUrl(e.target.value)}
+                      placeholder="Enter report URL"
+                      disabled={isSavingReport || reportStatus !== "STATIC"}
+                      className="bg-white"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() =>
+                        router.push(`/admin/${bookingNumber}/report`)
+                      }
+                    >
+                      Preview Report
+                    </Button>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-3 mt-6">
                   <Button
