@@ -515,7 +515,7 @@ const PaymentDetails = ({
         </div>
         {userDetails?.bookingNumber && (
           <button
-            disabled={PaymentDetails?.status === "Completed"}
+            disabled={PaymentDetails?.status === "Paid"}
             onClick={onClick}
             className="bg-[#8bc34a] text-white px-4 py-2 rounded-md hover:bg-[#95c25a] transition-colors"
           >

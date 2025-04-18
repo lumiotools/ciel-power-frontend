@@ -739,12 +739,12 @@ export default function BookingDetailsPage({
             )}
 
             {/* Booking Progress */}
-            <div className="pt-6 border-t">
+            {/* <div className="pt-6 border-t">
               <h3 className="text-lg font-medium mb-6">Booking Progress</h3>
               <div className="w-full overflow-x-auto pb-4">
                 <BookingProgress steps={getStepStatus(booking.currentStage)} />
               </div>
-            </div>
+            </div> */}
 
             {/* Report Management */}
             <div className="pt-6 border-t max-w-screen-md">
