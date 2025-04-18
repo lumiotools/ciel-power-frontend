@@ -76,7 +76,7 @@ export default function PercentageGauge({
       <CardContent className="flex flex-col items-center justify-between relative p-0 bg-transparent">
         <div
           className="w-full aspect-[4/3] relative"
-          style={{ minHeight: "300px" }}
+          style={{ minHeight: "120px" }}
         >
           <motion.svg
             viewBox="0 0 500 300"
