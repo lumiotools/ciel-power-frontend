@@ -7,18 +7,24 @@ import { BookingsTable } from "@/components/admin/BookingsTable";
 import { InviteCustomerDialog } from "@/components/admin/InviteCustomerDialog";
 import type { Booking, BookingResponse, NutshellLead } from "@/types/admin";
 import { toast } from "sonner";
-import { Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Settings,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
 
 export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [bookeoNumber, setBookeoNumber] = useState("");
   const [searchedBooking, setSearchedBooking] = useState<Booking | null>(null);
   const [isSearchingBooking, setIsSearchingBooking] = useState(false);
   const [nutshellLeadFound, setNutshellLeadFound] = useState<boolean | null>(
-    null,
+    null
   );
   const [nutshellLeadName, setNutshellLeadName] = useState("");
   const [isSearchingLead, setIsSearchingLead] = useState(false);
@@ -28,7 +34,7 @@ export default function AdminPage() {
   const [leadError, setLeadError] = useState<string | null>(null);
   const [hasSearchedLead, setHasSearchedLead] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalBookings, setTotalBookings] = useState(0);
@@ -41,9 +47,11 @@ export default function AdminPage() {
 
   const fetchBookings = async () => {
     setLoading(true);
-    setBookings([])
+    setBookings([]);
     try {
-      const response = await fetch(`/api/admin/bookings?page=${currentPage}&limit=${bookingsPerPage}`);
+      const response = await fetch(
+        `/api/admin/bookings?page=${currentPage}&limit=${bookingsPerPage}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -91,7 +99,7 @@ export default function AdminPage() {
     try {
       // Call the booking search API
       const response = await fetch(
-        `/api/admin/search/booking?bookingNumber=${bookeoNumber.trim()}`,
+        `/api/admin/search/booking?bookingNumber=${bookeoNumber.trim()}`
       );
 
       if (!response.ok) {
@@ -139,7 +147,7 @@ export default function AdminPage() {
     try {
       // Call the lead search API
       const response = await fetch(
-        `/api/admin/search/leads?leadName=${encodeURIComponent(nutshellLeadName.trim())}`,
+        `/api/admin/search/leads?leadName=${encodeURIComponent(nutshellLeadName.trim())}`
       );
 
       // Set search flag to true after search completes
@@ -259,15 +267,38 @@ export default function AdminPage() {
             <h2 className="text-2xl font-bold text-gray-800">
               Bookings Dashboard
             </h2>
+
             <div className="flex gap-3">
-              <Button
+              {/* <Button
                 onClick={fetchBookings}
                 variant="outline"
                 className="text-[#5cb85c] border-[#5cb85c] hover:bg-[#5cb85c]/10"
                 disabled={loading}
+                size="icon"
               >
-                {loading ? "Refreshing..." : "Refresh"}
-              </Button>
+                <RotateCw className={loading ? "animate-spin" : ""} />
+              </Button> */}
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder="Search..."
+                  disabled={loading}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      fetchBookings();
+                    }
+                  }}
+                />
+                <Button
+                  className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
+                  disabled={loading}
+                  onClick={fetchBookings}
+                >
+                  Search
+                </Button>
+              </div>
+
               <Button
                 onClick={() => {
                   resetInviteForm();
@@ -298,21 +329,22 @@ export default function AdminPage() {
           {/* Pagination Controls */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
             <div className="text-sm text-gray-600">
-              Showing page {currentPage} of {totalPages} ({totalBookings} total bookings)
+              Showing page {currentPage} of {totalPages} ({totalBookings} total
+              bookings)
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={handlePreviousPage} 
+                onClick={handlePreviousPage}
                 disabled={currentPage === 1 || loading}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" /> Previous
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={handleNextPage} 
+                onClick={handleNextPage}
                 disabled={currentPage === totalPages || loading}
               >
                 Next <ChevronRight className="h-4 w-4 ml-1" />

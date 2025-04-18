@@ -71,13 +71,15 @@ export function BookingsTable({ bookings, isLoading }: BookingsTableProps) {
             <TableHead className="font-semibold">Address</TableHead>
             <TableHead className="font-semibold">Date & Time</TableHead>
             <TableHead className="font-semibold">Current Stage</TableHead>
-            <TableHead className="font-semibold">Utility Bills Uploaded</TableHead>
+            <TableHead className="font-semibold">
+              Utility Bills Uploaded
+            </TableHead>
             <TableHead className="font-semibold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {bookings.map((booking) => (
-            <TableRow key={booking.bookingNumber} className="hover:bg-gray-50"> 
+            <TableRow key={booking.bookingNumber} className="hover:bg-gray-50">
               <TableCell className="font-medium">
                 {booking.bookingNumber}
               </TableCell>
@@ -89,7 +91,13 @@ export function BookingsTable({ bookings, isLoading }: BookingsTableProps) {
                   {STAGE_LABELS[booking.currentStage]}
                 </span>
               </TableCell>
-              <TableCell>{booking.utilityBillsUploaded ? "Yes": "No"}</TableCell>
+              <TableCell>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.utilityBillsUploaded ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                >
+                  {booking.utilityBillsUploaded ? "Yes" : "No"}
+                </span>
+              </TableCell>
               <TableCell>
                 <Button
                   variant="ghost"
