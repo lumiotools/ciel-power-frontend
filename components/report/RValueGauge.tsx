@@ -60,14 +60,26 @@ export default function RValueGauge({
     // Convert to radians
     const radian = (angleDeg * Math.PI) / 180;
 
+    // Increased radius for the gauge positioning
+    const gaugeRadius = 180; // Increased from 160
+
     // Calculate position on the gauge arc
     return {
-      x: 250 - 160 * Math.cos(radian),
-      y: 220 - 160 * Math.sin(radian),
+      x: 250 - gaugeRadius * Math.cos(radian),
+      y: 220 - gaugeRadius * Math.sin(radian),
     };
   };
 
   const valuePosition = getValuePosition(displayedValue);
+
+  // Constants for gauge sizing
+  const centerX = 250;
+  const centerY = 220;
+  const gaugeRadius = 180; // Increased from 160
+  const innerRadius = 160; // Increased from 140
+  const outerRadius = 200; // Increased from 180
+  const labelRadius = 215; // Increased from 195
+  const arcStrokeWidth = 50; // Increased from 40
 
   return (
     <Card className="border-none shadow-none bg-transparent">
@@ -140,10 +152,10 @@ export default function RValueGauge({
 
             {/* Main gauge arc - with square edges */}
             <motion.path
-              d="M 90,220 A 160,160 0 0 1 410,220"
+              d={`M ${centerX - gaugeRadius},${centerY} A ${gaugeRadius},${gaugeRadius} 0 0 1 ${centerX + gaugeRadius},${centerY}`}
               fill="none"
               stroke="url(#rvalue-gradient)"
-              strokeWidth="40"
+              strokeWidth={arcStrokeWidth}
               strokeLinecap="butt"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
@@ -152,7 +164,7 @@ export default function RValueGauge({
 
             {/* Dotted semi-circle */}
             <motion.path
-              d="M 130,220 A 120,120 0 0 1 370,220"
+              d={`M ${centerX - innerRadius},${centerY} A ${innerRadius},${innerRadius} 0 0 1 ${centerX + innerRadius},${centerY}`}
               fill="none"
               stroke="url(#rvalue-dotted-gradient)"
               strokeWidth="1.5"
@@ -170,14 +182,14 @@ export default function RValueGauge({
               const tickRadian = (tickAngle * Math.PI) / 180;
 
               // Coordinates for the tick line
-              const innerX = 250 - 140 * Math.cos(tickRadian);
-              const innerY = 220 - 140 * Math.sin(tickRadian);
-              const outerX = 250 - 180 * Math.cos(tickRadian);
-              const outerY = 220 - 180 * Math.sin(tickRadian);
+              const innerX = centerX - innerRadius * Math.cos(tickRadian);
+              const innerY = centerY - innerRadius * Math.sin(tickRadian);
+              const outerX = centerX - outerRadius * Math.cos(tickRadian);
+              const outerY = centerY - outerRadius * Math.sin(tickRadian);
 
               // Coordinates for the label
-              const labelX = 250 - 195 * Math.cos(tickRadian);
-              const labelY = 220 - 195 * Math.sin(tickRadian);
+              const labelX = centerX - labelRadius * Math.cos(tickRadian);
+              const labelY = centerY - labelRadius * Math.sin(tickRadian);
 
               // Rotation angle for the text to follow the curve
               // Makes the text tangent to the circle at that point
@@ -197,7 +209,7 @@ export default function RValueGauge({
                     x2={outerX}
                     y2={outerY}
                     stroke="white"
-                    strokeWidth="2.5"
+                    strokeWidth="3" // Increased from 2.5
                   />
 
                   {/* Rotated label */}
@@ -205,7 +217,7 @@ export default function RValueGauge({
                     x={labelX}
                     y={labelY}
                     fill="#666666"
-                    fontSize="16"
+                    fontSize="18" // Increased from 16
                     fontWeight="500"
                     textAnchor="middle"
                     dominantBaseline="middle"
@@ -226,18 +238,18 @@ export default function RValueGauge({
               <circle
                 cx={valuePosition.x}
                 cy={valuePosition.y}
-                r="6"
+                r="8" // Increased from 6
                 fill="#1e3a8a"
                 stroke="white"
-                strokeWidth="2"
+                strokeWidth="2.5" // Increased from 2
               />
 
               {/* Current value text */}
               <text
                 x="250"
-                y="160"
+                y="150" // Moved up slightly from 160
                 fill="#1e3a8a"
-                fontSize="24"
+                fontSize="32" // Increased from 24
                 fontWeight="700"
                 textAnchor="middle"
                 dominantBaseline="middle"
@@ -246,15 +258,15 @@ export default function RValueGauge({
               </text>
             </motion.g>
 
-            {/* Arrow/needle pointing to the current value */}
+            {/* Arrow/needle pointing to the current value - bigger needle */}
             <g
               style={{
                 transform: `rotate(${needleAngle + 90}deg)`,
-                transformOrigin: "250px 220px",
+                transformOrigin: `${centerX}px ${centerY}px`,
               }}
             >
               <path
-                d="M 250,110 L 260,140 L 255,140 L 255,220 L 245,220 L 245,140 L 240,140 Z"
+                d={`M ${centerX},${centerY - 130} L ${centerX + 12},${centerY - 90} L ${centerX + 6},${centerY - 90} L ${centerX + 6},${centerY} L ${centerX - 6},${centerY} L ${centerX - 6},${centerY - 90} L ${centerX - 12},${centerY - 90} Z`}
                 fill="url(#rvalue-arrow-gradient)"
                 stroke="none"
               />
@@ -263,9 +275,9 @@ export default function RValueGauge({
             {/* Title display - positioned at the bottom center */}
             <motion.text
               x="250"
-              y="270"
+              y="275" // Moved down slightly from 270
               fill="#333333"
-              fontSize="16"
+              fontSize="18" // Increased from 16
               fontWeight="500"
               textAnchor="middle"
               initial={{ opacity: 0, y: 10 }}
