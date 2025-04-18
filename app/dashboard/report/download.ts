@@ -189,7 +189,8 @@ const addSectionHeading = (
 const addImageToPDF = (
   pdf: jsPDF,
   canvas: HTMLCanvasElement,
-  startY = 20
+  startY = 20,
+  section?: string
 ): number => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -234,8 +235,13 @@ const addImageToPDF = (
     "FAST"
   );
 
-  // Return the new Y position with minimal gap
-  return startY + scaledHeight + 3; // Reduced gap
+  // Return the new Y position with adjusted gap based on section
+  // Remove gap for insulation sections
+  if (section === "insulation") {
+    return startY + scaledHeight; // No additional gap for insulation
+  } else {
+    return startY + scaledHeight + 3; // Regular gap for other sections
+  }
 };
 
 // Replace the existing addPageNumber function with this improved version
@@ -598,7 +604,8 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         }
 
         // Current Y position for adding elements
-        let currentY = 18; // Reduced to save vertical space
+        // Reduce top margin for insulation sections
+        let currentY = section.section === "insulation" ? 16 : 18;
 
         // Capture and add each element for this page
         for (const id of page.ids) {
@@ -606,7 +613,8 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
           const canvas = await captureElement(id);
           if (canvas) {
-            currentY = addImageToPDF(pdf, canvas, currentY);
+            // Pass the section name to addImageToPDF
+            currentY = addImageToPDF(pdf, canvas, currentY, section.section);
           }
         }
 
@@ -630,8 +638,13 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
               insulationZoneElements[0].id
             );
             if (firstZoneCanvas) {
-              // Add to the current page
-              currentY = addImageToPDF(pdf, firstZoneCanvas, currentY);
+              // Add to the current page with insulation section parameter
+              currentY = addImageToPDF(
+                pdf,
+                firstZoneCanvas,
+                currentY,
+                "insulation"
+              );
             }
           }
 
@@ -648,7 +661,8 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
               }
               pageCount++;
 
-              currentY = 16; // Start higher on the page
+              // Start higher on the page for insulation sections
+              currentY = 14; // Reduced top margin for insulation zones
 
               // Check the heights of the zones to determine how many can fit on one page
               // Measure first zone to analyze
@@ -687,7 +701,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
               // Add the zones to the page with minimal spacing
               for (const canvas of zoneCanvases) {
-                currentY = addImageToPDF(pdf, canvas, currentY);
+                currentY = addImageToPDF(pdf, canvas, currentY, "insulation");
               }
 
               // Move to the next group of zones

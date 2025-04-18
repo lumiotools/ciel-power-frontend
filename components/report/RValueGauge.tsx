@@ -16,8 +16,6 @@ export default function RValueGauge({
   value,
   minValue = 0,
   maxValue = 60,
-  title = "R-Value",
-  subtitle = "is",
 }: RValueGaugeProps): JSX.Element {
   const [displayedValue, setDisplayedValue] = useState(value);
 
@@ -69,20 +67,10 @@ export default function RValueGauge({
   const valuePosition = getValuePosition(displayedValue);
 
   return (
-    <div className="w-full aspect-[4/3] relative p-0 m-0 block">
+    <div className="w-full h-64 relative">
       <motion.svg
-        viewBox="0 0 500 300"
-        className="w-full h-full p-0 m-0 block"
-        style={{
-          display: "block",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          padding: 0,
-          margin: 0,
-        }}
+        viewBox="0 0 500 240"
+        className="w-full h-full"
         preserveAspectRatio="xMidYMid meet"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -139,7 +127,6 @@ export default function RValueGauge({
           stroke="url(#rvalue-gradient)"
           strokeWidth="40"
           strokeLinecap="butt"
-          style={{ margin: 0, padding: 0 }}
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ delay: 0.3, duration: 1 }}
@@ -152,7 +139,6 @@ export default function RValueGauge({
           stroke="url(#rvalue-dotted-gradient)"
           strokeWidth="1.5"
           strokeDasharray="3,6"
-          style={{ margin: 0, padding: 0 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
@@ -255,21 +241,6 @@ export default function RValueGauge({
             stroke="none"
           />
         </g>
-
-        {/* Title display - positioned at the bottom center */}
-        <motion.text
-          x="250"
-          y="270"
-          fill="#333333"
-          fontSize="16"
-          fontWeight="500"
-          textAnchor="middle"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          {title} {subtitle && subtitle}
-        </motion.text>
       </motion.svg>
     </div>
   );
