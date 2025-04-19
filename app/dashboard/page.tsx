@@ -1,12 +1,13 @@
 "use client";
 
+import type React from "react";
+
 import { useEffect, useState, useContext } from "react";
 import { AUTH_CONTEXT, type UserDetails } from "../../providers/auth";
 import { Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import GoogleReview from "./_comp/Google-review";
 import Recommendation from "./_comp/Recommendation";
-import TimelineItemWrapper, { shouldBeGreen } from "./timeline-item-wrapper";
 
 import {
   ClipboardList,
@@ -100,6 +101,13 @@ interface ConsultationDetailsProps {
   onClick: () => void;
 }
 
+interface TimelineItemProps {
+  state: keyof BookingDetails;
+  currentState: keyof BookingDetails | null;
+  bookingDetails: BookingDetails;
+  children: React.ReactNode;
+}
+
 const isOneAndHalfHourAhead = (startTime?: string): boolean => {
   if (!startTime) return false;
   const startDate = new Date(startTime);
@@ -130,6 +138,36 @@ const formatTime = (dateStr?: string): string => {
     hour12: true,
     timeZone: "UTC",
   }).format(date);
+};
+
+// Replace the shouldBeGreen function with this updated version
+const shouldBeGreen = (
+  state: keyof BookingDetails,
+  bookingDetails: BookingDetails,
+  latestState: keyof BookingDetails | null
+): boolean => {
+  // Only the current/latest state should be green
+  return state === latestState;
+};
+
+// Update the TimelineItem component to pass latestState to shouldBeGreen
+const TimelineItem = ({
+  state,
+  currentState,
+  bookingDetails,
+  children,
+}: TimelineItemProps) => {
+  const isGreen = shouldBeGreen(state, bookingDetails, currentState);
+  const isLatest = state === currentState;
+  const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white";
+
+  return (
+    <div className="timeline-item mb-6 relative">
+      <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
+        {children}
+      </div>
+    </div>
+  );
 };
 
 export default function DashboardPage() {
@@ -256,10 +294,11 @@ export default function DashboardPage() {
   const { userDetails } = useContext(AUTH_CONTEXT);
 
   // Function to render the latest state component
+  // Update the renderLatestStateComponent function to use the new shouldBeGreen logic
   const renderLatestStateComponent = () => {
     if (!latestState || !bookingDetails) return null;
 
-    const isGreen = shouldBeGreen(latestState, bookingDetails);
+    const isGreen = shouldBeGreen(latestState, bookingDetails, latestState);
     const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white";
 
     switch (latestState) {
@@ -380,7 +419,7 @@ export default function DashboardPage() {
                   <div className="timeline-items-container">
                     {/* Payment Details */}
                     {bookingDetails?.paymentDetails && (
-                      <TimelineItemWrapper
+                      <TimelineItem
                         state="paymentDetails"
                         currentState={latestState}
                         bookingDetails={bookingDetails}
@@ -390,12 +429,12 @@ export default function DashboardPage() {
                           userDetails={userDetails}
                           onClick={() => setIsModalOpen(true)}
                         />
-                      </TimelineItemWrapper>
+                      </TimelineItem>
                     )}
 
                     {/* Project Plans Ready */}
                     {bookingDetails?.proposalDetails && (
-                      <TimelineItemWrapper
+                      <TimelineItem
                         state="proposalDetails"
                         currentState={latestState}
                         bookingDetails={bookingDetails}
@@ -403,7 +442,7 @@ export default function DashboardPage() {
                         <ProjectPlansReady
                           ProposalDetails={bookingDetails?.proposalDetails}
                         />
-                      </TimelineItemWrapper>
+                      </TimelineItem>
                     )}
 
                     {/* Timeline Item - We're Lining Everything Up */}
@@ -419,7 +458,7 @@ export default function DashboardPage() {
 
                     {/* Timeline Item - Your Audit Results are in */}
                     {bookingDetails?.consultationDetails && (
-                      <TimelineItemWrapper
+                      <TimelineItem
                         state="consultationDetails"
                         currentState={latestState}
                         bookingDetails={bookingDetails}
@@ -433,12 +472,12 @@ export default function DashboardPage() {
                             openRescheduleModal("AUDIT-RESULTS-123")
                           }
                         />
-                      </TimelineItemWrapper>
+                      </TimelineItem>
                     )}
 
                     {/* Timeline Item - Your Results Are In — Let's Talk */}
                     {bookingDetails?.reportConsultation && (
-                      <TimelineItemWrapper
+                      <TimelineItem
                         state="reportConsultation"
                         currentState={latestState}
                         bookingDetails={bookingDetails}
@@ -448,12 +487,12 @@ export default function DashboardPage() {
                             bookingDetails?.reportConsultation
                           }
                         />
-                      </TimelineItemWrapper>
+                      </TimelineItem>
                     )}
 
                     {/* Timeline Item - Upload Your Utility Bills */}
                     {bookingDetails?.utilityBillDetails && (
-                      <TimelineItemWrapper
+                      <TimelineItem
                         state="utilityBillDetails"
                         currentState={latestState}
                         bookingDetails={bookingDetails}
@@ -463,12 +502,12 @@ export default function DashboardPage() {
                             bookingDetails?.utilityBillDetails
                           }
                         />
-                      </TimelineItemWrapper>
+                      </TimelineItem>
                     )}
 
                     {/* Timeline Item - Professional Home Energy Audit */}
                     {bookingDetails?.bookingDetails && (
-                      <TimelineItemWrapper
+                      <TimelineItem
                         state="bookingDetails"
                         currentState={latestState}
                         bookingDetails={bookingDetails}
@@ -477,7 +516,7 @@ export default function DashboardPage() {
                           BookingDetails={bookingDetails?.bookingDetails}
                           onClick={() => openRescheduleModal("AUDIT-345678")}
                         />
-                      </TimelineItemWrapper>
+                      </TimelineItem>
                     )}
                   </div>
                 )}
