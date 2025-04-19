@@ -158,7 +158,6 @@ const TimelineItem = ({
   children,
 }: TimelineItemProps) => {
   const isGreen = shouldBeGreen(state, bookingDetails, currentState);
-  const isLatest = state === currentState;
   const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white";
 
   return (
