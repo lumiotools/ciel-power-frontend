@@ -14,6 +14,7 @@ import KnowledgeContent from "@/components/booking/knowledgeContent";
 import BookingProgress from "@/components/component/booking-progress";
 import BlogContent from "@/components/booking/blogs";
 import Link from "next/link";
+import ContractDisplay from "@/components/booking/contractDisplay";
 
 interface Price {
   totalGross: { amount: string; currency: string };
@@ -44,6 +45,11 @@ interface BookingDetails {
   auditor: string;
 }
 
+export interface ContractData {
+  id: string;
+  name: string;
+}
+
 interface ApiResponse {
   success: boolean;
   message: string;
@@ -52,8 +58,10 @@ interface ApiResponse {
     customer: CustomerDetails;
     currentStage: string;
     reportUrl?: string | null;
+    reportData?: any | null;
     newFollowUpScheduleUrl: string;
-    followUpScheduleDetails: FollowUpDetals;
+    followUpScheduleDetails: FollowUpDetals | null;
+    offeredContracts: ContractData[];
     youtubeVideos: YouTubeVideo[];
     blogs: BlogPost[];
   };
@@ -99,8 +107,8 @@ const stepsSequence = [
   { label: "Booking Created", key: "bookingCreated" },
   { label: "Utility Bills Uploaded", key: "utilityBills" },
   { label: "Audit Performed", key: "auditPerformed" },
-  { label: "Report Generated", key: "reportGenerated" },
   { label: "Follow Up Scheduled", key: "followUpScheduled" },
+  { label: "Report Generated", key: "reportGenerated" },
   { label: "Proposal Signed", key: "proposalSigned" },
   { label: "Payment Done", key: "paymentDone" },
 ];
@@ -111,8 +119,8 @@ const getStepStatus = (currentStage: string) => {
       stepsSequence.findIndex((s) => s.key === currentStage) > index
         ? "completed"
         : stepsSequence.findIndex((s) => s.key === currentStage) === index
-        ? "current"
-        : "upcoming";
+          ? "current"
+          : "upcoming";
     return { label: step.label, status };
   });
 };
@@ -128,7 +136,7 @@ const BookingDetailsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [youtubeSuggestions, setYoutubeSuggestions] = useState<YouTubeVideo[]>(
-    []
+    [],
   );
   const [followUpScheduleDetails, setFollowUpScheduleDetails] =
     useState<FollowUpDetals | null>(null);
@@ -138,6 +146,11 @@ const BookingDetailsPage = () => {
     string | null
   >(null);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [offeredContracts, setOfferedContracts] = useState<ContractData[]>([]);
+  const [completedContractFileUrl, setCompletedContractFileUrl] = useState<
+    string | null
+  >(null);
+
   const handleRescheduleClick = () => {
     setModalOpen(true);
   };
@@ -202,15 +215,8 @@ const BookingDetailsPage = () => {
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
-        const response = await fetch(`/api/user/bookings/${bookingNumber}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        const data: ApiResponse = await response.json();
+        const response = await fetch(`/api/user/bookings/${bookingNumber}`);
+        const data = await response.json();
         if (data.success) {
           setBooking(data.data.booking);
           setCustomerDetails(data.data.customer);
@@ -222,6 +228,8 @@ const BookingDetailsPage = () => {
           setCurrentStage(data.data.currentStage);
           setNewFollowUpScheduleLink(data.data.newFollowUpScheduleUrl || null);
           setReportUrl(data.data.reportUrl || null);
+          setOfferedContracts(data.data.offeredContracts || []);
+          setCompletedContractFileUrl(data.data.completedContractLink || null);
         } else {
           throw new Error(data.message || "Failed to fetch booking details");
         }
@@ -466,26 +474,6 @@ const BookingDetailsPage = () => {
               </div>
             )}
 
-            {(currentStage === "reportGenerated" ||
-              currentStage === "followUpScheduled" ||
-              currentStage === "proposalSigned" ||
-              currentStage === "paymentDone") && (
-              <div>
-                <h4 className="text-lg font-bold">
-                  Congratulations, your audit report has been generated!
-                </h4>
-                {reportUrl && (
-                  <Link
-                    href={reportUrl}
-                    target="_blank"
-                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
-                  >
-                    Click here to view the report
-                  </Link>
-                )}
-              </div>
-            )}
-
             {/* Schedule Follow-Up Consultation */}
             {currentStage === "followUpScheduled" &&
             !followUpScheduleDetails?.isCancelled ? (
@@ -515,7 +503,7 @@ const BookingDetailsPage = () => {
             ) : (
               // If no followUpScheduleDetails exists, show header & follow-up link (Spaced Apart)
               (currentStage === "followUpScheduled" ||
-                currentStage === "reportGenerated") && (
+                currentStage === "auditPerformed") && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold">
@@ -534,11 +522,66 @@ const BookingDetailsPage = () => {
                 </div>
               )
             )}
+
+            {(currentStage === "reportGenerated" ||
+              currentStage === "proposalSigned" ||
+              currentStage === "paymentDone") && (
+              <div className="flex justify-between items-center">
+                <h4 className="text-lg font-bold">
+                  Congratulations, your audit report has been generated!
+                </h4>
+                {reportUrl ? (
+                  <Link
+                    href={reportUrl}
+                    target="_blank"
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                  >
+                    Click here to view the report
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() =>
+                      (window.location.href = `/dashboard/bookings/${bookingNumber}/reports`)
+                    }
+                    className="bg-[#96C93D] text-white hover:bg-[#85b234] py-2 px-4 rounded text-sm"
+                  >
+                    View Report
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Contract Details */}
+            {currentStage === "proposalSigned" ||
+            currentStage === "paymentDone" ? (
+              <div className="flex justify-between items-center">
+                <h4 className="text-lg font-bold">
+                  Congratulations, you have signed the contract!
+                </h4>
+                {completedContractFileUrl && (
+                  <Link
+                    href={completedContractFileUrl}
+                    target="_blank"
+                    className="text-[#96C93D] hover:text-[#85b234] hover:underline text-sm"
+                  >
+                    Download Signed Contract
+                  </Link>
+                )}
+              </div>
+            ) : (
+              offeredContracts &&
+              offeredContracts.length > 0 && (
+                <ContractDisplay
+                  bookingNumber={bookingNumber}
+                  offeredContracts={offeredContracts}
+                />
+              )
+            )}
           </div>
           {/* RIGHT COLUMN (1/3 width): Payment & Auditor */}
           {/* <div className="space-y-6"> */}
-            {/* Payment Details Card */}
-            {/* <Card className="p-6 bg-[#F0F8E6] shadow-md">
+          {/* Payment Details Card */}
+          {/* <Card className="p-6 bg-[#F0F8E6] shadow-md">
               <h4 className="mb-4 text-lg font-medium">Payment details</h4>
               <div className="mb-4 flex justify-between">
                 <span className="text-muted-foreground">Payment Status</span>
@@ -550,37 +593,37 @@ const BookingDetailsPage = () => {
                   ${booking.price.totalGross.amount}
                 </span>
               </div> */}
-              {/* <Button
+          {/* <Button
                 variant="outline"
                 className="w-full bg-[#96C93D] hover:bg-[#85b234]"
               >
                 {/* <Download className="mr-2 size-4" /> *
                 Download Invoice
               </Button> */}
-            {/* </Card> */}
+          {/* </Card> */}
 
-            {/* Auditor Card */}
-            {/* <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px]"> */}
-              {/* <h4 className="mb-4 text-lg font-medium">
-                Your Assigned Auditor
-              </h4> */}
-              {/* <div className="mb-4 flex flex-col items-center"> */}
-                {/* <div className="mb-4 overflow-hidden rounded-lg"> */}
-                  {/* Auditor avatar or placeholder image */}
-                  {/* <img
-                    src="https://st2.depositphotos.com/9998432/48284/v/450/depositphotos_482842120-stock-illustration-default-avatar-photo-placeholder-grey.jpg"
-                    alt="Auditor"
-                    width={120}
-                    height={120}
-                    className="object-cover rounded-full"
-                  /> */}
-                {/* </div> */}
-                {/* <h5 className="font-medium">{booking.auditor}</h5> */}
-              {/* </div> */}
-              {/* <Button className="w-full bg-[#96C93D] hover:bg-[#85b234]">
-                Track Professional
-              </Button> */}
-            {/* </Card> */}
+          {/* Auditor Card */}
+          <Card className="p-6 bg-[#F0F8E6] shadow-md rounded-[6px] flex flex-col justify-center">
+            <h4 className="mb-4 text-lg font-medium text-center">
+              Your Assigned Auditor
+            </h4>
+            <div className="mb-4 flex flex-col items-center justify-center">
+              <div className="mb-4 overflow-hidden rounded-lg">
+                {/* Auditor avatar or placeholder image */}
+                <img
+                  src="https://st2.depositphotos.com/9998432/48284/v/450/depositphotos_482842120-stock-illustration-default-avatar-photo-placeholder-grey.jpg"
+                  alt="Auditor"
+                  width={120}
+                  height={120}
+                  className="object-cover rounded-full"
+                />
+              </div>
+              <h5 className="font-medium">{booking.auditor}</h5>
+            </div>
+            {/* <Button className="w-full bg-[#96C93D] hover:bg-[#85b234]">
+        Track Professional
+      </Button> */}
+          </Card>
           {/* </div> */}
         </div>
 
@@ -641,14 +684,12 @@ const BookingDetailsPage = () => {
 
 export default BookingDetailsPage;
 
-
-const filterYoutubeSuggestions = (youtubeSuggestions)=>{
-  const today= new Date();
-  const oneYearAgo = new Date(today.setFullYear(today.getFullYear() - 1));
-  const filteredSuggestions = youtubeSuggestions.filter((content) => {
-    const contentDate = new Date(content.creationTime);
-    return contentDate >= oneYearAgo && contentDate <= today;
-  }
-  );   
-  return filteredSuggestions;
-}
+// const filterYoutubeSuggestions = (youtubeSuggestions) => {
+//   const today = new Date();
+//   const oneYearAgo = new Date(today.setFullYear(today.getFullYear() - 1));
+//   const filteredSuggestions = youtubeSuggestions.filter((content) => {
+//     const contentDate = new Date(content.creationTime);
+//     return contentDate >= oneYearAgo && contentDate <= today;
+//   });
+//   return filteredSuggestions;
+// };

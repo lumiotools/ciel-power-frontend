@@ -29,7 +29,7 @@ const UtilityBills = ({
         `/api/user/bookings/${bookingNumber}/utility-bills`,
         {
           method: "GET",
-        }
+        },
       );
       const data = await response.json();
       console.log(data);
@@ -49,7 +49,7 @@ const UtilityBills = ({
         `/api/user/bookings/${bookingNumber}/utility-bills/${id}`,
         {
           method: "DELETE",
-        }
+        },
       );
       const data = await response.json();
       console.log(data);
@@ -73,7 +73,12 @@ const UtilityBills = ({
               Upload Utility Bills
             </h3>
             {!bookingCancelled && (
-              <Button onClick={() => setUploadModal(true)} className="bg-[#96C93D] hover:bg-[#85b234]">Upload</Button>
+              <Button
+                onClick={() => setUploadModal(true)}
+                className="bg-[#96C93D] hover:bg-[#85b234]"
+              >
+                Upload
+              </Button>
             )}
           </div>
 
@@ -108,7 +113,12 @@ const UtilityBills = ({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm" className="bg-[#96C93D] hover:bg-[#85b234]">View</Button>
+                    <Button
+                      size="sm"
+                      className="bg-[#96C93D] hover:bg-[#85b234]"
+                    >
+                      View
+                    </Button>
                   </a>
                 </div>
               ))}

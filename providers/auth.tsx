@@ -21,6 +21,8 @@ export interface UserDetails {
   lastName: string;
   emailAddress: string;
   admin?: boolean | undefined;
+  bookeoCustomerId?: string;
+  bookingNumber?: string;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -53,7 +55,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (
       !isLoading &&
       !isLoggedIn &&
-      (pathname.includes("/dashboard") || pathname.includes("/admin"))
+      (pathname.includes("/dashboard") || pathname.includes("/admin") || ["/document-portal", "/knowledge-base"].includes(pathname))
     ) {
       router.replace("/login");
     }
@@ -62,7 +64,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       !isLoading &&
       isLoggedIn &&
       userDetails?.admin &&
-      pathname.includes("/dashboard")
+      pathname.includes("/dashboard") &&
+      ["/document-portal", "/knowledge-base"].includes(pathname)
     ) {
       router.replace("/admin");
     }
@@ -96,7 +99,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AUTH_CONTEXT.Provider
       value={{ isLoading, isLoggedIn, userDetails, checkAuth, logoutUser }}
     >
-      {children}
+      {isLoading ? (
+        <div className="w-screen h-screen flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        children
+      )}
     </AUTH_CONTEXT.Provider>
   );
 };

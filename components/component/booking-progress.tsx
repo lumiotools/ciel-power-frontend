@@ -1,6 +1,10 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { BadgeX } from "lucide-react";
-import type React from "react"; // Import React
+import type React from "react";
+import { useContext } from "react";
+import { BOOKING_CONTEXT } from "@/providers/booking";
 
 interface Step {
   label: string;
@@ -8,24 +12,25 @@ interface Step {
 }
 
 interface BookingProgressProps {
-  steps: Step[];
   className?: string;
 }
 
-const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
-  status === "cancelled" ? (
-    <BadgeX className="size-11 fill-destructive text-white" />
-  ) : (
-    <div className="relative w-8 h-8">
+const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) => {
+  if (status === "cancelled") {
+    return <BadgeX className="size-11 fill-destructive text-white" />;
+  }
+
+  return (
+    <div className="relative w-10 h-10">
       <svg
-        width="32"
-        height="32"
+        width="40"
+        height="40"
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={cn("transition-colors", {
-          "text-[#5ea502]": status === "completed" || status === "current",
-          // "text-[#b9dd8b]": status === "current",
+          "text-[#5ea502]": status === "completed",
+          "text-[#8bc34a]": status === "current",
           "text-[#d1d5db]": status === "upcoming",
         })}
       >
@@ -37,30 +42,97 @@ const StatusIcon: React.FC<{ status: Step["status"] }> = ({ status }) =>
       </svg>
     </div>
   );
+};
 
 export const BookingProgress: React.FC<BookingProgressProps> = ({
-  steps,
   className,
 }) => {
+  const { bookingDetails } = useContext(BOOKING_CONTEXT);
+
+  // Determine current stage based on available data
+  const currentStage = () => {
+    if (!bookingDetails) return 1;
+
+    // Step 6: Payment Complete
+    if (bookingDetails.paymentDetails?.status === "Paid") {
+      return 6;
+    }
+
+    // Step 5: Proposals Signed
+    if (bookingDetails.proposalDetails?.completedContractLink) {
+      return 5;
+    }
+
+    // Step 4: Consultation Scheduled
+    if (bookingDetails.consultationDetails?.startTime) {
+      return 4;
+    }
+
+    // Step 3: Audit Performed
+    if (bookingDetails.reportConsultation) {
+      return 3;
+    }
+
+    // Step 2: Utility Bills Uploaded
+    if (bookingDetails.utilityBillDetails?.count > 0) {
+      return 2;
+    }
+
+    // Step 1: Booking Created (default)
+    return 1;
+  };
+
+  const stage = currentStage();
+
+  // Define booking progress steps
+  const steps: Step[] = [
+    {
+      label: "Booking Created",
+      status: stage >= 1 ? "completed" : "upcoming",
+    },
+    {
+      label: "Utility Bills Uploaded",
+      status: stage >= 2 ? "completed" : stage === 1 ? "current" : "upcoming",
+    },
+    {
+      label: "Report Generated",
+      status: stage >= 3 ? "completed" : stage === 2 ? "current" : "upcoming",
+    },
+    {
+      label: "Consultation Scheduled",
+      status: stage >= 4 ? "completed" : stage === 3 ? "current" : "upcoming",
+    },
+    {
+      label: "Proposals Signed",
+      status: stage >= 5 ? "completed" : stage === 4 ? "current" : "upcoming",
+    },
+    {
+      label: "Payment Complete",
+      status: stage >= 6 ? "completed" : stage === 5 ? "current" : "upcoming",
+    },
+  ];
+
   return (
-    <div
-      className={cn("relative w-full mt-4", className)}
-    >
-       <div className="overflow-x-auto md:overflow-x-auto scrollbar-hide">
-        <div className="flex flex-nowrap items-center">
+    <div className={cn("relative w-full mt-4", className)}>
+      <div className="overflow-x-auto md:overflow-x-visible scrollbar-hide">
+        <div className="flex flex-nowrap items-center justify-between min-w-max md:min-w-0">
           {steps.map((step, index) => (
-            <div key={step.label} className="flex items-center flex-none">
-              <div className="flex flex-col items-center text-center min-w-[120px] sm:min-w-[100px]">
+            <div key={step.label} className="flex items-center">
+              <div className="flex flex-col items-center text-center min-w-[100px]">
                 <StatusIcon status={step.status} />
-                <span className="text-[14px] sm:text-[12px] text-black font-medium mt-2 ">
+                <span className="text-xs text-black font-medium mt-2 max-w-[80px]">
                   {step.label}
                 </span>
               </div>
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    "h-[2px] w-8 sm:w-12 md:w-16",
-                    step.status === "completed" ? "bg-[#5ea502]" : "bg-[#d1d5db]"
+                    "h-[2px] w-16 md:w-24 lg:w-32",
+                    step.status === "completed"
+                      ? "bg-[#5ea502]"
+                      : steps[index + 1].status === "current"
+                        ? "bg-[#5ea502]"
+                        : "bg-[#d1d5db]"
                   )}
                   aria-hidden="true"
                 />

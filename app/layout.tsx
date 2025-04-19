@@ -1,18 +1,9 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/providers/auth";
 import { Toaster } from "sonner";
-
-const poppins = Poppins({
-  weight: ["400", "500", "700"], // Specify weights
-  subsets: ["latin"], // Specify subsets
-});
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+import BookingProvider from "@/providers/booking";
+import AIChatbot from "@/components/chatbot/chatbot";
 
 export const metadata: Metadata = {
   title: "Ciel Power",
@@ -26,11 +17,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className}  antialiased`}>
+      <body>
         <AuthProvider>
-          <Toaster/>
-          {children}
-          </AuthProvider>
+          <BookingProvider>
+            <Toaster />
+            {children}
+            <AIChatbot/>
+          </BookingProvider>
+        </AuthProvider>
       </body>
     </html>
   );

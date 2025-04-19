@@ -172,7 +172,7 @@ const ServiceDetailsPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/booking/services/${id}`
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/services/${id}`,
       );
       const data = await response.json();
       setService(data?.data);
@@ -235,7 +235,7 @@ const ServiceDetailsPage: React.FC = () => {
 
         const selectedCountyId = service ? formData[service.preField.id] : "";
         const selectedCountyName = service?.preField.values?.find(
-          (v) => v.id === selectedCountyId
+          (v) => v.id === selectedCountyId,
         )?.name;
 
         if (!selectedCountyId || !selectedCountyName) return;
@@ -243,9 +243,7 @@ const ServiceDetailsPage: React.FC = () => {
         searchParams += `&preAnswerId=${preFieldId}&preAnswerValue=${selectedCountyName}`;
       }
 
-      const response = await fetch(
-        `/api/booking/slots?${searchParams}`
-      );
+      const response = await fetch(`/api/booking/slots?${searchParams}`);
       const data = await response.json();
       setSlots(data?.data || []);
     } catch (error) {
@@ -296,9 +294,9 @@ const ServiceDetailsPage: React.FC = () => {
 
       const eventId = `FT_${formattedDate}_${formattedStartTime}`;
       console.log("Generated eventId:", eventId);
-      
+
       const preFieldId = service?.preField?.id;
-      
+
       // Transform fields and add preField
       const fields = Object.entries(formData)
         .map(([id, value]) => {
@@ -313,7 +311,7 @@ const ServiceDetailsPage: React.FC = () => {
           if (fieldConfig?.values) {
             // If field has predefined values, find the selected value's name
             const selectedValue = fieldConfig.values.find(
-              (v) => v.id === value
+              (v) => v.id === value,
             );
             return {
               id,
@@ -335,7 +333,7 @@ const ServiceDetailsPage: React.FC = () => {
         const preFieldId = service?.preField?.id;
         const selectedCountyId = service ? formData[service.preField.id] : "";
         const selectedCountyName = service?.preField.values?.find(
-          (v) => v.id === selectedCountyId
+          (v) => v.id === selectedCountyId,
         )?.name;
 
         // Add preField at the beginning of the array
@@ -469,7 +467,7 @@ const ServiceDetailsPage: React.FC = () => {
     section: string,
     isCompleted: boolean,
     summary?: string,
-    canOpen = true
+    canOpen = true,
   ) => (
     <div
       className={`flex items-center justify-between w-full p-4 bg-gray-50 rounded-lg 
@@ -960,7 +958,7 @@ const ServiceDetailsPage: React.FC = () => {
             <p className="text-lg">
               {
                 service?.preField?.values?.find(
-                  (v) => v.id === formData[service.preField.id]
+                  (v) => v.id === formData[service.preField.id],
                 )?.name
               }
             </p>
@@ -974,7 +972,7 @@ const ServiceDetailsPage: React.FC = () => {
             <p className="text-lg">
               {selectedSlot &&
                 `${formatTime(selectedSlot.startTime)} - ${formatTime(
-                  selectedSlot.endTime
+                  selectedSlot.endTime,
                 )}`}
             </p>
           </div>
@@ -1022,10 +1020,10 @@ const ServiceDetailsPage: React.FC = () => {
                       ? field.values?.find((v) => v.id === formData[field.id])
                           ?.name
                       : field.type === "checkbox"
-                      ? formData[field.id]
-                        ? "Yes"
-                        : "No"
-                      : formData[field.id]}
+                        ? formData[field.id]
+                          ? "Yes"
+                          : "No"
+                        : formData[field.id]}
                   </p>
                 </div>
               ))}
@@ -1048,7 +1046,7 @@ const ServiceDetailsPage: React.FC = () => {
     if (
       !userDetails.firstName ||
       !userDetails.lastName ||
-      !userDetails.emailAddress 
+      !userDetails.emailAddress
       // ||
       // userDetails.phoneNumbers.length === 0 ||
       // !userDetails.streetAddress.address1 ||
@@ -1073,13 +1071,13 @@ const ServiceDetailsPage: React.FC = () => {
   const validateAdditionalInfo = (): boolean => {
     const requiredFields = service?.fields.filter((field) => field.required);
     const missingFields = requiredFields?.filter(
-      (field) => !formData[field.id]
+      (field) => !formData[field.id],
     );
     if (missingFields && missingFields.length > 0) {
       toast.error(
         `Please fill in all required fields: ${missingFields
           .map((f) => f.name)
-          .join(", ")}`
+          .join(", ")}`,
       );
       return false;
     }
@@ -1132,9 +1130,9 @@ const ServiceDetailsPage: React.FC = () => {
               "county",
               completedSections.county,
               service?.preField?.values?.find(
-                (v) => v.id === formData[service?.preField?.id || ""]
+                (v) => v.id === formData[service?.preField?.id || ""],
               )?.name,
-              true
+              true,
             )}
             {(openSection === "county" || editingSection === "county") &&
               renderCountySelection()}
@@ -1151,10 +1149,10 @@ const ServiceDetailsPage: React.FC = () => {
             completedSections.dateTime,
             selectedDate && selectedSlot
               ? `${format(selectedDate, "MMMM d, yyyy")} at ${formatTime(
-                  selectedSlot.startTime
+                  selectedSlot.startTime,
                 )}`
               : undefined,
-            true
+            true,
           )}
           {(openSection === "dateTime" || editingSection === "dateTime") &&
             renderDateAndTime()}
@@ -1167,11 +1165,12 @@ const ServiceDetailsPage: React.FC = () => {
             "contact",
             completedSections.contact,
             userDetails.emailAddress
-              ? `${userDetails.emailAddress} • ${""
-                // userDetails.phoneNumbers?.[0]?.number 
-              }`
+              ? `${userDetails.emailAddress} • ${
+                  ""
+                  // userDetails.phoneNumbers?.[0]?.number
+                }`
               : undefined,
-            true
+            true,
           )}
           {(openSection === "contact" || editingSection === "contact") &&
             renderUserDetails()}
@@ -1184,7 +1183,7 @@ const ServiceDetailsPage: React.FC = () => {
             "additional",
             completedSections.additional,
             "All information provided",
-            true
+            true,
           )}
           {(openSection === "additional" || editingSection === "additional") &&
             renderAdditionalInfo()}
@@ -1197,7 +1196,7 @@ const ServiceDetailsPage: React.FC = () => {
             "review",
             false,
             undefined,
-            true
+            true,
           )}
           {openSection === "review" && renderReview()}
         </div>

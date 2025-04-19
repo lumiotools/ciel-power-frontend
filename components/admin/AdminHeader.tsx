@@ -1,33 +1,33 @@
-"use client"
+"use client";
 
-import { useContext } from "react"
-import { useRouter } from "next/navigation"
-import { LogOut, Bell } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { AUTH_CONTEXT } from "@/providers/auth"
+import { useContext } from "react";
+import { useRouter } from "next/navigation";
+import { LogOut, Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AUTH_CONTEXT } from "@/providers/auth";
 
 export function AdminHeader() {
-  const { logoutUser } = useContext(AUTH_CONTEXT)
-  const router = useRouter()
+  const { logoutUser } = useContext(AUTH_CONTEXT);
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.message) {
-        logoutUser()
-        router.replace("/login")
+        logoutUser();
+        router.replace("/login");
       }
     } catch (error) {
-      console.error("Error logging out:", error)
+      console.error("Error logging out:", error);
     }
-  }
+  };
 
   return (
     <header className="bg-white border-b shadow-sm">
@@ -53,12 +53,17 @@ export function AdminHeader() {
             <span className="text-sm font-medium">Admin</span>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-600 hover:text-gray-900">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="text-gray-600 hover:text-gray-900"
+          >
             <LogOut className="h-4 w-4 mr-1" />
             Logout
           </Button>
         </div>
       </div>
     </header>
-  )
+  );
 }

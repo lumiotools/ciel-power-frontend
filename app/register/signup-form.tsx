@@ -39,13 +39,13 @@ export default function SignUpForm() {
 
     if (code && state) {
       const validEmail = decodeURIComponent(
-        Buffer.from(state || "", "hex").toString("utf8")
+        Buffer.from(state || "", "hex").toString("utf8"),
       );
       setEmail(validEmail);
       handleGoogleAuth(code, validEmail);
     } else if (emailToken) {
       const validEmail = decodeURIComponent(
-        Buffer.from(emailToken || "", "hex").toString("utf8")
+        Buffer.from(emailToken || "", "hex").toString("utf8"),
       );
       setEmail(validEmail);
     } else {
@@ -57,7 +57,7 @@ export default function SignUpForm() {
     // setGoogleLoading(true);
     const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     const redirectURI = encodeURIComponent(
-      `${window.location.origin}/register`
+      `${window.location.origin}/register`,
     );
 
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectURI}&response_type=code&scope=email%20profile&state=${searchParams.get("token")}`;
@@ -67,7 +67,7 @@ export default function SignUpForm() {
 
   const handleGoogleAuth = async (code: string, validEmail: string) => {
     setError(null);
-    setGoogleLoading(true)
+    setGoogleLoading(true);
 
     try {
       const response = await fetch(`/api/auth/google-auth`, {
@@ -87,7 +87,7 @@ export default function SignUpForm() {
       } else {
         const errorData = await response.json();
         setError(
-          errorData.detail || "Google sign up failed. Please try again."
+          errorData.detail || "Google sign up failed. Please try again.",
         );
         console.error("Google sign up failed:", errorData);
         router.replace(pathname);
@@ -95,7 +95,7 @@ export default function SignUpForm() {
     } catch (error) {
       console.log("Error", error as Error);
       setError(
-        "An error occurred during Google sign up. Please try again later."
+        "An error occurred during Google sign up. Please try again later.",
       );
       router.replace(pathname);
     } finally {
@@ -130,7 +130,9 @@ export default function SignUpForm() {
 
           // Handle "EMAIL_EXISTS" error case
           if (errorData.detail.includes("EMAIL_EXISTS")) {
-            throw new Error("An account with this email already exists. Please use a different email or log in.");
+            throw new Error(
+              "An account with this email already exists. Please use a different email or log in.",
+            );
           }
 
           throw new Error(extractedMessage || "Failed to sign up");
@@ -154,7 +156,7 @@ export default function SignUpForm() {
   };
 
   const inputClassName =
-    "focus:ring-2 focus:ring-[#5ea502] focus:border-[#5ea502] outline-none transition-colors duration-300 !important";
+    "h-12 focus:ring-2 focus:ring-[#5ea502] focus:border-[#5ea502] outline-none transition-colors duration-300 !important";
 
   return (
     <div className="flex h-screen">

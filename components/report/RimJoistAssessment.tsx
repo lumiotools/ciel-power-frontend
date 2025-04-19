@@ -1,11 +1,13 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import type React from "react"
+import { useState, useEffect } from "react"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Edit2, Check, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ImageUpload } from "./ImageUpload"
+import { ImageCustomer } from "@/components/report/ImageCustomer"
 
 interface EditableFieldProps {
   value: string
@@ -26,18 +28,19 @@ interface RimJoistData {
   image: string
 }
 
-// New interface for the data coming from reportData
 interface InsulationItemData {
-  condition: string;
-  material: string;
-  name: string;
-  rValue: number;
+  condition: string
+  material: string
+  name: string
+  rValue: number
+  image: string
 }
 
 interface RimJoistAssessmentProps {
-  data?: InsulationItemData;
-  isAdmin?: boolean;
-  onUpdate?: (updatedItem: InsulationItemData) => void;
+  data?: InsulationItemData | null
+  isAdmin?: boolean
+  onUpdate?: (updatedItem: InsulationItemData) => void
+  driveImages?: string[]
 }
 
 interface FieldItem {
@@ -53,8 +56,8 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
   const [editValue, setEditValue] = useState(value)
 
   useEffect(() => {
-    setEditValue(value);
-  }, [value]);
+    setEditValue(value)
+  }, [value])
 
   const handleSave = () => {
     onSave(editValue)
@@ -141,59 +144,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onSave, type, opti
   )
 }
 
-const ImageUpload: React.FC<{
-  src: string
-  onImageChange: (newImage: string) => void
-}> = ({ src, onImageChange }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const [isEditing, setIsEditing] = useState(false)
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const imageUrl = URL.createObjectURL(file)
-      onImageChange(imageUrl)
-      setIsEditing(false)
-    }
-  }
-
-  return (
-    <motion.div whileHover={{ scale: 1.02 }} className="relative aspect-video rounded-lg overflow-hidden">
-      <img src={src || "/placeholder.svg"} alt="Rim joist area" className="object-cover w-full" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute bottom-4 left-4 text-white">
-        <h3 className="font-semibold mb-1">Current Condition</h3>
-        <p className="text-sm">Uninsulated rim joist area</p>
-      </div>
-      {isEditing && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded">
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Choose New Image
-            </button>
-            <button onClick={() => setIsEditing(false)} className="ml-2 px-4 py-2 rounded border hover:bg-gray-100">
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-      {!isEditing && (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg"
-        >
-          <Edit2 className="w-4 h-4" />
-        </button>
-      )}
-    </motion.div>
-  )
-}
-
-export function RimJoistAssessment({ data, isAdmin = false, onUpdate }: RimJoistAssessmentProps) {
+export function RimJoistAssessment({ data, isAdmin = false, onUpdate, driveImages }: RimJoistAssessmentProps) {
   // Default data to use if no report data is provided
   const defaultRimJoistData: RimJoistData = {
     material: "None",
@@ -204,68 +155,69 @@ export function RimJoistAssessment({ data, isAdmin = false, onUpdate }: RimJoist
     efficiency: 0,
     image: "https://i.postimg.cc/jSVNngms/Screenshot-2024-11-25-033709.png",
   }
-  
+
   // Process the provided data into the format expected by our component
   const processRimJoistData = (): RimJoistData => {
-    if (!data) return defaultRimJoistData;
-    
+    if (!data) return defaultRimJoistData
+
     return {
       material: data.material || "None",
       condition: data.condition || "N/A",
       rValue: data.rValue || 0,
       recommendedValue: 13, // Standard recommendation for rim joist
-      maxValue: 20,        // Standard max value for scale
+      maxValue: 20, // Standard max value for scale
       efficiency: data.rValue ? Math.round((data.rValue / 13) * 100) : 0,
-      image: "https://i.postimg.cc/jSVNngms/Screenshot-2024-11-25-033709.png",
-    };
-  };
-  
+      image: data.image,
+    }
+  }
+
   const [rimJoistData, setRimJoistData] = useState<RimJoistData>(processRimJoistData())
 
   useEffect(() => {
     // Update rim joist data if report data changes
-    setRimJoistData(processRimJoistData());
-  }, [data]);
+    setRimJoistData(processRimJoistData())
+  }, [data])
 
   const updateRimJoistData = (field: keyof RimJoistData, value: string | number) => {
     setRimJoistData((prev) => {
       const newData = { ...prev, [field]: value }
 
-      // Update rValue and efficiency together
+      const updatedField: Partial<InsulationItemData> = {}
+
       if (field === "rValue") {
         const numericValue = typeof value === "string" ? Number.parseInt(value.replace("R", "")) : value
         if (!isNaN(numericValue)) {
           newData.rValue = numericValue
-          newData.efficiency = (numericValue / prev.recommendedValue) * 100
-          
-          // Notify parent of update
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: numericValue
-            });
-          }
+          newData.efficiency = Math.round((numericValue / newData.recommendedValue) * 100)
+          updatedField.rValue = numericValue
         }
       } else if (field === "efficiency") {
         const numericValue = typeof value === "string" ? Number.parseInt(value) : value
         if (!isNaN(numericValue)) {
           newData.efficiency = numericValue
-          newData.rValue = (numericValue * prev.recommendedValue) / 100
-          
-          // Notify parent of update
-          if (onUpdate && data) {
-            onUpdate({
-              ...data,
-              rValue: Math.round((numericValue * prev.recommendedValue) / 100)
-            });
-          }
+          const calculatedRValue = Math.round((numericValue * newData.recommendedValue) / 100)
+          newData.rValue = calculatedRValue
+          updatedField.rValue = calculatedRValue
         }
-      } else if ((field === "material" || field === "condition") && onUpdate && data) {
-        // For material and condition updates, notify parent
-        onUpdate({
-          ...data,
-          [field]: value as string
-        });
+      } else if (field === "material" || field === "condition") {
+        updatedField[field] = value as string
+      } else if (field === "image") {
+        updatedField.image = value as string
+      }
+
+      // Fire update only when something changed
+      if (onUpdate && Object.keys(updatedField).length > 0) {
+        const updatedItem: InsulationItemData = {
+          ...(data ?? {
+            name: "Your Home's Rim Joist Insulation",
+            rValue: 0,
+            material: "None",
+            condition: "N/A",
+            image: "",
+          }),
+          ...updatedField,
+        }
+        onUpdate(updatedItem)
       }
 
       return newData
@@ -275,168 +227,159 @@ export function RimJoistAssessment({ data, isAdmin = false, onUpdate }: RimJoist
   // Get the appropriate description based on the R-value
   const getConditionDescription = () => {
     if (rimJoistData.rValue < 3) {
-      return "Uninsulated rim joist area";
+      return "Uninsulated rim joist area"
     } else if (rimJoistData.rValue < rimJoistData.recommendedValue) {
-      return "Partially insulated rim joist area";
+      return "Partially insulated rim joist area"
     } else {
-      return "Well-insulated rim joist area";
+      return "Well-insulated rim joist area"
     }
-  };
+  }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <Card>
-        <CardHeader className="bg-teal-50 dark:bg-teal-900/20">
-          <CardTitle className="text-2xl text-teal-600 dark:text-teal-300">
-            Your Home&apos;s Rim Joist Insulation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                {(
-                  [
-                    {
-                      label: "Material",
-                      value: rimJoistData.material,
-                      field: "material" as const,
-                      type: "text" as const,
-                    },
-                    {
-                      label: "Condition",
-                      value: rimJoistData.condition,
-                      field: "condition" as const,
-                      type: "select" as const,
-                      options: ["N/A", "Poor", "Fair", "Good", "Excellent"],
-                    },
-                    {
-                      label: "Current R-Value",
-                      value: `R${rimJoistData.rValue}`,
-                      field: "rValue" as const,
-                      type: "text" as const,
-                    },
-                    {
-                      label: "Recommended",
-                      value: `R${rimJoistData.recommendedValue}`,
-                      field: "recommendedValue" as const,
-                      type: "text" as const,
-                    },
-                  ] satisfies FieldItem[]
-                ).map((item, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{item.label}</div>
-                      <div className="font-medium mt-1 text-gray-900 dark:text-gray-100">
-                        {isAdmin ? (
-                          <EditableField
-                            value={item.value}
-                            onSave={(value) => {
-                              if (item.field === "rValue" || item.field === "recommendedValue") {
-                                updateRimJoistData(item.field, Number.parseInt(value.replace("R", "")))
-                              } else {
-                                updateRimJoistData(item.field, value)
-                              }
-                            }}
-                            type={item.type}
-                            options={item.options}
-                          />
-                        ) : (
-                          item.value
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+    <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+      <CardHeader className="bg-[#E0F7F5] py-4 px-5 border-b border-gray-100">
+        <CardTitle className="text-lg font-medium text-[#256C68]">
+          Your Home&apos;s Rim Joist Insulation
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Left Column */}
+          <div className="p-5">
+            <div className="grid grid-cols-2 gap-y-4 mt-3">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Material</p>
+                <p className="text-[#256C68] font-medium">
+                  {isAdmin ? (
+                    <EditableField
+                      value={rimJoistData.material}
+                      onSave={(value) => updateRimJoistData("material", value)}
+                      type="text"
+                    />
+                  ) : (
+                    rimJoistData.material
+                  )}
+                </p>
               </div>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600 dark:text-gray-400">Current Efficiency</span>
-                    <span className="text-gray-900 dark:text-gray-100">
-                      {isAdmin ? (
-                        <EditableField
-                          value={`${Math.round((rimJoistData.rValue / rimJoistData.recommendedValue) * 100)}`}
-                          onSave={(value) => {
-                            const efficiency = Number.parseInt(value)
-                            if (!isNaN(efficiency)) {
-                              updateRimJoistData("efficiency", efficiency)
-                            }
-                          }}
-                          type="number"
-                          min={0}
-                          max={100}
-                        />
-                      ) : (
-                        `${Math.round((rimJoistData.rValue / rimJoistData.recommendedValue) * 100)}%`
-                      )}
-                    </span>
-                  </div>
-                  <Progress
-                    value={(rimJoistData.rValue / rimJoistData.maxValue) * 100}
-                    className="h-2 bg-teal-100 dark:bg-teal-700"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="bg-teal-50 dark:bg-teal-900/30 border-teal-200 dark:border-teal-700">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-teal-600 dark:text-teal-300">BPI Recommendation</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    BPI recommends Rim Joists be insulated to R{rimJoistData.recommendedValue} for optimal energy
-                    efficiency and to prevent air infiltration.
-                  </p>
-                </CardContent>
-              </Card>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Condition</p>
+                <p className="text-[#256C68] font-medium">
+                  {isAdmin ? (
+                    <EditableField
+                      value={rimJoistData.condition}
+                      onSave={(value) => updateRimJoistData("condition", value)}
+                      type="select"
+                      options={["N/A", "Poor", "Fair", "Good", "Excellent"]}
+                    />
+                  ) : (
+                    rimJoistData.condition
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Current R-Value</p>
+                <p className="text-[#256C68] font-medium">
+                  {isAdmin ? (
+                    <EditableField
+                      value={`R${rimJoistData.rValue}`}
+                      onSave={(value) => {
+                        const numericValue = Number.parseInt(value.replace("R", ""))
+                        if (!isNaN(numericValue)) {
+                          updateRimJoistData("rValue", numericValue)
+                        }
+                      }}
+                      type="text"
+                    />
+                  ) : (
+                    `R${rimJoistData.rValue}`
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Recommended</p>
+                <p className="text-[#256C68] font-medium">{`R${rimJoistData.recommendedValue}`}</p>
+              </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="mt-5">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-700">Efficiency Impact</span>
+                <span className="text-[#256C68] font-medium">
+                  {Math.round((rimJoistData.rValue / rimJoistData.recommendedValue) * 100)}%
+                </span>
+              </div>
+              <Progress
+                value={(rimJoistData.rValue / rimJoistData.maxValue) * 100}
+                className="h-1.5 bg-[#44BFB83D]"
+              />
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="p-5">
+            <div className="relative rounded-md overflow-hidden h-[200px] w-full">
               {isAdmin ? (
                 <ImageUpload
-                  src={rimJoistData.image || "/placeholder.svg"}
+                  image={rimJoistData.image || "/placeholder.svg"}
                   onImageChange={(newImage) => updateRimJoistData("image", newImage)}
+                  driveImages={driveImages}
                 />
               ) : (
-                <motion.div whileHover={{ scale: 1.02 }} className="relative aspect-video rounded-lg overflow-hidden">
-                  <img
-                    src={rimJoistData.image || "/placeholder.svg"}
-                    alt="Rim joist area"
-                    className="object-cover w-full"
-                  />
+                <div className="relative rounded-md overflow-hidden h-full w-full">
+                  <ImageCustomer image={rimJoistData.image} driveImages={driveImages} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="font-semibold mb-1">Current Condition</h3>
                     <p className="text-sm">{getConditionDescription()}</p>
                   </div>
-                </motion.div>
+                </div>
               )}
-
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Technical Details</h3>
-                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <p>
-                      The rim joist is a critical area for insulation as it&apos;s often a significant source of heat
-                      loss and air infiltration. {rimJoistData.rValue < rimJoistData.recommendedValue ? (
-                        "Improving insulation here can:"
-                      ) : (
-                        "Your well-insulated rim joist provides these benefits:"
-                      )}
-                    </p>
-                    <ul className="mt-2 space-y-1">
-                      <li>• {rimJoistData.rValue < rimJoistData.recommendedValue ? "Prevent" : "Prevents"} cold air infiltration</li>
-                      <li>• {rimJoistData.rValue < rimJoistData.recommendedValue ? "Reduce" : "Reduces"} energy costs</li>
-                      <li>• {rimJoistData.rValue < rimJoistData.recommendedValue ? "Improve" : "Improves"} comfort in rooms above</li>
-                      <li>• {rimJoistData.rValue < rimJoistData.recommendedValue ? "Protect" : "Protects"} against moisture issues</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Technical Details */}
+          <div className="p-5">
+            <h3 className="font-medium text-gray-900 mb-2">Technical Details</h3>
+            <div className="text-gray-700 text-sm">
+              <p className="mb-2">
+                The rim joist is a critical area for insulation as it&apos;s often a significant source of heat loss
+                and air infiltration.{" "}
+                {rimJoistData.rValue < rimJoistData.recommendedValue
+                  ? "Improving insulation here can:"
+                  : "Your well-insulated rim joist provides these benefits:"}
+              </p>
+              <ul className="space-y-1">
+                <li>
+                  • {rimJoistData.rValue < rimJoistData.recommendedValue ? "Prevent" : "Prevents"} cold air
+                  infiltration
+                </li>
+                <li>• {rimJoistData.rValue < rimJoistData.recommendedValue ? "Reduce" : "Reduces"} energy costs</li>
+                <li>
+                  • {rimJoistData.rValue < rimJoistData.recommendedValue ? "Improve" : "Improves"} comfort in rooms
+                  above
+                </li>
+                <li>
+                  • {rimJoistData.rValue < rimJoistData.recommendedValue ? "Protect" : "Protects"} against moisture
+                  issues
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* BPI Recommendation */}
+          <div className="p-5">
+            <div className="bg-[#F7FDFC] rounded-md p-4 h-full">
+              <h3 className="font-medium mb-2 text-[#256C68]">BPI Recommendation</h3>
+              <p className="text-gray-700 text-sm">
+                BPI recommends Rim Joists be insulated to R{rimJoistData.recommendedValue} for optimal energy
+                efficiency and to prevent air infiltration.
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

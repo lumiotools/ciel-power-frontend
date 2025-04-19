@@ -39,7 +39,7 @@ export default function LoginForm() {
     }
     if (emailToken) {
       const validEmail = decodeURIComponent(
-        Buffer.from(emailToken || "", "hex").toString("utf8")
+        Buffer.from(emailToken || "", "hex").toString("utf8"),
       );
       setEmail(validEmail);
     }
@@ -72,7 +72,7 @@ export default function LoginForm() {
     } catch (error) {
       console.log("Error", error as Error);
       setError(
-        "An error occurred during Google login. Please try again later."
+        "An error occurred during Google login. Please try again later.",
       );
       router.replace(pathname);
     } finally {
@@ -141,7 +141,7 @@ export default function LoginForm() {
   };
 
   const inputClassName =
-    "focus:ring-2 focus:ring-[#b9dd8b] focus:border-[#b9dd8b] outline-none transition-colors duration-300";
+    "h-12 focus:ring-2 focus:ring-[#b9dd8b] focus:border-[#b9dd8b] outline-none transition-colors duration-300";
 
   return (
     <div className="flex flex-col md:flex-row h-screen">
@@ -261,7 +261,7 @@ export default function LoginForm() {
               {/* Sign Up Link */}
               <p className="mt-4 text-center text-gray-700 text-[14px]">
                 Need an account?{" "}
-                <Link href="/signup" className="text-[#67b502]">
+                <Link href="/register" className="text-[#67b502]">
                   Create One
                 </Link>
               </p>

@@ -1,42 +1,41 @@
-import type React from "react"
-import { useRef } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import type React from "react";
+import { useRef } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface BlogPost {
-  blog_id: string
-  title: string
-  description: string
-  thumbnailLink: string
-  pageLink: string
+  blog_id: string;
+  title: string;
+  description: string;
+  thumbnailLink: string;
+  pageLink: string;
 }
 
 interface BlogContentProps {
-  blogs: BlogPost[]
+  blogs: BlogPost[];
 }
 
 const BlogContent: React.FC<BlogContentProps> = ({ blogs }) => {
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-
-   console.log("blog content", blogs)
+  console.log("blog content", blogs);
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 300 // Adjust this value to control scroll distance
+      const scrollAmount = 300; // Adjust this value to control scroll distance
       const newScrollPosition =
         direction === "left"
           ? scrollContainerRef.current.scrollLeft - scrollAmount
-          : scrollContainerRef.current.scrollLeft + scrollAmount
+          : scrollContainerRef.current.scrollLeft + scrollAmount;
 
       scrollContainerRef.current.scrollTo({
         left: newScrollPosition,
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   return (
     <Card className="md:col-span-2">
@@ -47,10 +46,20 @@ const BlogContent: React.FC<BlogContentProps> = ({ blogs }) => {
             Related Blog Posts
           </h3>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => scroll("left")}
+              className="rounded-full"
+            >
               <ChevronLeft className="w-6 h-6 text-gray-600" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => scroll("right")}
+              className="rounded-full"
+            >
               <ChevronRight className="w-6 h-6 text-gray-600" />
             </Button>
           </div>
@@ -66,13 +75,17 @@ const BlogContent: React.FC<BlogContentProps> = ({ blogs }) => {
                   {/* Thumbnail Container */}
                   <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden">
                     <img
-                      src={blog.thumbnailLink }
+                      src={blog.thumbnailLink}
                       alt={blog.title}
-                    className="w-full h-full object-cover"
+                      className="w-full h-full object-cover"
                     />
                     {/* Read More Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-                      <Link href={blog.pageLink} target="_blank" rel="noopener noreferrer">
+                      <Link
+                        href={blog.pageLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <Button variant="secondary" size="sm">
                           Read More
                         </Button>
@@ -82,8 +95,12 @@ const BlogContent: React.FC<BlogContentProps> = ({ blogs }) => {
 
                   {/* Content Text */}
                   <div className="space-y-2">
-                    <h4 className="font-medium text-gray-900 line-clamp-1">{blog.title}</h4>
-                    <p className="text-sm text-gray-500 line-clamp-2">{blog.description}</p>
+                    <h4 className="font-medium text-gray-900 line-clamp-1">
+                      {blog.title}
+                    </h4>
+                    <p className="text-sm text-gray-500 line-clamp-2">
+                      {blog.description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -92,8 +109,7 @@ const BlogContent: React.FC<BlogContentProps> = ({ blogs }) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default BlogContent
-
+export default BlogContent;
