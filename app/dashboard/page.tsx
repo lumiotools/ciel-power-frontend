@@ -162,12 +162,79 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (bookingDetails) {
+      // Start from the end (latest state) and work backwards
       for (let i = State.length - 1; i >= 0; i--) {
         const key = State[i];
+
+        // Check if the property exists in bookingDetails
         if (bookingDetails[key]) {
-          setLatestState(key);
-          break;
+          // Special cases for each state
+          switch (key) {
+            case "paymentDetails":
+              // Only consider payment details if payment is in progress
+              if (bookingDetails.paymentDetails) {
+                setLatestState(key);
+                return;
+              }
+              break;
+
+            case "proposalDetails":
+              // Consider proposal details if they exist
+              if (bookingDetails.proposalDetails) {
+                setLatestState(key);
+                return;
+              }
+              break;
+
+            case "consultationDetails":
+              // Consider consultation details if not cancelled
+              if (
+                bookingDetails.consultationDetails &&
+                !bookingDetails.consultationDetails.isCancelled
+              ) {
+                setLatestState(key);
+                return;
+              }
+              break;
+
+            case "reportConsultation":
+              // Consider report consultation if it exists
+              if (bookingDetails.reportConsultation) {
+                setLatestState(key);
+                return;
+              }
+              break;
+
+            case "utilityBillDetails":
+              // Only consider utility bill details if count > 0
+              if (
+                bookingDetails.utilityBillDetails &&
+                bookingDetails.utilityBillDetails.count > 0
+              ) {
+                setLatestState(key);
+                return;
+              }
+              break;
+
+            case "bookingDetails":
+              // This is the default first state
+              if (bookingDetails.bookingDetails) {
+                setLatestState(key);
+                return;
+              }
+              break;
+
+            default:
+              break;
+          }
         }
+      }
+
+      // Default to booking details if nothing else matches
+      if (bookingDetails.bookingDetails) {
+        setLatestState("bookingDetails");
+      } else {
+        setLatestState(null);
       }
     }
   }, [bookingDetails]);
