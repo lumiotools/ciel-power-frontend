@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { FileText } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export function EnergyAuditAccordion() {
-  const [isFirstOpen, setIsFirstOpen] = useState(true);
-  const [isSecondOpen, setIsSecondOpen] = useState(true);
-  const [isThirdOpen, setIsThirdOpen] = useState(true);
-  const [isFourthOpen, setIsFourthOpen] = useState(true);
-  const [openFaqItem, setOpenFaqItem] = useState(1);
+  const [isFirstOpen, setIsFirstOpen] = useState(false);
+  const [isSecondOpen, setIsSecondOpen] = useState(false);
+  const [isThirdOpen, setIsThirdOpen] = useState(false);
+  const [isFourthOpen, setIsFourthOpen] = useState(false);
+  const [openFaqItem, setOpenFaqItem] = useState(0);
 
   const faqItems = [
     {
@@ -51,46 +53,26 @@ export function EnergyAuditAccordion() {
   return (
     <div className="flex flex-col gap-4 max-w-4xl mx-auto">
       {/* First Accordion */}
-      <div className="border rounded-lg overflow-hidden bg-white font-sans">
+      <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
         <div
-          className="flex items-start p-4 cursor-pointer bg-[#f8fcf8] border-b"
+          className="w-full p-4 flex items-start justify-between cursor-pointer"
           onClick={() => setIsFirstOpen(!isFirstOpen)}
         >
-          <div className="flex-shrink-0 mr-4 mt-1">
-            <div className="w-8 h-8 bg-[#8bc34a] rounded-md flex items-center justify-center text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
-                <line x1="9" y1="9" x2="10" y2="9" />
-                <line x1="9" y1="13" x2="15" y2="13" />
-                <line x1="9" y1="17" x2="15" y2="17" />
-              </svg>
+          <div className="flex items-center gap-4">
+            <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
+              <FileText className="text-[#8bc34a]" size={24} />
+            </div>
+            <div className="text-left">
+              <h3 className="text-[#8bc34a] text-lg font-medium">
+                What You&apos;ll Gain from Your Audit
+              </h3>
+              <p className="text-gray-600">
+                Comfort, savings, and peace of mind — your audit is the first
+                step toward a better home.
+              </p>
             </div>
           </div>
-          <div className="flex-grow">
-            <h2 className="text-xl font-medium text-[#4caf50]">
-              What You&apos;ll Gain from Your Audit
-            </h2>
-            <p className="text-gray-600 text-sm">
-              Comfort, savings, and peace of mind — your audit is the first step
-              toward a better home.
-            </p>
-          </div>
-          <div className="flex-shrink-0 ml-4">
-            <ChevronUp
-              className={`h-6 w-6 text-[#4caf50] transform transition-transform ${isFirstOpen ? "" : "rotate-180"}`}
-            />
-          </div>
+          <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
         </div>
 
         {isFirstOpen && (
@@ -270,44 +252,41 @@ export function EnergyAuditAccordion() {
       </div>
 
       {/* Second Accordion */}
-      <div className="border rounded-lg overflow-hidden bg-white font-sans">
+      <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
         <div
-          className="flex items-start p-4 cursor-pointer bg-[#f8fcf8] border-b"
+          className="w-full p-4 flex items-start justify-between cursor-pointer"
           onClick={() => setIsSecondOpen(!isSecondOpen)}
         >
-          <div className="flex-shrink-0 mr-4 mt-1">
-            <div className="w-8 h-8 bg-[#8bc34a] rounded-md flex items-center justify-center text-white">
+          <div className="flex items-center gap-4">
+            <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="text-[#8bc34a]"
               >
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
             </div>
+            <div className="text-left">
+              <h3 className="text-[#8bc34a] text-lg font-medium">
+                What Happens During the Audit
+              </h3>
+              <p className="text-gray-600">
+                We&apos;re here to help, not to disrupt — here&apos;s how
+                we&apos;ll move through your home and what we&apos;ll be looking
+                for.
+              </p>
+            </div>
           </div>
-          <div className="flex-grow">
-            <h2 className="text-xl font-medium text-[#4caf50]">
-              What Happens During the Audit
-            </h2>
-            <p className="text-gray-600 text-sm">
-              We&apos;re here to help, not to disrupt — here&apos;s how
-              we&apos;ll move through your home and what we&apos;ll be looking
-              for.
-            </p>
-          </div>
-          <div className="flex-shrink-0 ml-4">
-            <ChevronUp
-              className={`h-6 w-6 text-[#4caf50] transform transition-transform ${isSecondOpen ? "" : "rotate-180"}`}
-            />
-          </div>
+          <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
         </div>
 
         {isSecondOpen && (
@@ -583,43 +562,40 @@ export function EnergyAuditAccordion() {
       </div>
 
       {/* Third Accordion */}
-      <div className="border rounded-lg overflow-hidden bg-white font-sans">
+      <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
         <div
-          className="flex items-start p-4 cursor-pointer bg-[#f8fcf8] border-b"
+          className="w-full p-4 flex items-start justify-between cursor-pointer"
           onClick={() => setIsThirdOpen(!isThirdOpen)}
         >
-          <div className="flex-shrink-0 mr-4 mt-1">
-            <div className="w-8 h-8 bg-[#8bc34a] rounded-md flex items-center justify-center text-white">
+          <div className="flex items-center gap-4">
+            <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="text-[#8bc34a]"
               >
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
             </div>
+            <div className="text-left">
+              <h3 className="text-[#8bc34a] text-lg font-medium">
+                How To Prepare
+              </h3>
+              <p className="text-gray-600">
+                We&apos;ll come prepared — this is simply to keep you in the
+                loop and avoid surprises.
+              </p>
+            </div>
           </div>
-          <div className="flex-grow">
-            <h2 className="text-xl font-medium text-[#4caf50]">
-              How To Prepare
-            </h2>
-            <p className="text-gray-600 text-sm">
-              We&apos;ll come prepared — this is simply to keep you in the loop
-              and avoid surprises.
-            </p>
-          </div>
-          <div className="flex-shrink-0 ml-4">
-            <ChevronUp
-              className={`h-6 w-6 text-[#4caf50] transform transition-transform ${isThirdOpen ? "" : "rotate-180"}`}
-            />
-          </div>
+          <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
         </div>
 
         {isThirdOpen && (
@@ -891,44 +867,41 @@ export function EnergyAuditAccordion() {
       </div>
 
       {/* Fourth Accordion - FAQ */}
-      <div className="border rounded-lg overflow-hidden bg-white font-sans">
+      <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
         <div
-          className="flex items-start p-4 cursor-pointer bg-[#f8fcf8] border-b"
+          className="w-full p-4 flex items-start justify-between cursor-pointer"
           onClick={() => setIsFourthOpen(!isFourthOpen)}
         >
-          <div className="flex-shrink-0 mr-4 mt-1">
-            <div className="w-8 h-8 bg-[#8bc34a] rounded-md flex items-center justify-center text-white">
+          <div className="flex items-center gap-4">
+            <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="text-[#8bc34a]"
               >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
             </div>
+            <div className="text-left">
+              <h3 className="text-[#8bc34a] text-lg font-medium">
+                Frequently Asked Questions(FAQ)
+              </h3>
+              <p className="text-gray-600">
+                Have questions? You&apos;re not alone — here are answers to the
+                things most homeowners want to know.
+              </p>
+            </div>
           </div>
-          <div className="flex-grow">
-            <h2 className="text-xl font-medium text-[#4caf50]">
-              Frequently Asked Questions(FAQ)
-            </h2>
-            <p className="text-gray-600 text-sm">
-              Have questions? You&apos;re not alone — here are answers to the
-              things most homeowners want to know.
-            </p>
-          </div>
-          <div className="flex-shrink-0 ml-4">
-            <ChevronUp
-              className={`h-6 w-6 text-[#4caf50] transform transition-transform ${isFourthOpen ? "" : "rotate-180"}`}
-            />
-          </div>
+          <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
         </div>
 
         {isFourthOpen && (
