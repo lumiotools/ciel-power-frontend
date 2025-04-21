@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Edit2, Check, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "./ImageUpload"
-import { ImageCustomer } from "@/components/report/ImageCustomer"
+import { ImageCustomer } from "@/components/report-/ImageCustomer"
 
 interface EditableFieldProps {
   value: string

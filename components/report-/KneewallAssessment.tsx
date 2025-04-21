@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import ImageCustomer from "./ImageCustomer";
 import { ImageUpload } from "./ImageUpload";
-import RValueGauge from "@/components/report/RValueGauge";
+import RValueGauge from "@/components/report-/RValueGauge";
 
 interface KneewallData {
   title: string;

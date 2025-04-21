@@ -6,7 +6,7 @@ import { Info, Sun } from "lucide-react"
 import { toast } from "sonner"
 import { useParams } from "next/navigation"
 import { motion } from "framer-motion"
-import CoolingSystemCard from "@/components/report/CoolingSystemCard"
+import CoolingSystemCard from "@/components/report-/CoolingSystemCard"
 
 interface HeatingCoolingItem {
   condition: string

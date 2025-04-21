@@ -57,8 +57,8 @@ interface BookingDetailsResponse {
   data: {
     booking: Booking;
     report: {
-      reportUrl: string;
-      reportData: object;
+      url: string;
+      data: object;
       displayReport: string;
     } | null;
     offeredContracts: OfferedContract[] | null;
@@ -187,8 +187,8 @@ export default function BookingDetailsPage({
         setBooking(data.data.booking);
         // Handle report data if available
         if (data.data.report) {
-          setReportData(data.data.report.reportData || null);
-          setReportUrl(data.data.report.reportUrl || "");
+          setReportData(data.data.report.data || null);
+          setReportUrl(data.data.report.url || "");
           setReportStatus(data.data.report.displayReport ?? "NONE");
           setTimeout(() => {
             setHasReportChanges(false);
@@ -454,12 +454,12 @@ export default function BookingDetailsPage({
         hasChanges = true;
 
         const updatedReportData: {
-          reportUrl: string;
-          reportData: object | null;
+          url: string;
+          data: object | null;
           displayReport: string;
         } = {
-          reportUrl: reportUrl,
-          reportData: reportUrl !== "" ? null : reportData,
+          url: reportUrl,
+          data: reportUrl !== "" ? null : reportData,
           displayReport: reportStatus,
         };
 

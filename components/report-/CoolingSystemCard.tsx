@@ -6,7 +6,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Zap, Sun, AlertCircle, Edit2, Check, X, Pencil } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
-import { ImageCustomer } from "@/components/report/ImageCustomer";
+import { ImageCustomer } from "@/components/report-/ImageCustomer";
 import {
   Select,
   SelectContent,
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import PercentageGauge from "@/components/report/PercentageGauge";
+import PercentageGauge from "@/components/report-/PercentageGauge";
 import ValueGauge from "./ValueGauge";
 
 // Only include the necessary interfaces

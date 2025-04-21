@@ -5,7 +5,7 @@ import type React from "react";
 import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImageCustomer } from "@/components/report/ImageCustomer";
+import { ImageCustomer } from "@/components/report-/ImageCustomer";
 import {
   Thermometer,
   Flame,
@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { ImageUpload } from "./ImageUpload";
-import PercentageGauge from "@/components/report/PercentageGauge";
+import PercentageGauge from "@/components/report-/PercentageGauge";
 
 // All interfaces remain the same
 interface EditableFieldProps {

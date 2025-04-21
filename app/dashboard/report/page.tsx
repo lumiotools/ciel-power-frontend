@@ -1,84 +1,134 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Overview } from "@/components/report/Overview";
-import { AirLeakageContent } from "@/components/report/AirLeakageContent";
-import { CoolingContent } from "@/components/report/CoolingContent";
-import { HeatingContent } from "@/components/report/HeatingContent";
-import { InsulationContent } from "@/components/report/InsulationContent";
-import { ReportSummary } from "@/components/report/ReportSummary";
-import { FutureUpgradesAndCertificates } from "@/components/report/FutureUpgradesAndCertificates";
+import { Overview } from "@/components/report-/Overview";
+import { AirLeakageContent } from "@/components/report-/AirLeakageContent";
+import { CoolingContent } from "@/components/report-/CoolingContent";
+import { HeatingContent } from "@/components/report-/HeatingContent";
+import { InsulationContent } from "@/components/report-/InsulationContent";
+import { ReportSummary } from "@/components/report-/ReportSummary";
+import { FutureUpgradesAndCertificates } from "@/components/report-/FutureUpgradesAndCertificates";
 import { useRef, useState, useEffect, use, useContext } from "react";
 import { Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { AUTH_CONTEXT } from "@/providers/auth";
 import handleDownloadReport, { ReportSection } from "./download";
 import DownloadModal from "./downloadModal";
+import ReportOverviewSection from "@/components/report/overview/overview";
+import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
+import ReportInsulationSection from "@/components/report/insulation/insulation";
+import ReportHeatingSection from "@/components/report/heating/heating";
+import ReportCoolingSection from "@/components/report/cooling/cooling";
+import ReportSummarySection from "@/components/report/summary/summary";
 
 // Define interfaces for specific data types
-interface AirLeakageData {
-  parameter: string;
-  title: string;
-  value: string;
+export interface ImageData {
+  id: string;
+  description?: string;
 }
 
-interface InsulationItem {
-  condition: string;
+export interface DescriptionData {
+  title: string;
+  content: string;
+  footer?: string;
+}
+
+export interface AirLeakageData {
+  title: string;
+  parameter: string;
+  current_value?: number;
+  recommended_value?: number;
+  image?: string;
+}
+
+export interface InsulationData {
+  title: string;
   material: string;
-  name: string;
-  rValue: number;
-}
-
-interface InsulationData {
-  data: InsulationItem[];
-  missingDataZones: string[];
-  missingZones: string[];
-  title: string;
-}
-
-interface HeatingCoolingItem {
   condition: string;
-  name: string;
-  parameter: string;
+  current_rValue?: number;
+  recommended_rValue?: number;
+  description?: DescriptionData;
+  images?: ImageData[];
+}
+
+export interface HeatingData {
+  title: string;
   type: string;
-  value: number | string;
+  condition: string;
   year?: number;
+  parameter: string;
+  current_value?: string;
+  recommended_value?: string;
+  description?: DescriptionData;
+  images?: ImageData[];
 }
 
-interface HeatingCoolingData {
-  data: HeatingCoolingItem[];
+export interface CoolingData {
   title: string;
+  type: string;
+  condition: string;
+  year?: number;
+  parameter: string;
+  current_value?: number;
+  recommended_value?: number;
+  description?: DescriptionData;
+  images?: ImageData[];
 }
 
-interface WaterHeaterData {
-  data: HeatingCoolingItem[];
-  title: string;
+export interface SummaryOfConcernsData {
+  name: string;
+  concern: string;
+  flag?: boolean;
 }
 
-interface FinancialItem {
+export interface SolutionsAndRecommendationsData {
   title: string;
-  amount: string;
+  benefits: string;
 }
 
-interface FinancialData {
+export interface FinancialSummaryItem {
   title: string;
-  data: FinancialItem[];
-  monthlyPayment: string;
-  financingPeriodYears: number;
+  amount: number | string;
+}
+
+export interface FinancialSummaryData {
+  title: string;
+  data?: FinancialSummaryItem[];
+  monthlyPayment?: number;
+  financingPeriodYears?: number;
+}
+
+export interface FederalTaxCreditData {
+  title: string;
+  amount: number | string;
+  note?: string;
+}
+
+export interface EnvironmentalImpactItem {
+  value: string;
+  unit: string;
+}
+
+export interface EnvironmentalImpactData {
+  title: string;
+  currentFootprint: EnvironmentalImpactItem;
+  projectedFootprint: EnvironmentalImpactItem;
+  projectedSavings: EnvironmentalImpactItem;
+  totalReduction: EnvironmentalImpactItem;
 }
 
 // Define the type for reportData
-interface ReportData {
+export interface ReportData {
   airLeakage?: AirLeakageData;
-  insulation?: InsulationData;
-  heatingAndCooling?: HeatingCoolingData;
-  waterHeater?: WaterHeaterData;
-  summaryOfConcerns?: any;
-  solutionsAndRecommendations?: any;
-  financialSummary?: FinancialData;
-  [key: string]: any;
+  insulation?: InsulationData[];
+  heating?: HeatingData[];
+  cooling?: CoolingData[];
+  summaryOfConcerns?: SummaryOfConcernsData[];
+  solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
+  financialSummary?: FinancialSummaryData;
+  federalTaxCredits?: FederalTaxCreditData[];
+  environmentalImpact?: EnvironmentalImpactData;
 }
-
 const ReportPage = ({
   params,
 }: {
@@ -107,7 +157,6 @@ const ReportPage = ({
     "NONE" | "STATIC" | "AUTOMATED"
   >("NONE");
   const [loading, setLoading] = useState(false);
-  const [imgOfUser, SetImageOfUser] = useState([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Add these state variables near your other useState declarations
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -145,8 +194,8 @@ const ReportPage = ({
 
       if (data.success) {
         console.log("Report data:", data.data);
-        setReportData(data.data.reportData || {});
-        setReportUrl(data.data.reportUrl || "");
+        setReportData(data.data.data || {});
+        setReportUrl(data.data.url || "");
         setReportStatus(data.data.displayReport || "NONE"); // Ensure it matches "NONE", "STATIC", or "AUTOMATED"
       } else {
         toast.error(data.message || "Failed to fetch report details");
@@ -159,69 +208,6 @@ const ReportPage = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const imagesOfUser = await fetch(
-          `/api/user/bookings/${bookingNumber}/pictures`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            cache: "default",
-            next: { revalidate: 3600 }, // Revalidate every 3600 seconds
-          }
-        );
-        const data = await imagesOfUser.json();
-
-        SetImageOfUser(data?.data?.pictures);
-      } catch (error) {
-        console.log("Error fetching images:", error);
-        toast.error("Failed to fetch images");
-      }
-    };
-    fetchData();
-  }, [bookingNumber]);
-
-  // Filter heating and cooling items from heatingAndCooling data
-  const getHeatingData = () => {
-    if (!reportData.heatingAndCooling?.data)
-      return { data: [], title: "Heating Systems" };
-
-    const heatingItems = reportData.heatingAndCooling.data.filter(
-      (item) =>
-        item.name.toLowerCase().includes("furnace") ||
-        item.name.toLowerCase().includes("boiler") ||
-        item.name.toLowerCase().includes("heat")
-    );
-
-    const waterHeaterItems = reportData.waterHeater?.data || [];
-
-    return {
-      data: [...heatingItems, ...waterHeaterItems],
-      title: "Heating & Water Heating Systems",
-    };
-  };
-
-  const getCoolingData = () => {
-    if (!reportData.heatingAndCooling?.data)
-      return { data: [], title: "Cooling Systems" };
-
-    const coolingItems = reportData.heatingAndCooling.data.filter(
-      (item) =>
-        item.name.toLowerCase().includes("a/c") ||
-        item.name.toLowerCase().includes("air condition") ||
-        item.name.toLowerCase().includes("cooling") ||
-        item.name.toLowerCase().includes("heat pump")
-    );
-
-    return {
-      data: coolingItems,
-      title: "Cooling Systems",
-    };
   };
 
   // Format tab name for display
@@ -270,26 +256,21 @@ const ReportPage = ({
       // Render the existing structure for automated reports
       switch (activeSubMenu) {
         case "overview":
-          return <Overview />;
+          return <ReportOverviewSection />;
         case "airLeakage":
-          return <AirLeakageContent data={reportData.airLeakage} />;
+          return (
+            <ReportAirLeakageSection airLeakage={reportData?.airLeakage} />
+          );
         case "insulation":
           return (
-            <InsulationContent
-              data={reportData.insulation}
-              driveImages={imgOfUser}
-            />
+            <ReportInsulationSection insulationData={reportData?.insulation} />
           );
         case "heating":
-          return (
-            <HeatingContent data={getHeatingData()} driveImages={imgOfUser} />
-          );
+          return <ReportHeatingSection heatingData={reportData?.heating} />;
         case "cooling":
-          return (
-            <CoolingContent data={getCoolingData()} driveImages={imgOfUser} />
-          );
+          return <ReportCoolingSection coolingData={reportData?.cooling} />;
         case "summary":
-          return <ReportSummary data={reportData} />;
+          return <ReportSummarySection reportData={reportData} />;
         default:
           return <Overview />;
       }
@@ -384,10 +365,11 @@ const ReportPage = ({
             ].map((tab) => (
               <button
                 key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
+                  activeSubMenu === tab
                     ? `text-${tab === "airLeakage" ? "blue" : tab === "insulation" ? "teal" : tab === "heating" || tab === "cooling" ? "amber" : tab === "summary" ? "orange" : "lime"}-600`
                     : "text-gray-600 hover:text-gray-800"
-                  }`}
+                }`}
                 onClick={() => setActiveSubMenu(tab)}
               >
                 {formatTabName(tab)}

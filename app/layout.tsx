@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/providers/auth";
 import { Toaster } from "sonner";
 import BookingProvider from "@/providers/booking";
 import AIChatbot from "@/components/chatbot/chatbot";
+
+const poppins = Poppins({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
 
 export const metadata: Metadata = {
   title: "Ciel Power",
@@ -17,12 +22,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={poppins.className}>
         <AuthProvider>
           <BookingProvider>
             <Toaster />
             {children}
-            <AIChatbot/>
+            <AIChatbot />
           </BookingProvider>
         </AuthProvider>
       </body>

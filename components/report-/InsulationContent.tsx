@@ -2,16 +2,16 @@
 
 import React from "react";
 
-import { Benefits } from "@/components/report/Benefits";
-import { InsulationOverview } from "@/components/report/InsulationOverview";
-import { TechnicalAspects } from "@/components/report/TechnicalAspects";
-import { SeasonalPerformance } from "@/components/report/SeasonalPerformance";
-import { KneewallAssessment } from "@/components/report/KneewallAssessment";
-import { ExteriorWallAssessment } from "@/components/report/ExteriorWallAssessment";
-import { CrawlspaceAssessment } from "@/components/report/CrawlspaceAssessment";
-import { RimJoistAssessment } from "@/components/report/RimJoistAssessment";
-import { OverhangAssessment } from "@/components/report/OverhangAssessment";
-import { InsulationZoneAssessment } from "@/components/report/InsulationZoneAssessment";
+import { Benefits } from "@/components/report-/Benefits";
+import { InsulationOverview } from "@/components/report-/InsulationOverview";
+import { TechnicalAspects } from "@/components/report-/TechnicalAspects";
+import { SeasonalPerformance } from "@/components/report-/SeasonalPerformance";
+import { KneewallAssessment } from "@/components/report-/KneewallAssessment";
+import { ExteriorWallAssessment } from "@/components/report-/ExteriorWallAssessment";
+import { CrawlspaceAssessment } from "@/components/report-/CrawlspaceAssessment";
+import { RimJoistAssessment } from "@/components/report-/RimJoistAssessment";
+import { OverhangAssessment } from "@/components/report-/OverhangAssessment";
+import { InsulationZoneAssessment } from "@/components/report-/InsulationZoneAssessment";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 

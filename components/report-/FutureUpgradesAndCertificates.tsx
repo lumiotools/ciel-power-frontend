@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { FutureUpgrades } from "@/components/report/FutureUpgrades";
-import { PearlCertification } from "@/components/report/PearlCertification";
+import { FutureUpgrades } from "@/components/report-/FutureUpgrades";
+import { PearlCertification } from "@/components/report-/PearlCertification";
 
 export const FutureUpgradesAndCertificates: React.FC = () => {
   return (

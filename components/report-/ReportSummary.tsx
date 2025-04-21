@@ -20,10 +20,10 @@ import {
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { usePathname } from "next/navigation"
-import { FutureSolutions } from "@/components/report/FutureUpgrades"
-import { ProjectCosts } from "@/components/report/ProjectCosts"
-import { FederalTaxCredits } from "@/components/report/TaxCredits"
-import { EnvironmentalImpact } from "@/components/report/EnvironmentalImpact"
+import { FutureSolutions } from "@/components/report-/FutureUpgrades"
+import { ProjectCosts } from "@/components/report-/ProjectCosts"
+import { FederalTaxCredits } from "@/components/report-/TaxCredits"
+import { EnvironmentalImpact } from "@/components/report-/EnvironmentalImpact"
 import { toast } from "sonner"
 
 // Define interfaces for data types

@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { Home, ArrowUp, ArrowDown, Info, Pencil, Check, X } from "lucide-react"
 import { toast } from "sonner"
 import { useParams } from "next/navigation"
-import { AirChangesGauge } from "@/components/report/AirChangesGauge"
+import { AirChangesGauge } from "@/components/report-/AirChangesGauge"
 
 interface AirLeakageData {
   parameter: string
