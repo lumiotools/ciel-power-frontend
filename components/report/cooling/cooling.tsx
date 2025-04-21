@@ -1,5 +1,5 @@
 import { CoolingData } from "@/app/admin/[bookingNumber]/report/page";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HouseImage } from "./card";
 import ReportCoolingSectioninformation from "./information";
 import ReportCoolingSectionCard from "./card";
@@ -17,28 +17,35 @@ const ReportCoolingSection = ({
   houseImages,
   onUpdateValue,
 }: ReportCoolingSectionProps) => {
+  const [coolingDataSection, setCoolingDataSection] = useState<CoolingData[]>(
+    coolingData ?? []
+  );
+
+  useEffect(() => {
+    if (onUpdateValue) {
+      onUpdateValue(coolingDataSection);
+    }
+  }, [coolingDataSection]);
+
   const addNewCooling = () => {
     if (!isAdmin) return;
-    if (onUpdateValue && coolingData) {
-      const emptyCooling: CoolingData = {
-        title: "Your Home's Cooling " + (coolingData.length + 1),
+    setCoolingDataSection((prev) => [
+      ...prev,
+      {
+        title: "Your Home's Cooling " + (prev.length + 1),
         type: "Unknown",
         condition: "Unknown",
         year: 0,
         parameter: "SEER",
         current_value: 0,
         recommended_value: 100,
-      };
-      onUpdateValue([...coolingData, emptyCooling]);
-    }
+      },
+    ]);
   };
 
   const deleteCooling = (index: number) => {
     if (!isAdmin) return;
-    if (onUpdateValue && coolingData) {
-      const updatedCooling = coolingData.filter((_, i) => i !== index);
-      onUpdateValue(updatedCooling);
-    }
+    setCoolingDataSection((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -57,19 +64,17 @@ const ReportCoolingSection = ({
 
       <ReportCoolingSectioninformation />
 
-      {coolingData?.map((cooling, index) => (
+      {coolingDataSection?.map((cooling, index) => (
         <ReportCoolingSectionCard
           key={`${cooling.title}_${index}`}
           isAdmin={isAdmin}
           cooling={cooling}
           houseImages={houseImages}
           onUpdateValue={(updatedCooling) => {
-            if (onUpdateValue)
-              onUpdateValue([
-                ...coolingData.slice(0, index),
-                updatedCooling,
-                ...coolingData.slice(index + 1),
-              ]);
+            if (!isAdmin) return;
+            setCoolingDataSection((prev) =>
+              prev.map((item, i) => (i === index ? updatedCooling : item))
+            );
           }}
           onDelete={() => deleteCooling(index)}
         />

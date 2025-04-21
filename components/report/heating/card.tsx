@@ -105,8 +105,11 @@ const ReportHeatingSectionCard = ({
                   value={
                     heating.current_value?.includes("%")
                       ? Number(heating.current_value?.replace("%", ""))
-                      : Number(heating.current_value?.replace("+", "")) * 100
+                      : Number(heating.current_value?.replace("+", ""))
                   }
+                  labelSuffix={heating.current_value?.includes("%") ? "%" : ""}
+                  minValue={0}
+                  maxValue={heating.current_value?.includes("%") ? 100 : 0.96}
                 />
 
                 <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">

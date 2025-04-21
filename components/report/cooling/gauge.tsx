@@ -10,6 +10,7 @@ interface ReportCoolingSectionGaugeProps {
   maxValue?: number;
   title?: string;
   subtitle?: string;
+  labelSuffix?: string;
 }
 
 export default function ReportCoolingSectionGauge({
@@ -18,6 +19,7 @@ export default function ReportCoolingSectionGauge({
   maxValue = 100,
   title = "Efficiency Rating",
   subtitle = "",
+  labelSuffix = "%",
 }: ReportCoolingSectionGaugeProps): JSX.Element {
   const [displayedValue, setDisplayedValue] = useState(value);
 
@@ -25,14 +27,37 @@ export default function ReportCoolingSectionGauge({
     setDisplayedValue(value);
   }, [value]);
 
-  // Define the tick marks and labels - FIXED: correct positions
-  const ticks = [
-    { value: 0, label: "0%", position: 0 }, // Right side (0 degrees)
-    { value: 25, label: "25%", position: 45 }, // Between right and top
-    { value: 50, label: "50%", position: 90 }, // Top (90 degrees)
-    { value: 75, label: "75%", position: 135 }, // Between top and left
-    { value: 100, label: "100%", position: 180 }, // Left side (180 degrees)
-  ];
+  // Generate dynamic tick marks and labels based on min and max values
+  const generateTicks = () => {
+    // Define the number of ticks we want (5 ticks: 0%, 25%, 50%, 75%, 100% of the range)
+    const tickCount = 5;
+    const ticks = [];
+    
+    for (let i = 0; i < tickCount; i++) {
+      // Calculate the value at this tick (distribute evenly between min and max)
+      const pct = i / (tickCount - 1);
+      const value = minValue + pct * (maxValue - minValue);
+      
+      // Calculate position (0 = right side, 180 = left side)
+      const position = i * (180 / (tickCount - 1));
+      
+      // Format the label with appropriate precision
+      // Use more decimal places for small ranges
+      const range = maxValue - minValue;
+      let decimals = 0;
+      
+      if (range < 1) decimals = 2;
+      else if (range < 10) decimals = 1;
+      
+      const label = `${value.toFixed(decimals)}${labelSuffix}`;
+      
+      ticks.push({ value, label, position });
+    }
+    
+    return ticks;
+  };
+  
+  const ticks = generateTicks();
 
   // Calculate the angle for the needle - FIXED: correct calculation
   const getNeedleAngle = (val: number): number => {
@@ -95,7 +120,7 @@ export default function ReportCoolingSectionGauge({
       >
         {/* Gradient definitions */}
         <defs>
-          {/* Gauge gradient: red (left/0%) to green (right/100%) */}
+          {/* Gauge gradient: green (low values) to red (high values) */}
           <linearGradient
             id="percentage-gradient"
             x1="100%"
@@ -103,11 +128,11 @@ export default function ReportCoolingSectionGauge({
             x2="0%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="#22c55e" /> {/* Green (100%) */}
+            <stop offset="0%" stopColor="#22c55e" /> {/* Green (low values) */}
             <stop offset="25%" stopColor="#84cc16" /> {/* Light green */}
             <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
             <stop offset="75%" stopColor="#e67700" /> {/* Orange */}
-            <stop offset="100%" stopColor="#cc2b2b" /> {/* Red (0%) */}
+            <stop offset="100%" stopColor="#cc2b2b" /> {/* Darker red (high values) */}
           </linearGradient>
 
           {/* Arrow gradient */}
@@ -131,9 +156,9 @@ export default function ReportCoolingSectionGauge({
             x2="0%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="#22c55e" /> {/* Green (100%) */}
+            <stop offset="0%" stopColor="#22c55e" /> {/* Green (low values) */}
             <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
-            <stop offset="100%" stopColor="#cc2b2b" /> {/* Red (0%) */}
+            <stop offset="100%" stopColor="#cc2b2b" /> {/* Red (high values) */}
           </linearGradient>
         </defs>
 
@@ -243,7 +268,7 @@ export default function ReportCoolingSectionGauge({
             textAnchor="middle"
             dominantBaseline="middle"
           >
-            {displayedValue.toFixed(1)}%
+            {displayedValue.toFixed(1)}{labelSuffix}
           </text>
         </motion.g>
 
