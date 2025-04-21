@@ -140,12 +140,12 @@ const ReportPage = ({
 
   // Define tab colors for the underlines
   const tabColors = {
-    overview: "bg-lime-500",
-    airLeakage: "bg-blue-600",
-    insulation: "bg-teal-500",
-    heating: "bg-amber-500",
-    cooling: "bg-amber-500",
-    summary: "bg-orange-500",
+    overview: "bg-[#85C435]",
+    airLeakage: "bg-[#031A82]",
+    insulation: "bg-[#44BFB8]",
+    heating: "bg-[#B18C2E]",
+    cooling: "bg-[#B18C2E]",
+    summary: "bg-[#FF6700]",
     "future solutions and certifications": "bg-purple-500",
   };
 
@@ -365,11 +365,20 @@ const ReportPage = ({
             ].map((tab) => (
               <button
                 key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
-                  activeSubMenu === tab
-                    ? `text-${tab === "airLeakage" ? "blue" : tab === "insulation" ? "teal" : tab === "heating" || tab === "cooling" ? "amber" : tab === "summary" ? "orange" : "lime"}-600`
+                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                    ? tab === "overview"
+                      ? "text-[#67B502]"
+                      : tab === "airLeakage"
+                        ? "text-[#031A82]"
+                        : tab === "insulation"
+                          ? "text-[#44BFB8]"
+                          : tab === "heating" || tab === "cooling"
+                            ? "text-[#B18C2E]"
+                            : tab === "summary"
+                              ? "text-[#FF6700]"
+                              : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
-                }`}
+                  }`}
                 onClick={() => setActiveSubMenu(tab)}
               >
                 {formatTabName(tab)}
