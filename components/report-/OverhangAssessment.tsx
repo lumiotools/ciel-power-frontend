@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { ImageUpload } from "./ImageUpload";
 import ImageCustomer from "./ImageCustomer";
-import RValueGauge from "@/components/report/RValueGauge";
+import RValueGauge from "@/components/report-/RValueGauge";
 
 interface EditableFieldProps {
   value: string;
