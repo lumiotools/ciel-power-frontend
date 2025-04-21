@@ -154,6 +154,16 @@ const ReportPage = ({
   const unwrappedParams = use(params);
   const bookingNumber = unwrappedParams.bookingNumber;
 
+  // Define tab colors for the underlines (matching user side)
+  const tabColors = {
+    overview: "bg-[#85C435]",
+    "air-leakage": "bg-[#031A82]",
+    insulation: "bg-[#44BFB8]",
+    heating: "bg-[#B18C2E]",
+    cooling: "bg-[#B18C2E]",
+    summary: "bg-[#FF6700]",
+  };
+
   const [activeSubMenu, setActiveSubMenu] = useState("overview");
   const [reportData, setReportData] = useState<ReportData>({});
   const [isChangesSaved, setIsChangesSaved] = useState(true);
@@ -173,6 +183,17 @@ const ReportPage = ({
     } else {
       router.replace(`/admin/${bookingNumber}`);
     }
+  };
+
+  // Format tab name for display (matching user side)
+  const formatTabName = (tab) => {
+    if (tab === "air-leakage") return "Air Leakage Reports";
+    if (tab === "summary") return "Report Summary";
+    return (
+      tab.charAt(0).toUpperCase() +
+      tab.slice(1) +
+      (tab !== "overview" ? " Reports" : "")
+    );
   };
 
   const handleChangeActiveSubMenu = (menu: string) => {
@@ -237,8 +258,6 @@ const ReportPage = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        //  = await fetchImages({ userid: bookingNumber });
-
         const imagesOfUser = await fetch(
           `/api/admin/bookings/${bookingNumber}/pictures`,
           {
@@ -440,42 +459,10 @@ const ReportPage = ({
         </Button>
       </div>
 
-      <div className="container mx-auto p-4" ref={scrollRef}>
-        <div className="bg-gradient-to-r from-lime-400 to-lime-400 py-4 px-6 rounded-t-lg shadow-md">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">Reports</h1>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-b-lg shadow-md">
-          <div className="flex border-b border-gray-200">
-            {[
-              "overview",
-              "air-leakage",
-              "insulation",
-              "heating",
-              "cooling",
-              "summary",
-            ].map((tab) => (
-              <button
-                key={tab}
-                className={`py-3 px-6 text-center font-medium transition-colors duration-200 ${
-                  activeSubMenu === tab
-                    ? "border-b-2 border-lime-500 text-lime-500"
-                    : "text-gray-600 hover:text-lime-500"
-                }`}
-                onClick={() => handleChangeActiveSubMenu(tab)}
-              >
-                {["air-leakage", "insulation", "heating", "cooling"].includes(
-                  tab
-                )
-                  ? `${tab.charAt(0).toUpperCase() + tab.slice(1)} Reports`
-                  : tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex justify-end px-8 mt-8">
+      <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-bold text-gray-800 ml-8">View Report</h1>
             {isAdmin && (
               <div className="flex items-center gap-2">
                 {isSaving ? (
@@ -497,8 +484,47 @@ const ReportPage = ({
               </div>
             )}
           </div>
+        </div>
 
-          <div className="p-6">{renderContent()}</div>
+        <div>
+          <div className="flex overflow-x-auto border-b border-gray-100">
+            {[
+              "overview",
+              "air-leakage",
+              "insulation",
+              "heating",
+              "cooling",
+              "summary",
+            ].map((tab) => (
+              <button
+                key={tab}
+                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                    ? tab === "overview"
+                      ? "text-[#67B502]"
+                      : tab === "air-leakage"
+                        ? "text-[#031A82]"
+                        : tab === "insulation"
+                          ? "text-[#44BFB8]"
+                          : tab === "heating" || tab === "cooling"
+                            ? "text-[#B18C2E]"
+                            : tab === "summary"
+                              ? "text-[#FF6700]"
+                              : "text-gray-800"
+                    : "text-gray-600 hover:text-gray-800"
+                  }`}
+                onClick={() => handleChangeActiveSubMenu(tab)}
+              >
+                {formatTabName(tab)}
+                {activeSubMenu === tab && (
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 h-1 ${tabColors[tab]}`}
+                  ></div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="py-6">{renderContent()}</div>
         </div>
       </div>
     </div>
