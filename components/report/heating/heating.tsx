@@ -55,11 +55,14 @@ const ReportHeatingSection = ({
         </div>
       )} */}
 
-      <ReportHeatingSectioninformation />
+      <div id="heating-header">
+        <ReportHeatingSectioninformation />
+      </div>
 
       {heatingData?.map((heating, index) => (
-        <ReportHeatingSectionCard
-          key={`${heating.title}_${index}`}
+        <div id={`heating-system-${index}`}>
+          <ReportHeatingSectionCard
+          key={`heating-system-${index}`}
           isAdmin={isAdmin}
           heating={heating}
           houseImages={houseImages}
@@ -73,6 +76,7 @@ const ReportHeatingSection = ({
           }}
           onDelete={() => deleteHeating(index)}
         />
+        </div>
       ))}
       {isAdmin && (
         <div className="flex justify-center items-center">

@@ -55,7 +55,10 @@ const ReportInsulationSection = ({
         </div>
       )} */}
 
-      <ReportInsulationSectionOverview />
+      <div id="insulation-overview">
+        <ReportInsulationSectionOverview />
+      </div>
+
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -68,14 +71,15 @@ const ReportInsulationSection = ({
         <ReportInsulationSectionSeasonalPerformance />
       </motion.div>
 
-      <div id="insulationData-benefits">
+      <div id="insulation-benefits">
         <ReportInsulationSectionBenefits />
       </div>
 
       {insulationData &&
         insulationData.map((insulation, index) => (
-          <ReportInsulationSectionCard
-            key={`${insulation.title}_${index}`}
+          <div key={`insulation-zone-${index}`} id={`insulation-zone-${index}`}>
+            <ReportInsulationSectionCard
+            key={`${insulation.title}-${index}`}
             isAdmin={isAdmin}
             insulation={insulation}
             houseImages={houseImages}
@@ -89,6 +93,7 @@ const ReportInsulationSection = ({
             }}
             onDelete={() => deleteInsulation(index)}
           />
+          </div>
         ))}
 
       {isAdmin && (

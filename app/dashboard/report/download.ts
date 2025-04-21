@@ -514,9 +514,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
               "insulation-benefits",
             ],
           },
-          { ids: ["insulation-kneewall", "insulation-exterior-wall"] },
-          { ids: ["insulation-crawlspace", "insulation-rim-joist"] },
-          { ids: ["insulation-overhang"] },
+          // Removed the commented out lines with the no-longer-needed IDs
         ],
       },
 
@@ -619,8 +617,9 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         }
 
         // Handle special cases for dynamic content
-        if (section.section === "insulation" && pageIndex === 3) {
-          // Handle insulation zones
+        // Updated insulation zone handling code
+        if (section.section === "insulation") {
+          // Handle insulation zones that use a dynamic ID pattern 'insulation-zone-X'
           const insulationZoneElements = document.querySelectorAll(
             '[id^="insulation-zone-"]'
           );
@@ -629,6 +628,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
             `Found ${insulationZoneElements.length} insulation zone elements`
           );
 
+          // Process all insulation zones if they exist
           if (insulationZoneElements.length > 0) {
             // Handle the first insulation zone
             updateProgress(`Processing first insulation zone...`);
@@ -646,66 +646,65 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
                 "insulation"
               );
             }
-          }
 
-          // Process remaining zones in optimized groups
-          if (insulationZoneElements.length > 1) {
-            // Process zones more efficiently
-            let i = 1; // Start from the second zone
+            // Process remaining zones
+            if (insulationZoneElements.length > 1) {
+              // Process zones efficiently
+              let i = 1; // Start from the second zone
 
-            while (i < insulationZoneElements.length) {
-              // Add a new page
-              pdf.addPage();
-              if (reportConfig.includePageNumbers) {
-                addPageNumber(pdf, reportConfig.includePageNumbers);
-              }
-              pageCount++;
-
-              // Start higher on the page for insulation sections
-              currentY = 14; // Reduced top margin for insulation zones
-
-              // Check the heights of the zones to determine how many can fit on one page
-              // Measure first zone to analyze
-              const firstZoneElement = insulationZoneElements[i];
-              const firstZoneHeight = firstZoneElement
-                ? firstZoneElement.getBoundingClientRect().height
-                : 0;
-
-              // Decide how many zones to put on this page based on height
-              let zonesPerPage = 2; // Default
-
-              // If zones are small enough, put 3 on a page
-              if (firstZoneHeight < 350) {
-                zonesPerPage = 3;
-              } else if (firstZoneHeight > 700) {
-                // If zones are very large, just put 1 on a page
-                zonesPerPage = 1;
-              }
-
-              // Capture the zones for this page
-              const zoneCanvases: HTMLCanvasElement[] = [];
-              for (
-                let j = 0;
-                j < zonesPerPage && i + j < insulationZoneElements.length;
-                j++
-              ) {
-                updateProgress(`Processing insulation zone ${i + j + 1}...`);
-
-                const canvas = await captureElement(
-                  insulationZoneElements[i + j].id
-                );
-                if (canvas) {
-                  zoneCanvases.push(canvas);
+              while (i < insulationZoneElements.length) {
+                // Add a new page
+                pdf.addPage();
+                if (reportConfig.includePageNumbers) {
+                  addPageNumber(pdf, reportConfig.includePageNumbers);
                 }
-              }
+                pageCount++;
 
-              // Add the zones to the page with minimal spacing
-              for (const canvas of zoneCanvases) {
-                currentY = addImageToPDF(pdf, canvas, currentY, "insulation");
-              }
+                // Start higher on the page for insulation sections
+                currentY = 14; // Reduced top margin for insulation zones
 
-              // Move to the next group of zones
-              i += zonesPerPage;
+                // Check the heights of the zones to determine how many can fit on one page
+                const firstZoneElement = insulationZoneElements[i];
+                const firstZoneHeight = firstZoneElement
+                  ? firstZoneElement.getBoundingClientRect().height
+                  : 0;
+
+                // Decide how many zones to put on this page based on height
+                let zonesPerPage = 2; // Default
+
+                // If zones are small enough, put 3 on a page
+                if (firstZoneHeight < 350) {
+                  zonesPerPage = 3;
+                } else if (firstZoneHeight > 700) {
+                  // If zones are very large, just put 1 on a page
+                  zonesPerPage = 1;
+                }
+
+                // Capture the zones for this page
+                const zoneCanvases: HTMLCanvasElement[] = [];
+                for (
+                  let j = 0;
+                  j < zonesPerPage && i + j < insulationZoneElements.length;
+                  j++
+                ) {
+                  updateProgress(`Processing insulation zone ${i + j + 1}...`);
+
+                  const canvas = await captureElement(
+                    insulationZoneElements[i + j].id
+                  );
+                  if (canvas) {
+                    zoneCanvases.push(canvas);
+                  }
+                }
+
+                // Add the zones to the page with minimal spacing
+                for (const canvas of zoneCanvases) {
+                  currentY = addImageToPDF(pdf, canvas, currentY, "insulation");
+                }
+
+                // Move to the next group of zones
+                i += zonesPerPage;
+              }
             }
           }
         } else if (section.section === "heating" && pageIndex === 0) {

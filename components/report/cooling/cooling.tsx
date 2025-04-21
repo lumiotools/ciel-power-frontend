@@ -55,11 +55,14 @@ const ReportCoolingSection = ({
         </div>
       )} */}
 
-      <ReportCoolingSectioninformation />
+      <div id="cooling-header">
+        <ReportCoolingSectioninformation />
+      </div>
 
       {coolingData?.map((cooling, index) => (
-        <ReportCoolingSectionCard
-          key={`${cooling.title}_${index}`}
+        <div id={`cooling-system-${index}`}>
+          <ReportCoolingSectionCard
+          key={`${cooling.title}-${index}`}
           isAdmin={isAdmin}
           cooling={cooling}
           houseImages={houseImages}
@@ -73,6 +76,7 @@ const ReportCoolingSection = ({
           }}
           onDelete={() => deleteCooling(index)}
         />
+        </div>
       ))}
 
       {isAdmin && (
