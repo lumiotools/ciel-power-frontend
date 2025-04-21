@@ -9,6 +9,7 @@ import { useContext } from "react";
 import { AUTH_CONTEXT } from "@/providers/auth";
 import { useParams } from "next/navigation";
 import ReportEditableInput from "./editableInput";
+import { cn } from "@/lib/utils";
 
 interface ImageViewerProps {
   allowSelection?: boolean;
@@ -25,7 +26,15 @@ export function ReportImageViewer({
   onOpenPicker,
   onDescriptionChange,
 }: ImageViewerProps) {
-  const { bookingNumber } = useParams();
+  let bookingNumber;
+
+  const { userDetails } = useContext(AUTH_CONTEXT);
+  if (userDetails?.admin) {
+    const { bookingNumber: adminBookingNumber } = useParams();
+    bookingNumber = adminBookingNumber;
+  } else {
+    bookingNumber = userDetails?.bookingNumber;
+  }
 
   if (!selectedImage) {
     return (
@@ -53,24 +62,31 @@ export function ReportImageViewer({
     <div className="w-full aspect-video relative">
       <img
         className="w-full h-full object-cover rounded-md"
-        src={`/api/admin/bookings/${bookingNumber}/pictures/${selectedImage?.id}`}
+        src={`/api/${userDetails?.admin ? "admin" : "user"}/bookings/${bookingNumber}/pictures/${selectedImage?.id}`}
       />
       <div className="p-5 absolute right-0 bottom-0 left-0 top-0 flex flex-col justify-between text-white bg-gradient-to-t from-black/30 to-transparent rounded-md">
         <div className="flex justify-end">
           <button
-            className="size-10 p-1 rounded-full bg-[#256C68B8] hover:bg-[#256C68] flex justify-center items-center"
+            className={cn(
+              "size-10 p-1 rounded-full flex justify-center items-center",
+              buttonClassName
+            )}
             onClick={onOpenPicker}
           >
             <Pencil className="!size-5" />
           </button>
         </div>
-        <ReportEditableInput
-          className="w-full"
-          value={selectedImage?.description ?? "Image Description"}
-          onChange={(description) => {
-            onDescriptionChange(description as string);
-          }}
-        />
+        {allowSelection ? (
+          <ReportEditableInput
+            className="w-full"
+            value={selectedImage?.description ?? "Image Description"}
+            onChange={(description) => {
+              onDescriptionChange(description as string);
+            }}
+          />
+        ) : (
+          (selectedImage?.description)
+        )}
       </div>
     </div>
   );

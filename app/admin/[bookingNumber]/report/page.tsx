@@ -322,7 +322,7 @@ const ReportPage = ({
   const updateReportDataField = (updatedData: ReportData) => {
     if (!isAdmin) return;
 
-    setReportData(updatedData);
+    // setReportData(updatedData);
     setIsChangesSaved(false);
 
     // Trigger debounced save
