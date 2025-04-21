@@ -10,12 +10,16 @@ interface RValueGaugeProps {
   maxValue?: number;
   title?: string;
   subtitle?: string;
+  labelPrefix?: string;
 }
 
 const ReportInsulationSectionGauge = ({
   value,
   minValue = 0,
   maxValue = 60,
+  title = "Insulation Rating",
+  subtitle = "",
+  labelPrefix = "R",
 }: RValueGaugeProps): JSX.Element => {
   const [displayedValue, setDisplayedValue] = useState(value);
 
@@ -23,14 +27,33 @@ const ReportInsulationSectionGauge = ({
     setDisplayedValue(value);
   }, [value]);
 
-  // Define the tick marks and labels
-  const ticks = [
-    { value: 0, label: "R0", position: 0 }, // Right side (0 degrees)
-    { value: 7, label: "R7", position: 45 }, // Between right and top
-    { value: 15, label: "R15", position: 90 }, // Top (90 degrees)
-    { value: 30, label: "R30", position: 135 }, // Between top and left
-    { value: 60, label: "R60+", position: 180 }, // Left side (180 degrees)
-  ];
+  // Generate dynamic tick marks and labels based on min and max values
+  const generateTicks = () => {
+    // Define the number of ticks we want (5 ticks evenly distributed)
+    const tickCount = 5;
+    const ticks = [];
+    
+    for (let i = 0; i < tickCount; i++) {
+      // Calculate the value at this tick (distribute evenly between min and max)
+      const pct = i / (tickCount - 1);
+      let value = minValue + pct * (maxValue - minValue);
+      
+      // Special case for the last tick if it's the max value
+      let label = `${labelPrefix}${value.toFixed(0)}`;
+      if (i === tickCount - 1) {
+        label = `${labelPrefix}${value.toFixed(0)}+`;
+      }
+      
+      // Calculate position (0 = right side, 180 = left side)
+      const position = i * (180 / (tickCount - 1));
+      
+      ticks.push({ value, label, position });
+    }
+    
+    return ticks;
+  };
+  
+  const ticks = generateTicks();
 
   // Calculate the angle for the needle - independent calculation based on R-value
   const getNeedleAngle = (val: number): number => {
@@ -78,7 +101,7 @@ const ReportInsulationSectionGauge = ({
       >
         {/* Gradient definitions */}
         <defs>
-          {/* Gauge gradient: blue (right/0) to green (left/60+) */}
+          {/* Gauge gradient: green (right/0) to red (left/60+) */}
           <linearGradient
             id="rvalue-gradient"
             x1="100%"
@@ -86,11 +109,11 @@ const ReportInsulationSectionGauge = ({
             x2="0%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="#3b82f6" /> {/* Blue (R0) */}
-            <stop offset="25%" stopColor="#60a5fa" /> {/* Light blue */}
-            <stop offset="50%" stopColor="#84cc16" /> {/* Light green */}
-            <stop offset="75%" stopColor="#4ade80" /> {/* Green */}
-            <stop offset="100%" stopColor="#22c55e" /> {/* Dark green (R60+) */}
+            <stop offset="0%" stopColor="#22c55e" /> {/* Green (low values) */}
+            <stop offset="25%" stopColor="#84cc16" /> {/* Light green */}
+            <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
+            <stop offset="75%" stopColor="#e67700" /> {/* Orange */}
+            <stop offset="100%" stopColor="#cc2b2b" /> {/* Darker red (high values) */}
           </linearGradient>
 
           {/* Arrow gradient */}
@@ -114,9 +137,9 @@ const ReportInsulationSectionGauge = ({
             x2="0%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="#3b82f6" /> {/* Blue (R0) */}
-            <stop offset="50%" stopColor="#84cc16" /> {/* Light green */}
-            <stop offset="100%" stopColor="#22c55e" /> {/* Dark green (R60+) */}
+            <stop offset="0%" stopColor="#22c55e" /> {/* Green (low values) */}
+            <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
+            <stop offset="100%" stopColor="#cc2b2b" /> {/* Red (high values) */}
           </linearGradient>
         </defs>
 
@@ -224,7 +247,7 @@ const ReportInsulationSectionGauge = ({
             textAnchor="middle"
             dominantBaseline="middle"
           >
-            R{displayedValue.toFixed(1)}
+            {labelPrefix}{displayedValue.toFixed(1)}
           </text>
         </motion.g>
 
@@ -241,6 +264,21 @@ const ReportInsulationSectionGauge = ({
             stroke="none"
           />
         </g>
+
+        {/* Title display - positioned at the bottom center */}
+        <motion.text
+          x="250"
+          y="270"
+          fill="#333333"
+          fontSize="16"
+          fontWeight="500"
+          textAnchor="middle"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+        >
+          {title} {subtitle && subtitle}
+        </motion.text>
       </motion.svg>
     </div>
   );

@@ -100,7 +100,7 @@ const ReportCoolingSectionCard = ({
                   Current Performance
                 </h3>
 
-                <ReportCoolingSectionGauge value={cooling.current_value ?? 0} />
+                <ReportCoolingSectionGauge value={cooling.current_value ?? 0} maxValue={20} labelSuffix="" />
 
                 <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">
                   <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { HeatingData } from "@/app/admin/[bookingNumber]/report/page";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HouseImage } from "../heating/card";
 import ReportHeatingSectioninformation from "./information";
 import ReportHeatingSectionCard from "./card";
@@ -17,28 +17,35 @@ const ReportHeatingSection = ({
   houseImages,
   onUpdateValue,
 }: ReportHeatingSectionProps) => {
+  const [heatingDataSection, setHeatingDataSection] = useState<HeatingData[]>(
+    heatingData ?? []
+  );
+
+  useEffect(() => {
+    if (onUpdateValue) {
+      onUpdateValue(heatingDataSection);
+    }
+  }, [heatingDataSection]);
+
   const addNewHeating = () => {
     if (!isAdmin) return;
-    if (onUpdateValue && heatingData) {
-      const emptyHeating: HeatingData = {
-        title: "Your Home's Heating " + (heatingData.length + 1),
+    setHeatingDataSection((prev) => [
+      ...prev,
+      {
+        title: "Your Home's Heating " + (prev.length + 1),
         type: "Unknown",
         condition: "Unknown",
         year: 0,
         parameter: "AFUE",
         current_value: "0%",
         recommended_value: "100%",
-      };
-      onUpdateValue([...heatingData, emptyHeating]);
-    }
+      },
+    ]);
   };
 
   const deleteHeating = (index: number) => {
     if (!isAdmin) return;
-    if (onUpdateValue && heatingData) {
-      const updatedHeating = heatingData.filter((_, i) => i !== index);
-      onUpdateValue(updatedHeating);
-    }
+    setHeatingDataSection((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -67,12 +74,10 @@ const ReportHeatingSection = ({
           heating={heating}
           houseImages={houseImages}
           onUpdateValue={(updatedHeating) => {
-            if (onUpdateValue)
-              onUpdateValue([
-                ...heatingData.slice(0, index),
-                updatedHeating,
-                ...heatingData.slice(index + 1),
-              ]);
+            if (!isAdmin) return;
+            setHeatingDataSection((prev) => [
+              ...prev.map((h, i) => (i === index ? updatedHeating : h)),
+            ]);
           }}
           onDelete={() => deleteHeating(index)}
         />
