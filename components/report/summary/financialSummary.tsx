@@ -168,7 +168,7 @@ const ReportSummarySectionFinancialSummary = ({
                         }}
                       />
                     ) : (
-                      formatCurrency(item.amount as string)
+                      item.amount
                     )}
                     {isAdmin && (
                       <button

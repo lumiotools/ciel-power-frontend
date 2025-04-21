@@ -160,7 +160,7 @@ const ReportSummarySectionFederalTaxCredits = ({
                           ) : item.amount === "0" ? (
                             "--"
                           ) : (
-                            formatCurrency(item.amount as string)
+                            item.amount
                           )}
                           {isAdmin && (
                             <button

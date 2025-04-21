@@ -66,15 +66,17 @@ export function ReportImageViewer({
       />
       <div className="p-5 absolute right-0 bottom-0 left-0 top-0 flex flex-col justify-between text-white bg-gradient-to-t from-black/30 to-transparent rounded-md">
         <div className="flex justify-end">
-          <button
-            className={cn(
-              "size-10 p-1 rounded-full flex justify-center items-center",
-              buttonClassName
-            )}
-            onClick={onOpenPicker}
-          >
-            <Pencil className="!size-5" />
-          </button>
+          {allowSelection && (
+            <button
+              className={cn(
+                "size-10 p-1 rounded-full flex justify-center items-center",
+                buttonClassName
+              )}
+              onClick={onOpenPicker}
+            >
+              <Pencil className="!size-5" />
+            </button>
+          )}
         </div>
         {allowSelection ? (
           <ReportEditableInput
@@ -85,7 +87,7 @@ export function ReportImageViewer({
             }}
           />
         ) : (
-          (selectedImage?.description)
+          selectedImage?.description
         )}
       </div>
     </div>

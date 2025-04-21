@@ -6,7 +6,7 @@ export const BOOKING_STAGES = [
   "followUpScheduled",
   "reportGenerated",
   "proposalSigned",
-  "paymentDone",
+  "paymentCompleted",
 ];
 
 export const STAGE_LABELS: Record<string, string> = {
@@ -16,5 +16,5 @@ export const STAGE_LABELS: Record<string, string> = {
   followUpScheduled: "Follow Up Scheduled",
   reportGenerated: "Report Generated",
   proposalSigned: "Proposal Signed",
-  paymentDone: "Payment Done",
+  paymentCompleted: "Payment Completed",
 };

@@ -187,7 +187,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
                                 }
                                 className="mr-2"
                               />
-                              Flagged for attention
+                              Display to User
                             </label>
                           </div>
                         )}
