@@ -66,11 +66,11 @@ export function Sidebar() {
       icon: <Zap size={20} />,
     },
     { name: "About Us", href: "/about-us", icon: <Home size={20} /> },
-    {
-      name: "Affiliate Program",
-      href: "/affiliate-program",
-      icon: <Leaf size={20} />,
-    },
+    // {
+    //   name: "Affiliate Program",
+    //   href: "/affiliate-program",
+    //   icon: <Leaf size={20} />,
+    // },
   ];
 
   return (
