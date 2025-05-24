@@ -241,15 +241,10 @@ const ReportAirLeakageSectionGauge = ({
         </g>
 
         {/* Value display - positioned at the bottom center */}
-        <text
-          x="250"
-          y="270"
-          fill="#333333"
-          fontSize="16"
-          fontWeight="500"
-          textAnchor="middle"
-        >
-          Air Changes per Hour (ACH)
+        <text x="250" y="270" fontSize="16" fontWeight="700" textAnchor="middle">
+          <tspan fill="#031a82">Your Air Changes</tspan>
+          <tspan fill="#666666"> per Hour (ACH) is </tspan>
+          <tspan fill="#031a82">{achValue.toFixed(2)}</tspan>
         </text>
       </svg>
     </div>
