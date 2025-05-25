@@ -32,63 +32,58 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
   const cardStyle = "bg-white rounded-lg overflow-hidden";
   return (
     <motion.div {...fadeInUp} id="common-air-leak-points">
-      <div className="border border-gray-200 rounded-xl p-6">
-        <h2 className="text-[#002366] text-2xl font-bold mb-6">
-          Air Sealing Trouble Spots
-        </h2>
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* House Diagram */}
-          <div className="md:w-[40%]">
-            <img
-              src="/images/air-sealing-diagram.png"
-              alt="House air sealing trouble spots diagram"
-              className="w-full h-auto"
-            />
-          </div>
+      <h2 className="text-[#002366] text-2xl font-bold mb-6">
+        Air Sealing Trouble Spots
+      </h2>
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* House Diagram */}
+        <div className="md:w-[40%]">
+          <img
+            src="/images/air-sealing-diagram.png"
+            alt="House air sealing trouble spots diagram"
+            className="w-full h-auto"
+          />
+        </div>
 
-          {/* Air Leak Points List */}
-          <div className="md:w-[60%]">
-            <div className="flex relative">
-              {/* First Column (1-10) */}
-              <div className="flex-1 pr-4">
-                {airLeakagePoints.slice(0, 10).map((point) => (
-                  <div key={point.id} className="flex items-center gap-2 mb-2">
-                    <div
-                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: "#002366" }}
-                    >
-                      <span className="font-medium text-white text-xs">
-                        {point.id}
-                      </span>
-                    </div>
-                    <span className="text-[#002366] text-xs font-medium">
-                      {point.label}
+        {/* Air Leak Points List */}
+        <div className="md:w-[60%]">
+          <div className="flex gap-8">
+            {/* First Column (1-10) */}
+            <div className="flex-1">
+              {airLeakagePoints.slice(0, 10).map((point) => (
+                <div key={point.id} className="flex items-center gap-3 mb-4">
+                  <div
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "#002366" }}
+                  >
+                    <span className="font-medium text-white text-sm">
+                      {point.id}
                     </span>
                   </div>
-                ))}
-              </div>
+                  <span className="text-[#002366] text-sm font-medium">
+                    {point.label}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-              {/* Vertical Separator Line */}
-              <div className="w-[1px] bg-gray-200 absolute h-full top-0 left-1/2"></div>
-
-              {/* Second Column (11-19) */}
-              <div className="flex-1 pl-4">
-                {airLeakagePoints.slice(10).map((point) => (
-                  <div key={point.id} className="flex items-center gap-2 mb-2">
-                    <div
-                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: "#002366" }}
-                    >
-                      <span className="font-medium text-white text-xs">
-                        {point.id}
-                      </span>
-                    </div>
-                    <span className="text-[#002366] text-xs font-medium">
-                      {point.label}
+            {/* Second Column (11-19) */}
+            <div className="flex-1">
+              {airLeakagePoints.slice(10).map((point) => (
+                <div key={point.id} className="flex items-center gap-3 mb-4">
+                  <div
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "#002366" }}
+                  >
+                    <span className="font-medium text-white text-sm">
+                      {point.id}
                     </span>
                   </div>
-                ))}
-              </div>
+                  <span className="text-[#002366] text-sm font-medium">
+                    {point.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
