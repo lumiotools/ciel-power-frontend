@@ -29,62 +29,43 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
     transition: { duration: 0.5 },
   };
 
-  const cardStyle = "bg-white rounded-lg overflow-hidden";
+  const cardStyle =
+    "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden";
   return (
     <motion.div {...fadeInUp} id="common-air-leak-points">
-      <h2 className="text-[#002366] text-2xl font-bold mb-6">
-        Air Sealing Trouble Spots
-      </h2>
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* House Diagram */}
-        <div className="md:w-[40%]">
-          <img
-            src="/images/air-sealing-diagram.png"
-            alt="House air sealing trouble spots diagram"
-            className="w-full h-auto"
-          />
+      <div className={cardStyle}>
+        <div className="py-3 px-5" style={{ backgroundColor: "#031A821A" }}>
+          <h3 className="font-medium" style={{ color: "#031A82" }}>
+            Common Air Leak Points
+          </h3>
         </div>
-
-        {/* Air Leak Points List */}
-        <div className="md:w-[60%]">
-          <div className="flex gap-8">
-            {/* First Column (1-10) */}
-            <div className="flex-1">
-              {airLeakagePoints.slice(0, 10).map((point) => (
-                <div key={point.id} className="flex items-center gap-3 mb-4">
-                  <div
-                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "#002366" }}
-                  >
-                    <span className="font-medium text-white text-sm">
-                      {point.id}
-                    </span>
-                  </div>
-                  <span className="text-[#002366] text-sm font-medium">
-                    {point.label}
+        <div className="p-6">
+          <p className="text-gray-700 mb-6">
+            Air leakage rates and sources vary from house to house. To pinpoint
+            air infiltration sources in your home, technicians use specialized
+            equipment including blower door devices and infra red cameras.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {airLeakagePoints.map((point) => (
+              <div
+                key={point.id}
+                className="flex items-center p-4 rounded-lg"
+                style={{
+                  backgroundColor: "#031A820A",
+                  border: "0.5px solid #031A8233",
+                }}
+              >
+                <div
+                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                  style={{ backgroundColor: "#EBF1FF" }}
+                >
+                  <span className="font-medium" style={{ color: "#031A82" }}>
+                    {point.id}
                   </span>
                 </div>
-              ))}
-            </div>
-
-            {/* Second Column (11-19) */}
-            <div className="flex-1">
-              {airLeakagePoints.slice(10).map((point) => (
-                <div key={point.id} className="flex items-center gap-3 mb-4">
-                  <div
-                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "#002366" }}
-                  >
-                    <span className="font-medium text-white text-sm">
-                      {point.id}
-                    </span>
-                  </div>
-                  <span className="text-[#002366] text-sm font-medium">
-                    {point.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+                <span className="text-gray-700">{point.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
