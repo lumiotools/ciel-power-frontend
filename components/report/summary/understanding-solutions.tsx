@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
-import { ChevronUp, Wind } from "lucide-react";
+import { ChevronUp, Wind, Thermometer } from "lucide-react";
 
 export default function NotesSection() {
   const [notes, setNotes] = useState("");
@@ -46,18 +46,9 @@ export default function NotesSection() {
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/notes-icon.svg" className="text-[#67b502] w-8 h-8 mr-2" />
+            <Thermometer className="text-[#67b502] w-8 h-8 mr-2" />
             <h2 className="text-[#67b502] text-2xl font-bold">Understanding Solutions</h2>
           </div>
-          {/* <button
-            onClick={toggleNotes}
-            className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
-            aria-label={isOpen ? "Hide notes" : "Show notes"}
-          >
-            <ChevronUp
-              className={`w-6 h-6 transition-transform duration-300 ${isOpen ? "" : "transform rotate-180"}`}
-            />
-          </button> */}
         </div>
 
 
