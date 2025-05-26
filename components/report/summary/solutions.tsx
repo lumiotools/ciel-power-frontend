@@ -76,19 +76,6 @@ const ReportSummarySolutionSection = ({
 
       {/* <ReportSummarySectionFutureUpgrades /> */}
 
-      <ReportSummarySectionEnvironmentalImpact
-        isAdmin={isAdmin}
-        environmentalImpact={reportData?.environmentalImpact}
-        onUpdateValue={(environmentalImpact) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              environmentalImpact: environmentalImpact,
-            });
-          }
-        }}
-      />
-
       <ReportSummarySectionFinancialSummary
         isAdmin={isAdmin}
         financialSummary={reportData?.financialSummary}
@@ -110,6 +97,19 @@ const ReportSummarySolutionSection = ({
             onUpdateValue({
               ...reportData,
               federalTaxCredits: federalTaxCredits,
+            });
+          }
+        }}
+      />
+
+      <ReportSummarySectionEnvironmentalImpact
+        isAdmin={isAdmin}
+        environmentalImpact={reportData?.environmentalImpact}
+        onUpdateValue={(environmentalImpact) => {
+          if (onUpdateValue) {
+            onUpdateValue({
+              ...reportData,
+              environmentalImpact: environmentalImpact,
             });
           }
         }}
