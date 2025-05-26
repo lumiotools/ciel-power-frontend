@@ -68,15 +68,8 @@ export default function NotesSection() {
         >
           <div className="bg-[#ffffff] rounded-2xl border border-gray-200 p-8 shadow-sm">
             <p className="text-gray-800 leading-relaxed text-base">
-              This section explains how uncontrolled air leakage affects your home's
-              energy efficiency, comfort, and air quality. It highlights the
-              consequences of relying on natural ventilation through leaks, such as
-              inconsistent airflow and potential health or structural issues, and
-              introduces the benefits of sealing cracks and openings to improve
-              indoor comfort and durability.
+              You can find solutions and recommended upgrades for your home here, as reccommended by your Ciel Power Home Energy Audit here.
             </p>
-
-
           </div>
         </div>
       </div>
