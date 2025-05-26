@@ -160,9 +160,9 @@ const ReportPage = ({
   const tabColors = {
     overview: "bg-[#85C435]",
     "air-leakage": "bg-[#031A82]",
-    insulation: "bg-[#44BFB8]",
-    heating: "bg-[#B18C2E]",
-    cooling: "bg-[#B18C2E]",
+    insulation: "bg-[#308883]",
+    heating: "bg-[#d47c00]",
+    cooling: "bg-[#d47c00]",
     concerns: "bg-[#FF6700]",
     solutions: "bg-[#85C435]",
   };
@@ -189,7 +189,7 @@ const ReportPage = ({
   };
 
   // Format tab name for display (matching user side)
-  const formatTabName = (tab) => {
+  const formatTabName = (tab: string) => {
     if (tab === "air-leakage") return "Air Leakage";
     if (tab === "concerns") return "Concerns";
     if (tab === "solutions") return "Solutions";
@@ -521,9 +521,9 @@ const ReportPage = ({
                       : tab === "air-leakage"
                         ? "text-[#031A82]"
                         : tab === "insulation"
-                          ? "text-[#44BFB8]"
+                          ? "text-[#308883]"
                           : tab === "heating" || tab === "cooling"
-                            ? "text-[#B18C2E]"
+                            ? "text-[#d47c00]"
                             : tab === "concerns"
                               ? "text-[#FF6700]"
                               : tab === "solutions"

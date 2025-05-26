@@ -1,25 +1,21 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
+import Image from "next/image";
 
 const ReportInsulationSectionSeasonalPerformance = () => {
   return (
     <div>
-      <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden h-[450px] flex flex-col">
-        <CardHeader className="bg-[#E0F7F5] py-4 px-5 border-b border-gray-100">
-          <CardTitle className="text-lg font-medium text-[#256C68]">
-            Seasonal Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 flex-grow flex items-center justify-center">
-          <div className="w-full flex items-center justify-center">
-            <img
-              src="https://i.postimg.cc/ZYG3nQCs/Screenshot-2024-11-25-003635.png"
-              alt="House insulation diagram showing seasonal performance"
-              className="w-full max-w-md mx-auto object-contain"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <h2 className="text-3xl font-bold text-[#308883] mb-6">
+        Seasonal Performance
+      </h2>
+      <div className="border border-gray-200 rounded-lg p-4">
+        <Image
+          src="/image 83.png"
+          alt="Diagram showing how insulation performs in summer and winter seasons"
+          width={600}
+          height={500}
+          className="w-full h-auto"
+        />
+      </div>
     </div>
   );
 };
