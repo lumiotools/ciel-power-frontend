@@ -2,7 +2,7 @@ import { ReportData } from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
 import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
-import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
+// import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
@@ -74,7 +74,7 @@ const ReportSummarySolutionSection = ({
         }}
       />
 
-      <ReportSummarySectionFutureUpgrades />
+      {/* <ReportSummarySectionFutureUpgrades /> */}
 
       <ReportSummarySectionEnvironmentalImpact
         isAdmin={isAdmin}
