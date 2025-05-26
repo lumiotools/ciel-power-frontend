@@ -17,9 +17,8 @@ const ReportInsulationSectionGauge = ({
   value,
   minValue = 0,
   maxValue = 60,
-  subtitle = "",
   labelPrefix = "R",
-  title
+  title,
 }: RValueGaugeProps): JSX.Element => {
   const [displayedValue, setDisplayedValue] = useState(value);
 
@@ -32,27 +31,27 @@ const ReportInsulationSectionGauge = ({
     // Define the number of ticks we want (5 ticks evenly distributed)
     const tickCount = 5;
     const ticks = [];
-    
+
     for (let i = 0; i < tickCount; i++) {
       // Calculate the value at this tick (distribute evenly between min and max)
       const pct = i / (tickCount - 1);
       let value = minValue + pct * (maxValue - minValue);
-      
+
       // Special case for the last tick if it's the max value
       let label = `${labelPrefix}${value.toFixed(0)}`;
       if (i === tickCount - 1) {
         label = `${labelPrefix}${value.toFixed(0)}+`;
       }
-      
+
       // Calculate position (0 = right side, 180 = left side)
       const position = i * (180 / (tickCount - 1));
-      
+
       ticks.push({ value, label, position });
     }
-    
+
     return ticks;
   };
-  
+
   const ticks = generateTicks();
 
   // Calculate the angle for the needle - independent calculation based on R-value
@@ -113,7 +112,8 @@ const ReportInsulationSectionGauge = ({
             <stop offset="25%" stopColor="#84cc16" /> {/* Light green */}
             <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
             <stop offset="75%" stopColor="#e67700" /> {/* Orange */}
-            <stop offset="100%" stopColor="#cc2b2b" /> {/* Darker red (high values) */}
+            <stop offset="100%" stopColor="#cc2b2b" />{" "}
+            {/* Darker red (high values) */}
           </linearGradient>
 
           {/* Arrow gradient */}
@@ -247,7 +247,8 @@ const ReportInsulationSectionGauge = ({
             textAnchor="middle"
             dominantBaseline="middle"
           >
-            {labelPrefix}{displayedValue.toFixed(1)}
+            {labelPrefix}
+            {displayedValue.toFixed(1)}
           </text>
         </motion.g>
 
@@ -266,7 +267,7 @@ const ReportInsulationSectionGauge = ({
         </g>
 
         {/* Title display - positioned at the bottom center */}
-        <motion.text
+        {/* <motion.text
           x="250"
           y="270"
           fill="#333333"
@@ -276,10 +277,7 @@ const ReportInsulationSectionGauge = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          <span>Your {title}</span>
-          {title} {subtitle && subtitle}
-        </motion.text>
+        ></motion.text> */}
       </motion.svg>
     </div>
   );

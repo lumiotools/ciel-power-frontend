@@ -117,7 +117,13 @@ const ReportInsulationSectionCard = ({
                 value={insulation.current_rValue ?? 0}
                 maxValue={insulation.recommended_rValue}
               />
-
+              <div className="text-xl text-center font-semibold text-gray-500">
+                <span className="text-[#308883]">{insulation.title} </span>
+                <span>R-value is </span>
+                <span className="text-[#308883]">
+                  R{insulation.current_rValue}
+                </span>
+              </div>
               <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-500">Current R-Value</p>
