@@ -12,8 +12,8 @@ interface ReportHeatingSectionGaugeProps {
   subtitle?: string
   labelSuffix?: string
   heating?: {
-    current_value: number
-    [key: string]: any
+    current_value: number | string; // Allow string type for current_value
+    [key: string]: any;
   }
 }
 
@@ -273,8 +273,9 @@ export default function ReportHeatingSectionGauge({
             {" rating is "}
           </tspan>
           <tspan fill="#d47c02" fontWeight="700">
-            {heating?.current_value || displayedValue}
-            {labelSuffix}
+            {typeof heating?.current_value === 'string' && heating.current_value.includes('%')
+              ? heating.current_value
+              : `${displayedValue.toFixed(1)}${labelSuffix}`}
           </tspan>
         </motion.text>
       </motion.svg>

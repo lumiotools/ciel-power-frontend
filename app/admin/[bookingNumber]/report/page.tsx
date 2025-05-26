@@ -69,15 +69,31 @@ export interface InsulationData {
 }
 
 export interface HeatingData {
-  title: string;
-  type: string;
-  condition: string;
-  year?: number;
-  parameter: string;
-  current_value?: string;
-  recommended_value?: string;
-  description?: DescriptionData;
-  images?: ImageData[];
+  title: string
+  type: string
+  condition: string
+  year: number
+  parameter: string
+  current_value: string
+  recommended_value: string
+  description?: {
+    title: string
+    content: string
+    footer?: string
+  }
+  images?: [
+    {
+      mimeType?: string
+      thumbnailLink?: string
+      size?: string
+      id?: string
+      name?: string
+      description?: string
+      createdTime?: string
+      modifiedTime?: string
+      link?: string
+    },
+  ]
 }
 
 export interface CoolingData {
@@ -189,7 +205,7 @@ const ReportPage = ({
   };
 
   // Format tab name for display (matching user side)
-  const formatTabName = (tab) => {
+  const formatTabName = (tab: string) => {
     if (tab === "air-leakage") return "Air Leakage";
     if (tab === "concerns") return "Concerns";
     if (tab === "solutions") return "Solutions";
@@ -503,7 +519,7 @@ const ReportPage = ({
 
         <div>
           <div className="flex overflow-x-auto border-b-2 border-gray-100 pb-4">
-            {[
+            {([
               "overview",
               "air-leakage",
               "insulation",
@@ -511,7 +527,7 @@ const ReportPage = ({
               "cooling",
               "concerns",
               "solutions",
-            ].map((tab) => (
+            ] as (keyof typeof tabColors)[]).map((tab) => (
               <button
                 key={tab}
                 className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${

@@ -1,37 +1,36 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import type { HeatingData } from "@/app/admin/[bookingNumber]/report/page";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import ReportHeatingSectionGauge from "./gauge";
-import ReportEditableInput from "../common/editableInput";
-import { ReportImageViewer } from "../common/imageViewer";
-import { ReportImagePicker } from "../common/imagePicker";
-import ReportEditableSelect from "../common/editableSelect";
-import { Flame, Info, Trash2 } from "lucide-react";
-import ReportHeatingSectionGauge from "./gauge";
-import ReportEditableTextArea from "../common/editableTextarea";
-import { motion } from "framer-motion";
+import { useState, useMemo } from "react"
+import type { HeatingData } from "@/app/admin/[bookingNumber]/report/page"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import ReportEditableInput from "../common/editableInput"
+import { ReportImageViewer } from "../common/imageViewer"
+import { ReportImagePicker } from "../common/imagePicker"
+import ReportEditableSelect from "../common/editableSelect"
+import { Flame, Info, Trash2 } from "lucide-react"
+import ReportHeatingSectionGauge from "./gauge"
+import ReportEditableTextArea from "../common/editableTextarea"
+import { motion } from "framer-motion"
 
 // Define the HouseImage interface based on the provided sample
 export interface HouseImage {
-  mimeType: string;
-  thumbnailLink: string;
-  size: string;
-  id: string;
-  name: string;
-  description: string;
-  createdTime: string;
-  modifiedTime: string;
-  link: string;
+  mimeType: string
+  thumbnailLink: string
+  size: string
+  id: string
+  name: string
+  description: string
+  createdTime: string
+  modifiedTime: string
+  link: string
 }
 
 interface ReportHeatingSectionCardProps {
-  isAdmin?: boolean;
-  heating: HeatingData;
-  houseImages?: HouseImage[];
-  onUpdateValue: (updatedHeating: HeatingData) => void;
-  onDelete?: () => void;
+  isAdmin?: boolean
+  heating: HeatingData
+  houseImages?: HouseImage[]
+  onUpdateValue: (updatedHeating: HeatingData) => void
+  onDelete?: () => void
 }
 
 const ReportHeatingSectionCard = ({
@@ -41,32 +40,23 @@ const ReportHeatingSectionCard = ({
   onUpdateValue,
   onDelete,
 }: ReportHeatingSectionCardProps) => {
-  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false)
 
-  useEffect(() => {
-    onUpdateValue({
-      ...heating,
-      description: {
-        title: "System Condition",
-        content: `Your ${heating.title} has a ${heating.parameter} of ${heating.current_value}. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`,
-        footer: "Estimated based on Age & Type",
-      },
-    });
-  }, [
-    heating?.title,
-    heating?.parameter,
-    heating?.current_value,
-    heating?.recommended_value,
-    onUpdateValue,
-    heating,
-  ]);
+  // Generate the default description content
+  const defaultDescription = useMemo(
+    () => ({
+      title: "System Condition",
+      content: `Your ${heating.title} has a ${heating.parameter} of ${heating.current_value}. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`,
+      footer: "Estimated based on Age & Type",
+    }),
+    [heating.title, heating.parameter, heating.current_value, heating.recommended_value],
+  )
+
+  // Use the existing description or fall back to default
+  const currentDescription = heating.description || defaultDescription
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
         <CardHeader className="py-4 px-5 border-b border-gray-100">
           <CardTitle className="text-xl font-bold text-[#d47c02] flex justify-between items-center">
@@ -80,7 +70,7 @@ const ReportHeatingSectionCard = ({
                     onUpdateValue({
                       ...heating,
                       title: title as string,
-                    });
+                    })
                   }}
                 />
               ) : (
@@ -99,9 +89,7 @@ const ReportHeatingSectionCard = ({
           <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-8">
               <div className="bg-white p-4 rounded-md">
-                <h3 className="text-lg font-semibold text-[#d47c02]">
-                  Current Performance
-                </h3>
+                <h3 className="text-lg font-semibold text-[#d47c02]">Current Performance</h3>
 
                 <ReportHeatingSectionGauge
                   value={
@@ -114,20 +102,14 @@ const ReportHeatingSectionCard = ({
                   maxValue={heating.current_value?.includes("%") ? 100 : 0.96}
                 />
 
-                <div className="ml-14 flex  items-center">
-                  <div className="flex  items-center w-full">
-                    <p className="text-sm text-gray-500">
-                      Current {heating.parameter}
-                    </p>
-                    <p className="text-xl ml-4 text-[#F44336]">
-                      {heating.current_value}
-                    </p>
+                <div className="flex justify-between items-center mt-4 px-4">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Current {heating.parameter}</p>
+                    <p className="text-xl font-bold text-[#F44336]">{heating.current_value}</p>
                   </div>
-                  <div className="flex items-center w-full">
-                    <p className="text-sm text-gray-500">BPI Recommends </p>
-                    <p className="ml-4 text-xl text-[#4CAF50]">
-                      {heating.recommended_value}
-                    </p>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">BPI Recommends</p>
+                    <p className="text-xl font-bold text-[#4CAF50]">{heating.recommended_value}</p>
                   </div>
                 </div>
               </div>
@@ -145,7 +127,7 @@ const ReportHeatingSectionCard = ({
                             onUpdateValue({
                               ...heating,
                               type: value as string,
-                            });
+                            })
                           }}
                         />
                       ) : (
@@ -169,7 +151,7 @@ const ReportHeatingSectionCard = ({
                             onUpdateValue({
                               ...heating,
                               condition: value as string,
-                            });
+                            })
                           }}
                         />
                       ) : (
@@ -188,23 +170,19 @@ const ReportHeatingSectionCard = ({
                     {isAdmin ? (
                       <ReportEditableInput
                         placeholder="Improvement Opportunity"
-                        value={
-                          heating.description?.title ??
-                          "Improvement Opportunity"
-                        }
+                        value={currentDescription.title}
                         onChange={(value) => {
                           onUpdateValue({
                             ...heating,
                             description: {
+                              ...currentDescription,
                               title: value as string,
-                              content: heating.description?.content ?? "",
-                              footer: heating.description?.footer ?? "",
                             },
-                          });
+                          })
                         }}
                       />
                     ) : (
-                      (heating.description?.title ?? "Improvement Opportunity")
+                      currentDescription.title
                     )}
                   </h3>
                 </div>
@@ -213,26 +191,19 @@ const ReportHeatingSectionCard = ({
                   {isAdmin ? (
                     <ReportEditableTextArea
                       placeholder="Enter improvement opportunity description"
-                      value={
-                        heating.description?.content ??
-                        `Your ${heating.title}'s current ${heating.parameter} rating of ${heating.current_value} means it's operating below optimal efficiency. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`
-                      }
+                      value={currentDescription.content}
                       onChange={(value) => {
                         onUpdateValue({
                           ...heating,
                           description: {
-                            title:
-                              heating.description?.title ??
-                              "Improvement Opportunity",
+                            ...currentDescription,
                             content: value as string,
-                            footer: heating.description?.footer ?? "",
                           },
-                        });
+                        })
                       }}
                     />
                   ) : (
-                    (heating.description?.content ??
-                    `Your ${heating.title}'s current ${heating.parameter} rating of ${heating.current_value} means it's operating below optimal efficiency. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`)
+                    currentDescription.content
                   )}
                 </div>
               </div>
@@ -241,7 +212,7 @@ const ReportHeatingSectionCard = ({
                 <ReportImageViewer
                   allowSelection={isAdmin}
                   buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
-                  selectedImage={heating?.images?.[0]}
+                  selectedImage={heating?.images?.[0] ? { ...heating.images[0], id: heating.images[0].id || '' } : undefined}
                   onOpenPicker={() => setIsImagePickerOpen(true)}
                   onDescriptionChange={(description) => {
                     if (heating?.images?.[0])
@@ -253,7 +224,7 @@ const ReportHeatingSectionCard = ({
                             description: description as string,
                           },
                         ],
-                      });
+                      })
                   }}
                 />
               </div>
@@ -283,14 +254,14 @@ const ReportHeatingSectionCard = ({
                           id: id as string,
                         },
                       ],
-                });
+                })
               }}
             />
           )}
         </CardContent>
       </Card>
     </motion.div>
-  );
-};
+  )
+}
 
-export default ReportHeatingSectionCard;
+export default ReportHeatingSectionCard
