@@ -60,7 +60,7 @@ const switchToTab = async (tabName: string): Promise<void> => {
       await wait(800);
 
       // Add a small additional wait for more complex tabs that might need more time
-      if (tabName === "Insulation Reports" || tabName === "Report Summary") {
+      if (tabName === "Insulation" || tabName === "Report Summary") {
         await wait(200);
       }
 
@@ -480,7 +480,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       // Overview - Regrouped elements as requested
       {
         section: "overview" as ReportSection,
-        tabName: "Overview",
+        tabName: "Introduction",
         pages: [
           { ids: ["about-ciel-power", "goals-of-the-audit"] },
           {
@@ -495,7 +495,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       // Air Leakage - Combined introduction with air-flow-rates
       {
         section: "airLeakage" as ReportSection,
-        tabName: "Air Leakage Reports",
+        tabName: "Air Leakage",
         pages: [
           { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] },
           { ids: ["common-air-leak-points"] },
@@ -505,7 +505,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       // Insulation - Regrouped elements as requested
       {
         section: "insulation" as ReportSection,
-        tabName: "Insulation Reports",
+        tabName: "Insulation",
         pages: [
           {
             ids: [
@@ -521,21 +521,30 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       // Heating - Include header with system-1 only
       {
         section: "heating" as ReportSection,
-        tabName: "Heating Reports",
+        tabName: "Heating",
         pages: [{ ids: ["heating-header"] }],
       },
 
       // Cooling - Include header with first cooling system
       {
         section: "cooling" as ReportSection,
-        tabName: "Cooling Reports",
+        tabName: "Cooling",
         pages: [{ ids: ["cooling-header"] }],
       },
 
       // Report Summary - Combined more elements and put project-costs and tax-credits on the same page
       {
-        section: "summary" as ReportSection,
-        tabName: "Report Summary",
+        section: "concerns" as ReportSection,
+        tabName: "Concerns",
+        pages: [
+          { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
+          { ids: ["future-solutions", "environmental-impact"] },
+          { ids: ["project-costs", "tax-credits"] },
+        ],
+      },
+      {
+        section: "solutions" as ReportSection,
+        tabName: "Solutions",
         pages: [
           { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
           { ids: ["future-solutions", "environmental-impact"] },

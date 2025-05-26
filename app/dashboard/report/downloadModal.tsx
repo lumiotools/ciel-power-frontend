@@ -7,7 +7,8 @@ export type ReportSection =
   | "insulation"
   | "heating"
   | "cooling"
-  | "summary";
+  | "concerns"
+  | "solutions";
 
 // Define the props interface
 interface DownloadModalProps {
@@ -67,11 +68,12 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
   // Define sections configuration
   const sections: Array<{ id: ReportSection; name: string }> = [
     { id: "overview", name: "Overview" },
-    { id: "airLeakage", name: "Air Leakage Reports" },
-    { id: "insulation", name: "Insulation Reports" },
-    { id: "heating", name: "Heating Reports" },
-    { id: "cooling", name: "Cooling Reports" },
-    { id: "summary", name: "Report Summary" },
+    { id: "airLeakage", name: "Air Leakage" },
+    { id: "insulation", name: "Insulation" },
+    { id: "heating", name: "Heating" },
+    { id: "cooling", name: "Cooling" },
+    { id: "concerns", name: "Concerns" },
+    { id: "solutions", name: "Solutions" },
   ];
 
   // All available section IDs

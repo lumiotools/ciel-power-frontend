@@ -37,10 +37,7 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
       className="p-6 border-t border-gray-200"
     >
       {/* Header */}
-      <h1
-        className="text-3xl font-bold mb-6"
-        style={{ color: "#031a82" }}
-      >
+      <h1 className="text-3xl font-bold mb-6" style={{ color: "#031a82" }}>
         Air Sealing Trouble Spots
       </h1>
 
@@ -48,16 +45,15 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
       <div className="bg-[#ffffff] rounded-2xl border border-gray-200 p-8 shadow-sm">
         <div className="flex flex-col md:flex-row gap-8">
           {/* House Diagram */}
-          <div className="md:w-[40%]">
+          <div className="md:w-[42.5%] border-r-[3px] border-gray-200 pr-4">
             <img
               src="/images/air-sealing-diagram.png"
               alt="House air sealing trouble spots diagram"
               className="w-full h-auto rounded-lg"
             />
           </div>
-
           {/* Air Leak Points List */}
-          <div className="md:w-[60%]">
+          <div className="md:w-[57.5%]">
             <div className="flex gap-8">
               {/* First Column (1-10) */}
               <div className="flex-1">
@@ -67,11 +63,11 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
                       className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                       style={{ backgroundColor: "#031A82" }}
                     >
-                      <span className="font-medium text-white text-sm">
+                      <span className="font-medium text-white text-md">
                         {point.id}
                       </span>
                     </div>
-                    <span className="text-gray-800 text-sm font-medium leading-tight">
+                    <span className="text-gray-800 text-md font-semibold leading-tight">
                       {point.label}
                     </span>
                   </div>
@@ -86,11 +82,11 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
                       className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                       style={{ backgroundColor: "#031A82" }}
                     >
-                      <span className="font-medium text-white text-sm">
+                      <span className="font-medium text-white text-md">
                         {point.id}
                       </span>
                     </div>
-                    <span className="text-gray-800 text-sm font-medium leading-tight">
+                    <span className="text-gray-800 text-md font-semibold leading-tight">
                       {point.label}
                     </span>
                   </div>

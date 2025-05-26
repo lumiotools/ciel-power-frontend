@@ -7,16 +7,16 @@ import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
 
-interface ReportSummarySectionProps {
+interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
   reportData: ReportData;
   onUpdateValue?: (reportData: ReportData) => void;
 }
-const ReportSummarySection = ({
+const ReportSummarySolutionSection = ({
   isAdmin,
   reportData,
   onUpdateValue,
-}: ReportSummarySectionProps) => {
+}: ReportSummarySolutionSectionProps) => {
   return (
     <div className="space-y-8">
       {/* {isAdmin && (
@@ -30,7 +30,7 @@ const ReportSummarySection = ({
         </div>
       )} */}
 
-      <ReportSummarySectionSummaryOfConcerns
+      {/* <ReportSummarySectionSummaryOfConcerns
         isAdmin={isAdmin}
         summaryOfConcerns={reportData?.summaryOfConcerns}
         onUpdateValue={(updatedSummaryOfConcerns) => {
@@ -41,7 +41,7 @@ const ReportSummarySection = ({
             });
           }
         }}
-      />
+      /> */}
 
       <ReportSummarySectionSolutionsAndRecommendations
         isAdmin={isAdmin}
@@ -133,4 +133,4 @@ const ReportSummarySection = ({
   );
 };
 
-export default ReportSummarySection;
+export default ReportSummarySolutionSection;

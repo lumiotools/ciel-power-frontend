@@ -19,7 +19,7 @@ import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
 import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
-import ReportSummarySection from "@/components/report/summary/summary";
+import ReportSummarySection from "@/components/report/summary/concerns";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -145,7 +145,8 @@ const ReportPage = ({
     insulation: "bg-[#44BFB8]",
     heating: "bg-[#B18C2E]",
     cooling: "bg-[#B18C2E]",
-    summary: "bg-[#FF6700]",
+    concerns: "bg-[#FF6700]",
+    solutions: "bg-[#85C435]",
     "future solutions and certifications": "bg-purple-500",
   };
 
@@ -212,7 +213,7 @@ const ReportPage = ({
 
   // Format tab name for display
   const formatTabName = (tab) => {
-    if (tab === "airLeakage") return "Air Leakage Reports";
+    if (tab === "airLeakage") return "Air Leakage";
     if (tab === "summary") return "Report Summary";
     if (tab === "future solutions and certifications")
       return "Future Solutions";
@@ -365,7 +366,8 @@ const ReportPage = ({
             ].map((tab) => (
               <button
                 key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
+                  activeSubMenu === tab
                     ? tab === "overview"
                       ? "text-[#67B502]"
                       : tab === "airLeakage"
@@ -378,7 +380,7 @@ const ReportPage = ({
                               ? "text-[#FF6700]"
                               : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
-                  }`}
+                }`}
                 onClick={() => setActiveSubMenu(tab)}
               >
                 {formatTabName(tab)}

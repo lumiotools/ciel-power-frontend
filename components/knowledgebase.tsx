@@ -385,7 +385,7 @@ const KnowledgeBase = () => {
                               <h3 className="text-[#8bc34a] font-medium line-clamp-3">
                                 {video.title}
                               </h3>
-                              <ChevronRight className="text-[#8bc34a]" />
+                              <ChevronRight className="text-[#8bc34a] w-14 h-14" />
                             </div>
                             {video.description && (
                               <p className="text-sm text-gray-600 line-clamp-4">

@@ -74,7 +74,7 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-[#a6d66b] flex flex-col overflow-y-auto ">
+    <div className="w-64 bg-[#7ab236] flex flex-col overflow-y-auto ">
       <div className="p-6">
         <div className="flex items-center">
           <img

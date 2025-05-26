@@ -109,7 +109,7 @@ export default function BookingDetailsPage({
   const [reportData, setReportData] = useState<Object | null>(null);
   const [reportStatus, setReportStatus] = useState("NONE");
   const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
-    [],
+    []
   );
   const [completedContractFileUrl, setCompletedContractFileUrl] = useState<
     string | null
@@ -119,10 +119,10 @@ export default function BookingDetailsPage({
   // Separate loading states for different actions
   const [isSavingReport, setIsSavingReport] = useState(false);
   const [isTogglingContract, setIsTogglingContract] = useState<string | null>(
-    null,
+    null
   );
   const [isRemovingContract, setIsRemovingContract] = useState<string | null>(
-    null,
+    null
   );
   const [isAttachingContract, setIsAttachingContract] = useState(false);
 
@@ -135,7 +135,7 @@ export default function BookingDetailsPage({
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<ContractDoc[]>([]);
   const [selectedContract, setSelectedContract] = useState<ContractDoc | null>(
-    null,
+    null
   );
 
   const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -186,6 +186,10 @@ export default function BookingDetailsPage({
       if (data.success) {
         setBooking(data.data.booking);
         // Handle report data if available
+        sessionStorage.setItem(
+          "bookingData",
+          JSON.stringify(data.data.booking)
+        );
         if (data.data.report) {
           setReportData(data.data.report.data || null);
           setReportUrl(data.data.report.url || "");
@@ -202,8 +206,14 @@ export default function BookingDetailsPage({
         // Handle offered contracts
         if (data.data.offeredContracts) {
           setOfferedContracts(data.data.offeredContracts);
+          // Store in sessionStorage for quick access
+          sessionStorage.setItem(
+            "offeredContracts",
+            JSON.stringify(data.data.offeredContracts)
+          );
         } else {
           setOfferedContracts([]);
+          sessionStorage.removeItem("offeredContracts");
         }
         if (data.data.completedContractLink) {
           setCompletedContractFileUrl(data.data.completedContractLink);
@@ -239,7 +249,7 @@ export default function BookingDetailsPage({
 
     try {
       const response = await fetch(
-        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`,
+        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`
       );
 
       if (!response.ok) {
@@ -269,7 +279,7 @@ export default function BookingDetailsPage({
 
     try {
       const response = await fetch(
-        `/api/admin/search/contracts/${contractId}/recipients`,
+        `/api/admin/search/contracts/${contractId}/recipients`
       );
 
       if (!response.ok) {
@@ -336,7 +346,7 @@ export default function BookingDetailsPage({
             "Content-Type": "application/json",
           },
           body: JSON.stringify(contractData),
-        },
+        }
       );
 
       const data = await response.json();
@@ -365,7 +375,7 @@ export default function BookingDetailsPage({
 
   const handleToggleContractDisplay = async (
     contractId: string,
-    display: boolean,
+    display: boolean
   ) => {
     setIsTogglingContract(contractId);
     try {
@@ -376,7 +386,7 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       const data = await response.json();
@@ -388,8 +398,8 @@ export default function BookingDetailsPage({
           prevContracts.map((contract) =>
             contract.id === contractId
               ? { ...contract, displayContract: display }
-              : contract,
-          ),
+              : contract
+          )
         );
       } else {
         toast.error(data.message || "Failed to toggle contract display");
@@ -416,7 +426,7 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       const data = await response.json();
@@ -425,7 +435,7 @@ export default function BookingDetailsPage({
         toast.success("Contract removed successfully");
         // Remove the contract from the local state
         setOfferedContracts((prevContracts) =>
-          prevContracts.filter((contract) => contract.id !== contractId),
+          prevContracts.filter((contract) => contract.id !== contractId)
         );
       } else {
         toast.error(data.message || "Failed to remove contract");
@@ -471,7 +481,7 @@ export default function BookingDetailsPage({
               "Content-Type": "application/json",
             },
             body: JSON.stringify(updatedReportData),
-          },
+          }
         );
 
         const responseData = await reportResponse.json();
@@ -480,7 +490,7 @@ export default function BookingDetailsPage({
           reportUpdated = true;
         } else {
           toast.error(
-            responseData.message || "Failed to update report details",
+            responseData.message || "Failed to update report details"
           );
         }
       }
@@ -900,7 +910,7 @@ export default function BookingDetailsPage({
                                 onCheckedChange={(checked) =>
                                   handleToggleContractDisplay(
                                     contract.id,
-                                    checked,
+                                    checked
                                   )
                                 }
                                 className="data-[state=checked]:bg-[#5cb85c]"

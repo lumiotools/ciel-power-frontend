@@ -33,8 +33,10 @@ import ReportOverviewSection from "@/components/report/overview/overview";
 import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
 import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
-import ReportSummarySection from "@/components/report/summary/summary";
+import ReportSummarySection from "@/components/report/summary/concerns";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
+import ReportSummaryConcernSection from "@/components/report/summary/concerns";
+import ReportSummarySolutionSection from "@/components/report/summary/solutions";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -161,7 +163,8 @@ const ReportPage = ({
     insulation: "bg-[#44BFB8]",
     heating: "bg-[#B18C2E]",
     cooling: "bg-[#B18C2E]",
-    summary: "bg-[#FF6700]",
+    concerns: "bg-[#FF6700]",
+    solutions: "bg-[#85C435]",
   };
 
   const [activeSubMenu, setActiveSubMenu] = useState("overview");
@@ -187,13 +190,13 @@ const ReportPage = ({
 
   // Format tab name for display (matching user side)
   const formatTabName = (tab) => {
-    if (tab === "air-leakage") return "Air Leakage Reports";
-    if (tab === "summary") return "Report Summary";
-    return (
-      tab.charAt(0).toUpperCase() +
-      tab.slice(1) +
-      (tab !== "overview" ? " Reports" : "")
-    );
+    if (tab === "air-leakage") return "Air Leakage";
+    if (tab === "concerns") return "Concerns";
+    if (tab === "solutions") return "Solutions";
+    if (tab === "overview") return "Introduction";
+    if (tab === "heating") return "Heating";
+    if (tab === "cooling") return "Cooling";
+    if (tab === "insulation") return "Insulation";
   };
 
   const handleChangeActiveSubMenu = (menu: string) => {
@@ -430,9 +433,19 @@ const ReportPage = ({
             houseImages={houseImages}
           />
         );
-      case "summary":
+      case "concerns":
         return (
-          <ReportSummarySection
+          <ReportSummaryConcernSection
+            isAdmin={isAdmin}
+            reportData={reportData}
+            onUpdateValue={(reportData: ReportData) =>
+              setReportData(reportData)
+            }
+          />
+        );
+      case "solutions":
+        return (
+          <ReportSummarySolutionSection
             isAdmin={isAdmin}
             reportData={reportData}
             onUpdateValue={(reportData: ReportData) =>
@@ -462,7 +475,9 @@ const ReportPage = ({
       <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-bold text-gray-800 ml-8">View Report</h1>
+            <h1 className="text-2xl font-bold text-gray-800 ml-8">
+              View Report
+            </h1>
             {isAdmin && (
               <div className="flex items-center gap-2">
                 {isSaving ? (
@@ -487,18 +502,20 @@ const ReportPage = ({
         </div>
 
         <div>
-          <div className="flex overflow-x-auto border-b border-gray-100">
+          <div className="flex overflow-x-auto border-b-2 border-gray-100 pb-4">
             {[
               "overview",
               "air-leakage",
               "insulation",
               "heating",
               "cooling",
-              "summary",
+              "concerns",
+              "solutions",
             ].map((tab) => (
               <button
                 key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
+                  activeSubMenu === tab
                     ? tab === "overview"
                       ? "text-[#67B502]"
                       : tab === "air-leakage"
@@ -507,11 +524,13 @@ const ReportPage = ({
                           ? "text-[#44BFB8]"
                           : tab === "heating" || tab === "cooling"
                             ? "text-[#B18C2E]"
-                            : tab === "summary"
+                            : tab === "concerns"
                               ? "text-[#FF6700]"
-                              : "text-gray-800"
+                              : tab === "solutions"
+                                ? "text-[#67B502]"
+                                : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
-                  }`}
+                }`}
                 onClick={() => handleChangeActiveSubMenu(tab)}
               >
                 {formatTabName(tab)}
