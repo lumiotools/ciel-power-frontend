@@ -57,7 +57,7 @@ export default function NotesSection() {
           className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
             }`}
         >
-          <div className="bg-[#ffffff] rounded-2xl border border-gray-200 p-8 shadow-sm">
+          <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm">
             <p className="text-gray-800 leading-relaxed text-base">
               You can find solutions and recommended upgrades for your home here, as reccommended by your Ciel Power Home Energy Audit here.
             </p>

@@ -112,7 +112,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 + 0.1 * index }}
-                    className="bg-[#ffffff] rounded-2xl border border-gray-200 p-8 shadow-sm"
+                    className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm"
                   >
                     {/* Header Row - Icon and Title */}
                     <div className="flex justify-between items-center mb-4">
@@ -179,7 +179,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
               })
             ) : (
               // Empty State with No Recommendations Message
-              <div className="bg-[#ffffff] rounded-2xl border border-gray-200 p-8 shadow-sm">
+              <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm">
                 <p className="text-gray-800 leading-relaxed text-base">
                   No recommendations or solutions have been added yet. This section
                   will display your home's recommended upgrades and improvements
@@ -188,7 +188,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                 {isAdmin && (
                   <button
                     onClick={addRecommendation}
-                    className="mt-8 bg-[#ffffff] rounded-2xl border border-gray-200 p-4 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
+                    className="mt-8 bg-[#ffffff] rounded-xl border border-gray-200 p-4 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
                     type="button"
                   >
                     <PlusCircle className="h-5 w-5" />
@@ -205,7 +205,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                 <div className="flex justify-end p-4">
                   <button
                     onClick={addRecommendation}
-                    className="bg-[#ffffff] rounded-2xl border border-gray-200 p-4 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
+                    className="bg-[#ffffff] rounded-xl border border-gray-200 p-4 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
                     type="button"
                   >
                     <PlusCircle className="h-5 w-5" />

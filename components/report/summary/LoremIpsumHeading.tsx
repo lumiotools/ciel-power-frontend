@@ -70,7 +70,7 @@ export default function NotesSection() {
             value={notes}
             onChange={handleNotesChange}
             placeholder="Write your consultation notes here..."
-            className="w-full p-4 border border-gray-200 rounded-2xl focus:outline-none min-h-[100px] resize-none"
+            className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none min-h-[100px] resize-none"
             aria-label="Consultation notes"
           />
         </div>
