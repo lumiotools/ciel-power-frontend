@@ -63,18 +63,19 @@ const ReportSummarySectionFederalTaxCredits = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.7 }}
       id="tax-credits"
+      className="w-full border-b border-gray-200 mb-4 -mt-4"
     >
-      <div className={cardStyle}>
-        <div className="py-3 px-5" style={{ backgroundColor: "#67B5021A" }}>
-          <h2
-            className="flex items-center gap-2 font-medium"
-            style={{ color: "#67B502" }}
-          >
-            <Activity className="h-5 w-5" style={{ color: "#67B502" }} />
-            Federal Tax Credits
-          </h2>
+      <div className="w-full mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <img src="/notes-icon.svg" className="text-[#67b502] w-8 h-8 mr-2" />
+            <h2 className="text-[#67b502] text-2xl font-bold">
+              Federal Tax Credits
+            </h2>
+          </div>
         </div>
-        <div className="p-6">
+
+        <div className="mt-4">
           {/* Static introduction text */}
           <div
             className="mb-5 p-5 rounded-lg"
@@ -101,12 +102,14 @@ const ReportSummarySectionFederalTaxCredits = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
                   className="p-5 rounded-lg"
-                  style={{ backgroundColor: "#67B5020A" }}
+                  // style={{ backgroundColor: "#67B5020A" }}
+                  // above wala code is after add tax credit click - new tax credit wla container
                 >
                   <div className="flex items-start gap-3">
+                    {/* after add tax credit click - new tax credit wla container ka icon wala div below*/}
                     <div
                       className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
-                      style={{ backgroundColor: "#67B5021A" }}
+                      // style={{ backgroundColor: "#67B5021A" }}
                     >
                       <Activity
                         className="h-5 w-5"
