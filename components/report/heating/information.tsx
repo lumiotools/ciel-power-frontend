@@ -15,8 +15,8 @@ const ReportHeatingSectioninformation = () => {
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           {/* Header Section - Inside outer border */}
           <div className="mb-6">
-            <h2 className="flex items-center gap-3 font-bold text-xl" style={{ color: "#FDC025" }}>
-              <Thermometer style={{ color: "#FDC025" }} className="h-6 w-6" />
+            <h2 className="flex items-center gap-3 font-bold text-xl" style={{ color: "#d47c02" }}>
+              <Thermometer style={{ color: "#d47c02" }} className="h-6 w-6" />
               Understanding Your Home&apos;s Heating Systems
             </h2>
           </div>
@@ -29,7 +29,7 @@ const ReportHeatingSectioninformation = () => {
 
             {/* Info Section */}
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 flex-shrink-0 mt-1" style={{ color: "#FDC025" }} />
+              <Info className="h-5 w-5 flex-shrink-0 mt-1" style={{ color: "#d47c02" }} />
               <p className="text-base text-gray-700 font-normal">
                 (Unified) Energy Factor - A measure of efficiency by how effective the heat from the energy source is
                 transferred to the water

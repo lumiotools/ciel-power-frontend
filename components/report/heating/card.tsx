@@ -57,6 +57,8 @@ const ReportHeatingSectionCard = ({
     heating?.parameter,
     heating?.current_value,
     heating?.recommended_value,
+    onUpdateValue,
+    heating,
   ]);
 
   return (
@@ -66,13 +68,13 @@ const ReportHeatingSectionCard = ({
       transition={{ duration: 0.5 }}
     >
       <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="bg-[#FFFCF3] py-4 px-5 border-b border-gray-100">
-          <CardTitle className="text-lg font-medium text-[#B18C2E] flex justify-between items-center">
-            <Flame className="size-5 mr-2" />
+        <CardHeader className="py-4 px-5 border-b border-gray-100">
+          <CardTitle className="text-xl font-bold text-[#d47c02] flex justify-between items-center">
+            <Flame className="size-6 mr-2 text-[#d47c02]" />
             <div className="flex-1">
               {isAdmin ? (
                 <ReportEditableInput
-                  className="max-w-[50%] !text-lg"
+                  className="max-w-[50%] !text-xl !font-bold"
                   value={heating?.title}
                   onChange={(title) => {
                     onUpdateValue({
@@ -96,8 +98,8 @@ const ReportHeatingSectionCard = ({
         <CardContent>
           <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-8">
-              <div className="bg-[#FFFCF3] p-4 rounded-md">
-                <h3 className="text-lg font-semibold text-[#B18C2E]">
+              <div className="bg-white p-4 rounded-md">
+                <h3 className="text-lg font-semibold text-[#d47c02]">
                   Current Performance
                 </h3>
 
@@ -112,130 +114,84 @@ const ReportHeatingSectionCard = ({
                   maxValue={heating.current_value?.includes("%") ? 100 : 0.96}
                 />
 
-                <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">
-                  <div className="flex items-center gap-2">
+                <div className="ml-14 flex  items-center">
+                  <div className="flex  items-center w-full">
                     <p className="text-sm text-gray-500">
                       Current {heating.parameter}
                     </p>
-                    <p className="text-xl font-bold text-[#F44336]">
+                    <p className="text-xl ml-4 text-[#F44336]">
                       {heating.current_value}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-500">BPI Recommends</p>
-                    <p className="text-xl font-bold text-[#4CAF50]">
+                  <div className="flex items-center w-full">
+                    <p className="text-sm text-gray-500">BPI Recommends </p>
+                    <p className="ml-4 text-xl text-[#4CAF50]">
                       {heating.recommended_value}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-2 p-4">
-                <div>
-                  <p className="text-gray-800">Type</p>
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableInput
-                        value={heating.type}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...heating,
-                            type: value as string,
-                          });
-                        }}
-                      />
-                    ) : (
-                      heating.type
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-800">Condition</p>
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableSelect
-                        value={heating.condition}
-                        options={[
-                          { label: "Poor", value: "Poor" },
-                          { label: "Fair", value: "Fair" },
-                          { label: "Good", value: "Good" },
-                          { label: "Excellent", value: "Excellent" },
-                        ]}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...heating,
-                            condition: value as string,
-                          });
-                        }}
-                      />
-                    ) : (
-                      heating.condition
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-800">Year</p>
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableInput
-                        type="number"
-                        value={heating.year ?? 0}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...heating,
-                            year: Number(value),
-                          });
-                        }}
-                      />
-                    ) : (
-                      heating.year
-                    )}
-                  </div>
-                </div>
 
-                <div>
-                  {isAdmin ? (
-                    <ReportEditableInput
-                      className="text-gray-800 !h-6 !py-0"
-                      value={heating.parameter ?? "AFUE"}
-                      onChange={(value) => {
-                        onUpdateValue({
-                          ...heating,
-                          parameter: value as string,
-                        });
-                      }}
-                    />
-                  ) : (
-                    <p className="text-gray-800 !h-6 !py-0">
-                      {heating.parameter}
-                    </p>
-                  )}
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableInput
-                        value={heating.current_value ?? "0%"}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...heating,
-                            current_value: value as string,
-                          });
-                        }}
-                      />
-                    ) : (
-                      heating.current_value
-                    )}
+              {/* System Information Card */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="grid grid-cols-2 gap-8">
+                  <div>
+                    <p className="text-gray-600 text-base mb-2">Type</p>
+                    <div className="text-gray-800 text-lg font-medium">
+                      {isAdmin ? (
+                        <ReportEditableInput
+                          value={heating.type}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...heating,
+                              type: value as string,
+                            });
+                          }}
+                        />
+                      ) : (
+                        heating.type
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-base mb-2">Condition</p>
+                    <div className="text-gray-800 text-lg font-medium">
+                      {isAdmin ? (
+                        <ReportEditableSelect
+                          value={heating.condition}
+                          options={[
+                            { label: "Poor", value: "Poor" },
+                            { label: "Fair", value: "Fair" },
+                            { label: "Good", value: "Good" },
+                            { label: "Excellent", value: "Excellent" },
+                          ]}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...heating,
+                              condition: value as string,
+                            });
+                          }}
+                        />
+                      ) : (
+                        heating.condition
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex flex-col gap-8">
-              <div className="bg-[#FFFCF3] p-4 rounded-md space-y-4">
-                <div className="flex items-center gap-2">
-                  <Info className="size-6 text-[#B18C2E]" />
-                  <div className="flex-1 !text-lg !font-semibold text-[#B18C2E]">
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Info className="h-6 w-6 text-[#d47c02]" />
+                  <h3 className="text-lg font-bold text-[#d47c02]">
                     {isAdmin ? (
                       <ReportEditableInput
-                        placeholder="Enter a title"
-                        value={heating.description?.title ?? ""}
+                        placeholder="Improvement Opportunity"
+                        value={
+                          heating.description?.title ??
+                          "Improvement Opportunity"
+                        }
                         onChange={(value) => {
                           onUpdateValue({
                             ...heating,
@@ -248,21 +204,26 @@ const ReportHeatingSectionCard = ({
                         }}
                       />
                     ) : (
-                      heating.description?.title
+                      (heating.description?.title ?? "Improvement Opportunity")
                     )}
-                  </div>
+                  </h3>
                 </div>
 
-                <div className="!text-gray-700 !text-base !min-h-24 !py-0">
+                <div className="text-gray-700 text-base">
                   {isAdmin ? (
                     <ReportEditableTextArea
-                      placeholder="Enter a description"
-                      value={heating.description?.content ?? ""}
+                      placeholder="Enter improvement opportunity description"
+                      value={
+                        heating.description?.content ??
+                        `Your ${heating.title}'s current ${heating.parameter} rating of ${heating.current_value} means it's operating below optimal efficiency. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`
+                      }
                       onChange={(value) => {
                         onUpdateValue({
                           ...heating,
                           description: {
-                            title: heating.description?.title ?? "",
+                            title:
+                              heating.description?.title ??
+                              "Improvement Opportunity",
                             content: value as string,
                             footer: heating.description?.footer ?? "",
                           },
@@ -270,41 +231,16 @@ const ReportHeatingSectionCard = ({
                       }}
                     />
                   ) : (
-                    heating.description?.content
+                    (heating.description?.content ??
+                    `Your ${heating.title}'s current ${heating.parameter} rating of ${heating.current_value} means it's operating below optimal efficiency. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`)
                   )}
                 </div>
-
-                {(isAdmin || heating.description?.footer) && (
-                  <div className="flex items-center gap-2">
-                    <Info className="size-6 text-[#B18C2E]" />
-                    <div className="flex-1 !text-base text-[#B18C2E]">
-                      {isAdmin ? (
-                        <ReportEditableInput
-                          placeholder="Enter a footer text (optional)"
-                          value={heating.description?.footer ?? ""}
-                          onChange={(value) => {
-                            onUpdateValue({
-                              ...heating,
-                              description: {
-                                title: heating.description?.title ?? "",
-                                content: heating.description?.content ?? "",
-                                footer: value as string,
-                              },
-                            });
-                          }}
-                        />
-                      ) : (
-                        heating.description?.footer
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="rounded-md flex justify-center items-start">
                 <ReportImageViewer
                   allowSelection={isAdmin}
-                  buttonClassName="bg-[#B18C2E] hover:bg-[#B18C2E]/90"
+                  buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
                   selectedImage={heating?.images?.[0]}
                   onOpenPicker={() => setIsImagePickerOpen(true)}
                   onDescriptionChange={(description) => {
@@ -327,7 +263,7 @@ const ReportHeatingSectionCard = ({
           {/* Image Picker Dialog */}
           {isAdmin && (
             <ReportImagePicker
-              buttonClassName="bg-[#B18C2E] hover:bg-[#B18C2E]/90"
+              buttonClassName="bg-[#d47c02] hover:bg-[#B18C2E]/90"
               images={houseImages}
               selectedImage={heating?.images?.[0]?.id}
               isOpen={isImagePickerOpen}
