@@ -188,7 +188,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                 {isAdmin && (
                   <button
                     onClick={addRecommendation}
-                    className="mt-8 bg-[#ffffff] rounded-xl border border-gray-200 p-4 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
+                    className="mt-4 bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
                     type="button"
                   >
                     <PlusCircle className="h-5 w-5" />
