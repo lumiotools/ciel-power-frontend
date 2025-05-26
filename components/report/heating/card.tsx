@@ -88,18 +88,19 @@ const ReportHeatingSectionCard = ({
         <CardContent>
           <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-8">
-              <div className="bg-white p-4 rounded-md">
+              <div className="bg-white p-4 rounded-md border border-gray-200">
                 <h3 className="text-lg font-semibold text-[#d47c02]">Current Performance</h3>
 
                 <ReportHeatingSectionGauge
                   value={
-                    heating.current_value?.includes("%")
+                    heating.current_value?.includes?.("%")
                       ? Number(heating.current_value?.replace("%", ""))
-                      : Number(heating.current_value?.replace("+", ""))
+                      : Number(String(heating.current_value)?.replace("+", ""))
                   }
-                  labelSuffix={heating.current_value?.includes("%") ? "%" : ""}
+                  labelSuffix={heating.current_value?.includes?.("%") ? "%" : ""}
                   minValue={0}
-                  maxValue={heating.current_value?.includes("%") ? 100 : 0.96}
+                  maxValue={heating.current_value?.includes?.("%") ? 100 : 0.96}
+                  heating={heating}
                 />
 
                 <div className="flex justify-between items-center mt-4 px-4">
@@ -116,10 +117,10 @@ const ReportHeatingSectionCard = ({
 
               {/* System Information Card */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-2 gap-x-12 gap-y-2 p-4">
                   <div>
-                    <p className="text-gray-600 text-base mb-2">Type</p>
-                    <div className="text-gray-800 text-lg font-medium">
+                    <p className="text-gray-800">Type</p>
+                    <div className="text-[#d47c02] !font-bold">
                       {isAdmin ? (
                         <ReportEditableInput
                           value={heating.type}
@@ -136,8 +137,8 @@ const ReportHeatingSectionCard = ({
                     </div>
                   </div>
                   <div>
-                    <p className="text-gray-600 text-base mb-2">Condition</p>
-                    <div className="text-gray-800 text-lg font-medium">
+                    <p className="text-gray-800">Condition</p>
+                    <div className="text-[#d47c02] !font-bold">
                       {isAdmin ? (
                         <ReportEditableSelect
                           value={heating.condition}
@@ -156,6 +157,57 @@ const ReportHeatingSectionCard = ({
                         />
                       ) : (
                         heating.condition
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-800">Year</p>
+                    <div className="text-[#d47c02] !font-bold">
+                      {isAdmin ? (
+                        <ReportEditableInput
+                          type="number"
+                          value={heating.year ?? 0}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...heating,
+                              year: Number(value),
+                            })
+                          }}
+                        />
+                      ) : (
+                        heating.year
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    {isAdmin ? (
+                      <ReportEditableInput
+                        className="text-gray-800 !h-6 !py-0"
+                        value={heating.parameter ?? "AFUE"}
+                        onChange={(value) => {
+                          onUpdateValue({
+                            ...heating,
+                            parameter: value as string,
+                          })
+                        }}
+                      />
+                    ) : (
+                      <p className="text-gray-800 !h-6 !py-0">{heating.parameter}</p>
+                    )}
+                    <div className="text-[#d47c02] !font-bold">
+                      {isAdmin ? (
+                        <ReportEditableInput
+                          value={heating.current_value ?? "0%"}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...heating,
+                              current_value: value as string,
+                            })
+                          }}
+                        />
+                      ) : (
+                        heating.current_value
                       )}
                     </div>
                   </div>
@@ -212,7 +264,7 @@ const ReportHeatingSectionCard = ({
                 <ReportImageViewer
                   allowSelection={isAdmin}
                   buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
-                  selectedImage={heating?.images?.[0] ? { ...heating.images[0], id: heating.images[0].id || '' } : undefined}
+                  selectedImage={heating?.images?.[0] as HouseImage | undefined}
                   onOpenPicker={() => setIsImagePickerOpen(true)}
                   onDescriptionChange={(description) => {
                     if (heating?.images?.[0])
@@ -234,7 +286,7 @@ const ReportHeatingSectionCard = ({
           {/* Image Picker Dialog */}
           {isAdmin && (
             <ReportImagePicker
-              buttonClassName="bg-[#d47c02] hover:bg-[#B18C2E]/90"
+              buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
               images={houseImages}
               selectedImage={heating?.images?.[0]?.id}
               isOpen={isImagePickerOpen}
