@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FinancialSummaryData } from "@/app/admin/[bookingNumber]/report/page";
 import { DollarSign, Trash2 } from "lucide-react";
 import ReportEditableInput from "../common/editableInput";
+import { PlusCircle, Lightbulb } from "lucide-react";
 
 interface ReportSummarySectionFinancialSummaryProps {
   isAdmin?: boolean;
@@ -78,18 +79,22 @@ const ReportSummarySectionFinancialSummary = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.6 }}
       id="project-costs"
+      className="w-full border-b border-gray-200 mb-4 -mt-4"
     >
-      <div className={cardStyle}>
-        <div className="py-3 px-5" style={{ backgroundColor: "#67B5021A" }}>
-          <h2
-            className="flex items-center gap-2 font-medium"
-            style={{ color: "#67B502" }}
-          >
-            <DollarSign className="h-5 w-5" style={{ color: "#67B502" }} />
-            Project Costs
-          </h2>
+      <div className="w-full mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            {/* <img
+              src="/notes-icon.svg"
+              className="text-[#67b502] w-8 h-8 mr-2"
+              alt="Notes Icon"
+            /> */}
+            <Lightbulb className="text-[#67b502] w-8 h-8 mr-2" />
+            <h2 className="text-[#67b502] text-2xl font-bold">Financial Summary</h2>
+          </div>
         </div>
-        <div className="p-6">
+
+        <div className="mt-4">
           <div className="space-y-4">
             {/* Render all financial items */}
             {financialSummaryData.data?.map((item, index) => (
@@ -98,22 +103,25 @@ const ReportSummarySectionFinancialSummary = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 * index }}
-                className="p-5 rounded-lg"
-                style={{ backgroundColor: "#67B5020A" }}
+                className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm"
+              // className="p-5 rounded-lg"
+              // style={{ backgroundColor: "#67B5020A" }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
                       className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
-                      style={{ backgroundColor: "#67B5021A" }}
+                    // style={{ backgroundColor: "#67B5021A" }}
                     >
                       <DollarSign
                         className="h-5 w-5"
                         style={{ color: "#67B502" }}
                       />
                     </div>
+
+                  {/* text insider container below financial summary */}
                     <div>
-                      <h3 className="font-medium" style={{ color: "#67B502" }}>
+                      <h3 className="font-semibold text-lg" style={{ color: "#545454" }}>
                         {isAdmin ? (
                           <ReportEditableInput
                             value={item.title}
@@ -144,9 +152,11 @@ const ReportSummarySectionFinancialSummary = ({
                       )}
                     </div>
                   </div>
+                  
+                  {/* values of the text below financial summary */}
                   <div
-                    className="flex items-center font-semibold"
-                    style={{ color: "#67B502" }}
+                    className="flex items-center font-semibold text-lg"
+                    style={{ color: "#545454" }}
                   >
                     {isAdmin ? (
                       <ReportEditableInput
@@ -190,11 +200,12 @@ const ReportSummarySectionFinancialSummary = ({
                 <div className="flex justify-end p-4">
                   <button
                     onClick={addFinancialItem}
-                    className="px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1"
-                    style={{ backgroundColor: "#67B5021A", color: "#67B502" }}
+                    // className="px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1"
+                    className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
                     type="button"
                   >
-                    + Add Financial Item
+                    <PlusCircle className="h-5 w-5" />
+                    Add Financial Item
                   </button>
                 </div>
               )}
@@ -206,54 +217,46 @@ const ReportSummarySectionFinancialSummary = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="p-6 rounded-lg"
-                  style={{ backgroundColor: "#67B5020A" }}
+                  className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm"
                 >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
-                      style={{ backgroundColor: "#67B5021A" }}
-                    >
-                      <DollarSign
-                        className="h-5 w-5"
-                        style={{ color: "#67B502" }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium" style={{ color: "#67B502" }}>
-                        No Financial Items
-                      </h3>
-                      <p className="text-gray-700 text-sm mt-1">
-                        No financial items have been added yet.
-                      </p>
-
-                      {isAdmin && (
-                        <button
-                          onClick={addFinancialItem}
-                          className="mt-4 px-4 py-2 rounded text-sm font-medium transition-colors"
-                          style={{
-                            backgroundColor: "#67B5021A",
-                            color: "#67B502",
-                          }}
-                          type="button"
-                        >
-                          + Add Financial Item
-                        </button>
-                      )}
-                    </div>
+                  {/* Header with Icon and Title in one line */}
+                  <div className="flex items-center gap-4 mb-6">
+                    <DollarSign
+                      className="h-5 w-5"
+                      style={{ color: "#67B502" }}
+                    />
+                    <h3 className="font-medium" style={{ color: "#67B502" }}>
+                      No Financial Items
+                    </h3>
                   </div>
+
+                  {/* Add Button Below */}
+                  {isAdmin && (
+                    <div>
+                    {/* <div className="flex justify-center"> */}
+                      <button
+                        onClick={addFinancialItem}
+                        className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
+                        type="button"
+                      >
+                        <PlusCircle className="h-5 w-5" />
+                        Add Financial Item 1
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
             {/* Render monthly payment at the bottom */}
             {financialSummaryData.data &&
               financialSummaryData.data.length > 0 && (
-                <div
-                  className="p-5 rounded-lg text-center"
-                  style={{ backgroundColor: "#67B5020A" }}
-                >
-                  <h3 className="font-medium mb-2" style={{ color: "#67B502" }}>
-                    Monthly Payment
+                // <div
+                //   className="p-5 rounded-lg text-center"
+                //   style={{ backgroundColor: "#67B5020A" }}
+                // >
+                <div className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-8 shadow-sm">
+                  <h3 className="text-3xl font-semibold mb-2" style={{ color: "#545454" }}>
+                    Total Project Costs
                   </h3>
                   {isAdmin ? (
                     <div className="flex justify-center items-center my-2">
