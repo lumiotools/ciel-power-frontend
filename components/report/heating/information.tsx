@@ -1,10 +1,8 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { Info, Thermometer } from "lucide-react";
+"use client"
+import { motion } from "framer-motion"
+import { Info, Thermometer } from "lucide-react"
 
 const ReportHeatingSectioninformation = () => {
-  const cardStyle =
-    "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden";
   return (
     <div>
       <motion.div
@@ -13,37 +11,35 @@ const ReportHeatingSectioninformation = () => {
         transition={{ duration: 0.5 }}
         id="heating-header"
       >
-        <div className={cardStyle}>
-          <div className="py-3 px-5" style={{ backgroundColor: "#FFFCF3" }}>
-            <h2
-              className="flex items-center gap-3 font-medium"
-              style={{ color: "#B18C2E" }}
-            >
-              <Thermometer style={{ color: "#B18C2E" }} className="h-6 w-6" />
+        {/* Outer Container with Border */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+          {/* Header Section - Inside outer border */}
+          <div className="mb-6">
+            <h2 className="flex items-center gap-3 font-bold text-xl" style={{ color: "#FDC025" }}>
+              <Thermometer style={{ color: "#FDC025" }} className="h-6 w-6" />
               Understanding Your Home&apos;s Heating Systems
             </h2>
           </div>
-          <div className="p-6">
-            <p className="text-gray-700 mb-5 font-normal">
-              During your Home Energy Assessment, our technician closely
-              examined the insulation levels in your home
+
+          {/* Inner Content Box */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <p className="text-gray-700 mb-6 font-normal text-lg">
+              During your Home Energy Assessment, our technician closely examined the insulation levels in your home
             </p>
-            <div className="flex items-center gap-3 py-2">
-              <Info
-                className="h-5 w-5 flex-shrink-0"
-                style={{ color: "#B18C2E" }}
-              />
-              <p className="text-sm text-gray-700 font-normal">
-                (Unified) Energy Factor - A measure of efficiency by how
-                effective the heat from the energy source is transferred to the
-                water
+
+            {/* Info Section */}
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 flex-shrink-0 mt-1" style={{ color: "#FDC025" }} />
+              <p className="text-base text-gray-700 font-normal">
+                (Unified) Energy Factor - A measure of efficiency by how effective the heat from the energy source is
+                transferred to the water
               </p>
             </div>
           </div>
         </div>
       </motion.div>
     </div>
-  );
-};
+  )
+}
 
-export default ReportHeatingSectioninformation;
+export default ReportHeatingSectioninformation
