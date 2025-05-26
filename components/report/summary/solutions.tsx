@@ -6,6 +6,9 @@ import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
+import UnderstandingSolutions from "./understanding-solutions";
+import LoremIpsumHeading from "./LoremIpsumHeading";
+
 
 interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
@@ -42,6 +45,21 @@ const ReportSummarySolutionSection = ({
           }
         }}
       /> */}
+
+      {/* <NotesSection
+        isAdmin={isAdmin}
+        notes={reportData?.notes}
+        onUpdateValue={(notes) => {
+          if (onUpdateValue) {
+            onUpdateValue({
+              ...reportData,
+              notes: notes,
+            });
+          }
+        }}
+      /> */}
+      <UnderstandingSolutions />
+      <LoremIpsumHeading />
 
       <ReportSummarySectionSolutionsAndRecommendations
         isAdmin={isAdmin}
@@ -96,6 +114,8 @@ const ReportSummarySolutionSection = ({
           }
         }}
       />
+
+      
 
       {/* Project Costs Section - Without styled wrapper */}
       {/* <motion.div
