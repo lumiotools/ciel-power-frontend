@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReportInsulationSectionOverview from "./overview";
 import { InsulationData } from "@/app/admin/[bookingNumber]/report/page";
 import ReportInsulationSectionTechnicalAspects from "./technicalAspects";
@@ -6,6 +6,7 @@ import ReportInsulationSectionSeasonalPerformance from "./seasonalPerformance";
 import ReportInsulationSectionBenefits from "./benefits";
 import ReportInsulationSectionCard, { HouseImage } from "./card";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 interface ReportInsulationSectionProps {
   isAdmin?: boolean;
@@ -42,6 +43,14 @@ const ReportInsulationSection = ({
     }
   };
 
+  const [isUser, setIsUser] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname.includes("/dashboard/report")) {
+      setIsUser(true);
+    }
+  }, [pathname]);
+
   return (
     <div className="space-y-8">
       {/* {isAdmin && (
@@ -58,8 +67,9 @@ const ReportInsulationSection = ({
       <div id="insulation-overview">
         <ReportInsulationSectionOverview />
       </div>
-
-
+      <hr
+        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
+      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -70,7 +80,9 @@ const ReportInsulationSection = ({
         <ReportInsulationSectionTechnicalAspects />
         <ReportInsulationSectionSeasonalPerformance />
       </motion.div>
-
+      <hr
+        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
+      />
       <div id="insulation-benefits">
         <ReportInsulationSectionBenefits />
       </div>
@@ -79,28 +91,28 @@ const ReportInsulationSection = ({
         insulationData.map((insulation, index) => (
           <div key={`insulation-zone-${index}`} id={`insulation-zone-${index}`}>
             <ReportInsulationSectionCard
-            key={`${insulation.title}-${index}`}
-            isAdmin={isAdmin}
-            insulation={insulation}
-            houseImages={houseImages}
-            onUpdateValue={(updatedInsulation) => {
-              if (onUpdateValue)
-                onUpdateValue([
-                  ...insulationData.slice(0, index),
-                  updatedInsulation,
-                  ...insulationData.slice(index + 1),
-                ]);
-            }}
-            onDelete={() => deleteInsulation(index)}
-          />
+              key={`${insulation.title}-${index}`}
+              isAdmin={isAdmin}
+              insulation={insulation}
+              houseImages={houseImages}
+              onUpdateValue={(updatedInsulation) => {
+                if (onUpdateValue)
+                  onUpdateValue([
+                    ...insulationData.slice(0, index),
+                    updatedInsulation,
+                    ...insulationData.slice(index + 1),
+                  ]);
+              }}
+              onDelete={() => deleteInsulation(index)}
+            />
           </div>
         ))}
 
       {isAdmin && (
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center fixed bottom-5 left-[40%]">
           <button
             onClick={addNewInsulation}
-            className="px-4 py-2 rounded-full bg-[#256C68] text-white font-bold"
+            className="px-4 py-2 rounded-full bg-[#308883] text-white font-bold"
           >
             Add New Insulation Section
           </button>

@@ -19,6 +19,7 @@ const ReportInsulationSectionGauge = ({
   maxValue = 60,
   subtitle = "",
   labelPrefix = "R",
+  title
 }: RValueGaugeProps): JSX.Element => {
   const [displayedValue, setDisplayedValue] = useState(value);
 
@@ -265,7 +266,7 @@ const ReportInsulationSectionGauge = ({
         </g>
 
         {/* Title display - positioned at the bottom center */}
-        {/* <motion.text
+        <motion.text
           x="250"
           y="270"
           fill="#333333"
@@ -276,8 +277,9 @@ const ReportInsulationSectionGauge = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
+          <span>Your {title}</span>
           {title} {subtitle && subtitle}
-        </motion.text> */}
+        </motion.text>
       </motion.svg>
     </div>
   );

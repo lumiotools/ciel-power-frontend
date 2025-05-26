@@ -8,7 +8,8 @@ export type ReportSection =
   | "insulation"
   | "heating"
   | "cooling"
-  | "summary";
+  | "concerns"
+  | "solutions";
 
 // Report configuration interface
 export interface ReportConfig {
@@ -139,7 +140,7 @@ const getSectionColor = (section: string): string => {
       return "#256C68"; // teal-500
     case "heating":
     case "cooling":
-      return "#B18C2E"; // amber-500
+      return "#d47c00"; // amber-500
     case "summary":
       return "#FF6700"; // orange-500
     default:

@@ -20,6 +20,7 @@ import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummarySection from "@/components/report/summary/concerns";
+import ReportSummaryConcernSection from "@/components/report/summary/concerns";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -142,9 +143,9 @@ const ReportPage = ({
   const tabColors = {
     overview: "bg-[#85C435]",
     airLeakage: "bg-[#031A82]",
-    insulation: "bg-[#44BFB8]",
-    heating: "bg-[#B18C2E]",
-    cooling: "bg-[#B18C2E]",
+    insulation: "bg-[#308883]",
+    heating: "bg-[#d47c00]",
+    cooling: "bg-[#d47c00]",
     concerns: "bg-[#FF6700]",
     solutions: "bg-[#85C435]",
     "future solutions and certifications": "bg-purple-500",
@@ -167,7 +168,8 @@ const ReportPage = ({
     "insulation",
     "heating",
     "cooling",
-    "summary",
+    "concerns",
+    "solutions",
   ]);
   useEffect(() => {
     // Fetch report data when component mounts
@@ -212,16 +214,14 @@ const ReportPage = ({
   };
 
   // Format tab name for display
-  const formatTabName = (tab) => {
-    if (tab === "airLeakage") return "Air Leakage";
-    if (tab === "summary") return "Report Summary";
-    if (tab === "future solutions and certifications")
-      return "Future Solutions";
-    return (
-      tab.charAt(0).toUpperCase() +
-      tab.slice(1) +
-      (tab !== "overview" ? " Reports" : "")
-    );
+  const formatTabName = (tab: string) => {
+    if (tab === "air-leakage") return "Air Leakage";
+    if (tab === "concerns") return "Concerns";
+    if (tab === "solutions") return "Solutions";
+    if (tab === "overview") return "Introduction";
+    if (tab === "heating") return "Heating";
+    if (tab === "cooling") return "Cooling";
+    if (tab === "insulation") return "Insulation";
   };
 
   // Get current breadcrumb based on active tab
@@ -270,8 +270,10 @@ const ReportPage = ({
           return <ReportHeatingSection heatingData={reportData?.heating} />;
         case "cooling":
           return <ReportCoolingSection coolingData={reportData?.cooling} />;
-        case "summary":
-          return <ReportSummarySection reportData={reportData} />;
+        case "concerns":
+          return <ReportSummaryConcernSection reportData={reportData} />;
+        case "solutions":
+          return <ReportSummaryConcernSection reportData={reportData} />;
         default:
           return <Overview />;
       }
@@ -358,11 +360,12 @@ const ReportPage = ({
           <div className="flex overflow-x-auto border-b border-gray-100">
             {[
               "overview",
-              "airLeakage",
+              "air-leakage",
               "insulation",
               "heating",
               "cooling",
-              "summary",
+              "concerns",
+              "solutions",
             ].map((tab) => (
               <button
                 key={tab}
@@ -370,15 +373,17 @@ const ReportPage = ({
                   activeSubMenu === tab
                     ? tab === "overview"
                       ? "text-[#67B502]"
-                      : tab === "airLeakage"
+                      : tab === "air-leakage"
                         ? "text-[#031A82]"
                         : tab === "insulation"
-                          ? "text-[#44BFB8]"
+                          ? "text-[#308883]"
                           : tab === "heating" || tab === "cooling"
-                            ? "text-[#B18C2E]"
-                            : tab === "summary"
+                            ? "text-[#d47c00]"
+                            : tab === "concerns"
                               ? "text-[#FF6700]"
-                              : "text-gray-800"
+                              : tab === "solutions"
+                                ? "text-[#67B502]"
+                                : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
                 onClick={() => setActiveSubMenu(tab)}
