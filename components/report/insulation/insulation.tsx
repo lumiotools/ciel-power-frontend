@@ -52,7 +52,12 @@ const ReportInsulationSection = ({
   }, [pathname]);
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
+    >
       {/* {isAdmin && (
         <div className="flex justify-end items-center">
           <button
@@ -118,7 +123,7 @@ const ReportInsulationSection = ({
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

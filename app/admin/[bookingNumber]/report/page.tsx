@@ -72,12 +72,28 @@ export interface HeatingData {
   title: string;
   type: string;
   condition: string;
-  year?: number;
+  year: number;
   parameter: string;
-  current_value?: string;
-  recommended_value?: string;
-  description?: DescriptionData;
-  images?: ImageData[];
+  current_value: string;
+  recommended_value: string;
+  description?: {
+    title: string;
+    content: string;
+    footer?: string;
+  };
+  images?: [
+    {
+      mimeType?: string;
+      thumbnailLink?: string;
+      size?: string;
+      id?: string;
+      name?: string;
+      description?: string;
+      createdTime?: string;
+      modifiedTime?: string;
+      link?: string;
+    },
+  ];
 }
 
 export interface CoolingData {
@@ -96,11 +112,15 @@ export interface SummaryOfConcernsData {
   name: string;
   concern: string;
   flag?: boolean;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface SolutionsAndRecommendationsData {
   title: string;
   benefits: string;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface FinancialSummaryItem {
@@ -504,15 +524,17 @@ const ReportPage = ({
 
         <div>
           <div className="flex overflow-x-auto border-b-2 border-gray-100 pb-4">
-            {[
-              "overview",
-              "air-leakage",
-              "insulation",
-              "heating",
-              "cooling",
-              "concerns",
-              "solutions",
-            ].map((tab) => (
+            {(
+              [
+                "overview",
+                "air-leakage",
+                "insulation",
+                "heating",
+                "cooling",
+                "concerns",
+                "solutions",
+              ] as (keyof typeof tabColors)[]
+            ).map((tab) => (
               <button
                 key={tab}
                 className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
