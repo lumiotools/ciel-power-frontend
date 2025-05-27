@@ -72,15 +72,14 @@ const ReportSummarySectionFederalTaxCredits = ({
       id="tax-credits"
       className="w-full border-b border-gray-200 mb-4 -mt-4"
     >
+      {/* --- Outer Container Padding (adjust here) --- */}
       <div className="w-full mx-auto px-4 py-4">
-        {/* Header Section with Toggle Button */}
+        {/* --- Header Section with Toggle Button --- */}
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <DollarSign className="text-[#67b502] w-8 h-8 mr-2" />
-            <h2 className="text-[#67b502] text-2xl font-bold">
-              Federal Tax Credits
-            </h2>
-          </div>
+          <h2 className="text-[#67b502] text-2xl font-bold flex items-center">
+            <DollarSign className="w-8 h-8 mr-2" />
+            Federal Tax Credits
+          </h2>
           <button
             onClick={toggleSection}
             className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
@@ -93,16 +92,19 @@ const ReportSummarySectionFederalTaxCredits = ({
             />
           </button>
         </div>
+        {/* --- End Header Section --- */}
 
-        {/* Collapsible Content Section */}
+        {/* --- Collapsible Content Section --- */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
             isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
           }`}
         >
+          {/* --- Inner Content Padding (adjust here) --- */}
           <div className="mt-4">
-            {/* Introduction Text */}
+            {/* --- Introduction Text Section --- */}
             <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm mb-4">
+              {/* p-8 above controls padding for intro box */}
               <div className="text-lg font-medium text-gray-800 mb-2">
                 Energy Efficient Home Improvement Federal Tax Credit
               </div>
@@ -111,9 +113,11 @@ const ReportSummarySectionFederalTaxCredits = ({
                 after Jan. 1, 2023, you may qualify for a tax credit up to $3,200.
               </div>
             </div>
+            {/* --- End Introduction Text Section --- */}
 
+            {/* --- Tax Credits List Section --- */}
             <div className="space-y-4">
-              {/* Tax Credits List */}
+              {/* Each tax credit item container */}
               {taxCredits.length > 0 ? (
                 taxCredits.map((item, index) => (
                   <motion.div
@@ -121,21 +125,25 @@ const ReportSummarySectionFederalTaxCredits = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 * index }}
-                    className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm"
+                    className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-2 shadow-sm" // This p-4 controls the container padding
                   >
+                    {/* --- Tax Credit Row --- */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center">
+                      <div className="flex items-center gap-1">
+                        <div
+                          className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
+                        >
                           <DollarSign className="h-5 w-5 text-[#67B502]" />
                         </div>
                         <div>
                           <h3
-                            className="font-semibold text-lg text-left"
+                            className="font-semibold text-lg text-left mb-0" // Remove bottom margin from heading
                             style={{ color: "#545454" }}
                           >
                             {isAdmin ? (
                               <ReportEditableInput
                                 value={item.title}
+                                // Optionally add style={{marginBottom: 0}} here if needed
                                 onChange={(value) => {
                                   setTaxCredits([
                                     ...taxCredits.slice(0, index),
@@ -151,11 +159,28 @@ const ReportSummarySectionFederalTaxCredits = ({
                               item.title
                             )}
                           </h3>
-                          {item.note && (
-                            <p className="text-xs text-gray-500 text-left">
-                              {item.note}
-                            </p>
-                          )}
+                          {/* Space between heading and note - adjust 'mt-[-2px]' as needed */}
+                          <div className="text-sm mt-[-2px]">
+                            {isAdmin ? (
+                              <ReportEditableInput
+                                value={item.note ?? ""}
+                                placeholder="Add a note (optional)"
+                                // Optionally add style={{marginTop: 0, paddingTop: 0}} here if needed
+                                onChange={(value) => {
+                                  setTaxCredits([
+                                    ...taxCredits.slice(0, index),
+                                    {
+                                      ...item,
+                                      note: value as string,
+                                    },
+                                    ...taxCredits.slice(index + 1),
+                                  ]);
+                                }}
+                              />
+                            ) : item.note ? (
+                              <p className="text-gray-500">{item.note}</p> // Note text color
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                       <div
@@ -192,31 +217,39 @@ const ReportSummarySectionFederalTaxCredits = ({
                         )}
                       </div>
                     </div>
+                    {/* --- End Tax Credit Row --- */}
                   </motion.div>
                 ))
               ) : (
-                // Empty State
+                // --- Empty State Section ---
                 <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm">
+                  {/* p-8 above controls padding for empty state box */}
                   <div className="flex items-center gap-4 mb-6">
                     <DollarSign className="h-5 w-5 text-[#67B502]" />
-                    <h3 className="font-medium text-[#67B502]">No Tax Credits</h3>
+                    <h3 className="font-medium text-[#gray-800]">No Tax Credits</h3>
                   </div>
                   {isAdmin && (
-                    <button
-                      onClick={addTaxCreditItem}
-                      className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
-                      type="button"
-                    >
-                      <PlusCircle className="h-5 w-5" />
-                      Add Tax Credit
-                    </button>
+                    <div className="flex justify-start"> {/* this is the first add tax credit button */}
+                      {/* p-4 above controls padding for add button row */}
+                      <button
+                        onClick={addTaxCreditItem}
+                        className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
+                        type="button"
+                      >
+                        <PlusCircle className="h-5 w-5" />
+                        Add Tax Credit
+                      </button>
+                    </div>
                   )}
                 </div>
+                // --- End Empty State Section ---
               )}
 
-              {/* Add Tax Credit Button */}
+              {/* --- Add Tax Credit Button Section --- */}
               {isAdmin && taxCredits.length > 0 && (
-                <div className="flex justify-end p-4">
+                // Changed justify-end to justify-start for left alignment
+                <div className="flex justify-start pl-8"> {/* this is the second add tax credit button */}
+                  {/* p-4 above controls padding for add button row */}
                   <button
                     onClick={addTaxCreditItem}
                     className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
@@ -227,9 +260,11 @@ const ReportSummarySectionFederalTaxCredits = ({
                   </button>
                 </div>
               )}
+              {/* --- End Add Tax Credit Button Section --- */}
 
-              {/* Instructions Text */}
+              {/* --- Instructions Text Section --- */}
               <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm mt-4">
+                {/* p-8 above controls padding for instructions box */}
                 <div className="text-lg font-medium text-gray-800 mb-2">
                   How to claim the Energy Efficient Home Improvement Credit
                 </div>
@@ -239,10 +274,15 @@ const ReportSummarySectionFederalTaxCredits = ({
                   the property is installed, not merely purchased.
                 </div>
               </div>
+              {/* --- End Instructions Text Section --- */}
             </div>
+            {/* --- End Tax Credits List Section --- */}
           </div>
+          {/* --- End Inner Content Padding --- */}
         </div>
+        {/* --- End Collapsible Content Section --- */}
       </div>
+      {/* --- End Outer Container Padding --- */}
     </motion.div>
   );
 };
