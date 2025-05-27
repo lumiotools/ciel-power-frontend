@@ -5,6 +5,13 @@ import { DollarSign, Trash2, ChevronUp } from "lucide-react";
 import ReportEditableInput from "../common/editableInput";
 import { PlusCircle, ChartCandlestick } from "lucide-react";
 
+// Remove this interface as we're using FinancialSummaryItem from page.tsx
+// interface FinancialItemData {
+//   title: string;
+//   amount: string;
+//   note?: string;
+// }
+
 interface ReportSummarySectionFinancialSummaryProps {
   isAdmin?: boolean;
   financialSummary?: FinancialSummaryData;
@@ -122,9 +129,7 @@ const ReportSummarySectionFinancialSummary = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
-                  className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm"
-                // className="p-5 rounded-lg"
-                // style={{ backgroundColor: "#67B5020A" }}
+                  className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm" // This p-4 controls the container padding
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -140,7 +145,7 @@ const ReportSummarySectionFinancialSummary = ({
 
                     {/* text insider container below financial summary */}
                       <div>
-                        <h3 className="font-semibold text-lg" style={{ color: "#545454" }}>
+                        <h3 className="font-semibold text-lg mb-0" style={{ color: "#545454" }}>
                           {isAdmin ? (
                             <ReportEditableInput
                               value={item.title}
@@ -169,6 +174,27 @@ const ReportSummarySectionFinancialSummary = ({
                             *if qualified by financing company (0% Interest Rate)
                           </p>
                         )}
+                        {/* Add note field */}
+                        <div className="text-sm mt-[-2px]">
+                          {isAdmin ? (
+                            <ReportEditableInput
+                              value={item.note ?? ""}
+                              placeholder="Add a note (optional)"
+                              onChange={(value) => {
+                                setFinancialSummaryData({
+                                  ...financialSummaryData,
+                                  data: [
+                                    ...(financialSummaryData.data?.slice(0, index) ?? []),
+                                    { ...item, note: value as string },
+                                    ...(financialSummaryData.data?.slice(index + 1) ?? []),
+                                  ],
+                                });
+                              }}
+                            />
+                          ) : item.note ? (
+                            <p className="text-gray-500">{item.note}</p>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                     
@@ -216,7 +242,7 @@ const ReportSummarySectionFinancialSummary = ({
               {isAdmin &&
                 financialSummaryData?.data &&
                 financialSummaryData.data.length > 0 && (
-                  <div className="flex justify-end p-4">
+                  <div className="flex justify-start pl-8"> {/*this is the second one, appears after */}
                     <button
                       onClick={addFinancialItem}
                       // className="px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1"
@@ -224,7 +250,7 @@ const ReportSummarySectionFinancialSummary = ({
                       type="button"
                     >
                       <PlusCircle className="h-5 w-5" />
-                      Add Financial Item
+                      Add Financial Item sec
                     </button>
                   </div>
                 )}
@@ -244,22 +270,21 @@ const ReportSummarySectionFinancialSummary = ({
                         className="h-5 w-5"
                         style={{ color: "#67B502" }}
                       />
-                      <h3 className="font-medium" style={{ color: "#67B502" }}>
+                      <h3 className="font-medium text-[#gray-800]"> {/* Updated color to match federal tax credits */}
                         No Financial Items
                       </h3>
                     </div>
 
                     {/* Add Button Below */}
                     {isAdmin && (
-                      <div>
-                      {/* <div className="flex justify-center"> */}
+                      <div className="flex justify-start"> {/* Changed to left align */}
                         <button
                           onClick={addFinancialItem}
                           className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
                           type="button"
                         >
                           <PlusCircle className="h-5 w-5" />
-                          Add Financial Item 1
+                          Add Financial Item
                         </button>
                       </div>
                     )}
@@ -341,3 +366,47 @@ const ReportSummarySectionFinancialSummary = ({
 };
 
 export default ReportSummarySectionFinancialSummary;
+
+/* Future Updates - TODO:
+1. Container Styling
+   - Adjust padding for items container: className="p-4" on financial items
+   - Update shadow and border styles to match design system
+   - Consider hover effects for interactive elements
+
+2. Typography
+   - Review and standardize font sizes across components
+   - Implement consistent text colors using design system variables
+   - Add proper heading hierarchy (h1, h2, h3)
+
+3. Spacing
+   - Review and adjust gap between items
+   - Standardize margins between sections
+   - Consider responsive spacing
+
+4. Animation
+   - Add smooth transitions for delete actions
+   - Consider adding hover animations for items
+   - Review loading states and transitions
+
+5. Functionality
+   - Add validation for amount inputs
+   - Consider adding sorting capability
+   - Add bulk edit/delete functionality
+   - Implement undo/redo functionality
+
+6. Accessibility
+   - Add ARIA labels
+   - Ensure keyboard navigation
+   - Add focus indicators
+   - Review color contrast
+
+7. Responsiveness
+   - Review mobile layout
+   - Adjust padding/margins for different screens
+   - Consider column layout changes
+
+8. Error Handling
+   - Add error states for inputs
+   - Implement error messages
+   - Add loading states
+*/
