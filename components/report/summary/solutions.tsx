@@ -8,7 +8,7 @@ import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
 import UnderstandingSolutions from "./understandingSolutions";
 import LoremIpsumHeading from "./LoremIpsumHeading";
-
+import { motion } from "framer-motion";
 
 interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
@@ -21,7 +21,12 @@ const ReportSummarySolutionSection = ({
   onUpdateValue,
 }: ReportSummarySolutionSectionProps) => {
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      id="summary-of-solutions"
+    >
       {/* {isAdmin && (
         <div className="flex justify-end items-center mb-4">
           <button
@@ -149,7 +154,7 @@ const ReportSummarySolutionSection = ({
           onUpdate={updateTaxCredits}
         />
       </motion.div> */}
-    </div>
+    </motion.div>
   );
 };
 

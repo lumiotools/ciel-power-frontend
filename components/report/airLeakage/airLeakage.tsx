@@ -4,6 +4,7 @@ import ReportAirLeakageSectionAirFlowRate from "./airFlowRate";
 import ReportAirLeakageSectionCommonAirLeakPoints from "./commonAirLeakPoints";
 import ReportAirLeakageSectionACH from "./ach";
 import { AirLeakageData } from "@/app/admin/[bookingNumber]/report/page";
+import { motion } from "framer-motion";
 
 interface AirLeakageProps {
   isAdmin?: boolean;
@@ -17,7 +18,12 @@ const ReportAirLeakageSection = ({
   onUpdateValue,
 }: AirLeakageProps) => {
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      id="summary-of-concerns"
+    >
       {/* {isAdmin && (
         <div className="flex justify-end items-center mb-4">
           <button
@@ -40,7 +46,7 @@ const ReportAirLeakageSection = ({
       />
 
       <ReportAirLeakageSectionCommonAirLeakPoints />
-    </div>
+    </motion.div>
   );
 };
 

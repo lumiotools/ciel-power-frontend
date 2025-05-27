@@ -21,6 +21,11 @@ import ReportHeatingSection from "@/components/report/heating/heating";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummarySection from "@/components/report/summary/concerns";
 import ReportSummaryConcernSection from "@/components/report/summary/concerns";
+import {
+  DescriptionData,
+  ImageData,
+} from "@/app/admin/[bookingNumber]/report/page";
+import ReportSummarySolutionSection from "@/components/report/summary/solutions";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -80,11 +85,15 @@ export interface SummaryOfConcernsData {
   name: string;
   concern: string;
   flag?: boolean;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface SolutionsAndRecommendationsData {
   title: string;
   benefits: string;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface FinancialSummaryItem {
@@ -216,7 +225,7 @@ const ReportPage = ({
 
   // Format tab name for display
   const formatTabName = (tab: string) => {
-    if (tab === "air-leakage") return "Air Leakage";
+    if (tab === "airLeakage") return "Air Leakage";
     if (tab === "concerns") return "Concerns";
     if (tab === "solutions") return "Solutions";
     if (tab === "overview") return "Introduction";
@@ -274,7 +283,7 @@ const ReportPage = ({
         case "concerns":
           return <ReportSummaryConcernSection reportData={reportData} />;
         case "solutions":
-          return <ReportSummaryConcernSection reportData={reportData} />;
+          return <ReportSummarySolutionSection reportData={reportData} />;
         default:
           return <Overview />;
       }
@@ -361,7 +370,7 @@ const ReportPage = ({
           <div className="flex overflow-x-auto border-b border-gray-100">
             {[
               "overview",
-              "air-leakage",
+              "airLeakage",
               "insulation",
               "heating",
               "cooling",
@@ -374,7 +383,7 @@ const ReportPage = ({
                   activeSubMenu === tab
                     ? tab === "overview"
                       ? "text-[#67B502]"
-                      : tab === "air-leakage"
+                      : tab === "airLeakage"
                         ? "text-[#031A82]"
                         : tab === "insulation"
                           ? "text-[#308883]"
