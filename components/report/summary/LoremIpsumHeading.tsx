@@ -184,7 +184,7 @@ const NotesSection = ({
                     }
                   />
                 ) : (
-                  <div className="rounded-md border-2 border-dashed border-gray-200 hover:border-[#67b502] transition-colors h-80 bg-white">
+                  <div className="rounded-md border-2 border-dashed border-gray-300 hover:border-[#67b502] transition-colors h-80 bg-white">
                     {isAdmin ? (
                       <button
                         onClick={() => handleAddImage(index)}
@@ -196,9 +196,8 @@ const NotesSection = ({
                         </span>
                       </button>
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-[#67b502]">
-                        <Plus className="size-12 mb-2" />
-                        <span className="text-sm">No image selected</span>
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                        <span className="text-sm">No image available</span>
                       </div>
                     )}
                   </div>
@@ -210,7 +209,9 @@ const NotesSection = ({
               <ReportImagePicker
                 buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
                 images={houseImages}
-                selectedImage={solutionsAndRecommendations?.[0]?.images?.[0]?.id}
+                selectedImage={
+                  solutionsAndRecommendations?.[0]?.images?.[0]?.id
+                }
                 isOpen={isImagePickerOpen}
                 onOpenChange={setIsImagePickerOpen}
                 onSelectImage={handleSelectImage}
