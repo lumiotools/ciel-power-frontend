@@ -1,9 +1,9 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect, useRef } from "react";
-import { ChevronUp, Wind } from "lucide-react";
+import { ChevronUp } from "lucide-react";
+import { ImageViewerSummary } from "./imageViewerSummary";
 
 export default function NotesSection() {
   const [notes, setNotes] = useState("");
@@ -41,6 +41,9 @@ export default function NotesSection() {
     }
   }, [notes]);
 
+  // Dummy state for demonstration (replace with your actual logic)
+  const [selectedImage, setSelectedImage] = useState<any>(undefined);
+
   return (
     <div className="w-full border-b border-gray-200 mb-4 -mt-4">
       <div className="w-full mx-auto px-4 py-4">
@@ -61,18 +64,42 @@ export default function NotesSection() {
         </div>
 
         <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
-          }`}
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[600px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+            }`}
         >
-          <textarea
-            ref={textareaRef}
-            value={notes}
-            onChange={handleNotesChange}
-            placeholder="Write your consultation notes here..."
-            className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none min-h-[100px] resize-none"
-            aria-label="Consultation notes"
-          />
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Textarea left */}
+            <div className="flex-[2] bg-[#ffffff] border border rounded-xl p-4 flex flex-col justify-between">
+              <textarea
+                ref={textareaRef}
+                value={notes}
+                onChange={handleNotesChange}
+                placeholder="Write your consultation notes here..."
+                className="w-full bg-transparent text-[#308883] p-2 border-none focus:outline-none min-h-[150px] resize-none"
+                aria-label="Consultation notes"
+              />
+            </div>
+              
+            {/* Image right */}
+            <div className="flex-1 flex items-center justify-center bg-[#ffffff] rounded-xl p-0 min-h-[180px]">
+              <ImageViewerSummary
+                allowSelection={false}
+                buttonClassName="bg-[#308883] hover:bg-[#308883]/90"
+                selectedImage={selectedImage}
+                onOpenPicker={() => { }}
+                onDescriptionChange={() => { }}
+              />
+            </div>
+            <div className="flex-1 flex items-center justify-center bg-[#ffffff] rounded-xl p-0 min-h-[180px]">
+              <ImageViewerSummary
+                allowSelection={false}
+                buttonClassName="bg-[#308883] hover:bg-[#308883]/90"
+                selectedImage={selectedImage}
+                onOpenPicker={() => { }}
+                onDescriptionChange={() => { }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
