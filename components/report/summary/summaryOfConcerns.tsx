@@ -281,8 +281,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
                         </button>
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                          <Fan className="size-12 mb-2" />
-                          <span className="text-sm">No image selected</span>
+                          <span className="text-sm">No image available</span>
                         </div>
                       )}
                     </div>
