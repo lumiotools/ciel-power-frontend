@@ -6,7 +6,7 @@ import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecom
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
-import UnderstandingSolutions from "./understanding-solutions";
+import UnderstandingSolutions from "./understandingSolutions";
 import LoremIpsumHeading from "./LoremIpsumHeading";
 
 
