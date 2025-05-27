@@ -4,7 +4,7 @@ import {
   EnvironmentalImpactData,
   EnvironmentalImpactItem,
 } from "@/app/admin/[bookingNumber]/report/page";
-import { Leaf } from "lucide-react";
+import { Leaf, Footprints, Percent } from "lucide-react";
 import ReportEditableInput from "../common/editableInput";
 
 interface ReportSummarySectionEnvironmentalImpactProps {
@@ -67,7 +67,7 @@ const ReportSummarySectionEnvironmentalImpact = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center">
-                  <Leaf className="h-5 w-5 text-[#67B502]" />
+                  <Footprints className="h-5 w-5 text-[#67B502]" />
                 </div>
                 <div>
                   <h3
@@ -112,7 +112,7 @@ const ReportSummarySectionEnvironmentalImpact = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center">
-                  <Leaf className="h-5 w-5 text-[#67B502]" />
+                  <Percent className="h-5 w-5 text-[#67B502]" />
                 </div>
                 <h3
                   className="font-semibold text-lg"
@@ -253,7 +253,7 @@ const ValueWithUnit: React.FC<ValueWithUnitProps> = ({
               placeholder={placeholder}
               value={data?.value ?? ""}
               onChange={(value) => onUpdate(value as string)}
-              className="text-center"
+              className="text-center text-gray-400 placeholder:text-gray-300" // Added placeholder color
             />
           ) : (
             data?.value
