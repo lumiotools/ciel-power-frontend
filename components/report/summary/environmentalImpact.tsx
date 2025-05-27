@@ -86,18 +86,15 @@ const ReportSummarySectionEnvironmentalImpact = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm"
+              className="bg-[#ffffff] rounded-xl border border-gray-200 px-6 py-5 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center justify-between gap-4">
+                <div className="flex flex-row items-center gap-4">
                   <div className="flex items-center justify-center">
-                    <Footprints className="h-5 w-5 text-[#67B502]" />
+                    <Footprints className="h-6 w-6 text-[#67B502]" />
                   </div>
                   <div>
-                    <h3
-                      className="font-semibold text-lg"
-                      style={{ color: "#545454" }}
-                    >
+                    <h3 className="font-semibold text-lg text-[#545454]">
                       Household Carbon Footprint
                     </h3>
                     <p className="text-xs text-gray-500 text-left">
@@ -105,10 +102,7 @@ const ReportSummarySectionEnvironmentalImpact = ({
                     </p>
                   </div>
                 </div>
-                <div
-                  className="font-semibold text-lg"
-                  style={{ color: "#545454" }}
-                >
+                <div className="font-semibold text-lg text-[#545454]">
                   <ValueWithUnit
                     isAdmin={isAdmin}
                     data={environmentalImpactData?.currentFootprint}
@@ -131,24 +125,18 @@ const ReportSummarySectionEnvironmentalImpact = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm"
+              className="bg-[#ffffff] rounded-xl border border-gray-200 px-6 py-5 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center justify-between gap-4">
+                <div className="flex flex-row items-center gap-4">
                   <div className="flex items-center justify-center">
-                    <Percent className="h-5 w-5 text-[#67B502]" />
+                    <Percent className="h-6 w-6 text-[#67B502]" />
                   </div>
-                  <h3
-                    className="font-semibold text-lg"
-                    style={{ color: "#545454" }}
-                  >
+                  <h3 className="font-semibold text-lg text-[#545454]">
                     Projected Total Energy Savings
                   </h3>
                 </div>
-                <div
-                  className="font-semibold text-lg"
-                  style={{ color: "#545454" }}
-                >
+                <div className="font-semibold text-lg text-[#545454]">
                   <ValueWithUnit
                     isAdmin={isAdmin}
                     data={environmentalImpactData.projectedSavings}
@@ -171,18 +159,15 @@ const ReportSummarySectionEnvironmentalImpact = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm"
+              className="bg-[#ffffff] rounded-xl border border-gray-200 px-6 py-5 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center justify-between gap-4">
+                <div className="flex flex-row items-center gap-4">
                   <div className="flex items-center justify-center">
-                    <Leaf className="h-5 w-5 text-[#67B502]" />
+                    <Leaf className="h-6 w-6 text-[#67B502]" />
                   </div>
                   <div>
-                    <h3
-                      className="font-semibold text-lg"
-                      style={{ color: "#545454" }}
-                    >
+                    <h3 className="font-semibold text-lg text-[#545454]">
                       Projected Carbon Footprint
                     </h3>
                     <p className="text-xs text-gray-500 text-left">
@@ -190,10 +175,7 @@ const ReportSummarySectionEnvironmentalImpact = ({
                     </p>
                   </div>
                 </div>
-                <div
-                  className="font-semibold text-lg"
-                  style={{ color: "#545454" }}
-                >
+                <div className="font-semibold text-lg text-[#545454]">
                   <ValueWithUnit
                     isAdmin={isAdmin}
                     data={environmentalImpactData.projectedFootprint}
