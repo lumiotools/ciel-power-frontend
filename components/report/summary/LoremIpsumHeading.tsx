@@ -2,12 +2,32 @@
 
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { ChevronUp } from "lucide-react";
-import { ImageViewerSummary } from "./imageViewerSummary";
+import { ChevronUp, Fan, Plus } from "lucide-react";
+import type { HouseImage } from "../heating/card";
+import { SummaryOfConcernsData } from "@/app/admin/[bookingNumber]/report/page";
+import { ReportImageViewer } from "./imageViewer-solutions";
+import { ReportImagePicker } from "./imagePicker-solutions";
 
-export default function NotesSection() {
+
+interface noteSectionLoremIpsumHeadingProps {
+  isAdmin?: boolean;
+  summaryOfConcerns?: SummaryOfConcernsData[];
+  onUpdateValue?: (summaryOfConcerns: SummaryOfConcernsData[]) => void;
+  houseImages?: HouseImage[];
+  selectedImages?: HouseImage[];
+  onUpdateImages?: (images: HouseImage[]) => void;
+}
+
+const NotesSection = ({
+  isAdmin,
+  summaryOfConcerns,
+  onUpdateValue,
+  houseImages = [],
+  selectedImages = [],
+  onUpdateImages,
+}: noteSectionLoremIpsumHeadingProps) => {
   const [notes, setNotes] = useState("");
-  const [isOpen, setIsOpen] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Load notes from sessionStorage on component mount
@@ -28,11 +48,6 @@ export default function NotesSection() {
     setNotes(e.target.value);
   };
 
-  // Toggle notes visibility
-  const toggleNotes = () => {
-    setIsOpen(!isOpen);
-  };
-
   // Auto-resize textarea based on content
   useEffect(() => {
     if (textareaRef.current) {
@@ -42,66 +57,160 @@ export default function NotesSection() {
   }, [notes]);
 
   // Dummy state for demonstration (replace with your actual logic)
-  const [selectedImage, setSelectedImage] = useState<any>(undefined);
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [imagePickerSlot, setImagePickerSlot] = useState<number | null>(null);
+
+  const handleAddImage = (index: number) => {
+    setImagePickerSlot(index);
+    setIsImagePickerOpen(true);
+  };
+
+  const handleEditImage = (index: number) => {
+    setImagePickerSlot(index);
+    setIsImagePickerOpen(true);
+  };
+
+  const handleSelectImage = (id: string) => {
+    const selectedImage = houseImages.find((img) => img.id === id);
+    if (onUpdateImages && imagePickerSlot !== null && selectedImage) {
+      const updatedImages = [...selectedImages];
+      updatedImages[imagePickerSlot] = selectedImage;
+      onUpdateImages(updatedImages);
+    }
+    setIsImagePickerOpen(false);
+    setImagePickerSlot(null);
+  };
+
+  const handleDescriptionChange = (index: number, description: string) => {
+    if (onUpdateImages) {
+      const updatedImages = [...selectedImages];
+      // Ensure we have enough slots
+      while (updatedImages.length <= index) {
+        updatedImages.push({} as HouseImage);
+      }
+      updatedImages[index] = {
+        ...updatedImages[index],
+        description,
+      };
+      onUpdateImages(updatedImages);
+    }
+  };
+
+  // Ensure we always show exactly 2 slots
+  const imageSlots = Array.from(
+    { length: 2 },
+    (_, index) => selectedImages[index] || null
+  );
 
   return (
-    <div className="w-full border-b border-gray-200 mb-4 -mt-4">
-      <div className="w-full mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <img src="/notes-icon.svg" className="text-[#67b502] w-8 h-8 mr-2" />
-            <h2 className="text-[#67b502] text-2xl font-bold">Lorem Ipsum Heading</h2>
+    <div className="w-full border-b mx-auto px-4 py-2 pb-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <div className="mr-4" style={{ color: "#67b502" }}>
+            <Fan size={32} />
           </div>
-          <button
-            onClick={toggleNotes}
-            className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
-            aria-label={isOpen ? "Hide notes" : "Show notes"}
-          >
-            <ChevronUp
-              className={`w-6 h-6 transition-transform duration-300 ${isOpen ? "" : "transform rotate-180"}`}
-            />
-          </button>
+          <h2 className="text-3xl font-bold" style={{ color: "#67b502" }}>
+            Lorem Ipsum Heading
+          </h2>
         </div>
-
-        <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[600px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
-            }`}
+        <button
+          onClick={() => setIsExpanded((v) => !v)}
+          className="text-[#67b502] transition-transform duration-300 border-2 border-[67b502] rounded-full p-0.5"
+          aria-label={isExpanded ? "Hide section" : "Show section"}
+          style={{ color: "#67b502" }}
         >
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Textarea left */}
-            <div className="flex-[2] bg-[#ffffff] border border rounded-xl p-4 flex flex-col justify-between">
+          <ChevronUp
+            className={`w-6 h-6 border border-[67b502] transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
+          />
+        </button>
+      </div>
+      <div
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+      >
+        <div className="w-full flex items-start justify-center gap-6 bg-[#ffffff] border border-1 border-gray-200 rounded-xl p-6">
+          <div className="flex flex-col items-start justify-start space-y-6 w-1/2">
+            <div
+              className="mr-4 flex items-center justify-center gap-2"
+              style={{ color: "#67b502" }}
+            >
+              <Fan size={24} />
+              <h3
+                className="text-2xl font-semibold"
+                style={{ color: "#67b502" }}
+              >
+                Lorem Ipsum Sub heading
+              </h3>
+            </div>
+            <div className="w-full">
               <textarea
                 ref={textareaRef}
                 value={notes}
                 onChange={handleNotesChange}
-                placeholder="Write your consultation notes here..."
-                className="w-full bg-transparent text-[#308883] p-2 border-none focus:outline-none min-h-[150px] resize-none"
+                placeholder="Write your notes here..."
+                className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto bg-white text-[#67b502]"
                 aria-label="Consultation notes"
               />
             </div>
-              
-            {/* Image right */}
-            <div className="flex-1 flex items-center justify-center bg-[#ffffff] rounded-xl p-0 min-h-[180px]">
-              <ImageViewerSummary
-                allowSelection={false}
-                buttonClassName="bg-[#308883] hover:bg-[#308883]/90"
-                selectedImage={selectedImage}
-                onOpenPicker={() => { }}
-                onDescriptionChange={() => { }}
+          </div>
+          <div className="w-1/2 flex flex-row items-center justify-center gap-4">
+            {imageSlots.map((image, index) => (
+              <div key={index} className="rounded-xl w-full ">
+                {image && image.id ? (
+                  <ReportImageViewer
+                    allowSelection={isAdmin}
+                    buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+                    selectedImage={image}
+                    onOpenPicker={() => handleEditImage(index)}
+                    onDescriptionChange={(description) =>
+                      handleDescriptionChange(index, description as string)
+                    }
+                  />
+                ) : (
+                  <div className="rounded-md border-2 border-dashed border-gray-200 hover:border-[#67b502] transition-colors h-80 bg-white">
+                    {isAdmin ? (
+                      <button
+                        onClick={() => handleAddImage(index)}
+                        className="w-full h-full flex flex-col items-center justify-center text-[#67b502] hover:text-[#d47c02] transition-colors"
+                      >
+                        <Plus className="size-12 mb-2" />
+                        <span className="text-sm font-medium">
+                          Add image {index + 1}
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-[#67b502]">
+                        <Plus className="size-12 mb-2" />
+                        <span className="text-sm">No image selected</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+            {/* Image Picker Dialog */}
+            {isAdmin && (
+              <ReportImagePicker
+                buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+                images={houseImages}
+                selectedImage={
+                  imagePickerSlot !== null
+                    ? selectedImages[imagePickerSlot]?.id
+                    : undefined
+                }
+                isOpen={isImagePickerOpen}
+                onOpenChange={(open) => {
+                  setIsImagePickerOpen(open);
+                  if (!open) setImagePickerSlot(null);
+                }}
+                onSelectImage={handleSelectImage}
               />
-            </div>
-            <div className="flex-1 flex items-center justify-center bg-[#ffffff] rounded-xl p-0 min-h-[180px]">
-              <ImageViewerSummary
-                allowSelection={false}
-                buttonClassName="bg-[#308883] hover:bg-[#308883]/90"
-                selectedImage={selectedImage}
-                onOpenPicker={() => { }}
-                onDescriptionChange={() => { }}
-              />
-            </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+export default NotesSection;
