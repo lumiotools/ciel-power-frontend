@@ -69,15 +69,20 @@ const ReportHeatingSection = ({
             isAdmin={isAdmin}
             heating={heating}
             houseImages={houseImages}
-            onUpdateValue={(updatedHeating) => updateHeating(index, updatedHeating)}
+            onUpdateValue={(updatedHeating) =>
+              updateHeating(index, updatedHeating)
+            }
             onDelete={() => deleteHeating(index)}
           />
         </div>
       ))}
 
       {isAdmin && (
-        <div className="flex justify-center items-center">
-          <button onClick={addNewHeating} className="px-4 py-2 rounded-full bg-[#d47c02] text-white font-bold">
+        <div className="flex justify-center items-center fixed bottom-5 left-[40%]">
+          <button
+            onClick={addNewHeating}
+            className="px-4 py-2 rounded-full bg-[#d47c02] text-white font-bold"
+          >
             Add New Heating Section
           </button>
         </div>
@@ -93,7 +98,7 @@ const ReportHeatingSection = ({
         />
       </div>
     </div>
-  )
+  );
 }
 
 export default ReportHeatingSection
