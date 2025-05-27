@@ -17,7 +17,7 @@ import Image from "next/image";
 import { Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { ReportImagePicker } from "../common/imagePicker";
 import { ReportImageViewer } from "../common/imageViewer";
-import type { HouseImage } from "../heating/card";
+import type { HouseImage } from "./concerns";
 
 interface ReportSummarySectionSummaryOfConcernsProps {
   isAdmin?: boolean;
@@ -293,14 +293,32 @@ const ReportSummarySectionSummaryOfConcerns = ({
                 <ReportImagePicker
                   buttonClassName="bg-[#ff6700] hover:bg-[#ff6700]/90"
                   images={houseImages}
-                  selectedImage={
-                    editingImageIndex !== null
-                      ? selectedImages[editingImageIndex]?.id
-                      : undefined
-                  }
+                  selectedImage={summaryOfConcerns?.[0].images?.[0]?.id}
                   isOpen={isImagePickerOpen}
                   onOpenChange={setIsImagePickerOpen}
-                  onSelectImage={handleSelectImage}
+                  onSelectImage={(id) => {
+                    if (onUpdateValue && summaryOfConcerns) {
+                      const updatedConcerns = [...summaryOfConcerns];
+                      if (updatedConcerns[0]) {
+                        updatedConcerns[0] = {
+                          ...updatedConcerns[0],
+                          images: updatedConcerns[0].images && updatedConcerns[0].images[0]
+                            ? [
+                                {
+                                  ...updatedConcerns[0].images[0],
+                                  id: id as string,
+                                },
+                              ]
+                            : [
+                                {
+                                  id: id as string,
+                                },
+                              ],
+                        };
+                        onUpdateValue(updatedConcerns);
+                      }
+                    }
+                  }}
                 />
               )}
             </div>

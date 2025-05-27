@@ -95,10 +95,7 @@ export function ReportImagePicker({
           )}
         </div>
         <DialogFooter>
-          <Button
-            onClick={handleDone}
-            className={buttonClassName}
-          >
+          <Button onClick={handleDone} className={buttonClassName}>
             Done
           </Button>
         </DialogFooter>

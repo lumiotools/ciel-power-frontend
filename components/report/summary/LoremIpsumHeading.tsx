@@ -3,28 +3,36 @@
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import { ChevronUp, Fan, Plus } from "lucide-react";
-import type { HouseImage } from "../heating/card";
-import { SummaryOfConcernsData } from "@/app/admin/[bookingNumber]/report/page";
 import { ReportImageViewer } from "./imageViewer-solutions";
 import { ReportImagePicker } from "./imagePicker-solutions";
+import { SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
 
+interface HouseImage {
+  mimeType: string;
+  thumbnailLink: string;
+  size: string;
+  id: string;
+  name: string;
+  description: string;
+  createdTime: string;
+  modifiedTime: string;
+  link: string;
+}
 
 interface noteSectionLoremIpsumHeadingProps {
   isAdmin?: boolean;
-  summaryOfConcerns?: SummaryOfConcernsData[];
-  onUpdateValue?: (summaryOfConcerns: SummaryOfConcernsData[]) => void;
   houseImages?: HouseImage[];
   selectedImages?: HouseImage[];
   onUpdateImages?: (images: HouseImage[]) => void;
+  solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
 }
 
 const NotesSection = ({
   isAdmin,
-  summaryOfConcerns,
-  onUpdateValue,
   houseImages = [],
   selectedImages = [],
   onUpdateImages,
+  solutionsAndRecommendations,
 }: noteSectionLoremIpsumHeadingProps) => {
   const [notes, setNotes] = useState("");
   const [isExpanded, setIsExpanded] = useState(true);
@@ -32,7 +40,7 @@ const NotesSection = ({
 
   // Load notes from sessionStorage on component mount
   useEffect(() => {
-    const savedNotes = sessionStorage.getItem("consultationNotes");
+    const savedNotes = sessionStorage.getItem("solutionsNotes");
     if (savedNotes) {
       setNotes(savedNotes);
     }
@@ -40,7 +48,7 @@ const NotesSection = ({
 
   // Save notes to sessionStorage whenever they change
   useEffect(() => {
-    sessionStorage.setItem("consultationNotes", notes);
+    sessionStorage.setItem("solutionsNotes", notes);
   }, [notes]);
 
   // Handle notes change
@@ -58,27 +66,35 @@ const NotesSection = ({
 
   // Dummy state for demonstration (replace with your actual logic)
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
-  const [imagePickerSlot, setImagePickerSlot] = useState<number | null>(null);
+  const [editingImageIndex, setEditingImageIndex] = useState<number | null>(
+    null
+  );
+
+  const handleSelectImage = (id: string) => {
+    const selectedImage = houseImages.find((img) => img.id === id);
+    if (selectedImage && onUpdateImages) {
+      if (editingImageIndex !== null) {
+        // Replace existing image
+        const updatedImages = [...selectedImages];
+        updatedImages[editingImageIndex] = selectedImage;
+        onUpdateImages(updatedImages);
+      } else {
+        // Add new image
+        onUpdateImages([...selectedImages, selectedImage]);
+      }
+    }
+    setIsImagePickerOpen(false);
+    setEditingImageIndex(null);
+  };
 
   const handleAddImage = (index: number) => {
-    setImagePickerSlot(index);
+    setEditingImageIndex(index);
     setIsImagePickerOpen(true);
   };
 
   const handleEditImage = (index: number) => {
-    setImagePickerSlot(index);
+    setEditingImageIndex(index);
     setIsImagePickerOpen(true);
-  };
-
-  const handleSelectImage = (id: string) => {
-    const selectedImage = houseImages.find((img) => img.id === id);
-    if (onUpdateImages && imagePickerSlot !== null && selectedImage) {
-      const updatedImages = [...selectedImages];
-      updatedImages[imagePickerSlot] = selectedImage;
-      onUpdateImages(updatedImages);
-    }
-    setIsImagePickerOpen(false);
-    setImagePickerSlot(null);
   };
 
   const handleDescriptionChange = (index: number, description: string) => {
@@ -115,18 +131,19 @@ const NotesSection = ({
         </div>
         <button
           onClick={() => setIsExpanded((v) => !v)}
-          className="text-[#67b502] transition-transform duration-300 border-2 border-[67b502] rounded-full p-0.5"
+          className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
           aria-label={isExpanded ? "Hide section" : "Show section"}
           style={{ color: "#67b502" }}
         >
           <ChevronUp
-            className={`w-6 h-6 border border-[67b502] transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
+            className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
           />
         </button>
       </div>
       <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-          }`}
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+          isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
         <div className="w-full flex items-start justify-center gap-6 bg-[#ffffff] border border-1 border-gray-200 rounded-xl p-6">
           <div className="flex flex-col items-start justify-start space-y-6 w-1/2">
@@ -149,7 +166,7 @@ const NotesSection = ({
                 onChange={handleNotesChange}
                 placeholder="Write your notes here..."
                 className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto bg-white text-[#67b502]"
-                aria-label="Consultation notes"
+                aria-label="Solutions notes"
               />
             </div>
           </div>
@@ -171,7 +188,7 @@ const NotesSection = ({
                     {isAdmin ? (
                       <button
                         onClick={() => handleAddImage(index)}
-                        className="w-full h-full flex flex-col items-center justify-center text-[#67b502] hover:text-[#d47c02] transition-colors"
+                        className="w-full h-full flex flex-col items-center justify-center text-[#67b502] hover:text-[#67b502] transition-colors"
                       >
                         <Plus className="size-12 mb-2" />
                         <span className="text-sm font-medium">
@@ -193,16 +210,9 @@ const NotesSection = ({
               <ReportImagePicker
                 buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
                 images={houseImages}
-                selectedImage={
-                  imagePickerSlot !== null
-                    ? selectedImages[imagePickerSlot]?.id
-                    : undefined
-                }
+                selectedImage={solutionsAndRecommendations?.[0]?.images?.[0]?.id}
                 isOpen={isImagePickerOpen}
-                onOpenChange={(open) => {
-                  setIsImagePickerOpen(open);
-                  if (!open) setImagePickerSlot(null);
-                }}
+                onOpenChange={setIsImagePickerOpen}
                 onSelectImage={handleSelectImage}
               />
             )}
@@ -211,6 +221,6 @@ const NotesSection = ({
       </div>
     </div>
   );
-}
+};
 
 export default NotesSection;
