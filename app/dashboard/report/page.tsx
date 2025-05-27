@@ -90,6 +90,7 @@ export interface SolutionsAndRecommendationsData {
 export interface FinancialSummaryItem {
   title: string;
   amount: number | string;
+  note?: string; // added note field for additional information, ask if needed or to remove this field
 }
 
 export interface FinancialSummaryData {
