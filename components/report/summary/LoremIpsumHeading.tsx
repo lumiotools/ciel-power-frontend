@@ -125,7 +125,7 @@ const NotesSection = ({
           <div className="mr-4" style={{ color: "#67b502" }}>
             <Fan size={32} />
           </div>
-          <h2 className="text-3xl font-bold" style={{ color: "#67b502" }}>
+          <h2 className="text-2xl font-bold" style={{ color: "#67b502" }}>
             Lorem Ipsum Heading
           </h2>
         </div>
@@ -153,7 +153,7 @@ const NotesSection = ({
             >
               <Fan size={24} />
               <h3
-                className="text-2xl font-semibold"
+                className="text-1xl font-semibold"
                 style={{ color: "#67b502" }}
               >
                 Lorem Ipsum Sub heading
