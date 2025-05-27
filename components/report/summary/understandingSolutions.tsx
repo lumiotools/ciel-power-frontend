@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
-import { ChevronUp, Wind } from "lucide-react";
+import { ChevronUp, Wind, Thermometer } from "lucide-react";
 
 export default function NotesSection() {
   const [notes, setNotes] = useState("");
@@ -42,37 +42,26 @@ export default function NotesSection() {
   }, [notes]);
 
   return (
-    <div className="w-full border-b border-gray-200 mb-4 -mt-4">
+    <div className="w-full border-b border-gray-200 mb-2 -mt-4 pb-2">
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/notes-icon.svg" className="text-[#67b502] w-8 h-8 mr-2" />
-            <h2 className="text-[#67b502] text-2xl font-bold">Lorem Ipsum Heading</h2>
+            <Thermometer className="text-[#67b502] w-8 h-8 mr-2" />
+            <h2 className="text-[#67b502] text-2xl font-bold">Understanding Solutions</h2>
           </div>
-          <button
-            onClick={toggleNotes}
-            className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
-            aria-label={isOpen ? "Hide notes" : "Show notes"}
-          >
-            <ChevronUp
-              className={`w-6 h-6 transition-transform duration-300 ${isOpen ? "" : "transform rotate-180"}`}
-            />
-          </button>
         </div>
 
+
+
         <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
-          }`}
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+            }`}
         >
-          <textarea
-            ref={textareaRef}
-            value={notes}
-            onChange={handleNotesChange}
-            placeholder="Write your consultation notes here..."
-            className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[100px] resize-none"
-            aria-label="Consultation notes"
-          />
+          <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm">
+            <p className="text-gray-800 leading-relaxed text-base">
+              You can find solutions and recommended upgrades for your home here, as reccommended by your Ciel Power Home Energy Audit here.
+            </p>
+          </div>
         </div>
       </div>
     </div>

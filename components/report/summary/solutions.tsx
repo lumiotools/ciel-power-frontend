@@ -2,11 +2,11 @@ import { ReportData } from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
 import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
-import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
+// import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
-import UnderstandingSolutions from "./understanding-solutions";
+import UnderstandingSolutions from "./understandingSolutions";
 import LoremIpsumHeading from "./LoremIpsumHeading";
 import { motion } from "framer-motion";
 
@@ -79,20 +79,7 @@ const ReportSummarySolutionSection = ({
         }}
       />
 
-      <ReportSummarySectionFutureUpgrades />
-
-      <ReportSummarySectionEnvironmentalImpact
-        isAdmin={isAdmin}
-        environmentalImpact={reportData?.environmentalImpact}
-        onUpdateValue={(environmentalImpact) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              environmentalImpact: environmentalImpact,
-            });
-          }
-        }}
-      />
+      {/* <ReportSummarySectionFutureUpgrades /> */}
 
       <ReportSummarySectionFinancialSummary
         isAdmin={isAdmin}
@@ -119,6 +106,21 @@ const ReportSummarySolutionSection = ({
           }
         }}
       />
+
+      <ReportSummarySectionEnvironmentalImpact
+        isAdmin={isAdmin}
+        environmentalImpact={reportData?.environmentalImpact}
+        onUpdateValue={(environmentalImpact) => {
+          if (onUpdateValue) {
+            onUpdateValue({
+              ...reportData,
+              environmentalImpact: environmentalImpact,
+            });
+          }
+        }}
+      />
+
+      
 
       {/* Project Costs Section - Without styled wrapper */}
       {/* <motion.div
