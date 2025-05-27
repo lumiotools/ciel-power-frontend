@@ -1,4 +1,4 @@
-import { ReportData } from "@/app/admin/[bookingNumber]/report/page";
+import { ReportData, SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
 import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
@@ -7,18 +7,24 @@ import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
 import UnderstandingSolutions from "./understandingSolutions";
-import LoremIpsumHeading from "./LoremIpsumHeading";
 import { motion } from "framer-motion";
+import NotesSection from "./LoremIpsumHeading";
+import { HouseImage } from "./concerns";
 
 interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
   reportData: ReportData;
   onUpdateValue?: (reportData: ReportData) => void;
+  houseImages: HouseImage[];
+  onUpdateImages?: (images: HouseImage[]) => void;
+  solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
 }
 const ReportSummarySolutionSection = ({
   isAdmin,
   reportData,
   onUpdateValue,
+  houseImages,
+  solutionsAndRecommendations,
 }: ReportSummarySolutionSectionProps) => {
   return (
     <motion.div
@@ -64,7 +70,11 @@ const ReportSummarySolutionSection = ({
         }}
       /> */}
       <UnderstandingSolutions />
-      <LoremIpsumHeading />
+      <NotesSection
+        isAdmin={isAdmin}
+        houseImages={houseImages}
+        solutionsAndRecommendations={solutionsAndRecommendations}
+      />
 
       <ReportSummarySectionSolutionsAndRecommendations
         isAdmin={isAdmin}
@@ -119,8 +129,6 @@ const ReportSummarySolutionSection = ({
           }
         }}
       />
-
-      
 
       {/* Project Costs Section - Without styled wrapper */}
       {/* <motion.div

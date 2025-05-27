@@ -1,21 +1,31 @@
 import { ReportData } from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
 import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
-import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
-import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
-import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
-import ReportSummarySectionFinancialSummary from "./financialSummary";
-import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
+
+export interface HouseImage {
+  mimeType: string;
+  thumbnailLink: string;
+  size: string;
+  id: string;
+  name: string;
+  description: string;
+  createdTime: string;
+  modifiedTime: string;
+  link: string;
+}
 
 interface ReportSummaryConcernSectionProps {
   isAdmin?: boolean;
   reportData: ReportData;
   onUpdateValue?: (reportData: ReportData) => void;
+  houseImages?: HouseImage[];
+
 }
 const ReportSummaryConcernSection = ({
   isAdmin,
   reportData,
   onUpdateValue,
+  houseImages,
 }: ReportSummaryConcernSectionProps) => {
   return (
     <div className="space-y-8">
@@ -33,6 +43,7 @@ const ReportSummaryConcernSection = ({
       <ReportSummarySectionSummaryOfConcerns
         isAdmin={isAdmin}
         summaryOfConcerns={reportData?.summaryOfConcerns}
+        houseImages={houseImages}
         onUpdateValue={(updatedSummaryOfConcerns) => {
           if (onUpdateValue) {
             onUpdateValue({

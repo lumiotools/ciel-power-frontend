@@ -47,13 +47,16 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
 
     const titleLower = title.toLowerCase();
     if (titleLower.includes("air") || titleLower.includes("seal")) {
-      return Wind;         // Air-Sealing icon
-    } else if (titleLower.includes("attic") && titleLower.includes("insulation")) {
-      return Home;         // Attic Insulation icon
+      return Wind; // Air-Sealing icon
+    } else if (
+      titleLower.includes("attic") &&
+      titleLower.includes("insulation")
+    ) {
+      return Home; // Attic Insulation icon
     } else if (titleLower.includes("hatch")) {
-      return Ruler;        // Attic Hatch icon
+      return Ruler; // Attic Hatch icon
     } else if (titleLower.includes("rim") || titleLower.includes("joint")) {
-      return Wrench;       // Rim joint Insulation icon
+      return Wrench; // Rim joint Insulation icon
     } else if (titleLower.includes("crawl")) {
       return ClipboardList; // Crawlspace Encapsulation icon
     } else {
@@ -71,7 +74,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
       const emptyRecommendation: SolutionsAndRecommendationsData = {
         title: "",
         benefits: "",
-        images: []
+        images: [],
       };
       onUpdateValue([...solutionsAndRecommendations, emptyRecommendation]);
     }
@@ -96,7 +99,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
     >
       <div className="w-full mx-auto px-4 py-4">
         {/* Header Section with Toggle Button */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-4">
           <div className="flex items-center">
             <Lightbulb className="text-[#67b502] w-8 h-8 mr-2" />
             <h2 className="text-[#67b502] text-2xl font-bold">
@@ -119,7 +122,9 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
         {/* Collapsible Content Section */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+            isOpen
+              ? "max-h-[2000px] opacity-100 mt-4"
+              : "max-h-0 opacity-0 mt-0"
           }`}
         >
           {/* Main Content Section */}
@@ -159,9 +164,17 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                                 onChange={(value) =>
                                   onUpdateValue &&
                                   onUpdateValue([
-                                    ...solutionsAndRecommendations.slice(0, index),
-                                    { ...recommendation, title: value as string },
-                                    ...solutionsAndRecommendations.slice(index + 1),
+                                    ...solutionsAndRecommendations.slice(
+                                      0,
+                                      index
+                                    ),
+                                    {
+                                      ...recommendation,
+                                      title: value as string,
+                                    },
+                                    ...solutionsAndRecommendations.slice(
+                                      index + 1
+                                    ),
                                   ])
                                 }
                               />
@@ -192,7 +205,10 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                               onUpdateValue &&
                               onUpdateValue([
                                 ...solutionsAndRecommendations.slice(0, index),
-                                { ...recommendation, benefits: value as string },
+                                {
+                                  ...recommendation,
+                                  benefits: value as string,
+                                },
                                 ...solutionsAndRecommendations.slice(index + 1),
                               ])
                             }
@@ -208,9 +224,9 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                 // Empty State with No Recommendations Message
                 <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm">
                   <p className="text-gray-800 leading-relaxed text-base">
-                    No recommendations or solutions have been added yet. This section
-                    will display your home's recommended upgrades and improvements
-                    once they are added.
+                    No recommendations or solutions have been added yet. This
+                    section will display your home's recommended upgrades and
+                    improvements once they are added.
                   </p>
                   {isAdmin && (
                     <button
@@ -219,7 +235,8 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                       type="button"
                     >
                       <PlusCircle className="h-5 w-5" />
-                      Add Recommendation {/* this is th efirst add button in side wala*/}
+                      Add Recommendation{" "}
+                      {/* this is th efirst add button in side wala*/}
                     </button>
                   )}
                 </div>
