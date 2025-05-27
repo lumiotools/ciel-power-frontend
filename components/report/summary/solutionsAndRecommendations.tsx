@@ -71,6 +71,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
       const emptyRecommendation: SolutionsAndRecommendationsData = {
         title: "",
         benefits: "",
+        images: []
       };
       onUpdateValue([...solutionsAndRecommendations, emptyRecommendation]);
     }
@@ -91,7 +92,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
       id="solutions-and-recommendations"
-      className="w-full border-b border-gray-200 mb-4 -mt-4"
+      className="w-full border-b border-gray-200 mb-4 -mt-4 pb-2"
     >
       <div className="w-full mx-auto px-4 py-4">
         {/* Header Section with Toggle Button */}
@@ -218,7 +219,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
                       type="button"
                     >
                       <PlusCircle className="h-5 w-5" />
-                      Add Recommendation
+                      Add Recommendation {/* this is th efirst add button in side wala*/}
                     </button>
                   )}
                 </div>
@@ -228,7 +229,8 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
               {isAdmin &&
                 solutionsAndRecommendations &&
                 solutionsAndRecommendations?.length > 0 && (
-                  <div className="flex justify-end p-4">
+                  // <div className="flex justify-start p-4">
+                  <div className="flex justify-start pl-8">
                     <button
                       onClick={addRecommendation}
                       className="bg-[#ffffff] rounded-xl border border-gray-200 p-4 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"

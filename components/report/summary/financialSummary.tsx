@@ -120,7 +120,7 @@ const ReportSummarySectionFinancialSummary = ({
             isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
           }`}
         >
-          <div className="mt-4">
+          <div className="mt-4 pb-2">
             <div className="space-y-4">
               {/* Render all financial items */}
               {financialSummaryData.data?.map((item, index) => (
@@ -129,10 +129,10 @@ const ReportSummarySectionFinancialSummary = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
-                  className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-4 shadow-sm" // This p-4 controls the container padding
+                  className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-2 shadow-sm" // This p-4 controls the container padding
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                       <div
                         className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
                       // style={{ backgroundColor: "#67B5021A" }}
@@ -169,11 +169,11 @@ const ReportSummarySectionFinancialSummary = ({
                             item.title
                           )}
                         </h3>
-                        {item.title.toLowerCase().includes("financing") && (
+                        {/* {item.title.toLowerCase().includes("financing") && (
                           <p className="text-xs text-gray-500">
                             *if qualified by financing company (0% Interest Rate)
                           </p>
-                        )}
+                        )} */}
                         {/* Add note field */}
                         <div className="text-sm mt-[-2px]">
                           {isAdmin ? (

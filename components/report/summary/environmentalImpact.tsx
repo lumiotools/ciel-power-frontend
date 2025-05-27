@@ -49,7 +49,7 @@ const ReportSummarySectionEnvironmentalImpact = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.8 }}
       id="environmental-impact"
-      className="w-full border-b border-gray-200 mb-4 -mt-4"
+      className="w-full border-b border-gray-200 mb-4 -mt-4 pb-2"
     >
       <div className="w-full mx-auto px-4 py-4">
         {/* Header Section */}
