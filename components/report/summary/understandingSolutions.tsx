@@ -40,9 +40,9 @@ export default function NotesSection() {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [notes]);
-
+  
   return (
-    <div className="w-full border-b border-gray-200 mb-2 -mt-4 pb-2">
+    <div className="w-full border-b border-gray-200 mb-2 -mt-2 pb-2">
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">

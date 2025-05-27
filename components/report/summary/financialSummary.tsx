@@ -120,7 +120,7 @@ const ReportSummarySectionFinancialSummary = ({
             isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
           }`}
         >
-          <div className="mt-4 pb-2">
+          <div className="mt-4 pb-1">
             <div className="space-y-4">
               {/* Render all financial items */}
               {financialSummaryData.data?.map((item, index) => (
