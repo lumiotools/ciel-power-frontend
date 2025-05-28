@@ -20,7 +20,7 @@ const ReportOverviewSection = () => {
     }
   }, [pathname]);
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto" id="intro-header">
       <NotesSection />
       <IntroSection />
       <ContentsSection />
@@ -31,7 +31,7 @@ const ReportOverviewSection = () => {
       <hr
         className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
       />
-      <ReportOverviewSectionAboutUs />
+      <ReportOverviewSectionAboutUs/>
       <hr
         className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
       />

@@ -113,10 +113,10 @@ const isOneAndHalfHourAhead = (startTime?: string): boolean => {
   if (!startTime) return false;
   const startDate = new Date(startTime);
   const currentDate = new Date();
-  if (currentDate < startDate) return false;
   const diffInHours =
     (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
-  return diffInHours >= 1.5;
+  console.log(diffInHours);
+  return diffInHours >= 1.5 || diffInHours < 0;
 };
 
 const formatDate = (dateStr?: string): string => {
@@ -164,7 +164,9 @@ const TimelineItem = ({
 
   return (
     <div className="timeline-item mb-6 relative">
-      <div className={`${greenBgClass} rounded-lg p-6 border-2 ${borderColorClass}`}>
+      <div
+        className={`${greenBgClass} rounded-lg p-6 border-2 ${borderColorClass}`}
+      >
         {children}
       </div>
     </div>
@@ -464,10 +466,10 @@ export default function DashboardPage() {
                     )}
                     {/* Timeline Item - We're Lining Everything Up */}
                     {isOneAndHalfHourAhead(
-                      bookingDetails?.bookingDetails?.startTime
+                      bookingDetails?.consultationDetails?.startTime
                     ) && (
                       <div className="timeline-item mb-6 relative">
-                        <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="bg-white rounded-lg p-6 border-2 border-gray-200">
                           <WeAreLinning />
                         </div>
                       </div>
@@ -668,12 +670,7 @@ const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
         <div className="font-bold text-xl">Your Project Plans Are Ready</div>
       </div>
 
-      <p className="text-gray-600 mb-4">
-        Review & sign the proposal which works for you! We&apos;ve prepared
-        detailed project plans based on your audit results. Choose the option
-        that best fits your needs and budget to move forward with your home
-        energy improvements.
-      </p>
+      <p className="text-gray-600 mb-4">Review & sign the proposal.</p>
 
       <div className="mb-4">
         {ProposalDetails?.count > 0 && (
@@ -707,10 +704,6 @@ const WeAreLinning = () => {
       <div className="flex items-center mb-2">
         <CheckCircle size={24} className="text-[#8bc34a] mr-2" />
         <div className="font-bold text-xl">We&apos;re Lining Everything Up</div>
-      </div>
-
-      <div className="mb-3 text-[#8bc34a] font-medium">
-        Thanks for signing off!
       </div>
 
       <p className="text-gray-600 mb-4">
@@ -761,7 +754,7 @@ const ConsultationDerails = ({
               isOneAndHalfHourAhead(BookingDetails?.startTime) &&
                 ConsultationDetails?.rescheduleLink
             )}
-            className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
+            className={`pointer-events-none opacity-35 bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
           >
             <Clock size={18} />
             Reschedule

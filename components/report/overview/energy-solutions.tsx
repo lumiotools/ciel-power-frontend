@@ -42,7 +42,7 @@ export default function EnergySolutionsSection() {
   ];
 
   return (
-    <section className="w-full mt-4 pb-4 px-4">
+    <section className="w-full mt-4 pb-4 px-4" id="intro-energy">
       <div className="w-full mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-[#2fabe2] mb-10">
           Whole Home Energy Solutions

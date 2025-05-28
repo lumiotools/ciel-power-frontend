@@ -19,6 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useContext } from "react";
 import BookingProgress from "../component/booking-progress";
+import NeedHelpSection from "./need-help-section";
 
 export default function BookingDetails() {
   const { bookingDetails } = useContext(BOOKING_CONTEXT);
@@ -57,191 +58,116 @@ export default function BookingDetails() {
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-3">May 6, 9:00 AM</h2>
+            <h2 className="text-2xl font-bold mb-3">
+              Upload Your Utility Bills
+            </h2>
             <h3 className="text-xl font-semibold mb-6">
-              Ciel Power Home Energy Audit
+              Help us help you — we need a picture of your home’s energy use
+              over the past year.
             </h3>
 
-            <p className="text-gray-600 mb-6">
-              532 lafayette road, harrington park, New Jersey 07640
+            <p className="text-black mb-6">
+              To accurately model your home and qualify you for
+              utility-sponsored incentives, we’ll need{" "}
+              <b>12 months of usage data </b>
+              for each <b>fuel type</b> your home uses — electric, gas, oil,
+              propane, or other.
             </p>
-
-            <div className="mb-6">
-              <h4 className="font-medium mb-1">Michael Eisner</h4>
-              <p className="text-gray-600">8455968349</p>
-            </div>
-
-            {/* Understanding Your Home Section */}
-            <div className="mb-8 text-gray-600 bg-[#f9fcf6] p-6 rounded-lg border border-[#e0f0d0]">
+          </div>
+        </div>
+        <div className="flex">
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Main Content Section */}
+            <div className="mb-4 text-black p-6 rounded-lg border-2 border-[#e0f0d0]">
               <div className="flex items-center gap-2 mb-4">
-                <Home className="text-[#8bc34a]" size={22} />
-                <h3 className="text-[#8bc34a] text-lg font-medium">
-                  Understanding Your Home
+                <h3 className="text-black text-lg font-bold">What to Upload</h3>
+              </div>
+              <p className="mb-3 font-bold">
+                🔌 If your home uses metered services (like electric or natural
+                gas):
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-5">
+                <li>
+                  <b>Upload your most recent bill</b> — if it includes a
+                  <b> 12-month usage summary</b> (like a chart from PSE&G),
+                  that’s all we need.
+                </li>
+                <li>
+                  If your bill doesn’t include 12 months of data, please upload
+                  <b> individual copies of your last 12 monthly bills.</b>
+                </li>
+              </ul>
+              <p className="mb-3 font-bold">
+                If your home uses delivered fuels (like oil or propane):
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-5">
+                <li>
+                  Contact your fuel provider and ask for a{" "}
+                  <b>12-month delivery history.</b>
+                </li>
+                <li>If they provide a summary or chart, upload that.</li>
+                <li>
+                  Otherwise, send copies of{" "}
+                  <b>the individual delivery records </b>
+                  covering the past year.
+                </li>
+              </ul>
+            </div>
+            <div className="mb-4 text-black p-6 rounded-lg border-2 border-[#e0f0d0]">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-black text-lg font-bold">
+                  Important Guidelines
                 </h3>
               </div>
+              <ul className="list-disc pl-6 mb-4 space-y-5">
+                <li>
+                  <b>Please do not redact or alter your utility bills.</b> We
+                  understand the concern — but in order to submit your project
+                  to the utility company for rebates or financing, your bills
+                  must include:
+                  <ul className="list-inside list-disc pl-6 mt-4 space-y-5">
+                    <li>Your name</li>
+                    <li>Service address</li>
+                    <li>Account number</li>
+                    <li>Usage history</li>
+                  </ul>
+                </li>
+                <li>
+                  Uploading screenshots, spreadsheets, or summaries you’ve
+                  created yourself <b>may delay or disqualify</b> your
+                  application for incentives.
+                </li>
+                <li>
+                  We <b>will never use your account information</b> to switch
+                  your energy provider or make changes to your service.
+                </li>
+              </ul>
               <p className="mb-3">
-                Your home does a lot for you — this visit helps us understand
-                how it&apos;s working, and how it could be doing even more.
+                Your documents are stored securely, used only to support your
+                participation in the incentive programs, and are never shared
+                for marketing or sales purposes.
               </p>
+            </div>
+            <div className="mb-4 text-black p-6 rounded-lg border-2 border-[#e0f0d0]">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-black text-lg font-bold">How to Upload</h3>
+              </div>
               <p className="mb-3">
-                During your Ciel Home Energy Audit, we&apos;ll take a closer
-                look at how your home uses energy, where it may be working
-                harder than it needs to, and what can be done to make it more
-                comfortable, efficient, and supportive of your daily life.
+                Use the <b>Document Portal</b> in your Ciel Customer Portal to
+                upload your files. PDF format is preferred, but we also accept
+                high-quality photos or screenshots.
               </p>
-              <p>
-                Below, you&apos;ll find a few simple ways to prepare so that we
-                can make the most of our visit.
-              </p>
+              <Link href="/document-portal#upload-utility-bills">
+                <button className="mb-3 bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors">
+                  <FileText size={18} />
+                  Go to Your Bills
+                </button>
+              </Link>
+              
             </div>
-
-            {/* Accordion Sections */}
-            <div className="mt-8 space-y-4">
-              {/* Section 1: What You'll Gain from Your Audit */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <FileText className="text-[#8bc34a]" size={24} />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        What You&apos;ll Gain from Your Audit
-                      </h3>
-                      <p className="text-gray-600">
-                        Comfort, savings, and peace of mind — your audit is the
-                        first step toward a better home.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Section 2: What Happens During the Audit */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <div className="text-[#8bc34a]">
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M17 18C17 16.3431 14.7614 15 12 15C9.23858 15 7 16.3431 7 18"
-                            stroke="#8bc34a"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                          <circle
-                            cx="10"
-                            cy="10"
-                            r="2"
-                            stroke="#8bc34a"
-                            strokeWidth="2"
-                          />
-                          <circle
-                            cx="14"
-                            cy="10"
-                            r="2"
-                            stroke="#8bc34a"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        What Happens During the Audit
-                      </h3>
-                      <p className="text-gray-600">
-                        We&apos;re here to help, not to disrupt — here&apos;s
-                        how we&apos;ll move through your home and what
-                        we&apos;ll be looking for.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Section 3: How To Prepare */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <FileText className="text-[#8bc34a]" size={24} />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        How To Prepare
-                      </h3>
-                      <p className="text-gray-600">
-                        We&apos;ll come prepared — this is simply to keep you in
-                        the loop and avoid surprises.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-
-              {/* Section 4: Frequently Asked Questions(FAQ) */}
-              <div className="border border-[#e0f0d0] rounded-lg bg-[#f9fcf6]">
-                <div className="w-full p-4 flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-md border border-[#e0f0d0]">
-                      <div className="text-[#8bc34a] text-xl font-bold">?</div>
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-[#8bc34a] text-lg font-medium">
-                        Frequently Asked Questions(FAQ)
-                      </h3>
-                      <p className="text-gray-600">
-                        Have questions? You&apos;re not alone — here are answers
-                        to the things most homeowners want to know.
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-[#8bc34a] flex-shrink-0" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Sidebar */}
-          <div className="w-80">
-            <div className="bg-[#f5f9ed] rounded-lg p-6">
-              <h3 className="text-lg font-medium text-center mb-6">
-                Your Assigned Auditor
-              </h3>
-
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden">
-                  <Image
-                    src="/profileDummy.png"
-                    alt="Mark Johnson"
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h4 className="font-medium text-lg">Mark Johnson</h4>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-4 justify-between">
-              <button className="bg-[#a6d66b] hover:bg-[#95c25a] text-white font-medium py-2 px-3 rounded-md transition-colors text-sm flex-1">
-                Reschedule
-              </button>
-              <button className="bg-white border border-gray-300 text-gray-600 font-medium py-2 px-3 rounded-md hover:bg-gray-50 transition-colors text-sm flex-1">
-                Cancel
-              </button>
+            <div className="mb-4 text-black p-6 rounded-lg border-2 border-[#e0f0d0]">
+              <NeedHelpSection />
             </div>
           </div>
         </div>

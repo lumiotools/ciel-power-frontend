@@ -42,11 +42,17 @@ export default function NotesSection() {
   }, [notes]);
 
   return (
-    <div className="w-full border-b border-gray-200 mb-4 -mt-4">
+    <div
+      className="w-full border-b border-gray-200 mb-4 -mt-4"
+      id="intro-header"
+    >
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/notes-icon.svg" className="text-[#67b502] w-8 h-8 mr-2" />
+            <img
+              src="/notes-icon.svg"
+              className="text-[#67b502] w-8 h-8 mr-2"
+            />
             <h2 className="text-[#67b502] text-2xl font-bold">Notes</h2>
           </div>
           <button
