@@ -55,7 +55,8 @@ const ReportSummarySectionSummaryOfConcerns = ({
     }
   };
 
-  const cardStyle = "bg-white rounded-xl shadow-sm mb-6 overflow-hidden";
+  const cardStyle =
+    "bg-white max-h-fit p-8 rounded-xl shadow-sm mb-6 overflow-hidden";
 
   const addConcern = () => {
     if (onUpdateValue && summaryOfConcerns) {
@@ -182,152 +183,151 @@ const ReportSummarySectionSummaryOfConcerns = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       id="summary-of-concerns"
+      className="container"
     >
-      <div className="w-full mx-auto px-4 py-6">
-        <div className="flex items-center mb-6">
-          <div className="mr-4" style={{ color: "#ff6700" }}>
-            <Thermometer size={32} />
-          </div>
-          <h2 className="text-3xl font-bold" style={{ color: "#ff6700" }}>
-            Understanding Concerns
-          </h2>
-        </div>
-
-        <div className="border-2 border-gray-200 rounded-xl p-6">
-          <p className="text-gray-700 text-lg">
-            You can find the summary of possible concerns as reported by your
-            auditor in this section.
-          </p>
-        </div>
-      </div>
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <div className="w-full mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
+      <div className="min-h-screen bg-[#eaeaea] flex-col items-center justify-center mb-52">
+        <div className="max-h-fit w-full mx-auto bg-white p-8">
+          <div className="flex items-center mb-6">
             <div className="mr-4" style={{ color: "#ff6700" }}>
-              <Fan size={32} />
+              <Thermometer size={32} />
             </div>
             <h2 className="text-3xl font-bold" style={{ color: "#ff6700" }}>
-              Lorem Ipsum Heading
+              Understanding Concerns
             </h2>
           </div>
-
-          <button
-            onClick={toggleExpanded}
-            className="text-[#ff6700] transition-transform duration-300 border-2 border-[#ff6700] rounded-full p-0.5"
-            aria-label={isExpanded ? "Hide section" : "Show section"}
-          >
-            <ChevronUp
-              className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
-            />
-          </button>
+          <div className="border-2 border-gray-200 rounded-xl p-6">
+            <p className="text-gray-700 text-lg">
+              You can find the summary of possible concerns as reported by your
+              auditor in this section.
+            </p>
+          </div>
         </div>
-        <div
-          className={`overflow-hidden transition-all duration-500 ease-in-out ${
-            isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="w-full flex items-start justify-center gap-6 border-2 border-gray-200 rounded-lg p-6">
-            <div className="flex flex-col items-start justify-start space-y-6 w-1/2">
-              <div
-                className="mr-4 flex items-center justify-center gap-2"
-                style={{ color: "#ff6700" }}
-              >
-                <Fan size={24} />
-                <h3
-                  className="text-2xl font-semibold"
+        <div className="max-h-fit w-full mx-auto bg-white p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="mr-4" style={{ color: "#ff6700" }}>
+                <Fan size={32} />
+              </div>
+              <h2 className="text-3xl font-bold" style={{ color: "#ff6700" }}>
+                Lorem Ipsum Heading
+              </h2>
+            </div>
+
+            <button
+              onClick={toggleExpanded}
+              className="text-[#ff6700] transition-transform duration-300 border-2 border-[#ff6700] rounded-full p-0.5"
+              aria-label={isExpanded ? "Hide section" : "Show section"}
+            >
+              <ChevronUp
+                className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
+              />
+            </button>
+          </div>
+          <div
+            className={`overflow-hidden transition-all duration-500 ease-in-out ${
+              isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="w-full flex items-start justify-center gap-6 border-2 border-gray-200 rounded-lg p-6">
+              <div className="flex flex-col items-start justify-start space-y-6 w-1/2">
+                <div
+                  className="mr-4 flex items-center justify-center gap-2"
                   style={{ color: "#ff6700" }}
                 >
-                  Lorem Ipsum Sub heading
-                </h3>
-              </div>
-              <div className="w-full">
-                <textarea
-                  ref={textareaRef}
-                  value={notes}
-                  onChange={handleNotesChange}
-                  placeholder="Write your notes here..."
-                  className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto"
-                  aria-label="Consultation notes"
-                />
-              </div>
-            </div>
-            <div className="w-1/2 flex flex-row items-center justify-center gap-4">
-              {imageSlots.map((image, index) => (
-                <div key={index} className="rounded-xl w-full ">
-                  {image && image.id ? (
-                    <ReportImageViewer
-                      allowSelection={isAdmin}
-                      buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
-                      selectedImage={image}
-                      onOpenPicker={() => handleEditImage(index)}
-                      onDescriptionChange={(description) =>
-                        handleDescriptionChange(index, description as string)
-                      }
-                    />
-                  ) : (
-                    <div className="rounded-md border-2 border-dashed border-gray-300 hover:border-[#ff6700] transition-colors h-80">
-                      {isAdmin ? (
-                        <button
-                          onClick={() => handleAddImage(index)}
-                          className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#ff6700] transition-colors"
-                        >
-                          <Plus className="size-12 mb-2" />
-                          <span className="text-sm font-medium">
-                            Add image {index + 1}
-                          </span>
-                        </button>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                          <span className="text-sm">No image available</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <Fan size={24} />
+                  <h3
+                    className="text-2xl font-semibold"
+                    style={{ color: "#ff6700" }}
+                  >
+                    Lorem Ipsum Sub heading
+                  </h3>
                 </div>
-              ))}
-              {/* Image Picker Dialog */}
-              {isAdmin && (
-                <ReportImagePicker
-                  buttonClassName="bg-[#ff6700] hover:bg-[#ff6700]/90"
-                  images={houseImages}
-                  selectedImage={summaryOfConcerns?.[0].images?.[0]?.id}
-                  isOpen={isImagePickerOpen}
-                  onOpenChange={setIsImagePickerOpen}
-                  onSelectImage={(id) => {
-                    if (onUpdateValue && summaryOfConcerns) {
-                      const updatedConcerns = [...summaryOfConcerns];
-                      if (updatedConcerns[0]) {
-                        updatedConcerns[0] = {
-                          ...updatedConcerns[0],
-                          images: updatedConcerns[0].images && updatedConcerns[0].images[0]
-                            ? [
-                                {
-                                  ...updatedConcerns[0].images[0],
-                                  id: id as string,
-                                },
-                              ]
-                            : [
-                                {
-                                  id: id as string,
-                                },
-                              ],
-                        };
-                        onUpdateValue(updatedConcerns);
+                <div className="w-full">
+                  <textarea
+                    disabled={isUser}
+                    ref={textareaRef}
+                    value={notes}
+                    onChange={handleNotesChange}
+                    className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto"
+                    aria-label="Consultation notes"
+                  />
+                </div>
+              </div>
+              <div className="w-1/2 flex flex-row items-center justify-center gap-4">
+                {imageSlots.map((image, index) => (
+                  <div key={index} className="rounded-xl w-full ">
+                    {image && image.id ? (
+                      <ReportImageViewer
+                        allowSelection={isAdmin}
+                        buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
+                        selectedImage={image}
+                        onOpenPicker={() => handleEditImage(index)}
+                        onDescriptionChange={(description) =>
+                          handleDescriptionChange(index, description as string)
+                        }
+                      />
+                    ) : (
+                      <div className="rounded-md border-2 border-dashed border-gray-300 hover:border-[#ff6700] transition-colors h-80">
+                        {isAdmin ? (
+                          <button
+                            onClick={() => handleAddImage(index)}
+                            className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#ff6700] transition-colors"
+                          >
+                            <Plus className="size-12 mb-2" />
+                            <span className="text-sm font-medium">
+                              Add image {index + 1}
+                            </span>
+                          </button>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                            <span className="text-sm">No image available</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {/* Image Picker Dialog */}
+                {isAdmin && (
+                  <ReportImagePicker
+                    buttonClassName="bg-[#ff6700] hover:bg-[#ff6700]/90"
+                    images={houseImages}
+                    selectedImage={summaryOfConcerns?.[0].images?.[0]?.id}
+                    isOpen={isImagePickerOpen}
+                    onOpenChange={setIsImagePickerOpen}
+                    onSelectImage={(id) => {
+                      if (onUpdateValue && summaryOfConcerns) {
+                        const updatedConcerns = [...summaryOfConcerns];
+                        if (updatedConcerns[0]) {
+                          updatedConcerns[0] = {
+                            ...updatedConcerns[0],
+                            images:
+                              updatedConcerns[0].images &&
+                              updatedConcerns[0].images[0]
+                                ? [
+                                    {
+                                      ...updatedConcerns[0].images[0],
+                                      id: id as string,
+                                    },
+                                  ]
+                                : [
+                                    {
+                                      id: id as string,
+                                    },
+                                  ],
+                          };
+                          onUpdateValue(updatedConcerns);
+                        }
                       }
-                    }
-                  }}
-                />
-              )}
+                    }}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
+
       <div className={cardStyle}>
         <div className="py-3 px-5 flex items-center justify-between">
           <h2

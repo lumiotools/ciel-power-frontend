@@ -1,16 +1,20 @@
-"use client"
-import { motion } from "framer-motion"
-import { Progress } from "@/components/ui/progress"
+"use client";
+import { motion } from "framer-motion";
+import { Progress } from "@/components/ui/progress";
 
 const ReportAirLeakageSectionAirFlowRate = () => {
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
-  }
+  };
 
   return (
-    <motion.div {...fadeInUp} id="air-flow-rates" className="p-6 border-t border-gray-200">
+    <motion.div
+      {...fadeInUp}
+      id="air-flow-rates"
+      className="bg-white max-h-fit p-8 border-t border-gray-200"
+    >
       {/* Header */}
       <h1 className="text-3xl font-bold mb-6" style={{ color: "#031a82" }}>
         Understanding Air Flow Rates
@@ -21,18 +25,31 @@ const ReportAirLeakageSectionAirFlowRate = () => {
         <div className="flex items-start justify-between">
           <div className="max-w-[70%] pr-8">
             <p className="text-gray-900 leading-relaxed text-base mb-6">
-              35% of the air in your home should exhaust each hour to maintain healthy ventilation. <br />
-              Airflow rates above these levels create excessive strain on heating & cooling systems.
+              35% of the air in your home should exhaust each hour to maintain
+              healthy ventilation. <br />
+              Airflow rates above these levels create excessive strain on
+              heating & cooling systems.
             </p>
             <div className="flex items-center">
               <div className="w-48 h-3 bg-gray-200 rounded-md overflow-hidden mr-4">
-                <Progress className="h-full bg-[#031A821A] [&>div]:bg-[#031A82]" value={35} />
+                <Progress
+                  className="h-full bg-[#031A821A] [&>div]:bg-[#031A82]"
+                  value={35}
+                />
               </div>
-              <span className="text-[#031A82] font-semibold text-base">Recommended: 35%</span>
+              <span className="text-[#031A82] font-semibold text-base">
+                Recommended: 35%
+              </span>
             </div>
           </div>
           <div className="flex-shrink-0 ml-4 mt-4 md:mt-0">
-            <svg width="144" height="115" viewBox="0 0 121 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              width="144"
+              height="115"
+              viewBox="0 0 121 120"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M63.4165 85.3334C64.2616 85.9672 65.2452 86.3911 66.2862 86.5702C67.3273 86.7493 68.396 86.6784 69.4043 86.3635C70.4126 86.0485 71.3316 85.4984 72.0856 84.7586C72.8396 84.0188 73.407 83.1104 73.7411 82.1082C74.0751 81.1061 74.1662 80.0389 74.0069 78.9947C73.8476 77.9504 73.4424 76.9589 72.8248 76.102C72.2071 75.245 71.3947 74.5471 70.4544 74.0658C69.5141 73.5844 68.4729 73.3334 67.4165 73.3334H27.4165"
                 stroke="#031a82"
@@ -62,7 +79,7 @@ const ReportAirLeakageSectionAirFlowRate = () => {
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ReportAirLeakageSectionAirFlowRate
+export default ReportAirLeakageSectionAirFlowRate;

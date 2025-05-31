@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import type { HeatingData } from "@/app/admin/[bookingNumber]/report/page"
-import { useState } from "react"
-import type { HouseImage } from "../heating/card"
-import ReportHeatingSectioninformation from "./information"
-import ReportHeatingSectionCard from "./card"
-import ClientsEquipment from "./clients-equipment"
+import type { HeatingData } from "@/app/admin/[bookingNumber]/report/page";
+import { useState } from "react";
+import type { HouseImage } from "../heating/card";
+import ReportHeatingSectioninformation from "./information";
+import ReportHeatingSectionCard from "./card";
+import ClientsEquipment from "./clients-equipment";
 
 interface ReportHeatingSectionProps {
-  isAdmin?: boolean
-  heatingData?: HeatingData[]
-  onUpdateValue?: (heating: HeatingData[]) => void
-  houseImages?: HouseImage[]
-  clientEquipmentImages?: HouseImage[]
-  onUpdateClientEquipment?: (images: HouseImage[]) => void
+  isAdmin?: boolean;
+  heatingData?: HeatingData[];
+  onUpdateValue?: (heating: HeatingData[]) => void;
+  houseImages?: HouseImage[];
+  clientEquipmentImages?: HouseImage[];
+  onUpdateClientEquipment?: (images: HouseImage[]) => void;
 }
 
 const ReportHeatingSection = ({
@@ -24,10 +24,11 @@ const ReportHeatingSection = ({
   clientEquipmentImages = [],
   onUpdateClientEquipment,
 }: ReportHeatingSectionProps) => {
-  const [heatingDataSection, setHeatingDataSection] = useState<HeatingData[]>(heatingData)
+  const [heatingDataSection, setHeatingDataSection] =
+    useState<HeatingData[]>(heatingData);
 
   const addNewHeating = () => {
-    if (!isAdmin) return
+    if (!isAdmin) return;
     const newHeating: HeatingData = {
       title: "Your Home's Heating " + (heatingDataSection.length + 1),
       type: "Unknown",
@@ -36,35 +37,44 @@ const ReportHeatingSection = ({
       parameter: "AFUE",
       current_value: "0%",
       recommended_value: "100%",
-    }
+    };
 
-    const updatedData = [...heatingDataSection, newHeating]
-    setHeatingDataSection(updatedData)
-    onUpdateValue?.(updatedData)
-  }
+    const updatedData = [...heatingDataSection, newHeating];
+    setHeatingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
 
   const deleteHeating = (index: number) => {
-    if (!isAdmin) return
-    const updatedData = heatingDataSection.filter((_, i) => i !== index)
-    setHeatingDataSection(updatedData)
-    onUpdateValue?.(updatedData)
-  }
+    if (!isAdmin) return;
+    const updatedData = heatingDataSection.filter((_, i) => i !== index);
+    setHeatingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
 
   const updateHeating = (index: number, updatedHeating: HeatingData) => {
-    if (!isAdmin) return
-    const updatedData = heatingDataSection.map((h, i) => (i === index ? updatedHeating : h))
-    setHeatingDataSection(updatedData)
-    onUpdateValue?.(updatedData)
-  }
+    if (!isAdmin) return;
+    const updatedData = heatingDataSection.map((h, i) =>
+      i === index ? updatedHeating : h
+    );
+    setHeatingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
 
   return (
-    <div className="space-y-8">
-      <div id="heating-header">
+    <div className="space-y-8 container bg-[#eaeaea]">
+      <div
+        id="heating-header"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ReportHeatingSectioninformation />
       </div>
 
       {heatingDataSection?.map((heating, index) => (
-        <div key={`heating-system-${index}`} id={`heating-system-${index}`}>
+        <div
+          key={`heating-system-${index}`}
+          id={`heating-system-${index}`}
+          className="min-h-screen flex items-center justify-center"
+        >
           <ReportHeatingSectionCard
             isAdmin={isAdmin}
             heating={heating}
@@ -89,7 +99,7 @@ const ReportHeatingSection = ({
       )}
 
       {/* Client's Equipment Section */}
-      <div id="clients-equipment">
+      <div id="clients-equipment" className="min-h-screen flex items-center justify-center">
         <ClientsEquipment
           isAdmin={isAdmin}
           houseImages={houseImages}
@@ -99,6 +109,6 @@ const ReportHeatingSection = ({
       </div>
     </div>
   );
-}
+};
 
-export default ReportHeatingSection
+export default ReportHeatingSection;

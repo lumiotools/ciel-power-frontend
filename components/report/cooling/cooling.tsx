@@ -62,14 +62,20 @@ const ReportCoolingSection = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-8"
+      className="space-y-8 container bg-[#eaeaea]"
     >
-      <div id="cooling-header">
+      <div
+        id="cooling-header"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ReportCoolingSectioninformation />
       </div>
 
       {/* Air Conditioning Assessment Section */}
-      <div id="air-conditioning-assessment">
+      <div
+        id="air-conditioning-assessment"
+        className="min-h-screen flex items-center justify-center"
+      >
         <AirConditioningAssessment
           isAdmin={isAdmin}
           houseImages={houseImages}
@@ -82,7 +88,11 @@ const ReportCoolingSection = ({
       </div>
 
       {coolingDataSection?.map((cooling, index) => (
-        <div key={`cooling-system-${index}`} id={`cooling-system-${index}`}>
+        <div
+          key={`cooling-system-${index}`}
+          id={`cooling-system-${index}`}
+          className="min-h-screen flex items-center justify-center"
+        >
           <ReportCoolingSectionCard
             isAdmin={isAdmin}
             cooling={cooling}

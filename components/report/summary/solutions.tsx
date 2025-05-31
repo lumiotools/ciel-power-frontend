@@ -1,4 +1,7 @@
-import { ReportData, SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
+import {
+  ReportData,
+  SolutionsAndRecommendationsData,
+} from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
 import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
@@ -32,6 +35,7 @@ const ReportSummarySolutionSection = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       id="summary-of-solutions"
+      className="container bg-[#eaeaea] space-y-8"
     >
       {/* {isAdmin && (
         <div className="flex justify-end items-center mb-4">
@@ -69,66 +73,76 @@ const ReportSummarySolutionSection = ({
           }
         }}
       /> */}
-      <UnderstandingSolutions />
-      <NotesSection
-        isAdmin={isAdmin}
-        houseImages={houseImages}
-        solutionsAndRecommendations={solutionsAndRecommendations}
-      />
-
-      <ReportSummarySectionSolutionsAndRecommendations
-        isAdmin={isAdmin}
-        solutionsAndRecommendations={reportData?.solutionsAndRecommendations}
-        onUpdateValue={(solutionsAndRecommendations) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              solutionsAndRecommendations: solutionsAndRecommendations,
-            });
-          }
-        }}
-      />
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <UnderstandingSolutions />
+      </div>
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <NotesSection
+          isAdmin={isAdmin}
+          houseImages={houseImages}
+          solutionsAndRecommendations={solutionsAndRecommendations}
+        />
+      </div>
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionSolutionsAndRecommendations
+          isAdmin={isAdmin}
+          solutionsAndRecommendations={reportData?.solutionsAndRecommendations}
+          onUpdateValue={(solutionsAndRecommendations) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                solutionsAndRecommendations: solutionsAndRecommendations,
+              });
+            }
+          }}
+        />
+      </div>
 
       {/* <ReportSummarySectionFutureUpgrades /> */}
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionFinancialSummary
+          isAdmin={isAdmin}
+          financialSummary={reportData?.financialSummary}
+          onUpdateValue={(financialSummary) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                financialSummary: financialSummary,
+              });
+            }
+          }}
+        />
+      </div>
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionFederalTaxCredits
+          isAdmin={isAdmin}
+          federalTaxCredits={reportData?.federalTaxCredits}
+          onUpdateValue={(federalTaxCredits) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                federalTaxCredits: federalTaxCredits,
+              });
+            }
+          }}
+        />
+      </div>
 
-      <ReportSummarySectionFinancialSummary
-        isAdmin={isAdmin}
-        financialSummary={reportData?.financialSummary}
-        onUpdateValue={(financialSummary) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              financialSummary: financialSummary,
-            });
-          }
-        }}
-      />
-
-      <ReportSummarySectionFederalTaxCredits
-        isAdmin={isAdmin}
-        federalTaxCredits={reportData?.federalTaxCredits}
-        onUpdateValue={(federalTaxCredits) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              federalTaxCredits: federalTaxCredits,
-            });
-          }
-        }}
-      />
-
-      <ReportSummarySectionEnvironmentalImpact
-        isAdmin={isAdmin}
-        environmentalImpact={reportData?.environmentalImpact}
-        onUpdateValue={(environmentalImpact) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              environmentalImpact: environmentalImpact,
-            });
-          }
-        }}
-      />
+      {/* Environmental Impact Section - Without styled wrapper */}
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionEnvironmentalImpact
+          isAdmin={isAdmin}
+          environmentalImpact={reportData?.environmentalImpact}
+          onUpdateValue={(environmentalImpact) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                environmentalImpact: environmentalImpact,
+              });
+            }
+          }}
+        />
+      </div>
 
       {/* Project Costs Section - Without styled wrapper */}
       {/* <motion.div

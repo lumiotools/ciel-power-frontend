@@ -2,7 +2,7 @@ import { Home, TrendingUp, DollarSign, Shield } from "lucide-react";
 
 export default function InsulationBenefits() {
   return (
-    <div className="w-full mx-auto px-4 py-2">
+    <div className="bg-white max-h-fit p-8 w-full mx-auto px-4">
       <h2 className="text-3xl font-bold text-[#308883] mb-8">
         Benefits of Properly Installed Insulation
       </h2>

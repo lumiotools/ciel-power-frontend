@@ -70,7 +70,7 @@ const ReportSummarySectionFederalTaxCredits = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.7 }}
       id="tax-credits"
-      className="w-full border-b border-gray-200 mb-2 mt-4 pb-2"
+      className="w-full border-b border-gray-200 bg-white max-h-fit p-8"
     >
       {/* --- Outer Container Padding (adjust here) --- */}
       <div className="w-full mx-auto px-4 py-4">
@@ -97,7 +97,9 @@ const ReportSummarySectionFederalTaxCredits = ({
         {/* --- Collapsible Content Section --- */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+            isOpen
+              ? "max-h-[2000px] opacity-100 mt-4"
+              : "max-h-0 opacity-0 mt-0"
           }`}
         >
           {/* --- Inner Content Padding (adjust here) --- */}
@@ -110,7 +112,8 @@ const ReportSummarySectionFederalTaxCredits = ({
               </div>
               <div className="text-gray-700">
                 If you make qualified energy-efficient improvements to your home
-                after Jan. 1, 2023, you may qualify for a tax credit up to $3,200.
+                after Jan. 1, 2023, you may qualify for a tax credit up to
+                $3,200.
               </div>
             </div>
             {/* --- End Introduction Text Section --- */}
@@ -130,9 +133,7 @@ const ReportSummarySectionFederalTaxCredits = ({
                     {/* --- Tax Credit Row --- */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
-                        <div
-                          className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
-                        >
+                        <div className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12">
                           <DollarSign className="h-5 w-5 text-[#67B502]" />
                         </div>
                         <div>
@@ -226,10 +227,14 @@ const ReportSummarySectionFederalTaxCredits = ({
                   {/* p-8 above controls padding for empty state box */}
                   <div className="flex items-center gap-4 mb-6">
                     <DollarSign className="h-5 w-5 text-[#67B502]" />
-                    <h3 className="font-medium text-[#gray-800]">No Tax Credits</h3>
+                    <h3 className="font-medium text-[#gray-800]">
+                      No Tax Credits
+                    </h3>
                   </div>
                   {isAdmin && (
-                    <div className="flex justify-start"> {/* this is the first add tax credit button */}
+                    <div className="flex justify-start">
+                      {" "}
+                      {/* this is the first add tax credit button */}
                       {/* p-4 above controls padding for add button row */}
                       <button
                         onClick={addTaxCreditItem}
@@ -248,7 +253,9 @@ const ReportSummarySectionFederalTaxCredits = ({
               {/* --- Add Tax Credit Button Section --- */}
               {isAdmin && taxCredits.length > 0 && (
                 // Changed justify-end to justify-start for left alignment
-                <div className="flex justify-start pl-8"> {/* this is the second add tax credit button */}
+                <div className="flex justify-start pl-8">
+                  {" "}
+                  {/* this is the second add tax credit button */}
                   {/* p-4 above controls padding for add button row */}
                   <button
                     onClick={addTaxCreditItem}
@@ -269,9 +276,10 @@ const ReportSummarySectionFederalTaxCredits = ({
                   How to claim the Energy Efficient Home Improvement Credit
                 </div>
                 <div className="text-gray-700">
-                  File Form 5695, Residential Energy Credits Part II, with your tax return
-                  to claim the credit. You must claim the credit for the tax year when
-                  the property is installed, not merely purchased.
+                  File Form 5695, Residential Energy Credits Part II, with your
+                  tax return to claim the credit. You must claim the credit for
+                  the tax year when the property is installed, not merely
+                  purchased.
                 </div>
               </div>
               {/* --- End Instructions Text Section --- */}

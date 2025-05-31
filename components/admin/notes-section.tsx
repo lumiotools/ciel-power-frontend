@@ -43,7 +43,7 @@ export default function NotesSection() {
 
   return (
     <div
-      className="w-full border-b border-gray-200 mb-4 -mt-4"
+      className="w-full border-b border-gray-200 p-4 bg-white max-h-fit"
       id="intro-header"
     >
       <div className="w-full mx-auto px-4 py-4">
@@ -53,7 +53,7 @@ export default function NotesSection() {
               src="/notes-icon.svg"
               className="text-[#67b502] w-8 h-8 mr-2"
             />
-            <h2 className="text-[#67b502] text-2xl font-bold">Notes</h2>
+            <h2 className="text-[#67b502] text-3xl font-bold">Notes</h2>
           </div>
           <button
             onClick={toggleNotes}

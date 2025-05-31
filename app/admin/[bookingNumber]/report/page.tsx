@@ -37,6 +37,7 @@ import ReportSummarySection from "@/components/report/summary/concerns";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummaryConcernSection from "@/components/report/summary/concerns";
 import ReportSummarySolutionSection from "@/components/report/summary/solutions";
+import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -186,6 +187,7 @@ const ReportPage = ({
     cooling: "bg-[#d47c00]",
     concerns: "bg-[#FF6700]",
     solutions: "bg-[#85C435]",
+    "pearl-certification": "bg-[#85C435]",
   };
 
   const [activeSubMenu, setActiveSubMenu] = useState("overview");
@@ -218,6 +220,7 @@ const ReportPage = ({
     if (tab === "heating") return "Heating";
     if (tab === "cooling") return "Cooling";
     if (tab === "insulation") return "Insulation";
+    if (tab === "pearl-certification") return "Pearl Certification";
   };
 
   const handleChangeActiveSubMenu = (menu: string) => {
@@ -474,6 +477,8 @@ const ReportPage = ({
             }
           />
         );
+      case "pearl-certification":
+        return <PearlCertificationSection />;
       default:
         return <Overview />;
     }
@@ -493,7 +498,7 @@ const ReportPage = ({
         </Button>
       </div>
 
-      <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
+      <div className="container mx-auto bg-white" ref={scrollRef}>
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-2xl font-bold text-gray-800 ml-8">
@@ -533,6 +538,7 @@ const ReportPage = ({
                 "cooling",
                 "concerns",
                 "solutions",
+                "pearl-certification",
               ] as (keyof typeof tabColors)[]
             ).map((tab) => (
               <button
@@ -551,7 +557,9 @@ const ReportPage = ({
                               ? "text-[#FF6700]"
                               : tab === "solutions"
                                 ? "text-[#67B502]"
-                                : "text-gray-800"
+                                : tab === "pearl-certification"
+                                  ? "text-[#85C435]"
+                                  : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
                 onClick={() => handleChangeActiveSubMenu(tab)}
@@ -566,7 +574,7 @@ const ReportPage = ({
             ))}
           </div>
 
-          <div className="py-6">{renderContent()}</div>
+          <div>{renderContent()}</div>
         </div>
       </div>
     </div>

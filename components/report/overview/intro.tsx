@@ -80,7 +80,10 @@ export default function IntroSection() {
   }, []);
 
   return (
-    <section className="w-full border-b border-gray-200" id="intro-header">
+    <section
+      className="bg-white max-h-fit p-2 w-full border-b border-gray-200"
+      id="intro-header"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left side - Text content */}
         <div className="p-8 md:p-12 flex flex-col justify-center">

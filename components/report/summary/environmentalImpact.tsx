@@ -49,7 +49,7 @@ const ReportSummarySectionEnvironmentalImpact = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.8 }}
       id="environmental-impact"
-      className="w-full border-b border-gray-200 mb-4 mt-4 pb-2"
+      className="bg-white max-h-fit p-8 w-full border-b border-gray-200"
     >
       <div className="w-full mx-auto px-4 py-4">
         {/* Header Section */}
@@ -77,7 +77,9 @@ const ReportSummarySectionEnvironmentalImpact = ({
         {/* Wrap content in collapsible div */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+            isOpen
+              ? "max-h-[2000px] opacity-100 mt-4"
+              : "max-h-0 opacity-0 mt-0"
           }`}
         >
           <div className="mt-4 space-y-4">

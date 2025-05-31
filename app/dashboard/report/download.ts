@@ -9,7 +9,8 @@ export type ReportSection =
   | "heating"
   | "cooling"
   | "concerns"
-  | "solutions";
+  | "solutions"
+  | "pearl-certification";
 
 // Report configuration interface
 export interface ReportConfig {

@@ -95,7 +95,7 @@ const ReportSummarySectionSolutionsAndRecommendations = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
       id="solutions-and-recommendations"
-      className="w-full border-b border-gray-200 mb-2 -mt-4 pb-2"
+      className="w-full border-b border-gray-200 bg-white max-h-fit p-8"
     >
       <div className="w-full mx-auto px-4 py-4">
         {/* Header Section with Toggle Button */}

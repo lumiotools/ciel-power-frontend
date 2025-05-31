@@ -108,11 +108,18 @@ export function ChatBot() {
       };
 
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
-    } catch (error) {
+        } catch (error: any) {
       console.error("Error in API call:", error);
+      let content = "Sorry, there was an error processing your request.";
+      if (
+        (error instanceof Response && (error.status === 401 || error.status === 403)) ||
+        (error?.message?.includes("401") || error?.message?.includes("403"))
+      ) {
+        content = "Session has expired, please login again";
+      }
       const errorMessage: Message = {
         role: "assistant",
-        content: "Sorry, there was an error processing your request.",
+        content,
         timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
       };
       setMessages((prevMessages) => [...prevMessages, errorMessage]);

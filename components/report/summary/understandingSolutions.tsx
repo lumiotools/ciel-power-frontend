@@ -42,24 +42,26 @@ export default function NotesSection() {
   }, [notes]);
   
   return (
-    <div className="w-full border-b border-gray-200 mb-2 -mt-2 pb-2">
+    <div className="bg-white max-h-fit p-8 w-full border-b border-gray-200">
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <Thermometer className="text-[#67b502] w-8 h-8 mr-2" />
-            <h2 className="text-[#67b502] text-2xl font-bold">Understanding Solutions</h2>
+            <h2 className="text-[#67b502] text-2xl font-bold">
+              Understanding Solutions
+            </h2>
           </div>
         </div>
 
-
-
         <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
-            }`}
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+          }`}
         >
           <div className="bg-[#ffffff] rounded-xl border border-gray-200 p-8 shadow-sm">
             <p className="text-gray-800 leading-relaxed text-base">
-              You can find solutions and recommended upgrades for your home here, as reccommended by your Ciel Power Home Energy Audit here.
+              You can find solutions and recommended upgrades for your home
+              here, as reccommended by your Ciel Power Home Energy Audit here.
             </p>
           </div>
         </div>

@@ -19,7 +19,6 @@ interface ReportSummaryConcernSectionProps {
   reportData: ReportData;
   onUpdateValue?: (reportData: ReportData) => void;
   houseImages?: HouseImage[];
-
 }
 const ReportSummaryConcernSection = ({
   isAdmin,
@@ -28,7 +27,7 @@ const ReportSummaryConcernSection = ({
   houseImages,
 }: ReportSummaryConcernSectionProps) => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 container bg-[#eaeaea]">
       {/* {isAdmin && (
         <div className="flex justify-end items-center mb-4">
           <button

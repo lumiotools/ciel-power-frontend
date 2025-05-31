@@ -43,20 +43,12 @@ const ReportInsulationSection = ({
     }
   };
 
-  const [isUser, setIsUser] = useState(false);
-  const pathname = usePathname();
-  useEffect(() => {
-    if (pathname.includes("/dashboard/report")) {
-      setIsUser(true);
-    }
-  }, [pathname]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-8"
+      className="space-y-8 container bg-[#eaeaea]"
     >
       {/* {isAdmin && (
         <div className="flex justify-end items-center">
@@ -69,32 +61,36 @@ const ReportInsulationSection = ({
         </div>
       )} */}
 
-      <div id="insulation-overview">
+      <div
+        id="insulation-overview"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ReportInsulationSectionOverview />
       </div>
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 min-h-screen"
         id="technical-aspects"
       >
         <ReportInsulationSectionTechnicalAspects />
         <ReportInsulationSectionSeasonalPerformance />
       </motion.div>
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <div id="insulation-benefits">
+      <div
+        id="insulation-benefits"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ReportInsulationSectionBenefits />
       </div>
 
       {insulationData &&
         insulationData.map((insulation, index) => (
-          <div key={`insulation-zone-${index}`} id={`insulation-zone-${index}`}>
+          <div
+            key={`insulation-zone-${index}`}
+            id={`insulation-zone-${index}`}
+            className="min-h-screen flex items-center justify-center"
+          >
             <ReportInsulationSectionCard
               key={`${insulation.title}-${index}`}
               isAdmin={isAdmin}

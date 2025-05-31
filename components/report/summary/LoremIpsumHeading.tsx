@@ -6,6 +6,7 @@ import { ChevronUp, Fan, Plus } from "lucide-react";
 import { ReportImageViewer } from "./imageViewer-solutions";
 import { ReportImagePicker } from "./imagePicker-solutions";
 import { SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
+import { usePathname } from "next/navigation";
 
 interface HouseImage {
   mimeType: string;
@@ -45,6 +46,14 @@ const NotesSection = ({
       setNotes(savedNotes);
     }
   }, []);
+
+  const [isUser, setIsUser] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname.includes("/dashboard/report")) {
+      setIsUser(true);
+    }
+  }, [pathname]);
 
   // Save notes to sessionStorage whenever they change
   useEffect(() => {
@@ -119,7 +128,7 @@ const NotesSection = ({
   );
 
   return (
-    <div className="w-full border-b border-gray-200 mb-2 mt-4 pb-2">
+    <div className="bg-white max-h-fit p-8 w-full border-b border-gray-200">
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -164,11 +173,11 @@ const NotesSection = ({
               </div>
               <div className="w-full">
                 <textarea
+                  disabled={isUser}
                   ref={textareaRef}
                   value={notes}
                   onChange={handleNotesChange}
-                  placeholder="Write your notes here..."
-                  className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto bg-white text-[#67b502]"
+                  className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto bg-white"
                   aria-label="Solutions notes"
                 />
               </div>
@@ -191,7 +200,7 @@ const NotesSection = ({
                       {isAdmin ? (
                         <button
                           onClick={() => handleAddImage(index)}
-                          className="w-full h-full flex flex-col items-center justify-center text-[#67b502] hover:text-[#67b502] transition-colors"
+                          className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#67b502] transition-colors"
                         >
                           <Plus className="size-12 mb-2" />
                           <span className="text-sm font-medium">

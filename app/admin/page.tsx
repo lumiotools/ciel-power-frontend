@@ -7,11 +7,7 @@ import { BookingsTable } from "@/components/admin/BookingsTable";
 import { InviteCustomerDialog } from "@/components/admin/InviteCustomerDialog";
 import type { Booking, BookingResponse, NutshellLead } from "@/types/admin";
 import { toast } from "sonner";
-import {
-  Settings,
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+import { Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 
@@ -261,7 +257,7 @@ export default function AdminPage() {
       <AdminHeader />
 
       {/* Main content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-4">
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">
@@ -325,7 +321,71 @@ export default function AdminPage() {
           </div>
 
           <BookingsTable bookings={bookings} isLoading={loading} />
-          
+
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600">
+              Showing page {currentPage} of {totalPages} ({totalBookings} total
+              bookings)
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1 || loading}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages || loading}
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <main className="container mx-auto px-6 py-4">
+        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Manage your Auditors
+            </h2>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder="Search..."
+                  disabled={loading}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      fetchBookings();
+                    }
+                  }}
+                />
+                <Button
+                  className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
+                  disabled={loading}
+                  onClick={fetchBookings}
+                >
+                  Search
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-gray-600">Manage all auditors</p>
+          </div>
+
+          {/* <BookingsTable bookings={bookings} isLoading={loading} /> */}
+
           {/* Pagination Controls */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
             <div className="text-sm text-gray-600">

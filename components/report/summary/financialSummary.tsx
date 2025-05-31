@@ -53,7 +53,7 @@ const ReportSummarySectionFinancialSummary = ({
   };
 
   const cardStyle =
-    "bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden";
+    "bg-white max-h-fit p-8 rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden";
 
   const formatCurrency = (amount: string): string => {
     // Convert to number, format, then back to string
@@ -92,13 +92,15 @@ const ReportSummarySectionFinancialSummary = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.6 }}
       id="project-costs"
-      className="w-full border-b border-gray-200 mb-4 mt-4 pb-2"
+      className="w-full border-b border-gray-200 bg-white max-h-fit p-8"
     >
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <ChartCandlestick className="text-[#67b502] w-8 h-8 mr-2" />
-            <h2 className="text-[#67b502] text-2xl font-bold">Financial Summary</h2>
+            <h2 className="text-[#67b502] text-2xl font-bold">
+              Financial Summary
+            </h2>
           </div>
           {/* Add toggle button */}
           <button
@@ -117,7 +119,9 @@ const ReportSummarySectionFinancialSummary = ({
         {/* Wrap content in collapsible div */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+            isOpen
+              ? "max-h-[2000px] opacity-100 mt-4"
+              : "max-h-0 opacity-0 mt-0"
           }`}
         >
           <div className="mt-4 pb-1">
@@ -135,7 +139,7 @@ const ReportSummarySectionFinancialSummary = ({
                     <div className="flex items-center gap-1">
                       <div
                         className="rounded-full flex items-center justify-center aspect-square w-10 md:w-12"
-                      // style={{ backgroundColor: "#67B5021A" }}
+                        // style={{ backgroundColor: "#67B5021A" }}
                       >
                         <DollarSign
                           className="h-5 w-5"
@@ -143,9 +147,12 @@ const ReportSummarySectionFinancialSummary = ({
                         />
                       </div>
 
-                    {/* text insider container below financial summary */}
+                      {/* text insider container below financial summary */}
                       <div>
-                        <h3 className="font-semibold text-lg mb-0" style={{ color: "#545454" }}>
+                        <h3
+                          className="font-semibold text-lg mb-0"
+                          style={{ color: "#545454" }}
+                        >
                           {isAdmin ? (
                             <ReportEditableInput
                               value={item.title}
@@ -184,9 +191,14 @@ const ReportSummarySectionFinancialSummary = ({
                                 setFinancialSummaryData({
                                   ...financialSummaryData,
                                   data: [
-                                    ...(financialSummaryData.data?.slice(0, index) ?? []),
+                                    ...(financialSummaryData.data?.slice(
+                                      0,
+                                      index
+                                    ) ?? []),
                                     { ...item, note: value as string },
-                                    ...(financialSummaryData.data?.slice(index + 1) ?? []),
+                                    ...(financialSummaryData.data?.slice(
+                                      index + 1
+                                    ) ?? []),
                                   ],
                                 });
                               }}
@@ -197,7 +209,7 @@ const ReportSummarySectionFinancialSummary = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* values of the text below financial summary */}
                     <div
                       className="flex items-center font-semibold text-lg"
@@ -210,14 +222,17 @@ const ReportSummarySectionFinancialSummary = ({
                             setFinancialSummaryData({
                               ...financialSummaryData,
                               data: [
-                                ...(financialSummaryData.data?.slice(0, index) ??
-                                  []),
+                                ...(financialSummaryData.data?.slice(
+                                  0,
+                                  index
+                                ) ?? []),
                                 {
                                   ...item,
                                   amount: formatCurrency(amount as string),
                                 },
-                                ...(financialSummaryData.data?.slice(index + 1) ??
-                                  []),
+                                ...(financialSummaryData.data?.slice(
+                                  index + 1
+                                ) ?? []),
                               ],
                             });
                           }}
@@ -242,7 +257,9 @@ const ReportSummarySectionFinancialSummary = ({
               {isAdmin &&
                 financialSummaryData?.data &&
                 financialSummaryData.data.length > 0 && (
-                  <div className="flex justify-start pl-8"> {/*this is the second one, appears after */}
+                  <div className="flex justify-start pl-8">
+                    {" "}
+                    {/*this is the second one, appears after */}
                     <button
                       onClick={addFinancialItem}
                       // className="px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-1"
@@ -270,14 +287,18 @@ const ReportSummarySectionFinancialSummary = ({
                         className="h-5 w-5"
                         style={{ color: "#67B502" }}
                       />
-                      <h3 className="font-medium text-[#gray-800]"> {/* Updated color to match federal tax credits */}
+                      <h3 className="font-medium text-[#gray-800]">
+                        {" "}
+                        {/* Updated color to match federal tax credits */}
                         No Financial Items
                       </h3>
                     </div>
 
                     {/* Add Button Below */}
                     {isAdmin && (
-                      <div className="flex justify-start"> {/* Changed to left align */}
+                      <div className="flex justify-start">
+                        {" "}
+                        {/* Changed to left align */}
                         <button
                           onClick={addFinancialItem}
                           className="bg-[#ffffff] rounded-xl border border-gray-200 p-3 shadow-sm hover:bg-[#67B5020A] transition-all duration-300 flex items-center gap-2 text-[#67b502] font-medium"
@@ -299,7 +320,10 @@ const ReportSummarySectionFinancialSummary = ({
                   //   style={{ backgroundColor: "#67B5020A" }}
                   // >
                   <div className="bg-[#ffffff] rounded-xl text-center border border-gray-200 p-8 shadow-sm">
-                    <h3 className="text-3xl font-semibold mb-2" style={{ color: "#545454" }}>
+                    <h3
+                      className="text-3xl font-semibold mb-2"
+                      style={{ color: "#545454" }}
+                    >
                       Total Project Costs
                     </h3>
                     {isAdmin ? (
@@ -338,7 +362,9 @@ const ReportSummarySectionFinancialSummary = ({
                         <span className="mx-1">
                           <ReportEditableInput
                             type="number"
-                            value={financialSummaryData.financingPeriodYears ?? 0}
+                            value={
+                              financialSummaryData.financingPeriodYears ?? 0
+                            }
                             onChange={(financingPeriodYears) => {
                               setFinancialSummaryData({
                                 ...financialSummaryData,

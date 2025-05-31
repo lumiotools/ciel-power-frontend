@@ -3,7 +3,7 @@ import { Info } from "lucide-react";
 
 export default function InsulationInfo() {
   return (
-    <div className="w-full mx-auto p-4">
+    <div className="bg-white max-h-fit p-8 w-full mx-auto">
       <h1 className="text-3xl md:text-4xl font-bold text-[#308883] mb-6">
         Understanding Insulation
       </h1>
