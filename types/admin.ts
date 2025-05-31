@@ -8,6 +8,7 @@ export interface Booking {
   utilityBillsUploaded: boolean;
   currentStage: string;
   googleDriveFolder?: string;
+  profilePictureUrl?: string | null;
 }
 
 export interface ContractDetails {

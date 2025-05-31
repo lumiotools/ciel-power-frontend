@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -7,9 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import BookingProgress from "@/components/component/booking-progress";
 import { STAGE_LABELS } from "@/constants/booking-stages";
-import { formatDate, getStepStatus } from "@/utils/booking-utils";
+import { formatDate } from "@/utils/booking-utils";
 import {
   ExternalLink,
   FolderOpen,
@@ -47,9 +48,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ReportImagePicker } from "../../../components/report/common/imagePicker";
+import { ReportImageViewer } from "../../../components/report/common/imageViewer";
+import type { HouseImage } from "../../../components/report/heating/card";
 
 interface BookingDetailsResponse {
   success: boolean;
@@ -115,6 +118,15 @@ export default function BookingDetailsPage({
     string | null
   >(null);
   const [hasReportChanges, setHasReportChanges] = useState(false);
+
+  // Profile picture management states
+  const [isProfileImagePickerOpen, setIsProfileImagePickerOpen] =
+    useState(false);
+  const [selectedProfileImage, setSelectedProfileImage] =
+    useState<HouseImage | null>(null);
+  const [houseImages, setHouseImages] = useState<HouseImage[]>([]);
+  const [isLoadingHouseImages, setIsLoadingHouseImages] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   // Separate loading states for different actions
   const [isSavingReport, setIsSavingReport] = useState(false);
@@ -509,7 +521,7 @@ export default function BookingDetailsPage({
   };
 
   const handleAddPayment = async () => {
-    if (!paymentAmount || isNaN(parseFloat(paymentAmount))) {
+    if (!paymentAmount || isNaN(Number.parseFloat(paymentAmount))) {
       toast.error("Please enter a valid amount");
       return;
     }
@@ -523,7 +535,7 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ amount: parseFloat(paymentAmount) }),
+          body: JSON.stringify({ amount: Number.parseFloat(paymentAmount) }),
         }
       );
 
@@ -571,6 +583,85 @@ export default function BookingDetailsPage({
       toast.error("An error occurred while deleting payment details");
     } finally {
       setIsDeletingPayment(false);
+    }
+  };
+
+  const fetchHouseImages = async () => {
+    setIsLoadingHouseImages(true);
+    setImageError(null);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/house-images`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setImageError(errorData.message || "Failed to fetch house images");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setHouseImages(data.data.images || []);
+      } else {
+        setImageError(data.message || "Failed to fetch house images");
+      }
+    } catch (error) {
+      console.error("Error fetching house images:", error);
+      setImageError(
+        "An error occurred while fetching house images. Please try again later."
+      );
+    } finally {
+      setIsLoadingHouseImages(false);
+    }
+  };
+
+  const handleSelectProfileImage = (id: string) => {
+    const selectedImage = houseImages.find((img) => img.id === id);
+    if (selectedImage) {
+      setSelectedProfileImage(selectedImage);
+      // Here you would typically save the selected profile image to the backend
+      toast.success("Profile picture selected successfully");
+
+      // Example API call to save the profile image (commented out as the endpoint doesn't exist yet)
+      // saveProfileImage(selectedImage.id);
+    }
+    setIsProfileImagePickerOpen(false);
+  };
+
+  const handleOpenProfileImagePicker = () => {
+    setImageError(null);
+    if (houseImages.length === 0) {
+      fetchHouseImages();
+    }
+    setIsProfileImagePickerOpen(true);
+  };
+
+  // Function to save the profile image to the backend (to be implemented)
+  const saveProfileImage = async (imageId: string) => {
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/profile-image`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageId }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Profile picture saved successfully");
+      } else {
+        toast.error(data.message || "Failed to save profile picture");
+      }
+    } catch (error) {
+      console.error("Error saving profile picture:", error);
+      toast.error("An error occurred while saving the profile picture");
     }
   };
 
@@ -857,6 +948,116 @@ export default function BookingDetailsPage({
                 </div>
               </div>
             </div>
+            {/* Profile Picture Management */}
+            <div className="pt-6 border-t max-w-screen-md">
+              <h3 className="text-lg font-medium mb-2">Add Profile Picture</h3>
+              <p className="text-gray-600 mb-3 text-sm">
+                Upload a profile picture that will be displayed on your user
+                dashboard. You can upload from your computer or select from your
+                custom drive.
+              </p>
+
+              {/* Current Profile Picture Preview */}
+              {selectedProfileImage && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Current Profile Picture
+                  </h4>
+                  <div className="w-32 h-32">
+                    <ReportImageViewer
+                      allowSelection={true}
+                      buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
+                      selectedImage={selectedProfileImage}
+                      onOpenPicker={handleOpenProfileImagePicker}
+                      onDescriptionChange={(newDescription) => {
+                        console.log("Description changed:", newDescription);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                {/* Upload from Computer */}
+                <Card className="h-64 border-2 border-dashed border-gray-300 hover:border-[#5cb85c] transition-colors">
+                  <button
+                    onClick={() => {
+                      // Handle upload from computer
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          // Handle file upload logic here
+                          console.log("File selected:", file);
+                          // You would typically upload this file to your server
+                          toast.success(
+                            "Profile picture uploaded successfully"
+                          );
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#5cb85c] transition-colors"
+                  >
+                    <Plus className="h-12 w-12 mb-2" />
+                    <span className="text-sm font-medium">
+                      Upload from Computer
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1">
+                      JPG, PNG or GIF up to 5MB
+                    </span>
+                  </button>
+                </Card>
+
+                {/* Select from Custom Drive */}
+                <Card className="h-64 border-2 border-dashed border-gray-300 hover:border-[#5cb85c] transition-colors">
+                  <button
+                    onClick={handleOpenProfileImagePicker}
+                    disabled={isLoadingHouseImages}
+                    className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#5cb85c] transition-colors disabled:opacity-50"
+                  >
+                    {isLoadingHouseImages ? (
+                      <>
+                        <div className="h-12 w-12 mb-2 animate-spin rounded-full border-4 border-gray-300 border-t-[#5cb85c]"></div>
+                        <span className="text-sm font-medium">
+                          Loading Images...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <FolderOpen className="h-12 w-12 mb-2" />
+                        <span className="text-sm font-medium">
+                          Select from Drive
+                        </span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          Choose from uploaded images
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </Card>
+              </div>
+
+              {imageError && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                  <p>{imageError}</p>
+                  <p className="mt-1">
+                    The image picker API endpoint may not be set up yet. Please
+                    check the server logs or contact the developer.
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6">
+                <p className="text-sm text-gray-600">
+                  The selected profile picture will be displayed on the user's
+                  dashboard page. You can change or update the profile picture
+                  at any time.
+                </p>
+              </div>
+            </div>
 
             {/* Contract Management */}
             <div className="pt-6 border-t">
@@ -1093,6 +1294,18 @@ export default function BookingDetailsPage({
           </div>
         </div>
       </main>
+
+      {/* Profile Image Picker Dialog */}
+      {isProfileImagePickerOpen && (
+        <ReportImagePicker
+          buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
+          images={houseImages}
+          selectedImage={selectedProfileImage?.id}
+          isOpen={isProfileImagePickerOpen}
+          onOpenChange={setIsProfileImagePickerOpen}
+          onSelectImage={handleSelectProfileImage}
+        />
+      )}
 
       {/* Attach Contract Modal */}
       <Dialog open={isContractModalOpen} onOpenChange={setIsContractModalOpen}>

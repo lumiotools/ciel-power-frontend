@@ -20,6 +20,7 @@ export interface BookingDetails {
       name: string;
     };
     rescheduleAvailable: boolean;
+    profilePictureUrl?: string | null;
   };
   utilityBillDetails: {
     count: number;
