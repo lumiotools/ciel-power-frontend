@@ -67,7 +67,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
 }) => {
   // Define sections configuration
   const sections: Array<{ id: ReportSection; name: string }> = [
-    { id: "overview", name: "Overview" },
+    { id: "overview", name: "Introduction" },
     { id: "airLeakage", name: "Air Leakage" },
     { id: "insulation", name: "Insulation" },
     { id: "heating", name: "Heating" },

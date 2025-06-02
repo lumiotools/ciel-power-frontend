@@ -40,3 +40,27 @@ export const getBookingDetails = async (bookingNumber: string) => {
 
   return data?.data || [];
 };
+
+export const updateAuditorDetails = async (
+  bookingNumber: string,
+  auditorData: { auditorImageUrl?: string; auditorDescription?: string }
+) => {
+  const response = await fetch(`/api/user/bookings/${bookingNumber}/auditor`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(auditorData),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error updating auditor details: ${response.status}`);
+    // Optionally handle error UI here
+  }
+
+  const data = await response.json();
+  console.log("Auditor update response:", data);
+
+  return data;
+};

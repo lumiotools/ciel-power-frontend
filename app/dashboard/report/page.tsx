@@ -20,6 +20,13 @@ import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummarySection from "@/components/report/summary/concerns";
+import ReportSummaryConcernSection from "@/components/report/summary/concerns";
+import {
+  DescriptionData,
+  ImageData,
+} from "@/app/admin/[bookingNumber]/report/page";
+import ReportSummarySolutionSection from "@/components/report/summary/solutions";
+import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -79,16 +86,21 @@ export interface SummaryOfConcernsData {
   name: string;
   concern: string;
   flag?: boolean;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface SolutionsAndRecommendationsData {
   title: string;
   benefits: string;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface FinancialSummaryItem {
   title: string;
   amount: number | string;
+  note?: string; // added note field for additional information, ask if needed or to remove this field
 }
 
 export interface FinancialSummaryData {
@@ -142,12 +154,13 @@ const ReportPage = ({
   const tabColors = {
     overview: "bg-[#85C435]",
     airLeakage: "bg-[#031A82]",
-    insulation: "bg-[#44BFB8]",
-    heating: "bg-[#B18C2E]",
-    cooling: "bg-[#B18C2E]",
+    insulation: "bg-[#308883]",
+    heating: "bg-[#d47c00]",
+    cooling: "bg-[#d47c00]",
     concerns: "bg-[#FF6700]",
     solutions: "bg-[#85C435]",
     "future solutions and certifications": "bg-purple-500",
+    "pearl-certification": "bg-[#85C435]",
   };
 
   const [activeSubMenu, setActiveSubMenu] = useState("overview");
@@ -167,7 +180,9 @@ const ReportPage = ({
     "insulation",
     "heating",
     "cooling",
-    "summary",
+    "concerns",
+    "solutions",
+    "pearl-certification",
   ]);
   useEffect(() => {
     // Fetch report data when component mounts
@@ -212,16 +227,15 @@ const ReportPage = ({
   };
 
   // Format tab name for display
-  const formatTabName = (tab) => {
+  const formatTabName = (tab: string) => {
     if (tab === "airLeakage") return "Air Leakage";
-    if (tab === "summary") return "Report Summary";
-    if (tab === "future solutions and certifications")
-      return "Future Solutions";
-    return (
-      tab.charAt(0).toUpperCase() +
-      tab.slice(1) +
-      (tab !== "overview" ? " Reports" : "")
-    );
+    if (tab === "concerns") return "Concerns";
+    if (tab === "solutions") return "Solutions";
+    if (tab === "overview") return "Introduction";
+    if (tab === "heating") return "Heating";
+    if (tab === "cooling") return "Cooling";
+    if (tab === "insulation") return "Insulation";
+    if (tab === "pearl-certification") return "Pearl Certification";
   };
 
   // Get current breadcrumb based on active tab
@@ -270,8 +284,12 @@ const ReportPage = ({
           return <ReportHeatingSection heatingData={reportData?.heating} />;
         case "cooling":
           return <ReportCoolingSection coolingData={reportData?.cooling} />;
-        case "summary":
-          return <ReportSummarySection reportData={reportData} />;
+        case "concerns":
+          return <ReportSummaryConcernSection reportData={reportData} />;
+        case "solutions":
+          return <ReportSummarySolutionSection reportData={reportData} />;
+        case "pearl-certification":
+          return <PearlCertificationSection />;
         default:
           return <Overview />;
       }
@@ -298,7 +316,7 @@ const ReportPage = ({
   }
 
   return (
-    <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
+    <div className="container mx-auto bg-white" ref={scrollRef}>
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-2xl font-bold text-gray-800">View Report</h1>
@@ -362,7 +380,9 @@ const ReportPage = ({
               "insulation",
               "heating",
               "cooling",
-              "summary",
+              "concerns",
+              "solutions",
+              "pearl-certification",
             ].map((tab) => (
               <button
                 key={tab}
@@ -373,12 +393,16 @@ const ReportPage = ({
                       : tab === "airLeakage"
                         ? "text-[#031A82]"
                         : tab === "insulation"
-                          ? "text-[#44BFB8]"
+                          ? "text-[#308883]"
                           : tab === "heating" || tab === "cooling"
-                            ? "text-[#B18C2E]"
-                            : tab === "summary"
+                            ? "text-[#d47c00]"
+                            : tab === "concerns"
                               ? "text-[#FF6700]"
-                              : "text-gray-800"
+                              : tab === "solutions"
+                                ? "text-[#67B502]"
+                                : tab === "pearl-certification"
+                                  ? "text-[#85C435]"
+                                  : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
                 onClick={() => setActiveSubMenu(tab)}
@@ -394,7 +418,7 @@ const ReportPage = ({
           </div>
         )}
 
-        <div className="py-6">{renderContent()}</div>
+        <div>{renderContent()}</div>
       </div>
     </div>
   );

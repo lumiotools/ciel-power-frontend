@@ -1,7 +1,9 @@
 import { ChevronDown } from "lucide-react";
-import React from "react";
+import React, { useRef } from "react";
 
 const GoogleReview = () => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   // Array of review data
   const reviews = [
     {
@@ -73,17 +75,40 @@ const GoogleReview = () => {
     return stars;
   };
 
+  // Function to scroll left
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -370, // Width of card (350px) + gap (20px)
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Function to scroll right
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 370, // Width of card (350px) + gap (20px)
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <div className="mt-12 mb-8 rounded-xl p-6">
       <div className="mb-6">
         <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
       </div>
       <div className="relative">
-        <div className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar">
+        <div
+          ref={scrollContainerRef}
+          className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth"
+        >
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="bg-white rounded-lg border-2 border-[#FFEBDC] p-6 min-w-[350px] max-w-[350px] flex flex-col shadow-sm hover:shadow-md hover:border-[#EE702E] transition-all duration-200"
+              className="bg-white rounded-lg border-2 border-[#FFEBDC] p-6 min-w-[350px] max-w-[350px] flex flex-col shadow-sm hover:shadow-md hover:border-[#EE702E] transition-all duration-200 flex-shrink-0"
             >
               <div className="flex items-center mb-4">
                 <div
@@ -121,13 +146,29 @@ const GoogleReview = () => {
             </div>
           ))}
         </div>
-        <button className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E]">
+        <button
+          onClick={scrollLeft}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E] hover:bg-orange-50 transition-colors"
+        >
           <ChevronDown className="rotate-90 text-[#EE702E]" size={24} />
         </button>
-        <button className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E]">
+        <button
+          onClick={scrollRight}
+          className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E] hover:bg-orange-50 transition-colors"
+        >
           <ChevronDown className="-rotate-90 text-[#EE702E]" size={24} />
         </button>
       </div>
+
+      <style jsx>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

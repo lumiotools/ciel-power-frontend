@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReportInsulationSectionOverview from "./overview";
 import { InsulationData } from "@/app/admin/[bookingNumber]/report/page";
 import ReportInsulationSectionTechnicalAspects from "./technicalAspects";
@@ -6,6 +6,7 @@ import ReportInsulationSectionSeasonalPerformance from "./seasonalPerformance";
 import ReportInsulationSectionBenefits from "./benefits";
 import ReportInsulationSectionCard, { HouseImage } from "./card";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 interface ReportInsulationSectionProps {
   isAdmin?: boolean;
@@ -43,7 +44,12 @@ const ReportInsulationSection = ({
   };
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8 container bg-[#eaeaea]"
+    >
       {/* {isAdmin && (
         <div className="flex justify-end items-center">
           <button
@@ -55,58 +61,65 @@ const ReportInsulationSection = ({
         </div>
       )} */}
 
-      <div id="insulation-overview">
+      <div
+        id="insulation-overview"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ReportInsulationSectionOverview />
       </div>
-
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 min-h-screen"
         id="technical-aspects"
       >
         <ReportInsulationSectionTechnicalAspects />
         <ReportInsulationSectionSeasonalPerformance />
       </motion.div>
-
-      <div id="insulation-benefits">
+      <div
+        id="insulation-benefits"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ReportInsulationSectionBenefits />
       </div>
 
       {insulationData &&
         insulationData.map((insulation, index) => (
-          <div key={`insulation-zone-${index}`} id={`insulation-zone-${index}`}>
+          <div
+            key={`insulation-zone-${index}`}
+            id={`insulation-zone-${index}`}
+            className="min-h-screen flex items-center justify-center"
+          >
             <ReportInsulationSectionCard
-            key={`${insulation.title}-${index}`}
-            isAdmin={isAdmin}
-            insulation={insulation}
-            houseImages={houseImages}
-            onUpdateValue={(updatedInsulation) => {
-              if (onUpdateValue)
-                onUpdateValue([
-                  ...insulationData.slice(0, index),
-                  updatedInsulation,
-                  ...insulationData.slice(index + 1),
-                ]);
-            }}
-            onDelete={() => deleteInsulation(index)}
-          />
+              key={`${insulation.title}-${index}`}
+              isAdmin={isAdmin}
+              insulation={insulation}
+              houseImages={houseImages}
+              onUpdateValue={(updatedInsulation) => {
+                if (onUpdateValue)
+                  onUpdateValue([
+                    ...insulationData.slice(0, index),
+                    updatedInsulation,
+                    ...insulationData.slice(index + 1),
+                  ]);
+              }}
+              onDelete={() => deleteInsulation(index)}
+            />
           </div>
         ))}
 
       {isAdmin && (
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center fixed bottom-5 left-[40%]">
           <button
             onClick={addNewInsulation}
-            className="px-4 py-2 rounded-full bg-[#256C68] text-white font-bold"
+            className="px-4 py-2 rounded-full bg-[#308883] text-white font-bold"
           >
             Add New Insulation Section
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

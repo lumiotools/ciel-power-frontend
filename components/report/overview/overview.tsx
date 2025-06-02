@@ -8,48 +8,39 @@ import AchievementsSection from "./achievements";
 import SustainabilitySection from "./sustainability";
 import EnergySolutionsSection from "./energy-solutions";
 import BuildingScienceSection from "./houseSystem";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 const ReportOverviewSection = () => {
-  const [isUser, setIsUser] = useState(false);
-  const pathname = usePathname();
-  useEffect(() => {
-    if (pathname.includes("/dashboard/report")) {
-      setIsUser(true);
-    }
-  }, [pathname]);
   return (
-    <div className="container mx-auto">
-      <NotesSection />
-      <IntroSection />
-      <ContentsSection />
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full hidden" : "w-[97vw]"} border my-4`}
-      />
-      <ReportOverviewSectionGoals />
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <ReportOverviewSectionAboutUs />
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <AchievementsSection />
-      {/* <ReportOverviewSectionProgram /> */}
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <SustainabilitySection />
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <EnergySolutionsSection />
-      <hr
-        className={`border-gray-200 ${isUser ? "w-full" : "w-[97vw]"} border my-4`}
-      />
-      <BuildingScienceSection />
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="container bg-[#eaeaea]"
+      id="intro-header"
+    >
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <NotesSection />
+        <IntroSection />
+      </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <ContentsSection />
+      </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <ReportOverviewSectionGoals />
+      </div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <ReportOverviewSectionAboutUs />
+        <AchievementsSection />
+        <SustainabilitySection />
+      </div>
+      <div className="min-h-screen flex items-center justify-center mt-52">
+        <EnergySolutionsSection />
+      </div>
+      <div className="min-h-screen flex items-center justify-center mt-52">
+        <BuildingScienceSection />
+      </div>
+    </motion.div>
   );
 };
 

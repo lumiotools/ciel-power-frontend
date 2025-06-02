@@ -1,36 +1,36 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import type { HeatingData } from "@/app/admin/[bookingNumber]/report/page"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import ReportEditableInput from "../common/editableInput"
-import { ReportImageViewer } from "../common/imageViewer"
-import { ReportImagePicker } from "../common/imagePicker"
-import ReportEditableSelect from "../common/editableSelect"
-import { Flame, Info, Trash2 } from "lucide-react"
-import ReportHeatingSectionGauge from "./gauge"
-import ReportEditableTextArea from "../common/editableTextarea"
-import { motion } from "framer-motion"
+import { useState, useMemo } from "react";
+import type { HeatingData } from "@/app/admin/[bookingNumber]/report/page";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ReportEditableInput from "../common/editableInput";
+import { ReportImageViewer } from "../common/imageViewer";
+import { ReportImagePicker } from "../common/imagePicker";
+import ReportEditableSelect from "../common/editableSelect";
+import { Flame, Info, Trash2 } from "lucide-react";
+import ReportHeatingSectionGauge from "./gauge";
+import ReportEditableTextArea from "../common/editableTextarea";
+import { motion } from "framer-motion";
 
 // Define the HouseImage interface based on the provided sample
 export interface HouseImage {
-  mimeType: string
-  thumbnailLink: string
-  size: string
-  id: string
-  name: string
-  description: string
-  createdTime: string
-  modifiedTime: string
-  link: string
+  mimeType: string;
+  thumbnailLink: string;
+  size: string;
+  id: string;
+  name: string;
+  description: string;
+  createdTime: string;
+  modifiedTime: string;
+  link: string;
 }
 
 interface ReportHeatingSectionCardProps {
-  isAdmin?: boolean
-  heating: HeatingData
-  houseImages?: HouseImage[]
-  onUpdateValue: (updatedHeating: HeatingData) => void
-  onDelete?: () => void
+  isAdmin?: boolean;
+  heating: HeatingData;
+  houseImages?: HouseImage[];
+  onUpdateValue: (updatedHeating: HeatingData) => void;
+  onDelete?: () => void;
 }
 
 const ReportHeatingSectionCard = ({
@@ -40,7 +40,7 @@ const ReportHeatingSectionCard = ({
   onUpdateValue,
   onDelete,
 }: ReportHeatingSectionCardProps) => {
-  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false)
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
 
   // Generate the default description content
   const defaultDescription = useMemo(
@@ -49,14 +49,24 @@ const ReportHeatingSectionCard = ({
       content: `Your ${heating.title} has a ${heating.parameter} of ${heating.current_value}. Upgrading to a high-efficiency model with ${heating.recommended_value} ${heating.parameter} could result in significant energy savings.`,
       footer: "Estimated based on Age & Type",
     }),
-    [heating.title, heating.parameter, heating.current_value, heating.recommended_value],
-  )
+    [
+      heating.title,
+      heating.parameter,
+      heating.current_value,
+      heating.recommended_value,
+    ]
+  );
 
   // Use the existing description or fall back to default
-  const currentDescription = heating.description || defaultDescription
+  const currentDescription = heating.description || defaultDescription;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white max-h-fit p-8"
+    >
       <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
         <CardHeader className="py-4 px-5 border-b border-gray-100">
           <CardTitle className="text-xl font-bold text-[#d47c02] flex justify-between items-center">
@@ -70,7 +80,7 @@ const ReportHeatingSectionCard = ({
                     onUpdateValue({
                       ...heating,
                       title: title as string,
-                    })
+                    });
                   }}
                 />
               ) : (
@@ -89,7 +99,9 @@ const ReportHeatingSectionCard = ({
           <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-8">
               <div className="bg-white p-4 rounded-md border border-gray-200">
-                <h3 className="text-lg font-semibold text-[#d47c02]">Current Performance</h3>
+                <h3 className="text-lg font-semibold text-[#d47c02]">
+                  Current Performance
+                </h3>
 
                 <ReportHeatingSectionGauge
                   value={
@@ -97,7 +109,9 @@ const ReportHeatingSectionCard = ({
                       ? Number(heating.current_value?.replace("%", ""))
                       : Number(String(heating.current_value)?.replace("+", ""))
                   }
-                  labelSuffix={heating.current_value?.includes?.("%") ? "%" : ""}
+                  labelSuffix={
+                    heating.current_value?.includes?.("%") ? "%" : ""
+                  }
                   minValue={0}
                   maxValue={heating.current_value?.includes?.("%") ? 100 : 0.96}
                   heating={heating}
@@ -105,12 +119,18 @@ const ReportHeatingSectionCard = ({
 
                 <div className="flex justify-between items-center mt-4 px-4">
                   <div className="text-center">
-                    <p className="text-sm text-gray-500">Current {heating.parameter}</p>
-                    <p className="text-xl font-bold text-[#F44336]">{heating.current_value}</p>
+                    <p className="text-sm text-gray-500">
+                      Current {heating.parameter}
+                    </p>
+                    <p className="text-xl font-bold text-[#F44336]">
+                      {heating.current_value}
+                    </p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-gray-500">BPI Recommends</p>
-                    <p className="text-xl font-bold text-[#4CAF50]">{heating.recommended_value}</p>
+                    <p className="text-xl font-bold text-[#4CAF50]">
+                      {heating.recommended_value}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -128,7 +148,7 @@ const ReportHeatingSectionCard = ({
                             onUpdateValue({
                               ...heating,
                               type: value as string,
-                            })
+                            });
                           }}
                         />
                       ) : (
@@ -152,7 +172,7 @@ const ReportHeatingSectionCard = ({
                             onUpdateValue({
                               ...heating,
                               condition: value as string,
-                            })
+                            });
                           }}
                         />
                       ) : (
@@ -171,7 +191,7 @@ const ReportHeatingSectionCard = ({
                             onUpdateValue({
                               ...heating,
                               year: Number(value),
-                            })
+                            });
                           }}
                         />
                       ) : (
@@ -189,11 +209,13 @@ const ReportHeatingSectionCard = ({
                           onUpdateValue({
                             ...heating,
                             parameter: value as string,
-                          })
+                          });
                         }}
                       />
                     ) : (
-                      <p className="text-gray-800 !h-6 !py-0">{heating.parameter}</p>
+                      <p className="text-gray-800 !h-6 !py-0">
+                        {heating.parameter}
+                      </p>
                     )}
                     <div className="text-[#d47c02] !font-bold">
                       {isAdmin ? (
@@ -203,7 +225,7 @@ const ReportHeatingSectionCard = ({
                             onUpdateValue({
                               ...heating,
                               current_value: value as string,
-                            })
+                            });
                           }}
                         />
                       ) : (
@@ -230,7 +252,7 @@ const ReportHeatingSectionCard = ({
                               ...currentDescription,
                               title: value as string,
                             },
-                          })
+                          });
                         }}
                       />
                     ) : (
@@ -251,7 +273,7 @@ const ReportHeatingSectionCard = ({
                             ...currentDescription,
                             content: value as string,
                           },
-                        })
+                        });
                       }}
                     />
                   ) : (
@@ -276,7 +298,7 @@ const ReportHeatingSectionCard = ({
                             description: description as string,
                           },
                         ],
-                      })
+                      });
                   }}
                 />
               </div>
@@ -306,14 +328,14 @@ const ReportHeatingSectionCard = ({
                           id: id as string,
                         },
                       ],
-                })
+                });
               }}
             />
           )}
         </CardContent>
       </Card>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ReportHeatingSectionCard
+export default ReportHeatingSectionCard;

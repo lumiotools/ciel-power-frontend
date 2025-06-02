@@ -37,6 +37,7 @@ import ReportSummarySection from "@/components/report/summary/concerns";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummaryConcernSection from "@/components/report/summary/concerns";
 import ReportSummarySolutionSection from "@/components/report/summary/solutions";
+import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -69,31 +70,31 @@ export interface InsulationData {
 }
 
 export interface HeatingData {
-  title: string
-  type: string
-  condition: string
-  year: number
-  parameter: string
-  current_value: string
-  recommended_value: string
+  title: string;
+  type: string;
+  condition: string;
+  year: number;
+  parameter: string;
+  current_value: string;
+  recommended_value: string;
   description?: {
-    title: string
-    content: string
-    footer?: string
-  }
+    title: string;
+    content: string;
+    footer?: string;
+  };
   images?: [
     {
-      mimeType?: string
-      thumbnailLink?: string
-      size?: string
-      id?: string
-      name?: string
-      description?: string
-      createdTime?: string
-      modifiedTime?: string
-      link?: string
+      mimeType?: string;
+      thumbnailLink?: string;
+      size?: string;
+      id?: string;
+      name?: string;
+      description?: string;
+      createdTime?: string;
+      modifiedTime?: string;
+      link?: string;
     },
-  ]
+  ];
 }
 
 export interface CoolingData {
@@ -112,16 +113,21 @@ export interface SummaryOfConcernsData {
   name: string;
   concern: string;
   flag?: boolean;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface SolutionsAndRecommendationsData {
   title: string;
   benefits: string;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface FinancialSummaryItem {
   title: string;
   amount: number | string;
+  note?: string; // added note field for additional information, ask if needed or to remove this field
 }
 
 export interface FinancialSummaryData {
@@ -176,11 +182,12 @@ const ReportPage = ({
   const tabColors = {
     overview: "bg-[#85C435]",
     "air-leakage": "bg-[#031A82]",
-    insulation: "bg-[#44BFB8]",
-    heating: "bg-[#B18C2E]",
-    cooling: "bg-[#B18C2E]",
+    insulation: "bg-[#308883]",
+    heating: "bg-[#d47c00]",
+    cooling: "bg-[#d47c00]",
     concerns: "bg-[#FF6700]",
     solutions: "bg-[#85C435]",
+    "pearl-certification": "bg-[#85C435]",
   };
 
   const [activeSubMenu, setActiveSubMenu] = useState("overview");
@@ -213,6 +220,7 @@ const ReportPage = ({
     if (tab === "heating") return "Heating";
     if (tab === "cooling") return "Cooling";
     if (tab === "insulation") return "Insulation";
+    if (tab === "pearl-certification") return "Pearl Certification";
   };
 
   const handleChangeActiveSubMenu = (menu: string) => {
@@ -469,6 +477,8 @@ const ReportPage = ({
             }
           />
         );
+      case "pearl-certification":
+        return <PearlCertificationSection />;
       default:
         return <Overview />;
     }
@@ -488,7 +498,7 @@ const ReportPage = ({
         </Button>
       </div>
 
-      <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
+      <div className="container mx-auto bg-white" ref={scrollRef}>
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-2xl font-bold text-gray-800 ml-8">
@@ -519,15 +529,18 @@ const ReportPage = ({
 
         <div>
           <div className="flex overflow-x-auto border-b-2 border-gray-100 pb-4">
-            {([
-              "overview",
-              "air-leakage",
-              "insulation",
-              "heating",
-              "cooling",
-              "concerns",
-              "solutions",
-            ] as (keyof typeof tabColors)[]).map((tab) => (
+            {(
+              [
+                "overview",
+                "air-leakage",
+                "insulation",
+                "heating",
+                "cooling",
+                "concerns",
+                "solutions",
+                "pearl-certification",
+              ] as (keyof typeof tabColors)[]
+            ).map((tab) => (
               <button
                 key={tab}
                 className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
@@ -537,14 +550,16 @@ const ReportPage = ({
                       : tab === "air-leakage"
                         ? "text-[#031A82]"
                         : tab === "insulation"
-                          ? "text-[#44BFB8]"
+                          ? "text-[#308883]"
                           : tab === "heating" || tab === "cooling"
-                            ? "text-[#B18C2E]"
+                            ? "text-[#d47c00]"
                             : tab === "concerns"
                               ? "text-[#FF6700]"
                               : tab === "solutions"
                                 ? "text-[#67B502]"
-                                : "text-gray-800"
+                                : tab === "pearl-certification"
+                                  ? "text-[#85C435]"
+                                  : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
                 onClick={() => handleChangeActiveSubMenu(tab)}
@@ -559,7 +574,7 @@ const ReportPage = ({
             ))}
           </div>
 
-          <div className="py-6">{renderContent()}</div>
+          <div>{renderContent()}</div>
         </div>
       </div>
     </div>

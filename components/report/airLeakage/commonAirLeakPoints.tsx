@@ -34,7 +34,7 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
     <motion.div
       {...fadeInUp}
       id="common-air-leak-points"
-      className="p-6 border-t border-gray-200"
+      className="bg-white max-h-fit p-8 border-t border-gray-200"
     >
       {/* Header */}
       <h1 className="text-3xl font-bold mb-6" style={{ color: "#031a82" }}>

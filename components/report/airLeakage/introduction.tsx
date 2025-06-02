@@ -10,9 +10,16 @@ const ReportAirLeakageSectionIntroduction = () => {
   };
 
   return (
-    <motion.div {...fadeInUp} id="introduction" className="p-6">
+    <motion.div
+      {...fadeInUp}
+      id="introduction"
+      className="bg-white max-h-fit p-8"
+    >
       {/* Header */}
-      <h1 className="text-3xl font-bold mb-6" style={{ color: "#031a82" }}>
+      <h1
+        className="bg-white text-3xl font-bold mb-6"
+        style={{ color: "#031a82" }}
+      >
         Understanding Air Leakage
       </h1>
 

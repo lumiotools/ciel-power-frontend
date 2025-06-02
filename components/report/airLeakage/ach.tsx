@@ -1,25 +1,33 @@
-"use client"
-import { motion } from "framer-motion"
-import { ArrowDown, ArrowUp, Home, InfoIcon } from "lucide-react"
-import ReportAirLeakageSectionGauge from "./gauge"
-import ReportEditableInput from "../common/editableInput"
-import type { AirLeakageData } from "@/app/admin/[bookingNumber]/report/page"
+"use client";
+import { motion } from "framer-motion";
+import { ArrowDown, ArrowUp, Home, InfoIcon } from "lucide-react";
+import ReportAirLeakageSectionGauge from "./gauge";
+import ReportEditableInput from "../common/editableInput";
+import type { AirLeakageData } from "@/app/admin/[bookingNumber]/report/page";
 
 interface AirLeakageACHProps {
-  isAdmin?: boolean
-  airLeakage?: AirLeakageData
-  onUpdateValue?: (airLeakage: AirLeakageData) => void
+  isAdmin?: boolean;
+  airLeakage?: AirLeakageData;
+  onUpdateValue?: (airLeakage: AirLeakageData) => void;
 }
 
-const ReportAirLeakageSectionACH = ({ isAdmin, airLeakage, onUpdateValue }: AirLeakageACHProps) => {
+const ReportAirLeakageSectionACH = ({
+  isAdmin,
+  airLeakage,
+  onUpdateValue,
+}: AirLeakageACHProps) => {
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
-  }
+  };
 
   return (
-    <motion.div {...fadeInUp} id="air-changes-per-hour" className="py-8">
+    <motion.div
+      {...fadeInUp}
+      id="air-changes-per-hour"
+      className="bg-white max-h-fit p-8"
+    >
       {/* Header */}
       <h1 className="text-3xl font-bold mb-6" style={{ color: "#031a82" }}>
         Your Home's Air Changes Per Hour (ACH)
@@ -32,13 +40,16 @@ const ReportAirLeakageSectionACH = ({ isAdmin, airLeakage, onUpdateValue }: AirL
           <div className="lg:w-2/3 pr-0 lg:pr-8">
             {/* Description text */}
             <p className="text-gray-800 leading-relaxed text-base mb-10">
-              A measure of how many times the air within a defined space is replaced. This is determined based on the
-              blower door reading of the space and the volume of the space.
+              A measure of how many times the air within a defined space is
+              replaced. This is determined based on the blower door reading of
+              the space and the volume of the space.
             </p>
 
             {/* Results section */}
             <div className="space-y-6">
-              <h2 className="text-[#545454] text-xl font-medium">Your Results</h2>
+              <h2 className="text-[#545454] text-xl font-medium">
+                Your Results
+              </h2>
 
               <div className="flex items-center gap-x-8">
                 <div className="flex items-center gap-2">
@@ -54,12 +65,14 @@ const ReportAirLeakageSectionACH = ({ isAdmin, airLeakage, onUpdateValue }: AirL
                             parameter: "ACH",
                             current_value: Number(value),
                             recommended_value: 0.35,
-                          })
+                          });
                         }
                       }}
                     />
                   ) : (
-                    <div className="text-[#031a82] text-5xl font-bold">{airLeakage?.current_value || 0.95}</div>
+                    <div className="text-[#031a82] text-5xl font-bold">
+                      {airLeakage?.current_value || 0.95}
+                    </div>
                   )}
                   <div className="text-[#031a82] text-2xl font-medium">ACH</div>
                 </div>
@@ -82,8 +95,13 @@ const ReportAirLeakageSectionACH = ({ isAdmin, airLeakage, onUpdateValue }: AirL
                 }}
               >
                 <div className="flex items-center">
-                  <InfoIcon className="h-5 w-5 mr-3 flex-shrink-0" style={{ color: "#031A82" }} />
-                  <span style={{ color: "#031A82" }}>BPI recommends the Air Changes per Hour be 0.35</span>
+                  <InfoIcon
+                    className="h-5 w-5 mr-3 flex-shrink-0"
+                    style={{ color: "#031A82" }}
+                  />
+                  <span style={{ color: "#031A82" }}>
+                    BPI recommends the Air Changes per Hour be 0.35
+                  </span>
                 </div>
               </div>
             </div>
@@ -100,27 +118,10 @@ const ReportAirLeakageSectionACH = ({ isAdmin, airLeakage, onUpdateValue }: AirL
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ReportAirLeakageSectionACH
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default ReportAirLeakageSectionACH;
 
 // import React from "react";
 // import { motion } from "framer-motion";

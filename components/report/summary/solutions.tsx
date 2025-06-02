@@ -1,24 +1,42 @@
-import { ReportData } from "@/app/admin/[bookingNumber]/report/page";
+import {
+  ReportData,
+  SolutionsAndRecommendationsData,
+} from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
 import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
-import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
+// import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
+import UnderstandingSolutions from "./understandingSolutions";
+import { motion } from "framer-motion";
+import NotesSection from "./LoremIpsumHeading";
+import { HouseImage } from "./concerns";
 
 interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
   reportData: ReportData;
   onUpdateValue?: (reportData: ReportData) => void;
+  houseImages: HouseImage[];
+  onUpdateImages?: (images: HouseImage[]) => void;
+  solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
 }
 const ReportSummarySolutionSection = ({
   isAdmin,
   reportData,
   onUpdateValue,
+  houseImages,
+  solutionsAndRecommendations,
 }: ReportSummarySolutionSectionProps) => {
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      id="summary-of-solutions"
+      className="container bg-[#eaeaea] space-y-8"
+    >
       {/* {isAdmin && (
         <div className="flex justify-end items-center mb-4">
           <button
@@ -43,59 +61,88 @@ const ReportSummarySolutionSection = ({
         }}
       /> */}
 
-      <ReportSummarySectionSolutionsAndRecommendations
+      {/* <NotesSection
         isAdmin={isAdmin}
-        solutionsAndRecommendations={reportData?.solutionsAndRecommendations}
-        onUpdateValue={(solutionsAndRecommendations) => {
+        notes={reportData?.notes}
+        onUpdateValue={(notes) => {
           if (onUpdateValue) {
             onUpdateValue({
               ...reportData,
-              solutionsAndRecommendations: solutionsAndRecommendations,
+              notes: notes,
             });
           }
         }}
-      />
+      /> */}
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <UnderstandingSolutions />
+      </div>
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <NotesSection
+          isAdmin={isAdmin}
+          houseImages={houseImages}
+          solutionsAndRecommendations={solutionsAndRecommendations}
+        />
+      </div>
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionSolutionsAndRecommendations
+          isAdmin={isAdmin}
+          solutionsAndRecommendations={reportData?.solutionsAndRecommendations}
+          onUpdateValue={(solutionsAndRecommendations) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                solutionsAndRecommendations: solutionsAndRecommendations,
+              });
+            }
+          }}
+        />
+      </div>
 
-      <ReportSummarySectionFutureUpgrades />
+      {/* <ReportSummarySectionFutureUpgrades /> */}
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionFinancialSummary
+          isAdmin={isAdmin}
+          financialSummary={reportData?.financialSummary}
+          onUpdateValue={(financialSummary) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                financialSummary: financialSummary,
+              });
+            }
+          }}
+        />
+      </div>
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionFederalTaxCredits
+          isAdmin={isAdmin}
+          federalTaxCredits={reportData?.federalTaxCredits}
+          onUpdateValue={(federalTaxCredits) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                federalTaxCredits: federalTaxCredits,
+              });
+            }
+          }}
+        />
+      </div>
 
-      <ReportSummarySectionEnvironmentalImpact
-        isAdmin={isAdmin}
-        environmentalImpact={reportData?.environmentalImpact}
-        onUpdateValue={(environmentalImpact) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              environmentalImpact: environmentalImpact,
-            });
-          }
-        }}
-      />
-
-      <ReportSummarySectionFinancialSummary
-        isAdmin={isAdmin}
-        financialSummary={reportData?.financialSummary}
-        onUpdateValue={(financialSummary) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              financialSummary: financialSummary,
-            });
-          }
-        }}
-      />
-
-      <ReportSummarySectionFederalTaxCredits
-        isAdmin={isAdmin}
-        federalTaxCredits={reportData?.federalTaxCredits}
-        onUpdateValue={(federalTaxCredits) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              federalTaxCredits: federalTaxCredits,
-            });
-          }
-        }}
-      />
+      {/* Environmental Impact Section - Without styled wrapper */}
+      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
+        <ReportSummarySectionEnvironmentalImpact
+          isAdmin={isAdmin}
+          environmentalImpact={reportData?.environmentalImpact}
+          onUpdateValue={(environmentalImpact) => {
+            if (onUpdateValue) {
+              onUpdateValue({
+                ...reportData,
+                environmentalImpact: environmentalImpact,
+              });
+            }
+          }}
+        />
+      </div>
 
       {/* Project Costs Section - Without styled wrapper */}
       {/* <motion.div
@@ -129,7 +176,7 @@ const ReportSummarySolutionSection = ({
           onUpdate={updateTaxCredits}
         />
       </motion.div> */}
-    </div>
+    </motion.div>
   );
 };
 

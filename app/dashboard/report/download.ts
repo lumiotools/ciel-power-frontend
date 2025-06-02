@@ -8,7 +8,9 @@ export type ReportSection =
   | "insulation"
   | "heating"
   | "cooling"
-  | "summary";
+  | "concerns"
+  | "solutions"
+  | "pearl-certification";
 
 // Report configuration interface
 export interface ReportConfig {
@@ -60,7 +62,11 @@ const switchToTab = async (tabName: string): Promise<void> => {
       await wait(800);
 
       // Add a small additional wait for more complex tabs that might need more time
-      if (tabName === "Insulation" || tabName === "Report Summary") {
+      if (
+        tabName === "Insulation" ||
+        tabName === "Concerns" ||
+        tabName === "Solutions"
+      ) {
         await wait(200);
       }
 
@@ -139,9 +145,11 @@ const getSectionColor = (section: string): string => {
       return "#256C68"; // teal-500
     case "heating":
     case "cooling":
-      return "#B18C2E"; // amber-500
-    case "summary":
-      return "#FF6700"; // orange-500
+      return "#d47c00"; // amber-500
+    case "concerns":
+      return "#FF6700";
+    case "solutions":
+      return "#67B502";
     default:
       return "#000000"; // black
   }
@@ -320,7 +328,7 @@ const addBookmark = (
 const formatSectionName = (section: string): string => {
   switch (section) {
     case "overview":
-      return "Overview";
+      return "Introduction";
     case "airLeakage":
     case "air-leakage":
       return "Air Leakage";
@@ -330,8 +338,10 @@ const formatSectionName = (section: string): string => {
       return "Heating Systems";
     case "cooling":
       return "Cooling Systems";
-    case "summary":
-      return "Report Summary";
+    case "concerns":
+      return "Concerns";
+    case "solutions":
+      return "Solutions";
     default:
       return section.charAt(0).toUpperCase() + section.slice(1);
   }
@@ -348,7 +358,8 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         "insulation",
         "heating",
         "cooling",
-        "summary",
+        "concerns",
+        "solutions",
       ],
       customFileName:
         config?.customFileName ||
@@ -482,13 +493,12 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         section: "overview" as ReportSection,
         tabName: "Introduction",
         pages: [
-          { ids: ["about-ciel-power", "goals-of-the-audit"] },
-          {
-            ids: [
-              "about-new-whole-home-energy-solutions-program",
-              "house-system",
-            ],
-          },
+          { ids: ["intro-header"] },
+          { ids: ["intro-about"] },
+          { ids: ["intro-achievements"] },
+          { ids: ["intro-sustainability"] },
+          { ids: ["intro-energy"] },
+          { ids: ["intro-science"] },
         ],
       },
 
@@ -546,7 +556,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         section: "solutions" as ReportSection,
         tabName: "Solutions",
         pages: [
-          { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
+          { ids: ["summary-of-solutions"] },
           { ids: ["future-solutions", "environmental-impact"] },
           { ids: ["project-costs", "tax-credits"] },
         ],

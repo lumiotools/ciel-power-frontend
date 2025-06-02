@@ -38,7 +38,7 @@ export function ReportImageViewer({
 
   if (!selectedImage) {
     return (
-      <div className="w-full aspect-video flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md">
+      <div className="w-full aspect-video flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md h-full">
         <ImagePlus className="h-12 w-12 text-gray-400 mb-2" />
 
         {allowSelection ? (

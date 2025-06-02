@@ -2,7 +2,10 @@ import { Plus, Scroll, Leaf } from "lucide-react";
 
 export default function GoalsSection() {
   return (
-    <section className="w-full mt-4 pb-4 px-4">
+    <section
+      className="bg-white max-h-fit p-8 w-full"
+      id="intro-header"
+    >
       <div className="w-full mx-auto">
         <h2 className="text-5xl font-bold text-[#818287] mb-10">Goals</h2>
 
