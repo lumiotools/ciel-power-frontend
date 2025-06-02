@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Card, CardContent } from "@/components/ui/card"
-import { Info, Plus, Snowflake } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Info, Snowflake, Zap } from "lucide-react"
 import { ReportImagePicker } from "../common/imagePicker"
 import { ReportImageViewer } from "../common/imageViewer"
 import type { HouseImage } from "../heating/card"
@@ -59,110 +59,102 @@ const AirConditioningAssessment = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="border border-gray-200 rounded-lg bg-white max-h-fit p-8"
+      className="bg-white max-h-fit p-8"
     >
-      <div className="mb-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <Snowflake className="h-8 w-8 text-[#d47c02]" />
-          <h2 className="text-xl font-bold text-[#d47c02]">
-            Air Conditioning Assessment
-          </h2>
-        </div>
+      <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+        <CardHeader className="bg-white py-4 px-5 border-b border-gray-100">
+          <CardTitle className="text-lg font-medium text-[#d47c02] flex items-center">
+            <Snowflake className="size-5 mr-2" />
+            <span className="flex-1 text-lg font-semibold">Air Conditioning Assessment</span>
+          </CardTitle>
+        </CardHeader>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left Content Area */}
-          <div className="lg:col-span-2">
-            <Card className="rounded-lg border-t border-gray-200 shadow-sm h-full">
-              <CardContent className="p-6">
-                <p className="text-gray-700 mb-6 text-lg leading-relaxed px-2.5">
-                  During your Home Energy Assessment, our technician closely
-                  examined your cooling equipment to determine the efficiency
-                  level of the system.
+        <CardContent className="py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Content Area */}
+            <div className="flex flex-col gap-6">
+              {/* Main Description Card */}
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <p className="text-gray-700 text-base leading-relaxed mb-6">
+                  During your Home Energy Assessment, our technician closely examined your cooling equipment to
+                  determine the efficiency level of the system.
                 </p>
 
                 <div className="flex items-start gap-3">
                   <Info className="h-5 w-5 flex-shrink-0 text-[#d47c02] mt-0.5" />
                   <div>
-                    <p className="text-base text-gray-700 leading-relaxed px-2.5">
-                      <span className="font-semibold text-[#d47c02]">
-                        SEER (Seasonal Energy Efficiency Ratio)
-                      </span>{" "}
-                      - A ratio of the cooling output during a typical cooling
-                      season with the total electric energy input during the
-                      same period.
+                    <p className="text-base text-gray-700 leading-relaxed">
+                      <span className="font-semibold text-[#d47c02]">SEER (Seasonal Energy Efficiency Ratio)</span> - A
+                      ratio of the cooling output during a typical cooling season with the total electric energy input
+                      during the same period.
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
 
-          {/* Right Image Areas */}
-          <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-              {imageSlots.map((image, index) => (
-                <div key={index} className="h-64">
-                  {image && image.id ? (
-                    <ReportImageViewer
-                      allowSelection={isAdmin}
-                      buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
-                      selectedImage={image}
-                      onOpenPicker={() => handleEditImage(index)}
-                      onDescriptionChange={(newDescription) => {
-                        // TODO: Implement description change logic
-                        console.log("Description changed:", newDescription);
-                      }}
-                    />
-                  ) : (
-                    <Card className="h-full border-2 border-dashed border-gray-300 hover:border-[#d47c02] transition-colors">
-                      {isAdmin ? (
-                        <button
-                          onClick={() => handleAddImage(index)}
-                          className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#d47c02] transition-colors"
-                        >
-                          <Plus className="h-12 w-12 mb-2" />
-                          <span className="text-sm font-medium">
-                            Add Assessment Image {index + 1}
-                          </span>
-                        </button>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                          <div className="w-24 h-16 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                            <div className="w-16 h-12 bg-gray-300 rounded"></div>
-                          </div>
-                          <span className="text-sm">
-                            Assessment Image {index + 1}
-                          </span>
-                        </div>
-                      )}
-                    </Card>
-                  )}
+              {/* Additional Info Card */}
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 mb-4">
+                  <Zap className="size-5 text-[#d47c02]" />
+                  <h3 className="text-lg font-semibold text-[#d47c02]">Assessment Details</h3>
                 </div>
-              ))}
+                <p className="text-gray-700 text-base leading-relaxed">
+                  Our comprehensive evaluation includes system age, condition, efficiency ratings, and potential upgrade
+                  recommendations to optimize your cooling performance and energy savings.
+                </p>
+              </div>
+            </div>
+
+            {/* Right Image Areas */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-semibold text-[#d47c02] mb-2">Assessment Images</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {imageSlots.map((image, index) => (
+                  <div key={index} className="h-64">
+                    {image && image.id ? (
+                      <ReportImageViewer
+                        allowSelection={isAdmin}
+                        buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
+                        selectedImage={image}
+                        onOpenPicker={() => handleEditImage(index)}
+                        onDescriptionChange={(description) => {
+                          if (onUpdateImages && image) {
+                            const updatedImages = [...selectedImages]
+                            updatedImages[index] = { ...image, description: description as string }
+                            onUpdateImages(updatedImages)
+                          }
+                        }}
+                      />
+                    ) : (
+                      <ReportImageViewer
+                        allowSelection={isAdmin}
+                        buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
+                        selectedImage={undefined}
+                        onOpenPicker={() => handleAddImage(index)}
+                        onDescriptionChange={() => {}}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Image Picker Dialog */}
       {isAdmin && (
         <ReportImagePicker
-          buttonClassName="bg-[#d47c02] hover:bg-[#B18C2E]/90"
+          buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
           images={houseImages}
-          selectedImage={
-            editingImageIndex !== null
-              ? selectedImages[editingImageIndex]?.id
-              : undefined
-          }
+          selectedImage={editingImageIndex !== null ? selectedImages[editingImageIndex]?.id : undefined}
           isOpen={isImagePickerOpen}
           onOpenChange={setIsImagePickerOpen}
           onSelectImage={handleSelectImage}
         />
       )}
     </motion.div>
-  );
+  )
 }
 
 export default AirConditioningAssessment
