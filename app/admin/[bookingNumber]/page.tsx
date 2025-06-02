@@ -591,7 +591,7 @@ export default function BookingDetailsPage({
     setImageError(null);
     try {
       const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/house-images`
+        `/api/admin/bookings/${bookingNumber}/pictures`
       );
 
       if (!response.ok) {
