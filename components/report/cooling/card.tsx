@@ -332,21 +332,17 @@ const ReportCoolingSectionCard = ({
               isOpen={isImagePickerOpen}
               onOpenChange={setIsImagePickerOpen}
               onSelectImage={(id) => {
-                const selected = houseImages.find((img) => img.id === id);
-                if (!selected) return;
                 onUpdateValue({
                   ...cooling,
                   images: cooling?.images?.[0]
                     ? [
                         {
                           ...cooling.images?.[0],
-                          ...selected,
                           id: id as string,
                         },
                       ]
                     : [
                         {
-                          ...selected,
                           id: id as string,
                         },
                       ],
