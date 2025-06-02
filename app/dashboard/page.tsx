@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useEffect, useState, useContext } from "react";
-import { AUTH_CONTEXT, type UserDetails } from "../../providers/auth";
-import { Clock, Loader2 } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import GoogleReview from "./_comp/Google-review";
-import Recommendation from "./_comp/Recommendation";
+import { useEffect, useState, useContext } from "react"
+import { AUTH_CONTEXT, type UserDetails } from "../../providers/auth"
+import { Clock, Loader2 } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+import GoogleReview from "./_comp/Google-review"
+import Recommendation from "./_comp/Recommendation"
 
 import {
   ClipboardList,
@@ -21,171 +21,161 @@ import {
   FileCheck,
   ListChecks,
   FileSpreadsheet,
-} from "lucide-react";
-import RescheduleModal from "@/components/component/reshedule-modal";
-import PaymentModal from "@/components/payment/modal";
-import { BOOKING_CONTEXT, type BookingDetails } from "@/providers/booking";
+} from "lucide-react"
+import RescheduleModal from "@/components/component/reshedule-modal"
+import PaymentModal from "@/components/payment/modal"
+import { BOOKING_CONTEXT, type BookingDetails } from "@/providers/booking"
 
 interface PaymentDetailsProps {
   PaymentDetails:
     | {
-        amount: number;
-        status: string;
+        amount: number
+        status: string
       }
-    | undefined;
-  userDetails: UserDetails | undefined;
-  onClick: () => void;
+    | undefined
+  userDetails: UserDetails | undefined
+  onClick: () => void
 }
 
 interface ProjectPlansReadyProps {
   ProposalDetails:
     | {
-        count: number;
-        completedContractLink: string;
+        count: number
+        completedContractLink: string
       }
-    | undefined;
+    | undefined
 }
 
 interface ReportConsultationProps {
   ReportConsultation:
     | {
-        consultationBookingUrl: string | null;
+        consultationBookingUrl: string | null
       }
-    | undefined;
+    | undefined
 }
 
 interface UtilityBillsProps {
   UtilityBillDetails:
     | {
-        count: number;
+        count: number
       }
-    | undefined;
+    | undefined
 }
 
 interface EnergyAuditProps {
   BookingDetails:
     | {
-        serviceName: string;
-        startTime: string;
-        endTime: string;
+        serviceName: string
+        startTime: string
+        endTime: string
         address: {
-          line1: string;
-          line2: string;
-          city: string;
-          province: string;
-          countryCode: string;
-          postalCode: string;
-        };
+          line1: string
+          line2: string
+          city: string
+          province: string
+          countryCode: string
+          postalCode: string
+        }
         auditor: {
-          name: string;
-        };
-        rescheduleAvailable: boolean;
+          name: string
+        }
+        rescheduleAvailable: boolean
       }
-    | undefined;
-  onClick: () => void;
+    | undefined
+  onClick: () => void
 }
 
 interface ConsultationDetailsProps {
   ConsultationDetails:
     | {
-        startTime: string;
-        endTime: string;
-        isCancelled: boolean;
-        rescheduleLink: string;
+        startTime: string
+        endTime: string
+        isCancelled: boolean
+        rescheduleLink: string
       }
-    | undefined;
+    | undefined
   BookingDetails:
     | {
-        startTime: string;
+        startTime: string
       }
-    | undefined;
-  onClick: () => void;
+    | undefined
+  onClick: () => void
 }
 
 interface TimelineItemProps {
-  state: keyof BookingDetails;
-  currentState: keyof BookingDetails | null;
-  bookingDetails: BookingDetails;
-  children: React.ReactNode;
+  state: keyof BookingDetails
+  currentState: keyof BookingDetails | null
+  bookingDetails: BookingDetails
+  children: React.ReactNode
 }
 
 const isOneAndHalfHourAhead = (startTime?: string): boolean => {
-  if (!startTime) return false;
-  const startDate = new Date(startTime);
-  const currentDate = new Date();
-  const diffInHours =
-    (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
-  console.log(diffInHours);
-  return diffInHours >= 1.5 || diffInHours < 0;
-};
+  if (!startTime) return false
+  const startDate = new Date(startTime)
+  const currentDate = new Date()
+  const diffInHours = (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60)
+  console.log(diffInHours)
+  return diffInHours >= 1.5 || diffInHours < 0
+}
 
 const formatDate = (dateStr?: string): string => {
-  if (!dateStr) return "";
-  const date = new Date(dateStr);
+  if (!dateStr) return ""
+  const date = new Date(dateStr)
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     weekday: "short",
     day: "numeric",
     timeZone: "UTC",
-  }).format(date);
-};
+  }).format(date)
+}
 
 const formatTime = (dateStr?: string): string => {
-  if (!dateStr) return "";
-  const date = new Date(dateStr);
+  if (!dateStr) return ""
+  const date = new Date(dateStr)
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "numeric",
     hour12: true,
     timeZone: "UTC",
-  }).format(date);
-};
+  }).format(date)
+}
 
 // Replace the shouldBeGreen function with this updated version
 const shouldBeGreen = (
   state: keyof BookingDetails,
   bookingDetails: BookingDetails,
-  latestState: keyof BookingDetails | null
+  latestState: keyof BookingDetails | null,
 ): boolean => {
   // Only the current/latest state should be green
-  return state === latestState;
-};
+  return state === latestState
+}
 
 // Update the TimelineItem component to pass latestState to shouldBeGreen
-const TimelineItem = ({
-  state,
-  currentState,
-  bookingDetails,
-  children,
-}: TimelineItemProps) => {
-  const isGreen = shouldBeGreen(state, bookingDetails, currentState);
-  const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white";
-  const borderColorClass = isGreen ? "border-[#7ab236]" : "border-gray-200";
+const TimelineItem = ({ state, currentState, bookingDetails, children }: TimelineItemProps) => {
+  const isGreen = shouldBeGreen(state, bookingDetails, currentState)
+  const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white"
+  const borderColorClass = isGreen ? "border-[#7ab236]" : "border-gray-200"
 
   return (
     <div className="timeline-item mb-6 relative">
-      <div
-        className={`${greenBgClass} rounded-lg p-6 border-2 ${borderColorClass}`}
-      >
-        {children}
-      </div>
+      <div className={`${greenBgClass} rounded-lg p-6 border-2 ${borderColorClass}`}>{children}</div>
     </div>
-  );
-};
+  )
+}
 
 export default function DashboardPage() {
-  const { isLoading, bookingDetails, recommendedVideos, refreshBookingData } =
-    useContext(BOOKING_CONTEXT);
+  const { isLoading, bookingDetails, recommendedVideos, refreshBookingData } = useContext(BOOKING_CONTEXT)
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false)
   // State to track if timeline is expanded or collapsed
-  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true)
   // State for reschedule modal
-  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
-  const [currentBookingId, setCurrentBookingId] = useState("");
-  const [latestState, setLatestState] = useState<keyof BookingDetails | null>(
-    null
-  );
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false)
+  const [currentBookingId, setCurrentBookingId] = useState("")
+  const [latestState, setLatestState] = useState<keyof BookingDetails | null>(null)
+  // State for profile image
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
+  const [profileImageLoading, setProfileImageLoading] = useState(true)
 
   const State: Array<keyof BookingDetails> = [
     "bookingDetails",
@@ -194,18 +184,48 @@ export default function DashboardPage() {
     "consultationDetails",
     "proposalDetails",
     "paymentDetails",
-  ];
+  ]
 
   // Toggle timeline expansion
   const toggleTimeline = () => {
-    setIsTimelineExpanded(!isTimelineExpanded);
-  };
+    setIsTimelineExpanded(!isTimelineExpanded)
+  }
+
+  const { userDetails } = useContext(AUTH_CONTEXT)
+
+  // Fetch profile image
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      if (!userDetails?.bookingNumber) {
+        setProfileImageLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/user/bookings/${userDetails.bookingNumber}/profile-image`)
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data.profileImage) {
+            // Construct the image URL using the API endpoint
+            setProfileImageUrl(`/api/user/bookings/${userDetails.bookingNumber}/pictures/${data.data.profileImage.id}`)
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching profile image:", error)
+      } finally {
+        setProfileImageLoading(false)
+      }
+    }
+
+    fetchProfileImage()
+  }, [userDetails?.bookingNumber])
 
   useEffect(() => {
     if (bookingDetails) {
       // Start from the end (latest state) and work backwards
       for (let i = State.length - 1; i >= 0; i--) {
-        const key = State[i];
+        const key = State[i]
 
         // Check if the property exists in bookingDetails
         if (bookingDetails[key]) {
@@ -214,166 +234,138 @@ export default function DashboardPage() {
             case "paymentDetails":
               // Only consider payment details if payment is in progress
               if (bookingDetails.paymentDetails) {
-                setLatestState(key);
-                return;
+                setLatestState(key)
+                return
               }
-              break;
+              break
 
             case "proposalDetails":
               // Consider proposal details if they exist
               if (bookingDetails.proposalDetails) {
-                setLatestState(key);
-                return;
+                setLatestState(key)
+                return
               }
-              break;
+              break
 
             case "consultationDetails":
               // Consider consultation details if not cancelled
-              if (
-                bookingDetails.consultationDetails &&
-                !bookingDetails.consultationDetails.isCancelled
-              ) {
-                setLatestState(key);
-                return;
+              if (bookingDetails.consultationDetails && !bookingDetails.consultationDetails.isCancelled) {
+                setLatestState(key)
+                return
               }
-              break;
+              break
 
             case "reportConsultation":
               // Consider report consultation if it exists
               if (bookingDetails.reportConsultation) {
-                setLatestState(key);
-                return;
+                setLatestState(key)
+                return
               }
-              break;
+              break
 
             case "utilityBillDetails":
               // Only consider utility bill details if count > 0
-              if (
-                bookingDetails.utilityBillDetails &&
-                bookingDetails.utilityBillDetails.count > 0
-              ) {
-                setLatestState(key);
-                return;
+              if (bookingDetails.utilityBillDetails && bookingDetails.utilityBillDetails.count > 0) {
+                setLatestState(key)
+                return
               }
-              break;
+              break
 
             case "bookingDetails":
               // This is the default first state
               if (bookingDetails.bookingDetails) {
-                setLatestState(key);
-                return;
+                setLatestState(key)
+                return
               }
-              break;
+              break
 
             default:
-              break;
+              break
           }
         }
       }
 
       // Default to booking details if nothing else matches
       if (bookingDetails.bookingDetails) {
-        setLatestState("bookingDetails");
+        setLatestState("bookingDetails")
       } else {
-        setLatestState(null);
+        setLatestState(null)
       }
     }
-  }, [bookingDetails]);
+  }, [bookingDetails])
 
   // Open reschedule modal
   const openRescheduleModal = (bookingId: string) => {
-    setCurrentBookingId(bookingId);
-    setIsRescheduleModalOpen(true);
-  };
+    setCurrentBookingId(bookingId)
+    setIsRescheduleModalOpen(true)
+  }
 
   // Handle reschedule confirmation
   const handleRescheduleConfirm = (date: Date, timeSlot: string) => {
-    console.log(
-      `Booking ${currentBookingId} rescheduled to ${date.toDateString()} at ${timeSlot}`
-    );
+    console.log(`Booking ${currentBookingId} rescheduled to ${date.toDateString()} at ${timeSlot}`)
     // In a real app, you would make an API call here
-  };
-
-  const { userDetails } = useContext(AUTH_CONTEXT);
+  }
 
   // Function to render the latest state component
   // Update the renderLatestStateComponent function to use the new shouldBeGreen logic
   const renderLatestStateComponent = () => {
-    if (!latestState || !bookingDetails) return null;
+    if (!latestState || !bookingDetails) return null
 
-    const isGreen = shouldBeGreen(latestState, bookingDetails, latestState);
-    const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white";
+    const isGreen = shouldBeGreen(latestState, bookingDetails, latestState)
+    const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white"
 
     switch (latestState) {
       case "paymentDetails":
         return bookingDetails?.paymentDetails ? (
-          <div
-            className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}
-          >
+          <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
             <PaymentDetails
               PaymentDetails={bookingDetails.paymentDetails}
               userDetails={userDetails}
               onClick={() => setIsModalOpen(true)}
             />
           </div>
-        ) : null;
+        ) : null
       case "proposalDetails":
         return bookingDetails?.proposalDetails ? (
-          <div
-            className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}
-          >
-            <ProjectPlansReady
-              ProposalDetails={bookingDetails.proposalDetails}
-            />
+          <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
+            <ProjectPlansReady ProposalDetails={bookingDetails.proposalDetails} />
           </div>
-        ) : null;
+        ) : null
       case "consultationDetails":
         return bookingDetails?.consultationDetails ? (
-          <div
-            className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}
-          >
+          <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
             <ConsultationDerails
               BookingDetails={bookingDetails.bookingDetails}
               ConsultationDetails={bookingDetails.consultationDetails}
               onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
             />
           </div>
-        ) : null;
+        ) : null
       case "reportConsultation":
         return bookingDetails?.reportConsultation ? (
-          <div
-            className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}
-          >
-            <ReportConsaltation
-              ReportConsultation={bookingDetails.reportConsultation}
-            />
+          <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
+            <ReportConsaltation ReportConsultation={bookingDetails.reportConsultation} />
           </div>
-        ) : null;
+        ) : null
       case "utilityBillDetails":
         return bookingDetails?.utilityBillDetails ? (
-          <div
-            className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}
-          >
-            <UtilityBills
-              UtilityBillDetails={bookingDetails.utilityBillDetails}
-            />
+          <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
+            <UtilityBills UtilityBillDetails={bookingDetails.utilityBillDetails} />
           </div>
-        ) : null;
+        ) : null
       case "bookingDetails":
         return bookingDetails?.bookingDetails ? (
-          <div
-            className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}
-          >
+          <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
             <EnergyAudit
               BookingDetails={bookingDetails.bookingDetails}
               onClick={() => openRescheduleModal("AUDIT-345678")}
             />
           </div>
-        ) : null;
+        ) : null
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   if (isLoading) {
     return (
@@ -383,7 +375,7 @@ export default function DashboardPage() {
           <p className="text-md text-gray-600">Loading dashboard...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -392,20 +384,20 @@ export default function DashboardPage() {
         {/* Main Content Container */}
         <div className="relative w-full h-64 md:h-80">
           <Image
-            src="/house-isolated-field.webp"
+            src={profileImageUrl || "/house-isolated-field.webp"}
             alt="Modern house with white walls and wooden accents"
             fill
             className="object-cover"
             priority
+            onError={() => {
+              // Fallback to default image if profile image fails to load
+              setProfileImageUrl(null)
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#ffffff4D] to-transparent"></div>
           <div className="absolute inset-0 flex flex-col justify-center">
-            <h1 className="text-4xl font-[800] text-gray-800 ml-8 md:ml-16">
-              Hi Fred!
-            </h1>
-            <p className="text-xl text-gray-700 ml-8 md:ml-16 mt-2 font-medium">
-              Welcome to your Dashboard
-            </p>
+            <h1 className="text-4xl font-[800] text-gray-800 ml-8 md:ml-16">Hi Fred!</h1>
+            <p className="text-xl text-gray-700 ml-8 md:ml-16 mt-2 font-medium">Welcome to your Dashboard</p>
           </div>
         </div>
         <div className="container mx-auto p-8">
@@ -417,15 +409,9 @@ export default function DashboardPage() {
               <button
                 onClick={toggleTimeline}
                 className="absolute -top-4 right-6 flex items-center justify-center w-8 h-8 rounded-full bg-white text-[#8bc34a] hover:bg-[#f5f9ed] transition-colors border border-[#e0f0d0] shadow-sm z-10"
-                aria-label={
-                  isTimelineExpanded ? "Collapse Timeline" : "Expand Timeline"
-                }
+                aria-label={isTimelineExpanded ? "Collapse Timeline" : "Expand Timeline"}
               >
-                {isTimelineExpanded ? (
-                  <ChevronUp size={20} />
-                ) : (
-                  <ChevronDown size={20} />
-                )}
+                {isTimelineExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
 
               <div className="timeline-container relative">
@@ -440,11 +426,7 @@ export default function DashboardPage() {
                   <div className="timeline-items-container">
                     {/* Payment Details */}
                     {bookingDetails?.paymentDetails && (
-                      <TimelineItem
-                        state="paymentDetails"
-                        currentState={latestState}
-                        bookingDetails={bookingDetails}
-                      >
+                      <TimelineItem state="paymentDetails" currentState={latestState} bookingDetails={bookingDetails}>
                         <PaymentDetails
                           PaymentDetails={bookingDetails?.paymentDetails}
                           userDetails={userDetails}
@@ -454,20 +436,12 @@ export default function DashboardPage() {
                     )}
                     {/* Project Plans Ready */}
                     {bookingDetails?.proposalDetails && (
-                      <TimelineItem
-                        state="proposalDetails"
-                        currentState={latestState}
-                        bookingDetails={bookingDetails}
-                      >
-                        <ProjectPlansReady
-                          ProposalDetails={bookingDetails?.proposalDetails}
-                        />
+                      <TimelineItem state="proposalDetails" currentState={latestState} bookingDetails={bookingDetails}>
+                        <ProjectPlansReady ProposalDetails={bookingDetails?.proposalDetails} />
                       </TimelineItem>
                     )}
                     {/* Timeline Item - We're Lining Everything Up */}
-                    {isOneAndHalfHourAhead(
-                      bookingDetails?.consultationDetails?.startTime
-                    ) && (
+                    {isOneAndHalfHourAhead(bookingDetails?.consultationDetails?.startTime) && (
                       <div className="timeline-item mb-6 relative">
                         <div className="bg-white rounded-lg p-6 border-2 border-gray-200">
                           <WeAreLinning />
@@ -483,12 +457,8 @@ export default function DashboardPage() {
                       >
                         <ConsultationDerails
                           BookingDetails={bookingDetails.bookingDetails}
-                          ConsultationDetails={
-                            bookingDetails.consultationDetails
-                          }
-                          onClick={() =>
-                            openRescheduleModal("AUDIT-RESULTS-123")
-                          }
+                          ConsultationDetails={bookingDetails.consultationDetails}
+                          onClick={() => openRescheduleModal("AUDIT-RESULTS-123")}
                         />
                       </TimelineItem>
                     )}
@@ -499,11 +469,7 @@ export default function DashboardPage() {
                         currentState={latestState}
                         bookingDetails={bookingDetails}
                       >
-                        <ReportConsaltation
-                          ReportConsultation={
-                            bookingDetails?.reportConsultation
-                          }
-                        />
+                        <ReportConsaltation ReportConsultation={bookingDetails?.reportConsultation} />
                       </TimelineItem>
                     )}
                     {/* Timeline Item - Upload Your Utility Bills */}
@@ -513,20 +479,12 @@ export default function DashboardPage() {
                         currentState={latestState}
                         bookingDetails={bookingDetails}
                       >
-                        <UtilityBills
-                          UtilityBillDetails={
-                            bookingDetails?.utilityBillDetails
-                          }
-                        />
+                        <UtilityBills UtilityBillDetails={bookingDetails?.utilityBillDetails} />
                       </TimelineItem>
                     )}
                     {/* Timeline Item - Professional Home Energy Audit */}
                     {bookingDetails?.bookingDetails && (
-                      <TimelineItem
-                        state="bookingDetails"
-                        currentState={latestState}
-                        bookingDetails={bookingDetails}
-                      >
+                      <TimelineItem state="bookingDetails" currentState={latestState} bookingDetails={bookingDetails}>
                         <EnergyAudit
                           BookingDetails={bookingDetails?.bookingDetails}
                           onClick={() => openRescheduleModal("AUDIT-345678")}
@@ -549,8 +507,8 @@ export default function DashboardPage() {
               <PaymentModal
                 isOpen={isModalOpen}
                 onClose={() => {
-                  setIsModalOpen(false);
-                  refreshBookingData();
+                  setIsModalOpen(false)
+                  refreshBookingData()
                 }}
                 bookingNumber={userDetails?.bookingNumber}
               />
@@ -558,24 +516,18 @@ export default function DashboardPage() {
           </div>
 
           {/* Recommended for you */}
-          {recommendedVideos && recommendedVideos.length > 0 && (
-            <Recommendation data={recommendedVideos} />
-          )}
+          {recommendedVideos && recommendedVideos.length > 0 && <Recommendation data={recommendedVideos} />}
 
           {/* Google review */}
           <GoogleReview />
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-const PaymentDetails = ({
-  PaymentDetails,
-  userDetails,
-  onClick,
-}: PaymentDetailsProps) => {
-  if (!PaymentDetails) return null;
+const PaymentDetails = ({ PaymentDetails, userDetails, onClick }: PaymentDetailsProps) => {
+  if (!PaymentDetails) return null
   return (
     <>
       <div className="flex items-center mb-4">
@@ -599,9 +551,8 @@ const PaymentDetails = ({
         <div className="font-bold text-xl">One Last Thing!</div>
       </div>
       <p className="text-gray-600 mb-4">
-        To finalize your project and secure your installation dates, please
-        complete the payment for your selected upgrades. Your investment in
-        energy efficiency is just a click away.
+        To finalize your project and secure your installation dates, please complete the payment for your selected
+        upgrades. Your investment in energy efficiency is just a click away.
       </p>
       <div className="mb-4">
         <div className="flex items-start p-3 bg-[#f5f9ed] rounded-md">
@@ -623,9 +574,7 @@ const PaymentDetails = ({
           <div className="flex-1">
             <div className="flex justify-between items-center">
               <div className="font-medium">Total amount</div>
-              <div className="text-gray-700 text-sm">
-                ${PaymentDetails?.amount}
-              </div>
+              <div className="text-gray-700 text-sm">${PaymentDetails?.amount}</div>
             </div>
           </div>
         </div>
@@ -646,23 +595,19 @@ const PaymentDetails = ({
       </div>
       <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
         <a href="/dashboard/one-last-thing">
-          <button className="text-[#007BFF] text-sm font-medium">
-            View Details
-          </button>
+          <button className="text-[#007BFF] text-sm font-medium">View Details</button>
         </a>
         <div className="flex items-center gap-1 ml-auto">
           <span className="font-medium">Status:</span>
-          <span className="text-[#8bc34a] font-medium">
-            {PaymentDetails?.status}
-          </span>
+          <span className="text-[#8bc34a] font-medium">{PaymentDetails?.status}</span>
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
 const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
-  if (!ProposalDetails) return null;
+  if (!ProposalDetails) return null
   return (
     <>
       <div className="flex items-center mb-4">
@@ -690,13 +635,11 @@ const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
         </div>
       </div>
       <Link href="/dashboard/project-plans-ready">
-        <button className="text-[#007BFF] text-sm font-medium">
-          View Details
-        </button>
+        <button className="text-[#007BFF] text-sm font-medium">View Details</button>
       </Link>
     </>
-  );
-};
+  )
+}
 
 const WeAreLinning = () => {
   return (
@@ -707,8 +650,8 @@ const WeAreLinning = () => {
       </div>
 
       <p className="text-gray-600 mb-4">
-        We&apos;re wrapping up final details and approvals. Installation will be
-        scheduled soon, and we&apos;ll keep you informed along the way.
+        We&apos;re wrapping up final details and approvals. Installation will be scheduled soon, and we&apos;ll keep you
+        informed along the way.
       </p>
 
       <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
@@ -718,18 +661,13 @@ const WeAreLinning = () => {
         </div>
       </div>
       <Link href="/dashboard/lining-everything-up">
-        <button className="text-[#007BFF] text-sm font-medium">
-          View Details
-        </button>
+        <button className="text-[#007BFF] text-sm font-medium">View Details</button>
       </Link>
     </>
-  );
-};
+  )
+}
 
-const ConsultationDerails = ({
-  ConsultationDetails,
-  BookingDetails,
-}: ConsultationDetailsProps) => {
+const ConsultationDerails = ({ ConsultationDetails, BookingDetails }: ConsultationDetailsProps) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
@@ -737,8 +675,7 @@ const ConsultationDerails = ({
           <FileCheck size={24} className="text-[#8bc34a] mr-2" />
           <div className="font-bold text-xl">Your Audit Results are in</div>
         </div>
-        {!isOneAndHalfHourAhead(BookingDetails?.startTime) &&
-        ConsultationDetails?.rescheduleLink ? (
+        {!isOneAndHalfHourAhead(BookingDetails?.startTime) && ConsultationDetails?.rescheduleLink ? (
           <Link
             href={ConsultationDetails?.rescheduleLink}
             target="_blank"
@@ -750,10 +687,7 @@ const ConsultationDerails = ({
           </Link>
         ) : (
           <button
-            disabled={Boolean(
-              isOneAndHalfHourAhead(BookingDetails?.startTime) &&
-                ConsultationDetails?.rescheduleLink
-            )}
+            disabled={Boolean(isOneAndHalfHourAhead(BookingDetails?.startTime) && ConsultationDetails?.rescheduleLink)}
             className={`pointer-events-none opacity-35 bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
           >
             <Clock size={18} />
@@ -763,10 +697,9 @@ const ConsultationDerails = ({
       </div>
 
       <p className="text-gray-600 mb-4">
-        Your comprehensive home energy report is now available. Review your
-        project plan and sign the contracts to proceed. All necessary documents,
-        including your detailed report with findings, recommendations, and
-        potential savings calculations are available for your review.
+        Your comprehensive home energy report is now available. Review your project plan and sign the contracts to
+        proceed. All necessary documents, including your detailed report with findings, recommendations, and potential
+        savings calculations are available for your review.
       </p>
 
       <div className="mb-4">
@@ -800,25 +733,19 @@ const ConsultationDerails = ({
         </div>
       </div>
       <Link href="/dashboard/audit-results">
-        <button className="text-[#007BFF] text-sm font-medium">
-          View Details
-        </button>
+        <button className="text-[#007BFF] text-sm font-medium">View Details</button>
       </Link>
     </>
-  );
-};
+  )
+}
 
-const ReportConsaltation = ({
-  ReportConsultation,
-}: ReportConsultationProps) => {
+const ReportConsaltation = ({ ReportConsultation }: ReportConsultationProps) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <FileSpreadsheet size={24} className="text-[#8bc34a] mr-2" />
-          <div className="font-bold text-xl">
-            Your Results Are In — Let&apos;s Talk
-          </div>
+          <div className="font-bold text-xl">Your Results Are In — Let&apos;s Talk</div>
         </div>
         <div className="flex gap-3 items-center">
           {ReportConsultation?.consultationBookingUrl ? (
@@ -843,10 +770,9 @@ const ReportConsaltation = ({
       </div>
 
       <p className="text-gray-600 mb-4">
-        We&apos;ve completed your audit and reviewed your home&apos;s
-        performance. Now it&apos;s time to schedule a consultation with your
-        Ciel Home Performance Consultant to walk through the findings and talk
-        about what&apos;s next.
+        We&apos;ve completed your audit and reviewed your home&apos;s performance. Now it&apos;s time to schedule a
+        consultation with your Ciel Home Performance Consultant to walk through the findings and talk about what&apos;s
+        next.
       </p>
 
       <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
@@ -856,13 +782,11 @@ const ReportConsaltation = ({
         </div>
       </div>
       <Link href="/dashboard/results-lets-talk">
-        <button className="text-[#007BFF] text-sm font-medium">
-          View Details
-        </button>
+        <button className="text-[#007BFF] text-sm font-medium">View Details</button>
       </Link>
     </>
-  );
-};
+  )
+}
 
 const UtilityBills = ({ UtilityBillDetails }: UtilityBillsProps) => {
   return (
@@ -873,10 +797,8 @@ const UtilityBills = ({ UtilityBillDetails }: UtilityBillsProps) => {
       </div>
 
       <p className="text-gray-600 mb-4">
-        Refer to the Document Portal on the sidebar to upload your Utility
-        Bills, our auditor will review this next. Sharing your utility bills
-        helps us analyze your energy usage patterns and identify potential
-        savings.
+        Refer to the Document Portal on the sidebar to upload your Utility Bills, our auditor will review this next.
+        Sharing your utility bills helps us analyze your energy usage patterns and identify potential savings.
       </p>
 
       <div className="flex justify-between items-center">
@@ -891,9 +813,7 @@ const UtilityBills = ({ UtilityBillDetails }: UtilityBillsProps) => {
           <div className="flex items-center gap-1">
             <span className="font-medium">Status:</span>
             <span className="text-[#8bc34a] font-medium">
-              {UtilityBillDetails && UtilityBillDetails.count > 0
-                ? "Completed"
-                : "Pending"}
+              {UtilityBillDetails && UtilityBillDetails.count > 0 ? "Completed" : "Pending"}
             </span>
           </div>
         </div>
@@ -901,14 +821,12 @@ const UtilityBills = ({ UtilityBillDetails }: UtilityBillsProps) => {
 
       <div className="mt-4">
         <Link href="/dashboard/utility-bills-details">
-          <button className="text-[#007BFF] text-sm font-medium">
-            View Details
-          </button>
+          <button className="text-[#007BFF] text-sm font-medium">View Details</button>
         </Link>
       </div>
     </>
-  );
-};
+  )
+}
 
 const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
   return (
@@ -917,14 +835,9 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
         <div className="flex items-center">
           <ListChecks size={24} className="text-[#8bc34a] mr-2" />
           <div>
-            <div className="font-bold text-xl">
-              Professional Home Energy Audit
-            </div>
+            <div className="font-bold text-xl">Professional Home Energy Audit</div>
             <div className="text-sm text-gray-500">
-              Auditor Assigned:{" "}
-              <span className="text-[#8bc34a] font-medium">
-                {BookingDetails?.auditor?.name}
-              </span>
+              Auditor Assigned: <span className="text-[#8bc34a] font-medium">{BookingDetails?.auditor?.name}</span>
             </div>
           </div>
         </div>
@@ -941,9 +854,8 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
       </div>
 
       <p className="text-gray-600 mb-4">
-        We&apos;re preparing for an in-home visit to evaluate how your home uses
-        energy. Your Ciel Home Energy Auditor will collect important details to
-        help us understand how your home is performing.
+        We&apos;re preparing for an in-home visit to evaluate how your home uses energy. Your Ciel Home Energy Auditor
+        will collect important details to help us understand how your home is performing.
       </p>
 
       <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 mb-2">
@@ -957,36 +869,12 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
         </div>
         <div className="flex items-center gap-1">
           <MapPin size={16} className="text-[#8bc34a]" />
-          <span>
-            {!!BookingDetails?.address?.line1
-              ? `${BookingDetails?.address?.line1},`
-              : ""}
-          </span>
-          <span>
-            {!!BookingDetails?.address?.line2
-              ? `${BookingDetails?.address?.line2},`
-              : ""}
-          </span>
-          <span>
-            {!!BookingDetails?.address?.city
-              ? `${BookingDetails?.address?.city},`
-              : ""}
-          </span>
-          <span>
-            {!!BookingDetails?.address?.province
-              ? `${BookingDetails?.address?.province},`
-              : ""}
-          </span>
-          <span>
-            {!!BookingDetails?.address?.countryCode
-              ? `${BookingDetails?.address?.countryCode}`
-              : ""}
-          </span>
-          <span>
-            {!!BookingDetails?.address?.postalCode
-              ? `${BookingDetails?.address?.postalCode}`
-              : ""}
-          </span>
+          <span>{!!BookingDetails?.address?.line1 ? `${BookingDetails?.address?.line1},` : ""}</span>
+          <span>{!!BookingDetails?.address?.line2 ? `${BookingDetails?.address?.line2},` : ""}</span>
+          <span>{!!BookingDetails?.address?.city ? `${BookingDetails?.address?.city},` : ""}</span>
+          <span>{!!BookingDetails?.address?.province ? `${BookingDetails?.address?.province},` : ""}</span>
+          <span>{!!BookingDetails?.address?.countryCode ? `${BookingDetails?.address?.countryCode}` : ""}</span>
+          <span>{!!BookingDetails?.address?.postalCode ? `${BookingDetails?.address?.postalCode}` : ""}</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="font-medium">Status:</span>
@@ -995,10 +883,8 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
       </div>
 
       <Link href="/dashboard/audit-details">
-        <button className="text-[#007BFF] text-sm font-medium">
-          View Details
-        </button>
+        <button className="text-[#007BFF] text-sm font-medium">View Details</button>
       </Link>
     </>
-  );
-};
+  )
+}

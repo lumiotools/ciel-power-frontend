@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { STAGE_LABELS } from "@/constants/booking-stages";
-import { formatDate } from "@/utils/booking-utils";
+import { useState, useEffect, use } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { AdminHeader } from "@/components/admin/AdminHeader"
+import { STAGE_LABELS } from "@/constants/booking-stages"
+import { formatDate } from "@/utils/booking-utils"
 import {
   ExternalLink,
   FolderOpen,
@@ -23,373 +23,343 @@ import {
   Eye,
   Trash2,
   Plus,
-} from "lucide-react";
-import type { Booking, ContractDoc, Recipient } from "@/types/admin";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Link from "next/link";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ReportImagePicker } from "../../../components/report/common/imagePicker";
-import { ReportImageViewer } from "../../../components/report/common/imageViewer";
-import type { HouseImage } from "../../../components/report/heating/card";
+  User,
+} from "lucide-react"
+import type { Booking, ContractDoc, Recipient } from "@/types/admin"
+import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ReportImagePicker } from "../../../components/report/common/imagePicker"
+import { ReportImageViewer } from "../../../components/report/common/imageViewer"
+
+// Define the HouseImage interface based on the provided sample
+export interface HouseImage {
+  mimeType: string
+  thumbnailLink: string
+  size: string
+  id: string
+  name: string
+  description: string
+  createdTime: string
+  modifiedTime: string
+  link: string
+}
 
 interface BookingDetailsResponse {
-  success: boolean;
-  message: string;
+  success: boolean
+  message: string
   data: {
-    booking: Booking;
+    booking: Booking
     report: {
-      url: string;
-      data: object;
-      displayReport: string;
-    } | null;
-    offeredContracts: OfferedContract[] | null;
-    completedContractLink: string | null;
+      url: string
+      data: object
+      displayReport: string
+    } | null
+    offeredContracts: OfferedContract[] | null
+    completedContractLink: string | null
     payment: {
-      amount: number;
-      currency: string;
-      status: string;
-      updated_at: string;
-    } | null;
-  };
+      amount: number
+      currency: string
+      status: string
+      updated_at: string
+    } | null
+    profileImage?: HouseImage | null
+  }
 }
 
 interface OfferedContract {
-  id: string;
-  name: string;
-  status: string;
-  displayContract: boolean;
-  customerRecipient: string;
-  cielPowerRepresentativeRecipient: string;
-  accepted: boolean;
-  link: string;
-  created_at: string;
-  updated_at: string;
+  id: string
+  name: string
+  status: string
+  displayContract: boolean
+  customerRecipient: string
+  cielPowerRepresentativeRecipient: string
+  accepted: boolean
+  link: string
+  created_at: string
+  updated_at: string
 }
 
 interface ContractSearchResponse {
-  success: boolean;
-  message: string;
+  success: boolean
+  message: string
   data: {
-    docs: ContractDoc[];
-  };
+    docs: ContractDoc[]
+  }
 }
 
 export default function BookingDetailsPage({
   params,
 }: {
-  params: Promise<{ bookingNumber: string }>;
+  params: Promise<{ bookingNumber: string }>
 }) {
   // Unwrap the params Promise using React.use()
-  const unwrappedParams = use(params);
-  const bookingNumber = unwrappedParams.bookingNumber;
+  const unwrappedParams = use(params)
+  const bookingNumber = unwrappedParams.bookingNumber
 
-  const router = useRouter();
-  const [booking, setBooking] = useState<Booking | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [reportUrl, setReportUrl] = useState("");
-  const [reportData, setReportData] = useState<Object | null>(null);
-  const [reportStatus, setReportStatus] = useState("NONE");
-  const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
-    []
-  );
-  const [completedContractFileUrl, setCompletedContractFileUrl] = useState<
-    string | null
-  >(null);
-  const [hasReportChanges, setHasReportChanges] = useState(false);
+  const router = useRouter()
+  const [booking, setBooking] = useState<Booking | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [reportUrl, setReportUrl] = useState("")
+  const [reportData, setReportData] = useState<Object | null>(null)
+  const [reportStatus, setReportStatus] = useState("NONE")
+  const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>([])
+  const [completedContractFileUrl, setCompletedContractFileUrl] = useState<string | null>(null)
+  const [hasReportChanges, setHasReportChanges] = useState(false)
 
   // Profile picture management states
-  const [isProfileImagePickerOpen, setIsProfileImagePickerOpen] =
-    useState(false);
-  const [selectedProfileImage, setSelectedProfileImage] =
-    useState<HouseImage | null>(null);
-  const [houseImages, setHouseImages] = useState<HouseImage[]>([]);
-  const [isLoadingHouseImages, setIsLoadingHouseImages] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
+  const [isProfileImagePickerOpen, setIsProfileImagePickerOpen] = useState(false)
+  const [selectedProfileImage, setSelectedProfileImage] = useState<HouseImage | null>(null)
+  const [houseImages, setHouseImages] = useState<HouseImage[]>([])
+  const [isLoadingHouseImages, setIsLoadingHouseImages] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const [isSavingProfileImage, setIsSavingProfileImage] = useState(false)
 
   // Separate loading states for different actions
-  const [isSavingReport, setIsSavingReport] = useState(false);
-  const [isTogglingContract, setIsTogglingContract] = useState<string | null>(
-    null
-  );
-  const [isRemovingContract, setIsRemovingContract] = useState<string | null>(
-    null
-  );
-  const [isAttachingContract, setIsAttachingContract] = useState(false);
+  const [isSavingReport, setIsSavingReport] = useState(false)
+  const [isTogglingContract, setIsTogglingContract] = useState<string | null>(null)
+  const [isRemovingContract, setIsRemovingContract] = useState<string | null>(null)
+  const [isAttachingContract, setIsAttachingContract] = useState(false)
 
-  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-  const [previewContractId, setPreviewContractId] = useState("");
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false)
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
+  const [previewContractId, setPreviewContractId] = useState("")
 
   // Contract search states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<ContractDoc[]>([]);
-  const [selectedContract, setSelectedContract] = useState<ContractDoc | null>(
-    null
-  );
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<ContractDoc[]>([])
+  const [selectedContract, setSelectedContract] = useState<ContractDoc | null>(null)
 
-  const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [loadingRecipients, setLoadingRecipients] = useState(false);
-  const [selectedCustomerRecipientId, setSelectedCustomerRecipientId] =
-    useState("");
-  const [
-    selectedRepresentativeRecipientId,
-    setSelectedRepresentativeRecipientId,
-  ] = useState("");
+  const [recipients, setRecipients] = useState<Recipient[]>([])
+  const [loadingRecipients, setLoadingRecipients] = useState(false)
+  const [selectedCustomerRecipientId, setSelectedCustomerRecipientId] = useState("")
+  const [selectedRepresentativeRecipientId, setSelectedRepresentativeRecipientId] = useState("")
 
-  const [isIframeLoading, setIsIframeLoading] = useState(true);
+  const [isIframeLoading, setIsIframeLoading] = useState(true)
 
   const [payment, setPayment] = useState<{
-    amount: number;
-    currency: string;
-    status: string;
-    updated_at: string;
-  } | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState<string>("");
-  const [isAddingPayment, setIsAddingPayment] = useState(false);
-  const [isDeletingPayment, setIsDeletingPayment] = useState(false);
+    amount: number
+    currency: string
+    status: string
+    updated_at: string
+  } | null>(null)
+  const [paymentAmount, setPaymentAmount] = useState<string>("")
+  const [isAddingPayment, setIsAddingPayment] = useState(false)
+  const [isDeletingPayment, setIsDeletingPayment] = useState(false)
 
   useEffect(() => {
     if (bookingNumber) {
-      fetchBookingDetails();
+      fetchBookingDetails()
     }
-  }, [bookingNumber]);
+  }, [bookingNumber])
 
   useEffect(() => {
-    setHasReportChanges(true);
-  }, [reportUrl, reportStatus]);
+    setHasReportChanges(true)
+  }, [reportUrl, reportStatus])
 
   const fetchBookingDetails = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const response = await fetch(`/api/admin/bookings/${bookingNumber}`);
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}`)
 
       if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.detail || "Failed to fetch booking details");
-        router.push("/admin");
-        return;
+        const errorData = await response.json()
+        toast.error(errorData.detail || "Failed to fetch booking details")
+        router.push("/admin")
+        return
       }
 
-      const data: BookingDetailsResponse = await response.json();
+      const data: BookingDetailsResponse = await response.json()
 
       if (data.success) {
-        setBooking(data.data.booking);
+        setBooking(data.data.booking)
         // Handle report data if available
-        sessionStorage.setItem(
-          "bookingData",
-          JSON.stringify(data.data.booking)
-        );
+        sessionStorage.setItem("bookingData", JSON.stringify(data.data.booking))
         if (data.data.report) {
-          setReportData(data.data.report.data || null);
-          setReportUrl(data.data.report.url || "");
-          setReportStatus(data.data.report.displayReport ?? "NONE");
+          setReportData(data.data.report.data || null)
+          setReportUrl(data.data.report.url || "")
+          setReportStatus(data.data.report.displayReport ?? "NONE")
           setTimeout(() => {
-            setHasReportChanges(false);
-          }, 500);
+            setHasReportChanges(false)
+          }, 500)
         } else {
-          setReportData(null);
-          setReportUrl("");
-          setReportStatus("NONE");
+          setReportData(null)
+          setReportUrl("")
+          setReportStatus("NONE")
+        }
+
+        // Handle profile image if available
+        if (data.data.profileImage) {
+          setSelectedProfileImage(data.data.profileImage)
         }
 
         // Handle offered contracts
         if (data.data.offeredContracts) {
-          setOfferedContracts(data.data.offeredContracts);
+          setOfferedContracts(data.data.offeredContracts)
           // Store in sessionStorage for quick access
-          sessionStorage.setItem(
-            "offeredContracts",
-            JSON.stringify(data.data.offeredContracts)
-          );
+          sessionStorage.setItem("offeredContracts", JSON.stringify(data.data.offeredContracts))
         } else {
-          setOfferedContracts([]);
-          sessionStorage.removeItem("offeredContracts");
+          setOfferedContracts([])
+          sessionStorage.removeItem("offeredContracts")
         }
         if (data.data.completedContractLink) {
-          setCompletedContractFileUrl(data.data.completedContractLink);
+          setCompletedContractFileUrl(data.data.completedContractLink)
         }
         if (data.data.payment) {
-          setPayment(data.data.payment);
+          setPayment(data.data.payment)
         } else {
-          setPayment(null);
+          setPayment(null)
         }
       } else {
-        toast.error(data.message || "Failed to fetch booking details");
-        router.push("/admin");
+        toast.error(data.message || "Failed to fetch booking details")
+        router.push("/admin")
       }
     } catch (error) {
-      console.error("Error fetching booking details:", error);
-      toast.error("An error occurred while fetching booking details");
-      router.push("/admin");
+      console.error("Error fetching booking details:", error)
+      toast.error("An error occurred while fetching booking details")
+      router.push("/admin")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleSearchContracts = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+    if (e) e.preventDefault()
 
     if (!searchQuery.trim()) {
-      toast.error("Please enter a search term");
-      return;
+      toast.error("Please enter a search term")
+      return
     }
 
-    setIsSearching(true);
-    setSearchResults([]);
+    setIsSearching(true)
+    setSearchResults([])
 
     try {
-      const response = await fetch(
-        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`
-      );
+      const response = await fetch(`/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`)
 
       if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to search contracts");
-        return;
+        const errorData = await response.json()
+        toast.error(errorData.message || "Failed to search contracts")
+        return
       }
 
-      const data: ContractSearchResponse = await response.json();
+      const data: ContractSearchResponse = await response.json()
 
       if (data.success) {
-        setSearchResults(data.data.docs);
+        setSearchResults(data.data.docs)
       } else {
-        toast.error(data.message || "Failed to search contracts");
+        toast.error(data.message || "Failed to search contracts")
       }
     } catch (error) {
-      console.error("Error searching contracts:", error);
-      toast.error("An error occurred while searching contracts");
+      console.error("Error searching contracts:", error)
+      toast.error("An error occurred while searching contracts")
     } finally {
-      setIsSearching(false);
+      setIsSearching(false)
     }
-  };
+  }
 
   const fetchRecipients = async (contractId: string) => {
-    setLoadingRecipients(true);
-    setRecipients([]);
+    setLoadingRecipients(true)
+    setRecipients([])
 
     try {
-      const response = await fetch(
-        `/api/admin/search/contracts/${contractId}/recipients`
-      );
+      const response = await fetch(`/api/admin/search/contracts/${contractId}/recipients`)
 
       if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to fetch recipients");
-        return;
+        const errorData = await response.json()
+        toast.error(errorData.message || "Failed to fetch recipients")
+        return
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        setRecipients(data.data.recipients);
+        setRecipients(data.data.recipients)
       } else {
-        toast.error(data.message || "Failed to fetch recipients");
+        toast.error(data.message || "Failed to fetch recipients")
       }
     } catch (error) {
-      console.error("Error fetching recipients:", error);
-      toast.error("An error occurred while fetching recipients");
+      console.error("Error fetching recipients:", error)
+      toast.error("An error occurred while fetching recipients")
     } finally {
-      setLoadingRecipients(false);
+      setLoadingRecipients(false)
     }
-  };
+  }
 
   const handleSelectContract = (contract: ContractDoc) => {
-    setSelectedContract(contract);
+    setSelectedContract(contract)
     // Reset the recipient selections
-    setSelectedCustomerRecipientId("");
-    setSelectedRepresentativeRecipientId("");
+    setSelectedCustomerRecipientId("")
+    setSelectedRepresentativeRecipientId("")
 
     // Fetch recipients for this contract
-    fetchRecipients(contract.id);
-  };
+    fetchRecipients(contract.id)
+  }
 
   const handleAttachContract = async () => {
     if (!selectedContract) {
-      toast.error("Please select a contract");
-      return;
+      toast.error("Please select a contract")
+      return
     }
 
     if (!selectedCustomerRecipientId) {
-      toast.error("Please select a customer recipient");
-      return;
+      toast.error("Please select a customer recipient")
+      return
     }
 
     if (!selectedRepresentativeRecipientId) {
-      toast.error("Please select a Ciel Power representative");
-      return;
+      toast.error("Please select a Ciel Power representative")
+      return
     }
 
-    setIsAttachingContract(true);
+    setIsAttachingContract(true)
 
     try {
       const contractData = {
         id: selectedContract.id,
         customerRecipientId: selectedCustomerRecipientId,
         cielPowerRepresentativeRecipientId: selectedRepresentativeRecipientId,
-      };
+      }
 
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/contract`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(contractData),
-        }
-      );
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/contract`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contractData),
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        toast.success("Contract attached successfully");
+        toast.success("Contract attached successfully")
         // Close the modal and reset form
-        setIsContractModalOpen(false);
-        setSelectedContract(null);
-        setSelectedCustomerRecipientId("");
-        setSelectedRepresentativeRecipientId("");
-        setSearchQuery("");
-        setSearchResults([]);
+        setIsContractModalOpen(false)
+        setSelectedContract(null)
+        setSelectedCustomerRecipientId("")
+        setSelectedRepresentativeRecipientId("")
+        setSearchQuery("")
+        setSearchResults([])
         // Refresh booking details to get the updated contract
-        fetchBookingDetails();
+        fetchBookingDetails()
       } else {
-        toast.error(data.message || "Failed to attach contract");
+        toast.error(data.message || "Failed to attach contract")
       }
     } catch (error) {
-      console.error("Error attaching contract:", error);
-      toast.error("An error occurred while attaching the contract");
+      console.error("Error attaching contract:", error)
+      toast.error("An error occurred while attaching the contract")
     } finally {
-      setIsAttachingContract(false);
+      setIsAttachingContract(false)
     }
-  };
+  }
 
-  const handleToggleContractDisplay = async (
-    contractId: string,
-    display: boolean
-  ) => {
-    setIsTogglingContract(contractId);
+  const handleToggleContractDisplay = async (contractId: string, display: boolean) => {
+    setIsTogglingContract(contractId)
     try {
       const response = await fetch(
         `/api/admin/bookings/${bookingNumber}/contract/${contractId}/toggle?displayContract=${display}`,
@@ -398,279 +368,262 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-        }
-      );
+        },
+      )
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        toast.success("Contract display toggled successfully");
+        toast.success("Contract display toggled successfully")
         // Update the local state to reflect the change
         setOfferedContracts((prevContracts) =>
           prevContracts.map((contract) =>
-            contract.id === contractId
-              ? { ...contract, displayContract: display }
-              : contract
-          )
-        );
+            contract.id === contractId ? { ...contract, displayContract: display } : contract,
+          ),
+        )
       } else {
-        toast.error(data.message || "Failed to toggle contract display");
+        toast.error(data.message || "Failed to toggle contract display")
       }
     } catch (error) {
-      console.error("Error toggling contract display:", error);
-      toast.error("An error occurred while toggling contract display");
+      console.error("Error toggling contract display:", error)
+      toast.error("An error occurred while toggling contract display")
     } finally {
-      setIsTogglingContract(null);
+      setIsTogglingContract(null)
     }
-  };
+  }
 
   const handleRemoveContract = async (contractId: string) => {
     if (!confirm("Are you sure you want to remove this contract?")) {
-      return;
+      return
     }
 
-    setIsRemovingContract(contractId);
+    setIsRemovingContract(contractId)
     try {
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/contract/${contractId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/contract/${contractId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        toast.success("Contract removed successfully");
+        toast.success("Contract removed successfully")
         // Remove the contract from the local state
-        setOfferedContracts((prevContracts) =>
-          prevContracts.filter((contract) => contract.id !== contractId)
-        );
+        setOfferedContracts((prevContracts) => prevContracts.filter((contract) => contract.id !== contractId))
       } else {
-        toast.error(data.message || "Failed to remove contract");
+        toast.error(data.message || "Failed to remove contract")
       }
     } catch (error) {
-      console.error("Error removing contract:", error);
-      toast.error("An error occurred while removing the contract");
+      console.error("Error removing contract:", error)
+      toast.error("An error occurred while removing the contract")
     } finally {
-      setIsRemovingContract(null);
+      setIsRemovingContract(null)
     }
-  };
+  }
 
   const handlePreviewContract = (contractId: string) => {
-    setPreviewContractId(contractId);
-    setIsPreviewModalOpen(true);
-  };
+    setPreviewContractId(contractId)
+    setIsPreviewModalOpen(true)
+  }
 
   const handleSaveChanges = async () => {
-    setIsSavingReport(true);
-    let hasChanges = false;
-    let reportUpdated = false;
+    setIsSavingReport(true)
+    let hasChanges = false
+    let reportUpdated = false
 
     try {
       // Check if report data has changed
       if (hasReportChanges) {
-        hasChanges = true;
+        hasChanges = true
 
         const updatedReportData: {
-          url: string;
-          data: object | null;
-          displayReport: string;
+          url: string
+          data: object | null
+          displayReport: string
         } = {
           url: reportUrl,
           data: reportUrl !== "" ? null : reportData,
           displayReport: reportStatus,
-        };
+        }
 
-        const reportResponse = await fetch(
-          `/api/admin/bookings/${bookingNumber}/report/update`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updatedReportData),
-          }
-        );
+        const reportResponse = await fetch(`/api/admin/bookings/${bookingNumber}/report/update`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedReportData),
+        })
 
-        const responseData = await reportResponse.json();
+        const responseData = await reportResponse.json()
 
         if (responseData.success) {
-          reportUpdated = true;
+          reportUpdated = true
         } else {
-          toast.error(
-            responseData.message || "Failed to update report details"
-          );
+          toast.error(responseData.message || "Failed to update report details")
         }
       }
 
       if (!hasChanges) {
-        toast.info("No changes to save");
+        toast.info("No changes to save")
       } else if (reportUpdated) {
-        toast.success("Report details updated successfully");
+        toast.success("Report details updated successfully")
       }
     } catch (error) {
-      console.error("Error saving changes:", error);
-      toast.error("An error occurred while saving changes");
+      console.error("Error saving changes:", error)
+      toast.error("An error occurred while saving changes")
     } finally {
-      setIsSavingReport(false);
+      setIsSavingReport(false)
     }
-  };
+  }
 
   const handleAddPayment = async () => {
     if (!paymentAmount || isNaN(Number.parseFloat(paymentAmount))) {
-      toast.error("Please enter a valid amount");
-      return;
+      toast.error("Please enter a valid amount")
+      return
     }
 
-    setIsAddingPayment(true);
+    setIsAddingPayment(true)
     try {
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/payment`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ amount: Number.parseFloat(paymentAmount) }),
-        }
-      );
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: Number.parseFloat(paymentAmount) }),
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        toast.success("Payment details added successfully");
-        setPaymentAmount("");
-        fetchBookingDetails(); // Refresh to get updated payment details
+        toast.success("Payment details added successfully")
+        setPaymentAmount("")
+        fetchBookingDetails() // Refresh to get updated payment details
       } else {
-        toast.error(data.message || "Failed to add payment details");
+        toast.error(data.message || "Failed to add payment details")
       }
     } catch (error) {
-      console.error("Error adding payment details:", error);
-      toast.error("An error occurred while adding payment details");
+      console.error("Error adding payment details:", error)
+      toast.error("An error occurred while adding payment details")
     } finally {
-      setIsAddingPayment(false);
+      setIsAddingPayment(false)
     }
-  };
+  }
 
   const handleDeletePayment = async () => {
     if (!confirm("Are you sure you want to delete this payment?")) {
-      return;
+      return
     }
 
-    setIsDeletingPayment(true);
+    setIsDeletingPayment(true)
     try {
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/payment`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/payment`, {
+        method: "DELETE",
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        toast.success("Payment details deleted successfully");
-        setPayment(null);
+        toast.success("Payment details deleted successfully")
+        setPayment(null)
       } else {
-        toast.error(data.message || "Failed to delete payment details");
+        toast.error(data.message || "Failed to delete payment details")
       }
     } catch (error) {
-      console.error("Error deleting payment details:", error);
-      toast.error("An error occurred while deleting payment details");
+      console.error("Error deleting payment details:", error)
+      toast.error("An error occurred while deleting payment details")
     } finally {
-      setIsDeletingPayment(false);
+      setIsDeletingPayment(false)
     }
-  };
+  }
 
   const fetchHouseImages = async () => {
-    setIsLoadingHouseImages(true);
-    setImageError(null);
+    setIsLoadingHouseImages(true)
+    setImageError(null)
     try {
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/pictures`
-      );
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/pictures`)
 
       if (!response.ok) {
-        const errorData = await response.json();
-        setImageError(errorData.message || "Failed to fetch house images");
-        return;
+        const errorData = await response.json()
+        setImageError(errorData.message || "Failed to fetch house images")
+        return
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        setHouseImages(data.data.images || []);
+        setHouseImages(data.data.pictures || []) // Changed from images to pictures
       } else {
-        setImageError(data.message || "Failed to fetch house images");
+        setImageError(data.message || "Failed to fetch house images")
       }
     } catch (error) {
-      console.error("Error fetching house images:", error);
-      setImageError(
-        "An error occurred while fetching house images. Please try again later."
-      );
+      console.error("Error fetching house images:", error)
+      setImageError("An error occurred while fetching house images. Please try again later.")
     } finally {
-      setIsLoadingHouseImages(false);
+      setIsLoadingHouseImages(false)
     }
-  };
+  }
 
   const handleSelectProfileImage = (id: string) => {
-    const selectedImage = houseImages.find((img) => img.id === id);
+    const selectedImage = houseImages.find((img) => img.id === id)
     if (selectedImage) {
-      setSelectedProfileImage(selectedImage);
-      // Here you would typically save the selected profile image to the backend
-      toast.success("Profile picture selected successfully");
-
-      // Example API call to save the profile image (commented out as the endpoint doesn't exist yet)
-      // saveProfileImage(selectedImage.id);
+      setSelectedProfileImage(selectedImage)
+      // Save the selected profile image to the backend
+      saveProfileImage(selectedImage.id)
     }
-    setIsProfileImagePickerOpen(false);
-  };
+    setIsProfileImagePickerOpen(false)
+  }
 
   const handleOpenProfileImagePicker = () => {
-    setImageError(null);
-    if (houseImages.length === 0) {
-      fetchHouseImages();
+    setImageError(null)
+    // Always fetch fresh images when opening picker
+    fetchHouseImages()
+    setIsProfileImagePickerOpen(true)
+  }
+
+  const handleProfileImageDescriptionChange = (description: string) => {
+    if (selectedProfileImage) {
+      const updatedImage = {
+        ...selectedProfileImage,
+        description: description,
+      }
+      setSelectedProfileImage(updatedImage)
+      // Optionally save the description change to the backend
+      // saveProfileImageDescription(updatedImage.id, description);
     }
-    setIsProfileImagePickerOpen(true);
-  };
+  }
 
-  // Function to save the profile image to the backend (to be implemented)
+  // Function to save the profile image to the backend
   const saveProfileImage = async (imageId: string) => {
+    setIsSavingProfileImage(true)
     try {
-      const response = await fetch(
-        `/api/admin/bookings/${bookingNumber}/profile-image`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ imageId }),
-        }
-      );
+      const response = await fetch(`/api/admin/bookings/${bookingNumber}/profile-image`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageId }),
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        toast.success("Profile picture saved successfully");
+        toast.success("Profile picture saved successfully")
       } else {
-        toast.error(data.message || "Failed to save profile picture");
+        toast.error(data.message || "Failed to save profile picture")
       }
     } catch (error) {
-      console.error("Error saving profile picture:", error);
-      toast.error("An error occurred while saving the profile picture");
+      console.error("Error saving profile picture:", error)
+      toast.error("An error occurred while saving the profile picture")
+    } finally {
+      setIsSavingProfileImage(false)
     }
-  };
+  }
 
   // Helper function to render status badge
   const renderStatusBadge = (status: string) => {
-    const statusMap: Record<
-      string,
-      { color: string; icon: React.ReactNode; label: string }
-    > = {
+    const statusMap: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
       "document.completed": {
         color: "bg-green-100 text-green-800 border-green-200",
         icon: <Check className="h-3 w-3 mr-1" />,
@@ -691,23 +644,23 @@ export default function BookingDetailsPage({
         icon: <X className="h-3 w-3 mr-1" />,
         label: "Voided",
       },
-    };
+    }
 
     const defaultStatus = {
       color: "bg-gray-100 text-gray-800 border-gray-200",
       icon: <FileText className="h-3 w-3 mr-1" />,
       label: status.replace("document.", ""),
-    };
+    }
 
-    const { color, icon, label } = statusMap[status] || defaultStatus;
+    const { color, icon, label } = statusMap[status] || defaultStatus
 
     return (
       <Badge variant="outline" className={`${color} flex items-center`}>
         {icon}
         {label}
       </Badge>
-    );
-  };
+    )
+  }
 
   if (loading) {
     return (
@@ -719,7 +672,7 @@ export default function BookingDetailsPage({
           </div>
         </main>
       </div>
-    );
+    )
   }
 
   if (!booking) {
@@ -729,24 +682,18 @@ export default function BookingDetailsPage({
         <main className="container mx-auto px-6 py-8">
           <div className="bg-white rounded-lg shadow-md p-8">
             <div className="flex flex-col items-center justify-center h-48 text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-1">
-                Booking not found
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">Booking not found</h3>
               <p className="text-gray-500 max-w-md mb-4">
-                The booking you are looking for does not exist or has been
-                removed.
+                The booking you are looking for does not exist or has been removed.
               </p>
-              <Button
-                onClick={() => router.push("/admin")}
-                className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
-              >
+              <Button onClick={() => router.push("/admin")} className="bg-[#5cb85c] hover:bg-[#4a9d4a]">
                 Return to Dashboard
               </Button>
             </div>
           </div>
         </main>
       </div>
-    );
+    )
   }
 
   return (
@@ -781,51 +728,35 @@ export default function BookingDetailsPage({
             {/* Basic Information */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-500">
-                  Client Name
-                </h3>
+                <h3 className="text-sm font-medium text-gray-500">Client Name</h3>
                 <p className="mt-1 text-lg font-medium">{booking.title}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">
-                  Booking Number
-                </h3>
-                <p className="mt-1 text-lg font-medium">
-                  {booking.bookingNumber}
-                </p>
+                <h3 className="text-sm font-medium text-gray-500">Booking Number</h3>
+                <p className="mt-1 text-lg font-medium">{booking.bookingNumber}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Address</h3>
                 <p className="mt-1">{booking.address}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">
-                  Email Address
-                </h3>
+                <h3 className="text-sm font-medium text-gray-500">Email Address</h3>
                 <p className="mt-1">{booking.email}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">
-                  Start Time
-                </h3>
+                <h3 className="text-sm font-medium text-gray-500">Start Time</h3>
                 <p className="mt-1">{formatDate(booking.startTime)}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">
-                  Current Stage
-                </h3>
-                <p className="mt-1">
-                  {STAGE_LABELS[booking.currentStage] || booking.currentStage}
-                </p>
+                <h3 className="text-sm font-medium text-gray-500">Current Stage</h3>
+                <p className="mt-1">{STAGE_LABELS[booking.currentStage] || booking.currentStage}</p>
               </div>
             </div>
 
             {/* Google Drive Folder */}
             {booking.googleDriveFolder && (
               <div className="pt-6 border-t">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Google Drive Folder
-                </h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Google Drive Folder</h3>
                 <a
                   href={booking.googleDriveFolder}
                   target="_blank"
@@ -839,37 +770,25 @@ export default function BookingDetailsPage({
               </div>
             )}
 
-            {/* Booking Progress */}
-            {/* <div className="pt-6 border-t">
-              <h3 className="text-lg font-medium mb-6">Booking Progress</h3>
-              <div className="w-full overflow-x-auto pb-4">
-                <BookingProgress steps={getStepStatus(booking.currentStage)} />
-              </div>
-            </div> */}
-
             {/* Report Management */}
             <div className="pt-6 border-t max-w-screen-md">
               <h3 className="text-lg font-medium mb-2">Report Management</h3>
               <p className="text-gray-600 mb-3 text-sm">
-                Manage your customers report from here. For static report,
-                kindly enter a URL of a pre-existing report. Automated report
-                has a pre-existing report template with data retrieved from the
-                auditor's Ciel Power Portal.
+                Manage your customers report from here. For static report, kindly enter a URL of a pre-existing report.
+                Automated report has a pre-existing report template with data retrieved from the auditor's Ciel Power
+                Portal.
               </p>
 
               <ul className="list-disc pl-5 mb-6 text-sm text-gray-600 space-y-1">
                 <li>
-                  <span className="font-medium">None:</span> In case no report
-                  is to be displayed for this customer
+                  <span className="font-medium">None:</span> In case no report is to be displayed for this customer
                 </li>
                 <li>
-                  <span className="font-medium">Static:</span> Use a
-                  pre-existing report by providing its URL
+                  <span className="font-medium">Static:</span> Use a pre-existing report by providing its URL
                 </li>
                 <li>
-                  <span className="font-medium">Automated:</span> Automated
-                  report has a pre-existing report template with data retrieved
-                  from the auditor's Ciel Power Portal
+                  <span className="font-medium">Automated:</span> Automated report has a pre-existing report template
+                  with data retrieved from the auditor's Ciel Power Portal
                 </li>
               </ul>
 
@@ -921,9 +840,7 @@ export default function BookingDetailsPage({
                     <Button
                       className="w-full"
                       variant="outline"
-                      onClick={() =>
-                        router.push(`/admin/${bookingNumber}/report`)
-                      }
+                      onClick={() => router.push(`/admin/${bookingNumber}/report`)}
                     >
                       Preview Report
                     </Button>
@@ -948,114 +865,58 @@ export default function BookingDetailsPage({
                 </div>
               </div>
             </div>
-            {/* Profile Picture Management */}
-            <div className="pt-6 border-t max-w-screen-md">
-              <h3 className="text-lg font-medium mb-2">Add Profile Picture</h3>
-              <p className="text-gray-600 mb-3 text-sm">
-                Upload a profile picture that will be displayed on your user
-                dashboard. You can upload from your computer or select from your
-                custom drive.
+
+            {/* Profile Picture Management - Unified Section */}
+            <div className="pt-6 border-t">
+              <div className="flex items-center gap-2 mb-4">
+                <User className="h-5 w-5 text-[#5cb85c]" />
+                <h3 className="text-lg font-medium">Profile Picture Management</h3>
+              </div>
+              <p className="text-gray-600 mb-6 text-sm">
+                Select a profile picture that will be displayed on the customer dashboard. Choose from uploaded images
+                in the customer's Google Drive folder.
               </p>
 
-              {/* Current Profile Picture Preview */}
-              {selectedProfileImage && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
-                    Current Profile Picture
-                  </h4>
-                  <div className="w-32 h-32">
-                    <ReportImageViewer
-                      allowSelection={true}
-                      buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
-                      selectedImage={selectedProfileImage}
-                      onOpenPicker={handleOpenProfileImagePicker}
-                      onDescriptionChange={(newDescription) => {
-                        console.log("Description changed:", newDescription);
-                      }}
-                    />
+              <div className="max-w-md">
+                <ReportImageViewer
+                  allowSelection={true}
+                  buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
+                  selectedImage={selectedProfileImage ?? undefined}
+                  onOpenPicker={handleOpenProfileImagePicker}
+                  onDescriptionChange={handleProfileImageDescriptionChange}
+                />
+
+                {/* Save Status */}
+                {isSavingProfileImage && (
+                  <div className="mt-4 flex items-center gap-2 text-sm text-[#5cb85c]">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#5cb85c] border-t-transparent"></div>
+                    Saving profile picture...
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                {/* Upload from Computer */}
-                <Card className="h-64 border-2 border-dashed border-gray-300 hover:border-[#5cb85c] transition-colors">
-                  <button
-                    onClick={() => {
-                      // Handle upload from computer
-                      const input = document.createElement("input");
-                      input.type = "file";
-                      input.accept = "image/*";
-                      input.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                          // Handle file upload logic here
-                          console.log("File selected:", file);
-                          // You would typically upload this file to your server
-                          toast.success(
-                            "Profile picture uploaded successfully"
-                          );
-                        }
-                      };
-                      input.click();
-                    }}
-                    className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#5cb85c] transition-colors"
-                  >
-                    <Plus className="h-12 w-12 mb-2" />
-                    <span className="text-sm font-medium">
-                      Upload from Computer
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">
-                      JPG, PNG or GIF up to 5MB
-                    </span>
-                  </button>
-                </Card>
-
-                {/* Select from Custom Drive */}
-                <Card className="h-64 border-2 border-dashed border-gray-300 hover:border-[#5cb85c] transition-colors">
-                  <button
-                    onClick={handleOpenProfileImagePicker}
-                    disabled={isLoadingHouseImages}
-                    className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#5cb85c] transition-colors disabled:opacity-50"
-                  >
-                    {isLoadingHouseImages ? (
-                      <>
-                        <div className="h-12 w-12 mb-2 animate-spin rounded-full border-4 border-gray-300 border-t-[#5cb85c]"></div>
-                        <span className="text-sm font-medium">
-                          Loading Images...
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <FolderOpen className="h-12 w-12 mb-2" />
-                        <span className="text-sm font-medium">
-                          Select from Drive
-                        </span>
-                        <span className="text-xs text-gray-400 mt-1">
-                          Choose from uploaded images
-                        </span>
-                      </>
-                    )}
-                  </button>
-                </Card>
-              </div>
-
-              {imageError && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-                  <p>{imageError}</p>
-                  <p className="mt-1">
-                    The image picker API endpoint may not be set up yet. Please
-                    check the server logs or contact the developer.
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-6">
-                <p className="text-sm text-gray-600">
-                  The selected profile picture will be displayed on the user's
-                  dashboard page. You can change or update the profile picture
-                  at any time.
-                </p>
+                {/* Error Display */}
+                {imageError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <X className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm">
+                        <p className="text-red-800 font-medium mb-1">Unable to load images</p>
+                        <p className="text-red-600">{imageError}</p>
+                        <Button
+                          onClick={() => {
+                            setImageError(null)
+                            fetchHouseImages()
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="mt-3 border-red-300 text-red-700 hover:bg-red-50"
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1063,10 +924,7 @@ export default function BookingDetailsPage({
             <div className="pt-6 border-t">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-medium">Contract Management</h3>
-                <Button
-                  onClick={() => setIsContractModalOpen(true)}
-                  className="bg-[#5cb85c] hover:bg-[#4a9d4a]"
-                >
+                <Button onClick={() => setIsContractModalOpen(true)} className="bg-[#5cb85c] hover:bg-[#4a9d4a]">
                   <Plus className="h-4 w-4 mr-2" />
                   Attach Contract
                 </Button>
@@ -1075,10 +933,7 @@ export default function BookingDetailsPage({
               {offeredContracts.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-4">
                   {offeredContracts.map((contract) => (
-                    <Card
-                      key={contract.id}
-                      className="border-gray-200 flex flex-col"
-                    >
+                    <Card key={contract.id} className="border-gray-200 flex flex-col">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex justify-between items-start">
                           <span>{contract.name}</span>
@@ -1088,13 +943,10 @@ export default function BookingDetailsPage({
                       <CardContent className="pb-2 flex-grow">
                         <div className="space-y-2 text-sm">
                           <div>
-                            <span className="text-gray-500">Customer:</span>{" "}
-                            {contract.customerRecipient}
+                            <span className="text-gray-500">Customer:</span> {contract.customerRecipient}
                           </div>
                           <div>
-                            <span className="text-gray-500">
-                              Representative:
-                            </span>{" "}
+                            <span className="text-gray-500">Representative:</span>{" "}
                             {contract.cielPowerRepresentativeRecipient}
                           </div>
                           <div>
@@ -1102,23 +954,13 @@ export default function BookingDetailsPage({
                             {new Date(contract.created_at).toLocaleDateString()}
                           </div>
                           <div className="flex items-center justify-between pt-2">
-                            <span className="text-gray-500">
-                              Display to Customer:
-                            </span>
+                            <span className="text-gray-500">Display to Customer:</span>
                             <div className="flex items-center">
                               <Switch
                                 checked={contract.displayContract}
-                                onCheckedChange={(checked) =>
-                                  handleToggleContractDisplay(
-                                    contract.id,
-                                    checked
-                                  )
-                                }
+                                onCheckedChange={(checked) => handleToggleContractDisplay(contract.id, checked)}
                                 className="data-[state=checked]:bg-[#5cb85c]"
-                                disabled={
-                                  !!completedContractFileUrl ||
-                                  isTogglingContract === contract.id
-                                }
+                                disabled={!!completedContractFileUrl || isTogglingContract === contract.id}
                               />
                               {isTogglingContract === contract.id && (
                                 <div className="ml-2 animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-[#5cb85c]"></div>
@@ -1147,11 +989,7 @@ export default function BookingDetailsPage({
                             Open in PandaDoc
                           </Button>
                         </Link>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePreviewContract(contract.id)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => handlePreviewContract(contract.id)}>
                           <Eye className="h-4 w-4 mr-1" />
                           Preview
                         </Button>
@@ -1161,10 +999,7 @@ export default function BookingDetailsPage({
                           size="sm"
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
                           onClick={() => handleRemoveContract(contract.id)}
-                          disabled={
-                            !!completedContractFileUrl ||
-                            isRemovingContract === contract.id
-                          }
+                          disabled={!!completedContractFileUrl || isRemovingContract === contract.id}
                         >
                           {isRemovingContract === contract.id ? (
                             <>
@@ -1184,28 +1019,21 @@ export default function BookingDetailsPage({
                 </div>
               ) : (
                 <div className="bg-gray-50 border rounded-md p-6 text-center">
-                  <p className="text-gray-500">
-                    No contracts have been attached to this booking yet.
-                  </p>
-                  <Button
-                    onClick={() => setIsContractModalOpen(true)}
-                    variant="outline"
-                    className="mt-4"
-                  >
+                  <p className="text-gray-500">No contracts have been attached to this booking yet.</p>
+                  <Button onClick={() => setIsContractModalOpen(true)} variant="outline" className="mt-4">
                     <Plus className="h-4 w-4 mr-2" />
                     Attach Contract
                   </Button>
                 </div>
               )}
             </div>
+
             {/* Payment Details */}
             <div className="pt-6 border-t">
               {payment ? (
                 <Card className="max-w-md">
                   <CardHeader>
-                    <CardTitle className="text-lg">
-                      Payment Information
-                    </CardTitle>
+                    <CardTitle className="text-lg">Payment Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex justify-between">
@@ -1230,18 +1058,12 @@ export default function BookingDetailsPage({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Last Updated:</span>
-                      <span>
-                        {new Date(payment.updated_at).toLocaleString()}
-                      </span>
+                      <span>{new Date(payment.updated_at).toLocaleString()}</span>
                     </div>
                   </CardContent>
                   {payment.status !== "Paid" && (
                     <CardFooter>
-                      <Button
-                        variant="destructive"
-                        onClick={handleDeletePayment}
-                        disabled={isDeletingPayment}
-                      >
+                      <Button variant="destructive" onClick={handleDeletePayment} disabled={isDeletingPayment}>
                         {isDeletingPayment ? (
                           <>
                             <div className="h-4 w-4 mr-2 animate-spin rounded-full border-b-2 border-white"></div>
@@ -1296,16 +1118,14 @@ export default function BookingDetailsPage({
       </main>
 
       {/* Profile Image Picker Dialog */}
-      {isProfileImagePickerOpen && (
-        <ReportImagePicker
-          buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
-          images={houseImages}
-          selectedImage={selectedProfileImage?.id}
-          isOpen={isProfileImagePickerOpen}
-          onOpenChange={setIsProfileImagePickerOpen}
-          onSelectImage={handleSelectProfileImage}
-        />
-      )}
+      <ReportImagePicker
+        buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
+        images={houseImages}
+        selectedImage={selectedProfileImage?.id}
+        isOpen={isProfileImagePickerOpen}
+        onOpenChange={setIsProfileImagePickerOpen}
+        onSelectImage={handleSelectProfileImage}
+      />
 
       {/* Attach Contract Modal */}
       <Dialog open={isContractModalOpen} onOpenChange={setIsContractModalOpen}>
@@ -1359,24 +1179,15 @@ export default function BookingDetailsPage({
                         <div className="flex items-center gap-3 mt-1">
                           {renderStatusBadge(doc.status)}
                           <span className="text-xs text-gray-500">
-                            Created:{" "}
-                            {new Date(doc.createdAt).toLocaleDateString()}
+                            Created: {new Date(doc.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
                       <Button
                         size="sm"
-                        variant={
-                          selectedContract?.id === doc.id
-                            ? "default"
-                            : "outline"
-                        }
+                        variant={selectedContract?.id === doc.id ? "default" : "outline"}
                         onClick={() => handleSelectContract(doc)}
-                        className={
-                          selectedContract?.id === doc.id
-                            ? "bg-[#5cb85c] hover:bg-[#4a9d4a]"
-                            : ""
-                        }
+                        className={selectedContract?.id === doc.id ? "bg-[#5cb85c] hover:bg-[#4a9d4a]" : ""}
                       >
                         {selectedContract?.id === doc.id ? (
                           <>
@@ -1396,9 +1207,7 @@ export default function BookingDetailsPage({
             {/* Recipients Selection */}
             {selectedContract && (
               <div className="border rounded-md p-4 bg-gray-50">
-                <h4 className="font-medium mb-4">
-                  Attach Contract: {selectedContract.name}
-                </h4>
+                <h4 className="font-medium mb-4">Attach Contract: {selectedContract.name}</h4>
 
                 {loadingRecipients ? (
                   <div className="flex justify-center py-4">
@@ -1407,13 +1216,11 @@ export default function BookingDetailsPage({
                 ) : recipients.length > 0 ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="customerRecipient">
-                        Customer Recipient
-                      </Label>
+                      <Label htmlFor="customerRecipient">Customer Recipient</Label>
                       <Select
                         value={selectedCustomerRecipientId}
                         onValueChange={(value) => {
-                          setSelectedCustomerRecipientId(value);
+                          setSelectedCustomerRecipientId(value)
                         }}
                       >
                         <SelectTrigger className="bg-white">
@@ -1430,13 +1237,11 @@ export default function BookingDetailsPage({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="cielPowerRep">
-                        Ciel Power Representative
-                      </Label>
+                      <Label htmlFor="cielPowerRep">Ciel Power Representative</Label>
                       <Select
                         value={selectedRepresentativeRecipientId}
                         onValueChange={(value) => {
-                          setSelectedRepresentativeRecipientId(value);
+                          setSelectedRepresentativeRecipientId(value)
                         }}
                       >
                         <SelectTrigger className="bg-white">
@@ -1455,9 +1260,7 @@ export default function BookingDetailsPage({
                     <Button
                       onClick={handleAttachContract}
                       disabled={
-                        isAttachingContract ||
-                        !selectedCustomerRecipientId ||
-                        !selectedRepresentativeRecipientId
+                        isAttachingContract || !selectedCustomerRecipientId || !selectedRepresentativeRecipientId
                       }
                       className="bg-[#5cb85c] hover:bg-[#4a9d4a] w-full"
                     >
@@ -1473,8 +1276,7 @@ export default function BookingDetailsPage({
                   </div>
                 ) : (
                   <div className="text-center py-4 text-gray-500">
-                    No recipients found for this contract. Please select a
-                    different contract.
+                    No recipients found for this contract. Please select a different contract.
                   </div>
                 )}
               </div>
@@ -1485,12 +1287,12 @@ export default function BookingDetailsPage({
             <Button
               variant="outline"
               onClick={() => {
-                setIsContractModalOpen(false);
-                setSelectedContract(null);
-                setSelectedCustomerRecipientId("");
-                setSelectedRepresentativeRecipientId("");
-                setSearchQuery("");
-                setSearchResults([]);
+                setIsContractModalOpen(false)
+                setSelectedContract(null)
+                setSelectedCustomerRecipientId("")
+                setSelectedRepresentativeRecipientId("")
+                setSearchQuery("")
+                setSearchResults([])
               }}
             >
               Cancel
@@ -1511,9 +1313,7 @@ export default function BookingDetailsPage({
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                 <div className="flex flex-col items-center">
                   <div className="h-12 w-12 rounded-full border-4 border-gray-200 border-t-[#96C93D] animate-spin"></div>
-                  <p className="mt-4 text-sm text-gray-500">
-                    Loading document...
-                  </p>
+                  <p className="mt-4 text-sm text-gray-500">Loading document...</p>
                 </div>
               </div>
             )}
@@ -1531,8 +1331,8 @@ export default function BookingDetailsPage({
           <DialogFooter>
             <Button
               onClick={() => {
-                setIsPreviewModalOpen(false);
-                setPreviewContractId("");
+                setIsPreviewModalOpen(false)
+                setPreviewContractId("")
               }}
             >
               Close
@@ -1541,5 +1341,5 @@ export default function BookingDetailsPage({
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
