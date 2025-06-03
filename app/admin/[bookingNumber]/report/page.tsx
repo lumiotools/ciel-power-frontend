@@ -33,10 +33,10 @@ import ReportOverviewSection from "@/components/report/overview/overview";
 import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
 import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
-import ReportSummarySection from "@/components/report/summary/concerns";
+import ReportSummarySection from "@/components/report/concerns/concerns";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
-import ReportSummaryConcernSection from "@/components/report/summary/concerns";
-import ReportSummarySolutionSection from "@/components/report/summary/solutions";
+import ReportSummaryConcernSection from "@/components/report/concerns/concerns";
+import ReportSummarySolutionSection from "@/components/report/solutions/solutions";
 import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
 
 // Define interfaces for specific data types

@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { ChevronUp, Fan, Plus } from "lucide-react";
+import { ChevronUp, Fan, Plus } from 'lucide-react';
 import { ReportImageViewer } from "./imageViewer-solutions";
 import { ReportImagePicker } from "./imagePicker-solutions";
 import { SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
@@ -182,57 +182,47 @@ const NotesSection = ({
                 />
               </div>
             </div>
-            <div className="w-1/2 flex flex-row items-center justify-center gap-4">
-              {imageSlots.map((image, index) => (
-                <div key={index} className="rounded-xl w-full ">
-                  {image && image.id ? (
-                    <ReportImageViewer
-                      allowSelection={isAdmin}
-                      buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
-                      selectedImage={image}
-                      onOpenPicker={() => handleEditImage(index)}
-                      onDescriptionChange={(description) =>
-                        handleDescriptionChange(index, description as string)
-                      }
-                    />
-                  ) : (
-                    <div className="rounded-md border-2 border-dashed border-gray-300 hover:border-[#67b502] transition-colors h-80 bg-white">
-                      {isAdmin ? (
-                        <button
-                          onClick={() => handleAddImage(index)}
-                          className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-[#67b502] transition-colors"
-                        >
-                          <Plus className="size-12 mb-2" />
-                          <span className="text-sm font-medium">
-                            Add image {index + 1}
-                          </span>
-                        </button>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                          <span className="text-sm">No image available</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {/* Image Picker Dialog */}
-              {isAdmin && (
-                <ReportImagePicker
-                  buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
-                  images={houseImages}
-                  selectedImage={
-                    solutionsAndRecommendations?.[0]?.images?.[0]?.id
-                  }
-                  isOpen={isImagePickerOpen}
-                  onOpenChange={setIsImagePickerOpen}
-                  onSelectImage={handleSelectImage}
-                />
-              )}
+            <div className="w-1/2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {imageSlots.map((image, index) => (
+                  <div key={index} className="h-64">
+                    {image && image.id ? (
+                      <ReportImageViewer
+                        allowSelection={isAdmin}
+                        buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+                        selectedImage={image}
+                        onOpenPicker={() => handleEditImage(index)}
+                        onDescriptionChange={(description) =>
+                          handleDescriptionChange(index, description as string)
+                        }
+                      />
+                    ) : (
+                      <ReportImageViewer
+                        allowSelection={isAdmin}
+                        buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+                        selectedImage={undefined}
+                        onOpenPicker={() => handleAddImage(index)}
+                        onDescriptionChange={() => {}}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {/* Image Picker Dialog */}
+      {isAdmin && (
+        <ReportImagePicker
+          buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+          images={houseImages}
+          selectedImage={editingImageIndex !== null ? selectedImages[editingImageIndex]?.id : undefined}
+          isOpen={isImagePickerOpen}
+          onOpenChange={setIsImagePickerOpen}
+          onSelectImage={handleSelectImage}
+        />
+      )}
     </div>
   );
 };

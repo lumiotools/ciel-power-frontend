@@ -19,13 +19,13 @@ import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
 import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
-import ReportSummarySection from "@/components/report/summary/concerns";
-import ReportSummaryConcernSection from "@/components/report/summary/concerns";
+import ReportSummarySection from "@/components/report/concerns/concerns";
+import ReportSummaryConcernSection from "@/components/report/concerns/concerns";
 import {
   DescriptionData,
   ImageData,
 } from "@/app/admin/[bookingNumber]/report/page";
-import ReportSummarySolutionSection from "@/components/report/summary/solutions";
+import ReportSummarySolutionSection from "@/components/report/solutions/solutions";
 import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
 
 // Define interfaces for specific data types

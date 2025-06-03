@@ -3,7 +3,7 @@ import {
   SolutionsAndRecommendationsData,
 } from "@/app/admin/[bookingNumber]/report/page";
 import React from "react";
-import ReportSummarySectionSummaryOfConcerns from "./summaryOfConcerns";
+import ReportSummarySectionSummaryOfConcerns from "../concerns/summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
 // import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
@@ -12,7 +12,7 @@ import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
 import UnderstandingSolutions from "./understandingSolutions";
 import { motion } from "framer-motion";
 import NotesSection from "./LoremIpsumHeading";
-import { HouseImage } from "./concerns";
+import { HouseImage } from "../concerns/concerns";
 
 interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
