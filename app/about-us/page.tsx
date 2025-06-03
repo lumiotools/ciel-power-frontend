@@ -1,5 +1,12 @@
-import { Home, Heart, Trophy, Award, Lightbulb, Newspaper, History } from "lucide-react";
-import React from "react";
+import {
+  Home,
+  Heart,
+  Trophy,
+  Award,
+  Lightbulb,
+  Newspaper,
+  History,
+} from "lucide-react";
 
 const page = () => {
   return (
@@ -10,27 +17,42 @@ const page = () => {
         better for the planet.
       </p>
 
-      {/* Introduction Section */}
+      {/* Introduction Section with Video */}
       <div className="mt-8 mb-8 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <Home size={24} className="text-[#68BEB9]" />
           <h3 className="text-xl font-semibold text-gray-700">Our Mission</h3>
         </div>
 
-        <div className="space-y-4">
-          <p className="text-gray-700">
-            At Ciel Power, we believe your home should support the way you live
-            — every season, every day. Since 2010, we've worked alongside New
-            Jersey homeowners to deliver thoughtful, high-impact improvements
-            that make homes more comfortable, more efficient, and more resilient
-            for the long term.
-          </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              At Ciel Power, we believe your home should support the way you
+              live — every season, every day. Since 2010, we&apos;ve worked
+              alongside New Jersey homeowners to deliver thoughtful, high-impact
+              improvements that make homes more comfortable, more efficient, and
+              more resilient for the long term.
+            </p>
 
-          <p className="text-gray-700">
-            We're not here to push products. We're here to listen, assess, and
-            help you take smart steps toward a better-performing home — and
-            we're honored to be part of your journey.
-          </p>
+            <p className="text-gray-700">
+              We&apos;re not here to push products. We&apos;re here to listen,
+              assess, and help you take smart steps toward a better-performing
+              home — and we&apos;re honored to be part of your journey.
+            </p>
+          </div>
+
+          <div className="w-full">
+            <div className="aspect-video rounded-lg overflow-hidden shadow-md">
+              <iframe
+                src="https://www.youtube.com/embed/06VTZ-ok5v0"
+                title="Welcome to Ciel | About Us"
+                width="100%"
+                height="100%"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -45,7 +67,7 @@ const page = () => {
 
         <div className="space-y-4">
           <p className="text-gray-700">
-            Every home has room to perform better. Whether it's a drafty
+            Every home has room to perform better. Whether it&apos;s a drafty
             hallway, high utility bills, or an aging HVAC system, most homes are
             doing more work than they need to — and costing more in the process.
           </p>
@@ -53,11 +75,11 @@ const page = () => {
           <p className="text-gray-700 font-medium">We exist to change that.</p>
 
           <p className="text-gray-700">
-            Our team is trained to look beneath the surface — to uncover what's
-            really going on in your home's energy systems and help you
-            prioritize improvements that make a meaningful difference. The
-            result? A home that works better, feels better, and costs less to
-            operate.
+            Our team is trained to look beneath the surface — to uncover
+            what&apos;s really going on in your home&apos;s energy systems and
+            help you prioritize improvements that make a meaningful difference.
+            The result? A home that works better, feels better, and costs less
+            to operate.
           </p>
         </div>
       </div>
@@ -67,23 +89,23 @@ const page = () => {
         <div className="flex items-center gap-3 mb-4">
           <History size={24} className="text-[#68BEB9]" />
           <h3 className="text-xl font-semibold text-gray-700">
-            Where We've Been
+            Where We&apos;ve Been
           </h3>
         </div>
 
         <div className="space-y-4">
           <p className="text-gray-700">
-            Since opening our doors in 2010, we've grown into one of New
-            Jersey's leading residential energy efficiency providers, proudly
-            delivering home energy audits and performance upgrades across dozens
-            of communities.
+            Since opening our doors in 2010, we&apos;ve grown into one of New
+            Jersey&apos;s leading residential energy efficiency providers,
+            proudly delivering home energy audits and performance upgrades
+            across dozens of communities.
           </p>
 
           <p className="text-gray-700">
-            Along the way, we've built strong relationships with homeowners,
-            utility providers, and municipalities — and we've stayed focused on
-            one thing: helping people live better in the homes they already
-            have.
+            Along the way, we&apos;ve built strong relationships with
+            homeowners, utility providers, and municipalities — and we&apos;ve
+            stayed focused on one thing: helping people live better in the homes
+            they already have.
           </p>
         </div>
       </div>
@@ -93,7 +115,7 @@ const page = () => {
         <div className="flex items-center gap-3 mb-4">
           <Trophy size={24} className="text-[#68BEB9]" />
           <h3 className="text-xl font-semibold text-gray-700">
-            Milestones We're Proud Of
+            Milestones We&apos;re Proud Of
           </h3>
         </div>
 
@@ -127,7 +149,7 @@ const page = () => {
               </div>
               <div>
                 <p className="text-gray-700 font-medium">
-                  ENERGY STAR® Contractor of the Year (2019, 2020, 2021, &
+                  ENERGY STAR® Contractor of the Year (2019, 2020, 2021, &amp;
                   2023)
                 </p>
                 <p className="text-gray-600 mt-1">
@@ -145,7 +167,8 @@ const page = () => {
               </div>
               <div>
                 <p className="text-gray-700 font-medium">
-                  Top 10 Contractor in PSE&G's Energy Efficiency Program (2023)
+                  Top 10 Contractor in PSE&amp;G&apos;s Energy Efficiency
+                  Program (2023)
                 </p>
                 <p className="text-gray-600 mt-1">
                   Recognized for completing hundreds of successful home energy
@@ -188,8 +211,8 @@ const page = () => {
           <p className="text-gray-700">
             Ciel Power is proud to be a member of the New Jersey Sustainable
             Business Registry and the New Jersey Sustainable Business Council.
-            We don't just talk about environmental responsibility — we live it,
-            every day.
+            We don&apos;t just talk about environmental responsibility — we live
+            it, every day.
           </p>
 
           <p className="text-gray-700">
@@ -205,11 +228,11 @@ const page = () => {
         <div className="flex items-center gap-3 mb-4">
           <Newspaper size={24} className="text-[#68BEB9]" />
           <h3 className="text-xl font-semibold text-gray-700">
-            Press & Recognition
+            Press &amp; Recognition
           </h3>
         </div>
 
-        <p className="text-gray-700 mb-4">We've been featured by:</p>
+        <p className="text-gray-700 mb-4">We&apos;ve been featured by:</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-lg p-5 border border-gray-200 flex items-center justify-center">
