@@ -1,3 +1,10 @@
+export interface Auditor {
+  id: string;
+  name: string;
+  description?: string;
+  file_id?: string;
+}
+
 export interface Booking {
   bookingNumber: string;
   startTime: string;
@@ -46,7 +53,7 @@ export interface BookingResponse {
       total_pages: number;
       total_records: number;
       limit: number;
-    }
+    };
   };
 }
 
