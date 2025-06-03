@@ -115,6 +115,7 @@ const ReportHeatingSectionCard = ({
                   minValue={0}
                   maxValue={heating.current_value?.includes?.("%") ? 100 : 0.96}
                   heating={heating}
+                  isAdmin={isAdmin}
                 />
 
                 <div className="flex justify-between items-center mt-4 px-4">
