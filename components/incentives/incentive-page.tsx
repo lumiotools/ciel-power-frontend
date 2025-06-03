@@ -14,6 +14,7 @@ import { QualificationSection } from "./qualification-section";
 import { QuestionsSection } from "./questions-section";
 import { SupportSection } from "./support-section";
 import { CostSection } from "./cost-section";
+import { ETGProgram } from "./etg-program";
 
 export default function IncentivePage() {
   const { bookingDetails } = useContext(BOOKING_CONTEXT) as {
@@ -41,6 +42,9 @@ export default function IncentivePage() {
     : true;
   const showSJG = postalCode
     ? shouldShowUtilityProgram(postalCode, "sjg")
+    : true;
+  const showETG = postalCode
+    ? shouldShowUtilityProgram(postalCode, "etg")
     : true;
 
   return (
@@ -82,6 +86,7 @@ export default function IncentivePage() {
         {showRECO && <RECOProgram />}
         {showNJNG && <NJNGProgram />}
         {showSJG && <SJGProgram />}
+        {showETG && <ETGProgram />}
 
         {/* Still Have Questions Section */}
         <QuestionsSection />
