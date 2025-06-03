@@ -3840,7 +3840,7 @@ export const ZIP_UTILITY_DATA = [
 ];
 // Utility mapping functions
 export function getUtilitiesForZipCode(zipCode: string) {
-  // zipCode = "08001";
+  zipCode = "8348";
   const entry = ZIP_UTILITY_DATA.find(
     (item) =>
       parseInt(String(item.zipCode), 10) === parseInt(String(zipCode), 10)
@@ -3868,7 +3868,8 @@ export function getUtilitiesForZipCode(zipCode: string) {
     const utility = entry.naturalGasUtility.toLowerCase();
     if (utility.includes("pseg") || utility.includes("pse&g"))
       utilities.add("pseg");
-    if (utility.includes("njng")) utilities.add("njng");
+    if (utility.includes("njng") || utility.includes("nj natural gas"))
+      utilities.add("njng");
     if (utility.includes("sjg") || utility.includes("south jersey gas"))
       utilities.add("sjg");
     if (utility.includes("etg") || utility.includes("elizabethtown"))
