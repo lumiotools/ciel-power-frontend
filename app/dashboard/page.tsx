@@ -430,11 +430,13 @@ export default function DashboardPage() {
 
               <div className="timeline-container relative">
                 {/* Show only the latest state component when collapsed */}
-                {!isTimelineExpanded && renderLatestStateComponent()}
                 <div className="font-extrabold text-2xl text-gray-800 flex items-center mb-4">
                   <FileCheck size={24} className="text-[#8bc34a] mr-2" />
                   Your Audit Journey
                 </div>
+                {/* Show only the latest state component when collapsed */}
+                {!isTimelineExpanded && renderLatestStateComponent()}
+
                 {/* Show all timeline items when expanded */}
                 {isTimelineExpanded && (
                   <div className="timeline-items-container">
