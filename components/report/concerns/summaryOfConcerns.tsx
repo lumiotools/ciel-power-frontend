@@ -443,11 +443,6 @@ const ReportSummarySectionSummaryOfConcerns = ({
                               onUpdateImages(updatedImages);
                             }
                           }}
-                          onRemove={
-                            isAdmin && image
-                              ? () => handleRemoveImage(index)
-                              : undefined
-                          }
                         />
                       </div>
                     ))}
