@@ -184,9 +184,14 @@ const ReportSummarySectionSummaryOfConcerns = ({
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [isExpanded1, setIsExpanded1] = useState(true);
+  const [isExpanded2, setIsExpanded2] = useState(true);
 
   const toggleExpanded1 = () => {
     setIsExpanded1(!isExpanded1);
+  };
+
+  const toggleExpanded2 = () => {
+    setIsExpanded2(!isExpanded2);
   };
 
   const toggleExpanded = () => {
@@ -300,16 +305,161 @@ const ReportSummarySectionSummaryOfConcerns = ({
     ({ flag }) => isAdmin || flag
   );
 
+  // Split concerns into two groups of 10 each
+  const concernsGroup1 = visibleConcerns.slice(0, 10);
+  const concernsGroup2 = visibleConcerns.slice(10, 20);
+
+  const renderConcernGroup = (
+    concerns: typeof visibleConcerns,
+    groupNumber: number
+  ) => {
+    if (concerns.length === 0) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="p-6 rounded-xl border-2 border-gray-200 bg-gradient-to-r from-green-50 to-blue-50"
+        >
+          <div className="flex items-start gap-3">
+            <Shield className="text-green-600 flex-shrink-0" size={24} />
+            <div className="flex-1">
+              <h3 className="font-medium text-green-800 text-lg">
+                {groupNumber === 1
+                  ? "No Primary Concerns Detected"
+                  : "No Additional Concerns Detected"}
+              </h3>
+              <p className="text-gray-700 text-sm mt-1">
+                {groupNumber === 1
+                  ? "No significant health, safety, or combustion issues were found during the assessment. Your home appears to be in good condition."
+                  : "No additional concerns were identified in this category."}
+              </p>
+
+              {isAdmin && groupNumber === 1 && (
+                <Button
+                  onClick={addConcern}
+                  variant="outline"
+                  className="mt-4 border-[#FF6700] text-[#FF6700] hover:bg-[#FF6700] hover:text-white"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New Concern
+                </Button>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+
+    return (
+      <div>
+        {/* Add New Concern button when there are already concerns and it's group 1 */}
+        {isAdmin && groupNumber === 1 && (
+          <div className="flex justify-start pb-4">
+            <Button
+              onClick={addConcern}
+              className="bg-[#FF6700] hover:bg-[#FF6700]/90 text-white"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Add New Concern
+            </Button>
+          </div>
+        )}
+
+        {concerns.map((concern, index) => {
+          const ConcernIcon = getIconForConcern(concern.name);
+          const actualIndex = summaryOfConcerns.findIndex((c) => c === concern);
+
+          return (
+            <motion.div
+              key={`concern-${actualIndex}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 * index }}
+              className="p-4 rounded-xl mb-4 border-2 border-gray-200 bg-white"
+            >
+              <div className="flex items-center mb-2">
+                <ConcernIcon className="h-8 w-8 mr-2 text-[#ff6700]" />
+                <div className="font-semibold text-xl text-[#FF6700] flex-1">
+                  {isAdmin ? (
+                    <ReportEditableInput
+                      value={concern.name}
+                      onChange={(value) =>
+                        updateConcern(actualIndex, {
+                          name: value as string,
+                        })
+                      }
+                      placeholder="Enter concern name..."
+                    />
+                  ) : (
+                    concern.name || "Unnamed Concern"
+                  )}
+                </div>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteConcern(actualIndex)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 size={14} className="mr-1" />
+                    Delete
+                  </Button>
+                )}
+              </div>
+
+              <div className="text-gray-700 text-sm mb-3">
+                {isAdmin ? (
+                  <ReportEditableTextArea
+                    value={concern.concern}
+                    onChange={(value) =>
+                      updateConcern(actualIndex, {
+                        concern: value as string,
+                      })
+                    }
+                    placeholder="Describe the concern..."
+                  />
+                ) : (
+                  concern.concern || "No description provided"
+                )}
+              </div>
+
+              {isAdmin && (
+                <div className="flex items-center">
+                  <label className="flex items-center text-xs text-gray-500 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!concern.flag}
+                      onChange={(e) =>
+                        updateConcern(actualIndex, {
+                          flag: e.target.checked,
+                        })
+                      }
+                      className="mr-2 rounded border-gray-300 text-[#FF6700] focus:ring-[#FF6700]"
+                    />
+                    Display to User
+                  </label>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      id="summary-of-concerns"
       className="container"
     >
-      <div className="min-h-screen bg-[#eaeaea] flex-col items-center justify-center mb-52">
-        {/* Header Section */}
+      {/* Header Section */}
+      <section
+        className="min-h-screen bg-[#eaeaea] flex-col items-center justify-center mb-24"
+        id="summary-of-concerns"
+      >
         <Card className="max-h-fit w-full mx-auto mb-6">
           <CardHeader>
             <CardTitle className="flex items-center text-3xl font-bold text-[#ff6700]">
@@ -452,173 +602,85 @@ const ReportSummarySectionSummaryOfConcerns = ({
             </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
-      {/* Summary of Concerns Section */}
-      <Card className="bg-white max-h-fit p-8 rounded-xl shadow-sm mb-6 overflow-hidden">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-3xl font-bold flex items-center gap-2 text-[#FF6700]">
-              <AlertTriangle className="h-8 w-8" />
-              Summary of Concerns
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleExpanded1}
-              className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
-              aria-label={isExpanded1 ? "Hide section" : "Show section"}
-            >
-              <ChevronUp
-                className={`w-6 h-6 transition-transform duration-300 ${isExpanded1 ? "" : "transform rotate-180"}`}
-              />
-            </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <div
-            className={`overflow-hidden transition-all duration-500 ease-in-out ${
-              isExpanded1 ? "max-h-[8000px] opacity-100" : "max-h-0 opacity-0"
-            }`}
-          >
-            <div className="grid gap-4">
-              {visibleConcerns.length > 0 ? (
-                <div>
-                  {/* Add New Concern button when there are already concerns */}
-                  {isAdmin && (
-                    <div className="flex justify-start pb-4">
-                      <Button
-                        onClick={addConcern}
-                        className="bg-[#FF6700] hover:bg-[#FF6700]/90 text-white"
-                      >
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Add New Concern
-                      </Button>
-                    </div>
-                  )}
-
-                  {visibleConcerns.map((concern, index) => {
-                    const ConcernIcon = getIconForConcern(concern.name);
-                    const actualIndex = summaryOfConcerns.findIndex(
-                      (c) => c === concern
-                    );
-
-                    return (
-                      <motion.div
-                        key={`concern-${actualIndex}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 * index }}
-                        className="p-4 rounded-xl mb-4 border-2 border-gray-200 bg-white"
-                      >
-                        <div className="flex items-center mb-2">
-                          <ConcernIcon className="h-8 w-8 mr-2 text-[#ff6700]" />
-                          <div className="font-semibold text-xl text-[#FF6700] flex-1">
-                            {isAdmin ? (
-                              <ReportEditableInput
-                                value={concern.name}
-                                onChange={(value) =>
-                                  updateConcern(actualIndex, {
-                                    name: value as string,
-                                  })
-                                }
-                                placeholder="Enter concern name..."
-                              />
-                            ) : (
-                              concern.name || "Unnamed Concern"
-                            )}
-                          </div>
-                          {isAdmin && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteConcern(actualIndex)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 size={14} className="mr-1" />
-                              Delete
-                            </Button>
-                          )}
-                        </div>
-
-                        <div className="text-gray-700 text-sm mb-3">
-                          {isAdmin ? (
-                            <ReportEditableTextArea
-                              value={concern.concern}
-                              onChange={(value) =>
-                                updateConcern(actualIndex, {
-                                  concern: value as string,
-                                })
-                              }
-                              placeholder="Describe the concern..."
-                            />
-                          ) : (
-                            concern.concern || "No description provided"
-                          )}
-                        </div>
-
-                        {isAdmin && (
-                          <div className="flex items-center">
-                            <label className="flex items-center text-xs text-gray-500 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={!!concern.flag}
-                                onChange={(e) =>
-                                  updateConcern(actualIndex, {
-                                    flag: e.target.checked,
-                                  })
-                                }
-                                className="mr-2 rounded border-gray-300 text-[#FF6700] focus:ring-[#FF6700]"
-                              />
-                              Display to User
-                            </label>
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="p-6 rounded-xl border-2 border-gray-200 bg-gradient-to-r from-green-50 to-blue-50"
-                >
-                  <div className="flex items-start gap-3">
-                    <Shield
-                      className="text-green-600 flex-shrink-0"
-                      size={24}
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-green-800 text-lg">
-                        No Concerns Detected
-                      </h3>
-                      <p className="text-gray-700 text-sm mt-1">
-                        No significant health, safety, or combustion issues were
-                        found during the assessment. Your home appears to be in
-                        good condition.
-                      </p>
-
-                      {isAdmin && (
-                        <Button
-                          onClick={addConcern}
-                          variant="outline"
-                          className="mt-4 border-[#FF6700] text-[#FF6700] hover:bg-[#FF6700] hover:text-white"
-                        >
-                          <PlusCircle className="h-4 w-4 mr-2" />
-                          Add New Concern
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+      {/* Summary of Concerns Section 1 (First 10 concerns) */}
+      <section id="summary-of-concerns-1">
+        <Card className="bg-white max-h-fit p-8 rounded-xl shadow-sm mb-6 overflow-hidden">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-3xl font-bold flex items-center gap-2 text-[#FF6700]">
+                <AlertTriangle className="h-8 w-8" />
+                Summary of Concerns - Primary Issues
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleExpanded1}
+                className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
+                aria-label={isExpanded1 ? "Hide section" : "Show section"}
+              >
+                <ChevronUp
+                  className={`w-6 h-6 transition-transform duration-300 ${isExpanded1 ? "" : "transform rotate-180"}`}
+                />
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+
+          <CardContent>
+            <div
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                isExpanded1 ? "max-h-[8000px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="grid gap-4">
+                {renderConcernGroup(concernsGroup1, 1)}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Summary of Concerns Section 2 (Next 10 concerns) */}
+      {concernsGroup2.length > 0 && (
+        <section id="summary-of-concerns-2">
+          <Card className="bg-white max-h-fit p-8 rounded-xl shadow-sm mb-6 overflow-hidden">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-3xl font-bold flex items-center gap-2 text-[#FF6700]">
+                  <AlertTriangle className="h-8 w-8" />
+                  Summary of Concerns - Additional Issues
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleExpanded2}
+                  className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
+                  aria-label={isExpanded2 ? "Hide section" : "Show section"}
+                >
+                  <ChevronUp
+                    className={`w-6 h-6 transition-transform duration-300 ${isExpanded2 ? "" : "transform rotate-180"}`}
+                  />
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  isExpanded2
+                    ? "max-h-[8000px] opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="grid gap-4">
+                  {renderConcernGroup(concernsGroup2, 2)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {/* Image Picker Dialog - only show if images are loaded and no error */}
       {isAdmin && !isLoadingImages && !imageError && (

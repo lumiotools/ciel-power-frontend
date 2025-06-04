@@ -1,11 +1,6 @@
-import Image from "next/image";
-
 export default function AboutCredentials() {
   return (
-    <section
-      className="bg-white max-h-fit p-8 w-full"
-      id="intro-about"
-    >
+    <section className="bg-white max-h-fit p-8 w-full" id="intro-about">
       <div className="w-full mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-[#818287] mb-10">
           About Ciel Power
@@ -13,13 +8,18 @@ export default function AboutCredentials() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* PSE&G Trade Ally Card */}
-          <div className="rounded-lg border border-gray-200 p-8 flex flex-col items-center text-center">
-            <div className="h-48 w-48 relative mb-8">
-              <Image
-                src="/image 22.png"
-                alt="PSE&G Trade Ally Award"
-                fill
-                style={{ objectFit: "contain" }}
+          <div className="rounded-lg border border-gray-200 p-6 flex flex-col items-center text-center min-h-[400px]">
+            <div className="h-56 w-full mb-6 flex items-center justify-center">
+              <div
+                className="w-full h-full max-w-[200px]"
+                style={{
+                  backgroundImage: "url('/image 22.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="PSE&G Trade Ally Award"
               />
             </div>
             <p className="text-[#333333] text-lg">
@@ -32,13 +32,18 @@ export default function AboutCredentials() {
           </div>
 
           {/* BPI Goldstar Card */}
-          <div className="rounded-lg border border-gray-200 p-8 flex flex-col items-center text-center">
-            <div className="h-48 w-48 relative mb-8">
-              <Image
-                src="/image 23.png"
-                alt="Building Performance Institute Logo"
-                fill
-                style={{ objectFit: "contain" }}
+          <div className="rounded-lg border border-gray-200 p-6 flex flex-col items-center text-center min-h-[400px]">
+            <div className="h-56 w-full mb-6 flex items-center justify-center">
+              <div
+                className="w-full h-full max-w-[200px]"
+                style={{
+                  backgroundImage: "url('/image 23.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="Building Performance Institute Logo"
               />
             </div>
             <p className="text-[#333333] text-lg">
@@ -51,13 +56,18 @@ export default function AboutCredentials() {
           </div>
 
           {/* BBB Card */}
-          <div className="rounded-lg border border-gray-200 p-8 flex flex-col items-center text-center">
-            <div className="h-48 w-48 relative mb-8">
-              <Image
-                src="/image 24.png"
-                alt="Better Business Bureau Logo"
-                fill
-                style={{ objectFit: "contain" }}
+          <div className="rounded-lg border border-gray-200 p-6 flex flex-col items-center text-center min-h-[400px]">
+            <div className="h-56 w-full mb-6 flex items-center justify-center">
+              <div
+                className="w-full h-full max-w-[200px]"
+                style={{
+                  backgroundImage: "url('/image 24.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="Better Business Bureau Logo"
               />
             </div>
             <p className="text-[#333333] text-lg">

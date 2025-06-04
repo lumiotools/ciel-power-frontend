@@ -1,5 +1,6 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import Image from "next/image";
 
 interface ParsedAddress {
   street: string;
@@ -113,13 +114,18 @@ export default function IntroSection() {
           </div>
         </div>
         {/* Right side - Home image */}
-        <div className="relative w-full h-[300px] md:h-auto overflow-hidden">
-          <Image
-            src="/house-report.png"
-            alt="Home exterior"
-            fill
-            style={{ objectFit: "cover" }}
-            priority
+        <div className="relative w-full h-[300px] md:h-full">
+          {/* Using a div with background image for better print/capture compatibility */}
+          <div
+            className="w-full h-full min-h-[300px]"
+            style={{
+              backgroundImage: "url('/house-report.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+            role="img"
+            aria-label="Home exterior"
           />
         </div>
       </div>
