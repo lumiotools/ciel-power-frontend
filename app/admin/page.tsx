@@ -214,36 +214,8 @@ export default function AdminPage() {
     }
   };
 
-  // Populate auditors only if not done before
-  const populateAuditors = async () => {
-    if (hasPopulatedAuditors) {
-      console.log("Auditors already populated. Skipping.");
-      return;
-    }
-
-    setAuditorsLoading(true);
-    try {
-      const response = await fetch("/api/admin/auditors/populate");
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("Auditors fetched successfully");
-        setHasPopulatedAuditors(true); // Mark as done
-        await fetchAuditors(); // refresh table after populate
-      } else {
-        toast.error(data.message || "Failed to fetch auditors");
-      }
-    } catch (error) {
-      console.error("Error populating auditors:", error);
-      toast.error("An error occurred while populating auditors");
-    } finally {
-      setAuditorsLoading(false);
-    }
-  };
-
-  // Run populateAuditors only once on mount
   useEffect(() => {
-    populateAuditors();
+    fetchAuditors();
   }, []);
 
   // Auditors search handler

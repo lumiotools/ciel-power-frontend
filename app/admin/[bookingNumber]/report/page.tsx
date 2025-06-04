@@ -500,7 +500,7 @@ const ReportPage = ({
       </div>
 
       <div className="container mx-auto bg-white" ref={scrollRef}>
-        <div className="mb-6">
+        <div className="mb-6 px-10">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-2xl font-bold text-gray-800 ml-8">
               View Report
@@ -544,7 +544,7 @@ const ReportPage = ({
             ).map((tab) => (
               <button
                 key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
+                className={`relative py-4 px-6 ml-2 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
                   activeSubMenu === tab
                     ? tab === "overview"
                       ? "text-[#67B502]"
