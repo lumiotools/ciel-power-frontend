@@ -1,11 +1,6 @@
-import Image from "next/image";
-
 export default function AchievementsSection() {
   return (
-    <section
-      className="bg-white max-h-fit p-8 w-full"
-      id="intro-achievements"
-    >
+    <section className="bg-white max-h-fit p-8 w-full" id="intro-achievements">
       <div className="w-full mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-[#818287] mb-10">
           Achievements & Accolades
@@ -15,12 +10,17 @@ export default function AchievementsSection() {
           {/* Awards Card */}
           <div className="rounded-lg border border-gray-200">
             <div className="flex flex-col md:flex-row items-center">
-              <div className="w-80 h-80 relative flex-shrink-0">
-                <Image
-                  src="/image 25.png"
-                  alt="Energy Star Award"
-                  fill
-                  style={{ objectFit: "contain" }}
+              <div className="w-80 h-80 flex-shrink-0">
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: "url('/image 25.png')",
+                    backgroundSize: "contain",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                  role="img"
+                  aria-label="Energy Star Award"
                 />
               </div>
 
@@ -54,32 +54,47 @@ export default function AchievementsSection() {
 
             <div className="flex flex-col items-center justify-center space-y-2">
               <div className="space-y-6 flex flex-row items-center justify-center gap-x-5 -mt-20">
-                <div className="h-64 w-64 relative">
-                  <Image
-                    src="/image 26.png"
-                    alt="ABC World News Tonight"
-                    fill
-                    style={{ objectFit: "contain" }}
+                <div className="h-64 w-64">
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: "url('/image 26.png')",
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    role="img"
+                    aria-label="ABC World News Tonight"
                   />
                 </div>
 
-                <div className="h-64 w-64 relative">
-                  <Image
-                    src="/image 27.png"
-                    alt="ABC Good Morning America"
-                    fill
-                    style={{ objectFit: "contain" }}
+                <div className="h-64 w-64">
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: "url('/image 27.png')",
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    role="img"
+                    aria-label="ABC Good Morning America"
                   />
                 </div>
               </div>
 
               <div>
-                <div className="w-[700px] h-[100px] relative -mt-20">
-                  <Image
-                    src="/image 28.png"
-                    alt="The New York Times"
-                    fill
-                    style={{ objectFit: "contain" }}
+                <div className="w-[700px] h-[100px] -mt-20">
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: "url('/image 28.png')",
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    role="img"
+                    aria-label="The New York Times"
                   />
                 </div>
               </div>

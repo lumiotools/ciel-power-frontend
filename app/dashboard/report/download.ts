@@ -36,10 +36,10 @@ const PAGE_CONFIG: {
   orientation: "portrait",
   unit: "mm",
   margins: {
-    top: 8,
-    right: 8,
-    bottom: 12,
-    left: 8,
+    top: 2,
+    right: 2,
+    bottom: 2,
+    left: 2,
   },
 };
 
@@ -150,6 +150,8 @@ const getSectionColor = (section: string): string => {
       return "#FF6700";
     case "solutions":
       return "#67B502";
+    case "pearl-certification":
+      return "#67B502";
     default:
       return "#000000"; // black
   }
@@ -193,12 +195,13 @@ const addSectionHeading = (
   pdf.setTextColor(0, 0, 0);
 };
 
-// Helper function to add an image to the PDF
+// Helper function to add an image to the PDF with custom spacing
 const addImageToPDF = (
   pdf: jsPDF,
   canvas: HTMLCanvasElement,
   startY = 20,
-  section?: string
+  section?: string,
+  elementId?: string
 ): number => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -243,9 +246,11 @@ const addImageToPDF = (
     "FAST"
   );
 
-  // Return the new Y position with adjusted gap based on section
-  // Remove gap for insulation sections
-  if (section === "insulation") {
+  // Return the new Y position with adjusted gap based on section and element
+  // Add extra spacing after intro-header specifically
+  if (elementId === "intro-header") {
+    return startY + scaledHeight + 24; // Extra spacing after intro-header (increased from 8 to 12)
+  } else if (section === "insulation") {
     return startY + scaledHeight; // No additional gap for insulation
   } else {
     return startY + scaledHeight + 3; // Regular gap for other sections
@@ -342,6 +347,8 @@ const formatSectionName = (section: string): string => {
       return "Concerns";
     case "solutions":
       return "Solutions";
+    case "pearl-certification":
+      return "Pearl Certification";
     default:
       return section.charAt(0).toUpperCase() + section.slice(1);
   }
@@ -360,6 +367,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         "cooling",
         "concerns",
         "solutions",
+        "pearl-certification",
       ],
       customFileName:
         config?.customFileName ||
@@ -488,16 +496,14 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
     // Define the report structure based on the specified requirements
     // Using the exact groupings as specified
     const allReportSections = [
-      // Overview - Regrouped elements as requested
+      // Overview - Keep elements together but add spacing between intro-header and intro-contents
       {
         section: "overview" as ReportSection,
         tabName: "Introduction",
         pages: [
-          { ids: ["intro-header"] },
-          { ids: ["intro-about"] },
-          { ids: ["intro-achievements"] },
-          { ids: ["intro-sustainability"] },
-          { ids: ["intro-energy"] },
+          { ids: ["intro-notes", "intro-header", "intro-contents"] },
+          { ids: ["intro-goals", "intro-about", "intro-achievements"] },
+          { ids: ["intro-sustainability", "intro-energy"] },
           { ids: ["intro-science"] },
         ],
       },
@@ -519,7 +525,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         pages: [
           {
             ids: [
-              "insulation-overview",
+              "insulation-overview-intro",
               "technical-aspects",
               "insulation-benefits",
             ],
@@ -547,9 +553,9 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         section: "concerns" as ReportSection,
         tabName: "Concerns",
         pages: [
-          { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
-          { ids: ["future-solutions", "environmental-impact"] },
-          { ids: ["project-costs", "tax-credits"] },
+          { ids: ["summary-of-concerns"] },
+          { ids: ["summary-of-concerns-1"] },
+          { ids: ["summary-of-concerns-2"] },
         ],
       },
       {
@@ -559,6 +565,15 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
           { ids: ["summary-of-solutions"] },
           { ids: ["future-solutions", "environmental-impact"] },
           { ids: ["project-costs", "tax-credits"] },
+        ],
+      },
+      {
+        section: "pearl-certification" as ReportSection,
+        tabName: "Pearl Certification",
+        pages: [
+          { ids: ["pearl-discover", "pearl-what-is"] },
+          { ids: ["pearl-package"] },
+          { ids: ["pearl-why-matters", "pearl-peace-of-mind", "pearl-access"] },
         ],
       },
     ];
@@ -630,8 +645,14 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
           const canvas = await captureElement(id);
           if (canvas) {
-            // Pass the section name to addImageToPDF
-            currentY = addImageToPDF(pdf, canvas, currentY, section.section);
+            // Pass the section name and element ID to addImageToPDF for custom spacing
+            currentY = addImageToPDF(
+              pdf,
+              canvas,
+              currentY,
+              section.section,
+              id
+            );
           }
         }
 

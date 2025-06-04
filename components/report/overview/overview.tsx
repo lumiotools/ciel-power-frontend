@@ -17,7 +17,7 @@ const ReportOverviewSection = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="container bg-[#eaeaea]"
-      id="intro-header"
+      id="intro-top"
     >
       <div className="min-h-screen flex flex-col items-center justify-center">
         <NotesSection />
