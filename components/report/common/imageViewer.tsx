@@ -78,7 +78,7 @@ export function ReportImageViewer({
             </button>
           )}
         </div>
-        {allowSelection ? (
+        {/* {allowSelection ? (
           <ReportEditableInput
             className="w-full"
             value={selectedImage?.description ?? "Image Description"}
@@ -88,7 +88,7 @@ export function ReportImageViewer({
           />
         ) : (
           selectedImage?.description
-        )}
+        )} */}
       </div>
     </div>
   );

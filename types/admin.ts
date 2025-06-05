@@ -16,6 +16,7 @@ export interface Booking {
   currentStage: string;
   googleDriveFolder?: string;
   profilePictureUrl?: string | null;
+  imageId?: string;
 }
 
 export interface ContractDetails {
