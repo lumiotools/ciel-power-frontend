@@ -2,11 +2,14 @@
 
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { ChevronUp, Fan, Plus } from 'lucide-react';
+import { ChevronUp, Fan, Trash2 } from "lucide-react";
 import { ReportImageViewer } from "./imageViewer-solutions";
 import { ReportImagePicker } from "./imagePicker-solutions";
-import { SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
+import type { SolutionsAndRecommendationsData } from "@/app/admin/[bookingNumber]/report/page";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import ReportEditableInput from "../common/editableInput";
 
 interface HouseImage {
   mimeType: string;
@@ -20,12 +23,21 @@ interface HouseImage {
   link: string;
 }
 
+// Add interface for solution notes data
+interface SolutionNotesData {
+  title: string;
+  subtitle: string;
+  notes: string;
+}
+
 interface noteSectionLoremIpsumHeadingProps {
   isAdmin?: boolean;
   houseImages?: HouseImage[];
   selectedImages?: HouseImage[];
   onUpdateImages?: (images: HouseImage[]) => void;
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
+  notesData?: SolutionNotesData;
+  onUpdateNotes?: (notes: SolutionNotesData) => void;
 }
 
 const NotesSection = ({
@@ -34,18 +46,18 @@ const NotesSection = ({
   selectedImages = [],
   onUpdateImages,
   solutionsAndRecommendations,
+  notesData,
+  onUpdateNotes,
 }: noteSectionLoremIpsumHeadingProps) => {
-  const [notes, setNotes] = useState("");
+  // Use notes data from props or fallback to defaults
+  const currentNotes = notesData || {
+    title: "Solution Details",
+    subtitle: "Add subheading",
+    notes: "",
+  };
+
   const [isExpanded, setIsExpanded] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Load notes from sessionStorage on component mount
-  useEffect(() => {
-    const savedNotes = sessionStorage.getItem("solutionsNotes");
-    if (savedNotes) {
-      setNotes(savedNotes);
-    }
-  }, []);
 
   const [isUser, setIsUser] = useState(false);
   const pathname = usePathname();
@@ -55,14 +67,19 @@ const NotesSection = ({
     }
   }, [pathname]);
 
-  // Save notes to sessionStorage whenever they change
-  useEffect(() => {
-    sessionStorage.setItem("solutionsNotes", notes);
-  }, [notes]);
+  // Update notes data function
+  const updateNotesData = (updates: Partial<SolutionNotesData>) => {
+    if (onUpdateNotes) {
+      onUpdateNotes({
+        ...currentNotes,
+        ...updates,
+      });
+    }
+  };
 
   // Handle notes change
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
+    updateNotesData({ notes: e.target.value });
   };
 
   // Auto-resize textarea based on content
@@ -71,9 +88,9 @@ const NotesSection = ({
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [notes]);
+  }, [currentNotes.notes]);
 
-  // Dummy state for demonstration (replace with your actual logic)
+  // Image handling
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(
     null
@@ -87,9 +104,11 @@ const NotesSection = ({
         const updatedImages = [...selectedImages];
         updatedImages[editingImageIndex] = selectedImage;
         onUpdateImages(updatedImages);
+        toast.success("Image updated");
       } else {
         // Add new image
         onUpdateImages([...selectedImages, selectedImage]);
+        toast.success("Image added");
       }
     }
     setIsImagePickerOpen(false);
@@ -135,22 +154,61 @@ const NotesSection = ({
             <div className="mr-2" style={{ color: "#67b502" }}>
               <Fan size={32} />
             </div>
-            <h2 className="text-2xl font-bold" style={{ color: "#67b502" }}>
-              Lorem Ipsum Heading
-            </h2>
+            {isAdmin ? (
+              <ReportEditableInput
+                value={currentNotes.title}
+                onChange={(value) => {
+                  updateNotesData({ title: value as string });
+                }}
+                placeholder="Solution Details"
+                className="!text-2xl !font-bold !text-[#67b502]"
+              />
+            ) : (
+              <h2 className="text-2xl font-bold" style={{ color: "#67b502" }}>
+                {currentNotes.title || "Solution Details"}
+              </h2>
+            )}
           </div>
-          <button
-            onClick={() => setIsExpanded((v) => !v)}
-            className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
-            aria-label={isExpanded ? "Hide section" : "Show section"}
-            style={{ color: "#67b502" }}
-          >
-            <ChevronUp
-              className={`w-6 h-6 transition-transform duration-300 ${
-                isExpanded ? "" : "transform rotate-180"
-              }`}
-            />
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to delete this solution section?"
+                    )
+                  ) {
+                    // Clear the notes data
+                    updateNotesData({
+                      title: "Solution Details",
+                      subtitle: "",
+                      notes: "",
+                    });
+                    // Clear the images
+                    if (onUpdateImages) {
+                      onUpdateImages([]);
+                    }
+                    toast.success("Solution section deleted");
+                  }
+                }}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 size={16} className="mr-1" />
+              </Button>
+            )}
+            <button
+              onClick={() => setIsExpanded((v) => !v)}
+              className="text-[#67b502] transition-transform duration-300 border-2 border-[#67b502] rounded-full p-0.5"
+              aria-label={isExpanded ? "Hide section" : "Show section"}
+              style={{ color: "#67b502" }}
+            >
+              <ChevronUp
+                className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
+              />
+            </button>
+          </div>
         </div>
         <div
           className={`overflow-hidden transition-all duration-500 ease-in-out ${
@@ -164,20 +222,32 @@ const NotesSection = ({
                 style={{ color: "#67b502" }}
               >
                 <Fan size={24} />
-                <h3
-                  className="text-1xl font-semibold"
-                  style={{ color: "#67b502" }}
-                >
-                  Lorem Ipsum Sub heading
-                </h3>
+                {isAdmin ? (
+                  <ReportEditableInput
+                    value={currentNotes.subtitle}
+                    onChange={(value) => {
+                      updateNotesData({ subtitle: value as string });
+                    }}
+                    placeholder="Add subheading"
+                    className="!text-xl !font-semibold !text-[#67b502]"
+                  />
+                ) : (
+                  <h3
+                    className="text-xl font-semibold"
+                    style={{ color: "#67b502" }}
+                  >
+                    {currentNotes.subtitle || "Add subheading"}
+                  </h3>
+                )}
               </div>
               <div className="w-full">
                 <textarea
                   disabled={isUser}
                   ref={textareaRef}
-                  value={notes}
+                  value={currentNotes.notes}
                   onChange={handleNotesChange}
-                  className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none min-h-[265px] max-h-[265px] resize-none overflow-y-auto bg-white"
+                  placeholder="Add description here"
+                  className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#67b502] focus:border-transparent min-h-[265px] max-h-[265px] resize-none overflow-y-auto bg-white disabled:bg-gray-50 disabled:cursor-not-allowed"
                   aria-label="Solutions notes"
                 />
               </div>
@@ -217,7 +287,11 @@ const NotesSection = ({
         <ReportImagePicker
           buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
           images={houseImages}
-          selectedImage={editingImageIndex !== null ? selectedImages[editingImageIndex]?.id : undefined}
+          selectedImage={
+            editingImageIndex !== null
+              ? selectedImages[editingImageIndex]?.id
+              : undefined
+          }
           isOpen={isImagePickerOpen}
           onOpenChange={setIsImagePickerOpen}
           onSelectImage={handleSelectImage}

@@ -39,6 +39,13 @@ interface HouseImage {
   link: string;
 }
 
+// Add interface for assessment data
+interface AssessmentData {
+  title: string;
+  subtitle: string;
+  notes: string;
+}
+
 interface ReportSummarySectionSummaryOfConcernsProps {
   isAdmin?: boolean;
   summaryOfConcerns?: SummaryOfConcernsData[];
@@ -46,6 +53,9 @@ interface ReportSummarySectionSummaryOfConcernsProps {
   houseImages?: HouseImage[];
   selectedImages?: HouseImage[];
   onUpdateImages?: (images: HouseImage[]) => void;
+  // Add assessment data props
+  assessmentData?: AssessmentData;
+  onUpdateAssessment?: (assessment: AssessmentData) => void;
 }
 
 const ReportSummarySectionSummaryOfConcerns = ({
@@ -55,6 +65,8 @@ const ReportSummarySectionSummaryOfConcerns = ({
   houseImages: propHouseImages,
   selectedImages = [],
   onUpdateImages,
+  assessmentData,
+  onUpdateAssessment,
 }: ReportSummarySectionSummaryOfConcernsProps) => {
   const { userDetails } = useContext(AUTH_CONTEXT);
   const { bookingNumber: adminBookingNumber } = useParams();
@@ -253,14 +265,6 @@ const ReportSummarySectionSummaryOfConcerns = ({
     setIsImagePickerOpen(true);
   };
 
-  const handleRemoveImage = (index: number) => {
-    if (onUpdateImages) {
-      const updatedImages = selectedImages.filter((_, i) => i !== index);
-      onUpdateImages(updatedImages);
-      toast.success("Image removed");
-    }
-  };
-
   // Retry fetching images
   const retryFetchImages = () => {
     setImageError(null);
@@ -273,25 +277,28 @@ const ReportSummarySectionSummaryOfConcerns = ({
     (_, index) => selectedImages[index] || null
   );
 
-  const [notes, setNotes] = useState("");
+  // Use assessment data from props or fallback to defaults
+  const currentAssessment = assessmentData || {
+    title: "Assessment Details",
+    subtitle: "",
+    notes: "",
+  };
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load notes from sessionStorage on component mount
-  useEffect(() => {
-    const savedNotes = sessionStorage.getItem("concernsNotes");
-    if (savedNotes) {
-      setNotes(savedNotes);
+  // Update assessment data function
+  const updateAssessmentData = (updates: Partial<AssessmentData>) => {
+    if (onUpdateAssessment) {
+      onUpdateAssessment({
+        ...currentAssessment,
+        ...updates,
+      });
     }
-  }, []);
-
-  // Save notes to sessionStorage whenever they change
-  useEffect(() => {
-    sessionStorage.setItem("concernsNotes", notes);
-  }, [notes]);
+  };
 
   // Handle notes change
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
+    updateAssessmentData({ notes: e.target.value });
   };
 
   useEffect(() => {
@@ -299,7 +306,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [notes]);
+  }, [currentAssessment.notes]);
 
   const visibleConcerns = summaryOfConcerns.filter(
     ({ flag }) => isAdmin || flag
@@ -403,7 +410,6 @@ const ReportSummarySectionSummaryOfConcerns = ({
                     className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 size={14} className="mr-1" />
-                    Delete
                   </Button>
                 )}
               </div>
@@ -483,20 +489,78 @@ const ReportSummarySectionSummaryOfConcerns = ({
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center text-3xl font-bold text-[#ff6700]">
                 <Fan size={32} className="mr-4" />
-                Assessment Details
+                {isAdmin ? (
+                  <ReportEditableInput
+                    value={currentAssessment.title}
+                    onChange={(value) => {
+                      updateAssessmentData({ title: value as string });
+                    }}
+                    placeholder="Enter assessment title..."
+                    className="!text-3xl !font-bold !text-[#ff6700]"
+                  />
+                ) : (
+                  currentAssessment.title
+                )}
               </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleExpanded}
-                className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
-                aria-label={isExpanded ? "Hide section" : "Show section"}
-              >
-                <ChevronUp
-                  className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
-                />
-              </Button>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this assessment section?"
+                        )
+                      ) {
+                        // Clear the assessment data
+                        updateAssessmentData({
+                          title: "Assessment Details",
+                          subtitle: "",
+                          notes: "",
+                        });
+                        // Clear the images
+                        if (onUpdateImages) {
+                          onUpdateImages([]);
+                        }
+                        toast.success("Assessment section deleted");
+                      }
+                    }}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 size={16} className="mr-1" />
+                    Delete
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleExpanded}
+                  className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
+                  aria-label={isExpanded ? "Hide section" : "Show section"}
+                >
+                  <ChevronUp
+                    className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "" : "transform rotate-180"}`}
+                  />
+                </Button>
+              </div>
             </div>
+            {isAdmin ? (
+              <ReportEditableInput
+                value={currentAssessment.subtitle}
+                onChange={(value) => {
+                  updateAssessmentData({ subtitle: value as string });
+                }}
+                placeholder="Enter subtitle..."
+                className="!text-lg !text-gray-600 !mt-2"
+              />
+            ) : (
+              currentAssessment.subtitle && (
+                <p className="text-lg text-gray-600 mt-2">
+                  {currentAssessment.subtitle}
+                </p>
+              )
+            )}
           </CardHeader>
 
           <CardContent>
@@ -515,9 +579,9 @@ const ReportSummarySectionSummaryOfConcerns = ({
                     <textarea
                       disabled={isUser}
                       ref={textareaRef}
-                      value={notes}
+                      value={currentAssessment.notes}
                       onChange={handleNotesChange}
-                      placeholder="Add assessment notes here..."
+                      placeholder="Add description here"
                       className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6700] focus:border-transparent min-h-[265px] max-h-[265px] resize-none overflow-y-auto disabled:bg-gray-50 disabled:cursor-not-allowed"
                       aria-label="Assessment notes"
                     />
@@ -526,10 +590,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
 
                 {/* Right Image Areas with enhanced error handling */}
                 <div className="w-1/2 flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-[#ff6700]">
-                      Assessment Images
-                    </h3>
+                  <div className="flex items-center justify-end">
                     <div className="flex items-center gap-2">
                       {isLoadingImages && (
                         <div className="flex items-center gap-2 text-sm text-[#ff6700]">
