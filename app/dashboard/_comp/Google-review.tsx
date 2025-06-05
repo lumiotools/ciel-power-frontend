@@ -51,7 +51,60 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({
         const data = await response.json();
 
         if (data.success) {
-          setReviews(data.data.reviews);
+          // setReviews(data.data.reviews);
+          setReviews([
+            {
+              id: 1,
+              author: "Yosef Sharbat",
+              initials: "YS",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-[#EE702E]",
+              review:
+                "Wow! Jesse was so nice, respectful and very knowledgeable! He was patient with me and answered all my questions with a smile on his face. I would definitely recommend Cielpower to audit your home.",
+            },
+            {
+              id: 2,
+              author: "Hostos Monegro",
+              initials: "HM",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-blue-500",
+              review:
+                "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed. Would definitely recommend Ciel Power to anyone looking for energy efficiency services!",
+            },
+            {
+              id: 3,
+              author: "JOHN PERRY",
+              initials: "JP",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-green-500",
+              review:
+                "A little while back we had a Ciel Power Energy audit by Jesse Lubkiewicz and was completely satisfied. Jesse was punctual and very professional as he did a complete examination of the interior and exterior of our home and he actually explained in terms we could comprehend of what he was doing. he did audit with no disruption to our home and left no mess, Jesse seemed to really like his work and talking with people. Anyone requiring a Ciel Audit should ask for Jesse!",
+            },
+            {
+              id: 4,
+              author: "James Van Ness",
+              initials: "JVN",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-purple-500",
+              review:
+                "I’ve done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it’s pretty common for me to have quality issues with other contractors work.  However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project. I just recommended them to my son, so that’s so that says something!",
+            },
+            {
+              id: 5,
+              author: "Fred Twum-Acheampong",
+              initials: "FTA",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-red-500",
+              review:
+                "Mason, Krystal, and the rest of the team were great! They performed a comprehensive audit of my home, installed a bunch of insulation to improve the efficiency of the house, and were friendly and accommodating the entire time. Highly recommend if you are looking for energy-improvement projects!",
+            },
+          ]);
+
           setLastUpdated(data.data.last_updated);
         } else {
           throw new Error(data.error || "Failed to fetch reviews");
@@ -66,23 +119,53 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({
         setReviews([
           {
             id: 1,
-            author: "Hostos Monegro",
-            initials: "HM",
-            date: "15/04/2025",
+            author: "Yosef Sharbat",
+            initials: "YS",
+            date: "", // You can add a real date if available
             rating: 5,
             color: "bg-[#EE702E]",
             review:
-              "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed.",
+              "Wow! Jesse was so nice, respectful and very knowledgeable! He was patient with me and answered all my questions with a smile on his face. I would definitely recommend Cielpower to audit your home.",
           },
           {
             id: 2,
-            author: "James Van Ness",
-            initials: "JV",
-            date: "10/04/2025",
+            author: "Hostos Monegro",
+            initials: "HM",
+            date: "", // You can add a real date if available
             rating: 5,
             color: "bg-blue-500",
             review:
-              "I've done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it's pretty common for me to have quality issues with other contractors work. However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project.",
+              "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed. Would definitely recommend Ciel Power to anyone looking for energy efficiency services!",
+          },
+          {
+            id: 3,
+            author: "JOHN PERRY",
+            initials: "JP",
+            date: "", // You can add a real date if available
+            rating: 5,
+            color: "bg-green-500",
+            review:
+              "A little while back we had a Ciel Power Energy audit by Jesse Lubkiewicz and was completely satisfied. Jesse was punctual and very professional as he did a complete examination of the interior and exterior of our home and he actually explained in terms we could comprehend of what he was doing. he did audit with no disruption to our home and left no mess, Jesse seemed to really like his work and talking with people. Anyone requiring a Ciel Audit should ask for Jesse!",
+          },
+          {
+            id: 4,
+            author: "James Van Ness",
+            initials: "JVN",
+            date: "", // You can add a real date if available
+            rating: 5,
+            color: "bg-purple-500",
+            review:
+              "I’ve done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it’s pretty common for me to have quality issues with other contractors work.  However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project. I just recommended them to my son, so that’s so that says something!",
+          },
+          {
+            id: 5,
+            author: "Fred Twum-Acheampong",
+            initials: "FTA",
+            date: "", // You can add a real date if available
+            rating: 5,
+            color: "bg-red-500",
+            review:
+              "Mason, Krystal, and the rest of the team were great! They performed a comprehensive audit of my home, installed a bunch of insulation to improve the efficiency of the house, and were friendly and accommodating the entire time. Highly recommend if you are looking for energy-improvement projects!",
           },
         ]);
       } finally {
