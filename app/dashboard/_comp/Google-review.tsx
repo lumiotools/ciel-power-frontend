@@ -1,58 +1,66 @@
-"use client"
+"use client";
 
-import { ChevronDown } from "lucide-react"
-import type React from "react"
-import { useRef, useState, useEffect } from "react"
+import { ChevronDown } from "lucide-react";
+import type React from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface Review {
-  id: number
-  author: string
-  initials: string
-  date: string
-  rating: number
-  color: string
-  review: string
+  id: number;
+  author: string;
+  initials: string;
+  date: string;
+  rating: number;
+  color: string;
+  review: string;
 }
 
 interface GoogleReviewProps {
-  bookingNumber?: string
-  apiEndpoint?: string
+  bookingNumber?: string;
+  apiEndpoint?: string;
 }
 
-const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", apiEndpoint = "/api/bookings" }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+const GoogleReview: React.FC<GoogleReviewProps> = ({
+  bookingNumber,
+  apiEndpoint = "/api/bookings",
+}) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   // Fetch reviews from API
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        setLoading(true)
-        const response = await fetch(`${apiEndpoint}/${bookingNumber}/google-reviews`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your auth method
-            "Content-Type": "application/json",
-          },
-        })
+        setLoading(true);
+        const response = await fetch(
+          `/api/user/bookings/${bookingNumber}/google-reviews`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your auth method
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json()
+        const data = await response.json();
 
         if (data.success) {
-          setReviews(data.data.reviews)
-          setLastUpdated(data.data.last_updated)
+          setReviews(data.data.reviews);
+          setLastUpdated(data.data.last_updated);
         } else {
-          throw new Error(data.error || "Failed to fetch reviews")
+          throw new Error(data.error || "Failed to fetch reviews");
         }
       } catch (err) {
-        console.error("Error fetching reviews:", err)
-        setError(err instanceof Error ? err.message : "Failed to fetch reviews")
+        console.error("Error fetching reviews:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch reviews"
+        );
 
         // Fallback to static data if API fails
         setReviews([
@@ -76,27 +84,31 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
             review:
               "I've done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it's pretty common for me to have quality issues with other contractors work. However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project.",
           },
-        ])
+        ]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchReviews()
-  }, [bookingNumber, apiEndpoint])
+    fetchReviews();
+  }, [bookingNumber, apiEndpoint]);
 
   // Function to render star ratings
   const renderStars = (rating: number) => {
-    const stars = []
+    const stars = [];
     for (let i = 0; i < rating; i++) {
       stars.push(
-        <svg key={i} className="w-5 h-5 text-[#EE702E] fill-current" viewBox="0 0 24 24">
+        <svg
+          key={i}
+          className="w-5 h-5 text-[#EE702E] fill-current"
+          viewBox="0 0 24 24"
+        >
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-        </svg>,
-      )
+        </svg>
+      );
     }
-    return stars
-  }
+    return stars;
+  };
 
   // Function to scroll left
   const scrollLeft = () => {
@@ -104,9 +116,9 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
       scrollContainerRef.current.scrollBy({
         left: -370, // Width of card (350px) + gap (20px)
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   // Function to scroll right
   const scrollRight = () => {
@@ -114,29 +126,33 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
       scrollContainerRef.current.scrollBy({
         left: 370, // Width of card (350px) + gap (20px)
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="mt-12 mb-8 rounded-xl p-6">
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+          <h3 className="text-2xl font-bold text-gray-700">
+            Our Google Reviews
+          </h3>
         </div>
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EE702E]"></div>
           <span className="ml-2 text-gray-600">Loading reviews...</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (error && reviews.length === 0) {
     return (
       <div className="mt-12 mb-8 rounded-xl p-6">
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+          <h3 className="text-2xl font-bold text-gray-700">
+            Our Google Reviews
+          </h3>
         </div>
         <div className="flex justify-center items-center h-32">
           <div className="text-red-500">
@@ -150,7 +166,7 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -158,12 +174,21 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
       <div className="mb-6">
         <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
         {lastUpdated && (
-          <p className="text-sm text-gray-500 mt-1">Last updated: {new Date(lastUpdated).toLocaleDateString()}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Last updated: {new Date(lastUpdated).toLocaleDateString()}
+          </p>
         )}
-        {error && <p className="text-sm text-yellow-600 mt-1">Using cached data due to: {error}</p>}
+        {error && (
+          <p className="text-sm text-yellow-600 mt-1">
+            Using cached data due to: {error}
+          </p>
+        )}
       </div>
       <div className="relative">
-        <div ref={scrollContainerRef} className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth">
+        <div
+          ref={scrollContainerRef}
+          className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth"
+        >
           {reviews.map((review) => (
             <div
               key={review.id}
@@ -233,7 +258,7 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default GoogleReview
+export default GoogleReview;
