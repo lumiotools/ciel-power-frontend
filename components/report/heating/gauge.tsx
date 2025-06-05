@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { motion } from "framer-motion"
 import type { JSX } from "react"
 import { Info } from "lucide-react"
@@ -22,16 +23,33 @@ interface ReportHeatingSectionGaugeProps {
   }
 }
 
-// Dynamic tooltip data based on heating system type with improved keyword matching
+// Check if title contains valid keywords for tooltip
+const hasValidKeywords = (title?: string) => {
+  if (!title) return false
+
+  const titleLower = title.toLowerCase()
+
+  // Check for specific keywords
+  const validKeywords = ["furnace", "water heater", "hot water", "boiler"]
+
+  return validKeywords.some((keyword) => titleLower.includes(keyword))
+}
+
+// Check if title is just a default title without keywords
+const isOnlyDefaultTitle = (title?: string) => {
+  if (!title) return false
+
+  // Check if it's a default title pattern (Your Home's Heating followed by optional number)
+  const defaultTitlePattern = /^Your Home's Heating\s*\d*$/i
+  return defaultTitlePattern.test(title)
+}
+
+// Dynamic tooltip data based on heating system type with exact keyword matching
 const getTooltipData = (heating?: ReportHeatingSectionGaugeProps["heating"]) => {
   const systemTitle = heating?.title?.toLowerCase() || heating?.type?.toLowerCase() || ""
 
-  // Check for Gas/Oil/Propane Furnace
-  if (
-    (systemTitle.includes("furnace") &&
-      (systemTitle.includes("gas") || systemTitle.includes("oil") || systemTitle.includes("propane"))) ||
-    (systemTitle.includes("furnace") && !systemTitle.includes("water"))
-  ) {
+  // Check for Furnace
+  if (systemTitle.includes("furnace")) {
     return {
       title: "Electrification Opportunity",
       content:
@@ -39,13 +57,8 @@ const getTooltipData = (heating?: ReportHeatingSectionGaugeProps["heating"]) => 
     }
   }
 
-  // Check for Gas/Oil/Propane Water Heater
-  if (
-    systemTitle.includes("water heater") ||
-    systemTitle.includes("hot water") ||
-    (systemTitle.includes("water") &&
-      (systemTitle.includes("gas") || systemTitle.includes("oil") || systemTitle.includes("propane")))
-  ) {
+  // Check for Water Heater
+  if (systemTitle.includes("water heater") || systemTitle.includes("hot water")) {
     return {
       title: "Electrification Opportunity",
       content:
@@ -53,20 +66,7 @@ const getTooltipData = (heating?: ReportHeatingSectionGaugeProps["heating"]) => 
     }
   }
 
-  // Check for Boiler + Central AC
-  if (
-    (systemTitle.includes("boiler") && systemTitle.includes("central")) ||
-    (systemTitle.includes("boiler") && systemTitle.includes("ac")) ||
-    (systemTitle.includes("boiler") && systemTitle.includes("air conditioning"))
-  ) {
-    return {
-      title: "Electrification Opportunity",
-      content:
-        "Suggestion: replace your central A/C with a cold-climate heat pump-keep the radiators, cut fossil fuel use most of the year.",
-    }
-  }
-
-  // Check for standalone Boiler
+  // Check for Boiler
   if (systemTitle.includes("boiler")) {
     return {
       title: "Electrification Opportunity",
@@ -75,16 +75,7 @@ const getTooltipData = (heating?: ReportHeatingSectionGaugeProps["heating"]) => 
     }
   }
 
-  // Check for any heating system with gas/oil/propane
-  if (systemTitle.includes("gas") || systemTitle.includes("oil") || systemTitle.includes("propane")) {
-    return {
-      title: "Electrification Opportunity",
-      content:
-        "Consider a cold-climate heat pump for cleaner, all-in-one heating + cooling and a smaller carbon footprint.",
-    }
-  }
-
-  // Default fallback
+  // Default fallback (should not be reached if hasValidKeywords works correctly)
   return {
     title: "Electrification Opportunity",
     content:
@@ -103,11 +94,96 @@ export default function ReportHeatingSectionGauge({
   heating,
 }: ReportHeatingSectionGaugeProps): JSX.Element {
   const [displayedValue, setDisplayedValue] = useState(value)
-  const [showInfoIcon, setShowInfoIcon] = useState(true)
+  const [showInfoIcon, setShowInfoIcon] = useState(() => {
+    // Only show info icon if the title has valid keywords and is not ONLY a default title
+    if (!heating?.title) return false
+    return !isOnlyDefaultTitle(heating.title) && hasValidKeywords(heating.title)
+  })
   const [showTooltip, setShowTooltip] = useState(false)
-  const [isHovering, setIsHovering] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
+  const [isMounted, setIsMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const infoIconRef = useRef<HTMLDivElement>(null)
+  const tooltipData = getTooltipData(heating)
+
+  // Function to check if mouse is over the icon
+  const isMouseOverIcon = useCallback((event: MouseEvent) => {
+    if (!infoIconRef.current) return false
+
+    const iconRect = infoIconRef.current.getBoundingClientRect()
+    const { clientX, clientY } = event
+
+    return (
+      clientX >= iconRect.left && clientX <= iconRect.right && clientY >= iconRect.top && clientY <= iconRect.bottom
+    )
+  }, [])
+
+  // Function to hide tooltip
+  const hideTooltip = useCallback(() => {
+    setShowTooltip(false)
+  }, [])
+
+  // Global mouse move handler
+  const handleGlobalMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (showTooltip && !isMouseOverIcon(event)) {
+        hideTooltip()
+      }
+    },
+    [showTooltip, isMouseOverIcon, hideTooltip],
+  )
+
+  // Global scroll handler - immediate hide
+  const handleGlobalScroll = useCallback(() => {
+    if (showTooltip) {
+      hideTooltip()
+    }
+  }, [showTooltip, hideTooltip])
+
+  // Global mouse down handler (for drag detection)
+  const handleGlobalMouseDown = useCallback(() => {
+    if (showTooltip) {
+      hideTooltip()
+    }
+  }, [showTooltip, hideTooltip])
+
+  // Global key handler (for keyboard navigation)
+  const handleGlobalKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (showTooltip && (event.key === "Escape" || event.key === "Tab")) {
+        hideTooltip()
+      }
+    },
+    [showTooltip, hideTooltip],
+  )
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Add/remove global event listeners based on tooltip visibility
+  useEffect(() => {
+    if (showTooltip) {
+      // Add multiple event listeners for accurate detection
+      document.addEventListener("mousemove", handleGlobalMouseMove, { passive: true })
+      document.addEventListener("scroll", handleGlobalScroll, { passive: true, capture: true })
+      document.addEventListener("wheel", handleGlobalScroll, { passive: true })
+      document.addEventListener("mousedown", handleGlobalMouseDown, { passive: true })
+      document.addEventListener("keydown", handleGlobalKeyDown, { passive: true })
+      window.addEventListener("blur", hideTooltip, { passive: true })
+      window.addEventListener("resize", hideTooltip, { passive: true })
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleGlobalMouseMove)
+      document.removeEventListener("scroll", handleGlobalScroll, true)
+      document.removeEventListener("wheel", handleGlobalScroll)
+      document.removeEventListener("mousedown", handleGlobalMouseDown)
+      document.removeEventListener("keydown", handleGlobalKeyDown)
+      window.removeEventListener("blur", hideTooltip)
+      window.removeEventListener("resize", hideTooltip)
+    }
+  }, [showTooltip, handleGlobalMouseMove, handleGlobalScroll, handleGlobalMouseDown, handleGlobalKeyDown, hideTooltip])
 
   useEffect(() => {
     setDisplayedValue(value)
@@ -127,24 +203,68 @@ export default function ReportHeatingSectionGauge({
     }
   }, [heating?.current_value])
 
+  // Update showInfoIcon when title changes
+  useEffect(() => {
+    if (heating?.title) {
+      // Only show info icon if:
+      // 1. Title is not ONLY the default "Your Home's Heating X" (without keywords)
+      // 2. Title contains valid keywords
+      const isOnlyDefault = isOnlyDefaultTitle(heating.title)
+      const hasKeywords = hasValidKeywords(heating.title)
+      setShowInfoIcon(!isOnlyDefault && hasKeywords)
+    } else {
+      setShowInfoIcon(false)
+    }
+  }, [heating?.title])
+
+  const calculateTooltipPosition = useCallback(() => {
+    if (!infoIconRef.current) return
+
+    const iconRect = infoIconRef.current.getBoundingClientRect()
+    const tooltipWidth = 320 // 80 * 4 (w-80)
+    const tooltipHeight = 120 // Approximate height
+    const margin = 16
+
+    // Calculate left position - ensure tooltip doesn't go off screen
+    let left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2
+
+    // Adjust if tooltip would go off the left edge
+    if (left < margin) {
+      left = margin
+    }
+
+    // Adjust if tooltip would go off the right edge
+    if (left + tooltipWidth > window.innerWidth - margin) {
+      left = window.innerWidth - tooltipWidth - margin
+    }
+
+    // Position above the icon
+    const top = iconRect.top - tooltipHeight - 12
+
+    setTooltipPosition({ top, left })
+  }, [])
+
   const handleMouseEnter = () => {
-    setIsHovering(true)
+    calculateTooltipPosition()
     setShowTooltip(true)
   }
 
   const handleMouseLeave = () => {
-    setIsHovering(false)
-    setShowTooltip(false)
+    // Double-check with a small timeout to ensure mouse really left
+    setTimeout(() => {
+      if (infoIconRef.current) {
+        const iconRect = infoIconRef.current.getBoundingClientRect()
+        const isStillOver =
+          document.elementFromPoint(iconRect.left + iconRect.width / 2, iconRect.top + iconRect.height / 2) ===
+          infoIconRef.current.querySelector("svg")
+
+        if (!isStillOver) {
+          setShowTooltip(false)
+        }
+      }
+    }, 10)
   }
 
-  const handleToggleChange = () => {
-    setShowInfoIcon(!showInfoIcon)
-  }
-
-  // Get dynamic tooltip content - recalculate on every render to ensure real-time updates
-  const tooltipData = getTooltipData(heating)
-
-  // Generate dynamic title text based on heating data
   const getSystemName = () => {
     if (heating?.title) {
       // Remove "Your Home's" prefix if present
@@ -208,6 +328,60 @@ export default function ReportHeatingSectionGauge({
 
   const valuePosition = getValuePosition(displayedValue)
 
+  // Calculate arrow position relative to tooltip
+  const getArrowPosition = () => {
+    if (!infoIconRef.current) return { left: "50%" }
+
+    const iconRect = infoIconRef.current.getBoundingClientRect()
+    const iconCenter = iconRect.left + iconRect.width / 2
+    const tooltipLeft = tooltipPosition.left
+    const arrowLeft = iconCenter - tooltipLeft
+
+    return { left: `${Math.max(20, Math.min(300, arrowLeft))}px` }
+  }
+
+  const renderTooltip = () => {
+    if (!isMounted || !showTooltip) return null
+
+    return createPortal(
+      <div
+        className="fixed w-80 max-w-[90vw] transition-opacity duration-150 opacity-100 pointer-events-none"
+        style={{
+          top: tooltipPosition.top,
+          left: tooltipPosition.left,
+          zIndex: 99999,
+        }}
+      >
+        <div className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-1">{tooltipData.title}</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">{tooltipData.content}</p>
+          </div>
+          <div className="absolute top-full transform -translate-y-1/2" style={getArrowPosition()}>
+            <div className="w-3 h-3 bg-white border-r border-b border-gray-200 transform rotate-45"></div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    )
+  }
+
+  const handleToggleChange = () => {
+    setShowInfoIcon((prev) => !prev)
+  }
+
+  // Check if we should show the admin toggle
+  const shouldShowAdminToggle = () => {
+    if (!isAdmin) return false
+    if (!heating?.title) return false
+
+    // Don't show toggle for pure default titles (without keywords)
+    if (isOnlyDefaultTitle(heating.title)) return false
+
+    // Only show toggle if title has valid keywords
+    return hasValidKeywords(heating.title)
+  }
+
   return (
     <div className="w-full" ref={containerRef}>
       {/* Add CSS for neon flash animation */}
@@ -233,36 +407,21 @@ export default function ReportHeatingSectionGauge({
 
       {/* SVG Gauge */}
       <div className="w-full aspect-[5/3] relative">
-        {/* Info icon and tooltip - visibility controlled by admin toggle, shown to all users when enabled */}
+        {/* Info icon - only visible when title has valid keywords and is not default */}
         {showInfoIcon && (
-          <div className="absolute bottom-[30px] left-[35px] z-[100]" ref={infoIconRef}>
-            <div className="relative">
+          <div className="absolute bottom-[30px] left-[35px] z-[999]" ref={infoIconRef}>
+            <div
+              className="h-6 w-6 flex items-center justify-center cursor-help"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <Info
-                className="h-5 w-5 text-[#e67e22] cursor-help"
+                className="h-5 w-5 text-[#e67e22]"
                 style={{
                   filter: "drop-shadow(0 0 4px rgba(230, 126, 34, 0.6)) drop-shadow(0 0 8px rgba(230, 126, 34, 0.4))",
                   animation: "neonFlash 2s infinite ease-in-out",
                 }}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
               />
-              <div
-                className={`absolute bottom-0 left-full ml-2 w-80 max-w-[90vw] transition-all duration-300 z-[100] ${
-                  showTooltip && isHovering
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-2 pointer-events-none"
-                }`}
-              >
-                <div className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">{tooltipData.title}</h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">{tooltipData.content}</p>
-                  </div>
-                  <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -402,32 +561,78 @@ export default function ReportHeatingSectionGauge({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
-            <tspan fill="#333333" fontWeight="700" x="80" textAnchor="start">
-              {"Your "}
-            </tspan>
-            <tspan fill="#333333" fontWeight="700" textAnchor="start">
-              {getSystemName()}
-            </tspan>
-            <tspan fill="#333333" fontWeight="700" textAnchor="start">
-              {"'s "}
-            </tspan>
-            <tspan fill="#d47c02" fontWeight="700" textAnchor="start">
-              {"current " + getParameterName()}
-            </tspan>
-            <tspan fill="#333333" fontWeight="700" textAnchor="start">
-              {" rating is "}
-            </tspan>
-            <tspan fill="#d47c02" fontWeight="700" textAnchor="start">
-              {typeof heating?.current_value === "string" && heating.current_value.includes("%")
-                ? heating.current_value
-                : `${displayedValue.toFixed(1)}${labelSuffix}`}
-            </tspan>
+            {(() => {
+              const systemName = getSystemName()
+              const parameterName = getParameterName()
+              const currentValue =
+                typeof heating?.current_value === "string" && heating.current_value.includes("%")
+                  ? heating.current_value
+                  : `${displayedValue.toFixed(1)}${labelSuffix}`
+
+              const fullText = `Your ${systemName}'s current ${parameterName} rating is ${currentValue}`
+
+              // Check if text is too long (approximate character limit for single line)
+              const maxCharsPerLine = 45
+
+              if (fullText.length <= maxCharsPerLine) {
+                // Single line version
+                return (
+                  <>
+                    <tspan fill="#333333" fontWeight="700" x="80" textAnchor="start">
+                      {"Your "}
+                    </tspan>
+                    <tspan fill="#333333" fontWeight="700" textAnchor="start">
+                      {systemName}
+                    </tspan>
+                    <tspan fill="#333333" fontWeight="700" textAnchor="start">
+                      {"'s "}
+                    </tspan>
+                    <tspan fill="#d47c02" fontWeight="700" textAnchor="start">
+                      {"current " + parameterName}
+                    </tspan>
+                    <tspan fill="#333333" fontWeight="700" textAnchor="start">
+                      {" rating is "}
+                    </tspan>
+                    <tspan fill="#d47c02" fontWeight="700" textAnchor="start">
+                      {currentValue}
+                    </tspan>
+                  </>
+                )
+              } else {
+                // Multi-line version - properly spaced and organized
+                return (
+                  <>
+                    {/* First line - centered */}
+                    <tspan fill="#333333" fontWeight="700" x="250" textAnchor="middle" dy="0">
+                      {"Your "}
+                    </tspan>
+                    <tspan fill="#333333" fontWeight="700" textAnchor="middle">
+                      {systemName}
+                    </tspan>
+                    <tspan fill="#333333" fontWeight="700" textAnchor="middle">
+                      {"'s"}
+                    </tspan>
+
+                    {/* Second line - properly spaced */}
+                    <tspan fill="#d47c02" fontWeight="700" x="250" textAnchor="middle" dy="22">
+                      {"current " + parameterName + " rating is "}
+                    </tspan>
+                    <tspan fill="#d47c02" fontWeight="700" textAnchor="middle">
+                      {currentValue}
+                    </tspan>
+                  </>
+                )
+              }
+            })()}
           </motion.text>
         </motion.svg>
       </div>
 
-      {/* Admin Toggle - Only visible in admin mode, controls tooltip visibility for all users */}
-      {isAdmin && (
+      {/* Render tooltip using portal */}
+      {renderTooltip()}
+
+      {/* Admin Toggle - Only visible when conditions are met */}
+      {shouldShowAdminToggle() && (
         <div className="flex items-center justify-center gap-2 mt-2">
           <span className="text-sm text-gray-600">Enable tooltip for all users</span>
           <button
