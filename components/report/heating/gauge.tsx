@@ -1,6 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import type React from "react"
+
+import { useState, useEffect, useRef, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { motion } from "framer-motion"
 import type { JSX } from "react"
 import { Info } from "lucide-react"
@@ -103,11 +106,44 @@ export default function ReportHeatingSectionGauge({
   heating,
 }: ReportHeatingSectionGaugeProps): JSX.Element {
   const [displayedValue, setDisplayedValue] = useState(value)
-  const [showInfoIcon, setShowInfoIcon] = useState(true)
+  const [showInfoIcon, setShowInfoIcon] = useState(() => {
+    // Only show info icon if the title has been customized (doesn't contain default text)
+    return heating?.title ? !heating.title.includes("Your Home's Heating") : false
+  })
   const [showTooltip, setShowTooltip] = useState(false)
-  const [isHovering, setIsHovering] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
+  const [isMounted, setIsMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const infoIconRef = useRef<HTMLDivElement>(null)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isTooltipClickedRef = useRef(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+
+    // Add global click handler to close tooltip when clicking outside
+    const handleGlobalClick = (e: MouseEvent) => {
+      if (
+        showTooltip &&
+        tooltipRef.current &&
+        !tooltipRef.current.contains(e.target as Node) &&
+        infoIconRef.current &&
+        !infoIconRef.current.contains(e.target as Node)
+      ) {
+        setShowTooltip(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleGlobalClick)
+
+    return () => {
+      document.removeEventListener("mousedown", handleGlobalClick)
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+      }
+    }
+  }, [showTooltip])
 
   useEffect(() => {
     setDisplayedValue(value)
@@ -127,14 +163,94 @@ export default function ReportHeatingSectionGauge({
     }
   }, [heating?.current_value])
 
+  // Update showInfoIcon when title changes
+  useEffect(() => {
+    if (heating?.title) {
+      // Only show info icon if the title has been customized
+      setShowInfoIcon(!heating.title.includes("Your Home's Heating"))
+    } else {
+      setShowInfoIcon(false)
+    }
+  }, [heating?.title])
+
+  const calculateTooltipPosition = useCallback(() => {
+    if (!infoIconRef.current) return
+
+    const iconRect = infoIconRef.current.getBoundingClientRect()
+    const tooltipWidth = 320 // 80 * 4 (w-80)
+    const tooltipHeight = 120 // Approximate height
+    const margin = 16
+
+    // Calculate left position - ensure tooltip doesn't go off screen
+    let left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2
+
+    // Adjust if tooltip would go off the left edge
+    if (left < margin) {
+      left = margin
+    }
+
+    // Adjust if tooltip would go off the right edge
+    if (left + tooltipWidth > window.innerWidth - margin) {
+      left = window.innerWidth - tooltipWidth - margin
+    }
+
+    // Position above the icon
+    const top = iconRect.top - tooltipHeight - 12
+
+    setTooltipPosition({ top, left })
+  }, [])
+
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Toggle tooltip
+    if (showTooltip) {
+      setShowTooltip(false)
+    } else {
+      calculateTooltipPosition()
+      setShowTooltip(true)
+    }
+  }
+
   const handleMouseEnter = () => {
-    setIsHovering(true)
-    setShowTooltip(true)
+    // Clear any existing timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+
+    // Only show tooltip on hover if it's not already shown by click
+    if (!showTooltip) {
+      calculateTooltipPosition()
+      setShowTooltip(true)
+    }
   }
 
   const handleMouseLeave = () => {
-    setIsHovering(false)
-    setShowTooltip(false)
+    // Don't hide immediately, add a small delay
+    if (!isTooltipClickedRef.current) {
+      hideTimeoutRef.current = setTimeout(() => {
+        setShowTooltip(false)
+      }, 300) // 300ms delay before hiding
+    }
+  }
+
+  const handleTooltipMouseEnter = () => {
+    // Clear hide timeout when mouse enters tooltip
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+  }
+
+  const handleTooltipMouseLeave = () => {
+    // Only hide if tooltip wasn't clicked to stay open
+    if (!isTooltipClickedRef.current) {
+      hideTimeoutRef.current = setTimeout(() => {
+        setShowTooltip(false)
+      }, 300)
+    }
   }
 
   const handleToggleChange = () => {
@@ -208,6 +324,47 @@ export default function ReportHeatingSectionGauge({
 
   const valuePosition = getValuePosition(displayedValue)
 
+  // Calculate arrow position relative to tooltip
+  const getArrowPosition = () => {
+    if (!infoIconRef.current) return { left: "50%" }
+
+    const iconRect = infoIconRef.current.getBoundingClientRect()
+    const iconCenter = iconRect.left + iconRect.width / 2
+    const tooltipLeft = tooltipPosition.left
+    const arrowLeft = iconCenter - tooltipLeft
+
+    return { left: `${Math.max(20, Math.min(300, arrowLeft))}px` }
+  }
+
+  const renderTooltip = () => {
+    if (!isMounted || !showTooltip) return null
+
+    return createPortal(
+      <div
+        ref={tooltipRef}
+        className="fixed w-80 max-w-[90vw] transition-all duration-300 opacity-100 translate-y-0"
+        style={{
+          top: tooltipPosition.top,
+          left: tooltipPosition.left,
+          zIndex: 99999,
+        }}
+        onMouseEnter={handleTooltipMouseEnter}
+        onMouseLeave={handleTooltipMouseLeave}
+      >
+        <div className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-1">{tooltipData.title}</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">{tooltipData.content}</p>
+          </div>
+          <div className="absolute top-full transform -translate-y-1/2" style={getArrowPosition()}>
+            <div className="w-3 h-3 bg-white border-r border-b border-gray-200 transform rotate-45"></div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    )
+  }
+
   return (
     <div className="w-full" ref={containerRef}>
       {/* Add CSS for neon flash animation */}
@@ -233,36 +390,22 @@ export default function ReportHeatingSectionGauge({
 
       {/* SVG Gauge */}
       <div className="w-full aspect-[5/3] relative">
-        {/* Info icon and tooltip - visibility controlled by admin toggle, shown to all users when enabled */}
+        {/* Info icon - visibility controlled by admin toggle, shown to all users when enabled */}
         {showInfoIcon && (
-          <div className="absolute bottom-[30px] left-[35px] z-[100]" ref={infoIconRef}>
-            <div className="relative">
+          <div className="absolute bottom-[30px] left-[35px] z-[999]" ref={infoIconRef}>
+            <div
+              className="h-6 w-6 flex items-center justify-center cursor-pointer"
+              onClick={handleInfoClick}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <Info
-                className="h-5 w-5 text-[#e67e22] cursor-help"
+                className="h-5 w-5 text-[#e67e22]"
                 style={{
                   filter: "drop-shadow(0 0 4px rgba(230, 126, 34, 0.6)) drop-shadow(0 0 8px rgba(230, 126, 34, 0.4))",
                   animation: "neonFlash 2s infinite ease-in-out",
                 }}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
               />
-              <div
-                className={`absolute bottom-0 left-full ml-2 w-80 max-w-[90vw] transition-all duration-300 z-[100] ${
-                  showTooltip && isHovering
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-2 pointer-events-none"
-                }`}
-              >
-                <div className="bg-white border border-gray-200 rounded-xl shadow-2xl p-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">{tooltipData.title}</h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">{tooltipData.content}</p>
-                  </div>
-                  <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -426,8 +569,11 @@ export default function ReportHeatingSectionGauge({
         </motion.svg>
       </div>
 
+      {/* Render tooltip using portal */}
+      {renderTooltip()}
+
       {/* Admin Toggle - Only visible in admin mode, controls tooltip visibility for all users */}
-      {isAdmin && (
+      {isAdmin && !heating?.title?.includes("Your Home's Heating") && (
         <div className="flex items-center justify-center gap-2 mt-2">
           <span className="text-sm text-gray-600">Enable tooltip for all users</span>
           <button
