@@ -1,40 +1,23 @@
 "use client";
 
 import { Overview } from "@/components/report-/Overview";
-import { AirLeakageContent } from "@/components/report-/AirLeakageContent";
-import { CoolingContent } from "@/components/report-/CoolingContent";
-import { HeatingContent } from "@/components/report-/HeatingContent";
-import { InsulationContent } from "@/components/report-/InsulationContent";
-import { ReportSummary } from "@/components/report-/ReportSummary";
-import { FutureUpgradesAndCertificates } from "@/components/report-/FutureUpgradesAndCertificates";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { motion } from "framer-motion";
-import React, { useRef, useState, useEffect, use, useContext } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Info,
-  HelpCircle,
-  CheckCircle2,
-  Home,
-  DollarSign,
-  Leaf,
-  Percent,
-  ArrowLeft,
-} from "lucide-react";
+import { useRef, useState, useEffect, use, useContext } from "react";
+import { ArrowLeft } from "lucide-react";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { set } from "date-fns";
-import { DefaultReportData } from "./utils";
 import { useDebouncedCallback } from "use-debounce";
 import { AUTH_CONTEXT } from "@/providers/auth";
 import ReportOverviewSection from "@/components/report/overview/overview";
 import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
 import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
-import ReportSummarySection from "@/components/report/summary/summary";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
+import ReportSummaryConcernSection from "@/components/report/concerns/concerns";
+import ReportSummarySolutionSection from "@/components/report/solutions/solutions";
+import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -70,12 +53,28 @@ export interface HeatingData {
   title: string;
   type: string;
   condition: string;
-  year?: number;
+  year: number;
   parameter: string;
-  current_value?: string;
-  recommended_value?: string;
-  description?: DescriptionData;
-  images?: ImageData[];
+  current_value: string;
+  recommended_value: string;
+  description?: {
+    title: string;
+    content: string;
+    footer?: string;
+  };
+  images?: [
+    {
+      mimeType?: string;
+      thumbnailLink?: string;
+      size?: string;
+      id?: string;
+      name?: string;
+      description?: string;
+      createdTime?: string;
+      modifiedTime?: string;
+      link?: string;
+    },
+  ];
 }
 
 export interface CoolingData {
@@ -94,16 +93,21 @@ export interface SummaryOfConcernsData {
   name: string;
   concern: string;
   flag?: boolean;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface SolutionsAndRecommendationsData {
   title: string;
   benefits: string;
+  description?: DescriptionData;
+  images: ImageData[];
 }
 
 export interface FinancialSummaryItem {
   title: string;
   amount: number | string;
+  note?: string; // added note field for additional information, ask if needed or to remove this field
 }
 
 export interface FinancialSummaryData {
@@ -132,6 +136,18 @@ export interface EnvironmentalImpactData {
   totalReduction: EnvironmentalImpactItem;
 }
 
+export interface HouseImage {
+  mimeType: string;
+  thumbnailLink: string;
+  size: string;
+  id: string;
+  name: string;
+  description: string;
+  createdTime: string;
+  modifiedTime: string;
+  link: string;
+}
+
 // Define the type for reportData
 export interface ReportData {
   airLeakage?: AirLeakageData;
@@ -143,6 +159,18 @@ export interface ReportData {
   financialSummary?: FinancialSummaryData;
   federalTaxCredits?: FederalTaxCreditData[];
   environmentalImpact?: EnvironmentalImpactData;
+  concernsImages?: HouseImage[];
+  assessmentData?: {
+    title: string;
+    subtitle: string;
+    notes: string;
+  };
+  solutionImages?: HouseImage[];
+  solutionNotesData?: {
+    title: string;
+    subtitle: string;
+    notes: string;
+  };
 }
 
 const ReportPage = ({
@@ -158,10 +186,12 @@ const ReportPage = ({
   const tabColors = {
     overview: "bg-[#85C435]",
     "air-leakage": "bg-[#031A82]",
-    insulation: "bg-[#44BFB8]",
-    heating: "bg-[#B18C2E]",
-    cooling: "bg-[#B18C2E]",
-    summary: "bg-[#FF6700]",
+    insulation: "bg-[#308883]",
+    heating: "bg-[#d47c00]",
+    cooling: "bg-[#d47c00]",
+    concerns: "bg-[#FF6700]",
+    solutions: "bg-[#85C435]",
+    "pearl-certification": "bg-[#85C435]",
   };
 
   const [activeSubMenu, setActiveSubMenu] = useState("overview");
@@ -186,14 +216,15 @@ const ReportPage = ({
   };
 
   // Format tab name for display (matching user side)
-  const formatTabName = (tab) => {
-    if (tab === "air-leakage") return "Air Leakage Reports";
-    if (tab === "summary") return "Report Summary";
-    return (
-      tab.charAt(0).toUpperCase() +
-      tab.slice(1) +
-      (tab !== "overview" ? " Reports" : "")
-    );
+  const formatTabName = (tab: string) => {
+    if (tab === "air-leakage") return "Air Leakage";
+    if (tab === "concerns") return "Concerns";
+    if (tab === "solutions") return "Solutions";
+    if (tab === "overview") return "Introduction";
+    if (tab === "heating") return "Heating";
+    if (tab === "cooling") return "Cooling";
+    if (tab === "insulation") return "Insulation";
+    if (tab === "pearl-certification") return "Pearl Certification";
   };
 
   const handleChangeActiveSubMenu = (menu: string) => {
@@ -203,11 +234,6 @@ const ReportPage = ({
       setActiveSubMenu(menu);
     }
   };
-
-  useEffect(() => {
-    setIsChangesSaved(false);
-    updateReportDataField(reportData);
-  }, [reportData]);
 
   // Debounced save function to avoid too many API calls
   const debouncedSaveReportData = useDebouncedCallback(
@@ -254,6 +280,16 @@ const ReportPage = ({
     },
     2000
   ); // 2 second debounce
+
+  // NEW: Add a separate useEffect to trigger auto-save when reportData changes
+  useEffect(() => {
+    // Skip auto-save on initial load or when changes are already saved
+    if (Object.keys(reportData).length === 0 || isChangesSaved) return;
+
+    if (isAdmin) {
+      debouncedSaveReportData(reportData);
+    }
+  }, [reportData, isAdmin, isChangesSaved, debouncedSaveReportData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -318,15 +354,12 @@ const ReportPage = ({
     }
   }, [bookingNumber]);
 
-  // Common function to update report data and trigger autosave
+  // UPDATED: Common function to update report data and trigger autosave
   const updateReportDataField = (updatedData: ReportData) => {
     if (!isAdmin) return;
 
-    // setReportData(updatedData);
+    setReportData(updatedData); // Actually update the state
     setIsChangesSaved(false);
-
-    // Trigger debounced save
-    debouncedSaveReportData(updatedData);
   };
 
   // Manual save function for the save button
@@ -393,7 +426,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             airLeakage={reportData?.airLeakage}
             onUpdateValue={(airLeakage) =>
-              setReportData({ ...reportData, airLeakage })
+              updateReportDataField({ ...reportData, airLeakage })
             }
           />
         );
@@ -403,7 +436,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             insulationData={reportData?.insulation}
             onUpdateValue={(insulation) =>
-              setReportData({ ...reportData, insulation })
+              updateReportDataField({ ...reportData, insulation })
             }
             houseImages={houseImages}
           />
@@ -414,7 +447,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             heatingData={reportData?.heating}
             onUpdateValue={(heating) =>
-              setReportData({ ...reportData, heating })
+              updateReportDataField({ ...reportData, heating })
             }
             houseImages={houseImages}
           />
@@ -425,21 +458,35 @@ const ReportPage = ({
             isAdmin={isAdmin}
             coolingData={reportData?.cooling}
             onUpdateValue={(cooling) =>
-              setReportData({ ...reportData, cooling })
+              updateReportDataField({ ...reportData, cooling })
             }
             houseImages={houseImages}
           />
         );
-      case "summary":
+      case "concerns":
         return (
-          <ReportSummarySection
+          <ReportSummaryConcernSection
             isAdmin={isAdmin}
             reportData={reportData}
-            onUpdateValue={(reportData: ReportData) =>
-              setReportData(reportData)
+            onUpdateValue={(updatedReportData: ReportData) =>
+              updateReportDataField(updatedReportData)
             }
+            houseImages={houseImages}
           />
         );
+      case "solutions":
+        return (
+          <ReportSummarySolutionSection
+            isAdmin={isAdmin}
+            reportData={reportData}
+            onUpdateValue={(updatedReportData: ReportData) =>
+              updateReportDataField(updatedReportData)
+            }
+            houseImages={houseImages}
+          />
+        );
+      case "pearl-certification":
+        return <PearlCertificationSection />;
       default:
         return <Overview />;
     }
@@ -459,10 +506,12 @@ const ReportPage = ({
         </Button>
       </div>
 
-      <div className="container mx-auto p-4 bg-white" ref={scrollRef}>
-        <div className="mb-6">
+      <div className="container mx-auto bg-white" ref={scrollRef}>
+        <div className="mb-6 px-10">
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-bold text-gray-800 ml-8">View Report</h1>
+            <h1 className="text-2xl font-bold text-gray-800 ml-8">
+              View Report
+            </h1>
             {isAdmin && (
               <div className="flex items-center gap-2">
                 {isSaving ? (
@@ -487,31 +536,40 @@ const ReportPage = ({
         </div>
 
         <div>
-          <div className="flex overflow-x-auto border-b border-gray-100">
-            {[
-              "overview",
-              "air-leakage",
-              "insulation",
-              "heating",
-              "cooling",
-              "summary",
-            ].map((tab) => (
+          <div className="flex overflow-x-auto border-b-2 border-gray-100 pb-4">
+            {(
+              [
+                "overview",
+                "air-leakage",
+                "insulation",
+                "heating",
+                "cooling",
+                "concerns",
+                "solutions",
+                "pearl-certification",
+              ] as (keyof typeof tabColors)[]
+            ).map((tab) => (
               <button
                 key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${activeSubMenu === tab
+                className={`relative py-4 px-6 ml-2 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
+                  activeSubMenu === tab
                     ? tab === "overview"
                       ? "text-[#67B502]"
                       : tab === "air-leakage"
                         ? "text-[#031A82]"
                         : tab === "insulation"
-                          ? "text-[#44BFB8]"
+                          ? "text-[#308883]"
                           : tab === "heating" || tab === "cooling"
-                            ? "text-[#B18C2E]"
-                            : tab === "summary"
+                            ? "text-[#d47c00]"
+                            : tab === "concerns"
                               ? "text-[#FF6700]"
-                              : "text-gray-800"
+                              : tab === "solutions"
+                                ? "text-[#67B502]"
+                                : tab === "pearl-certification"
+                                  ? "text-[#85C435]"
+                                  : "text-gray-800"
                     : "text-gray-600 hover:text-gray-800"
-                  }`}
+                }`}
                 onClick={() => handleChangeActiveSubMenu(tab)}
               >
                 {formatTabName(tab)}
@@ -524,7 +582,7 @@ const ReportPage = ({
             ))}
           </div>
 
-          <div className="py-6">{renderContent()}</div>
+          <div>{renderContent()}</div>
         </div>
       </div>
     </div>

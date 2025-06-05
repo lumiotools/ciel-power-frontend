@@ -1,67 +1,66 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { BugIcon, CameraIcon, RulerIcon } from "lucide-react";
-import React from "react";
+import { Camera, Ruler, Bug } from "lucide-react";
 
-const ReportInsulationSectionTechnicalAspects = () => {
+export default function InsulationTechnical() {
   return (
-    <div>
-      <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden h-[450px] flex flex-col">
-        <CardHeader className="bg-[#E0F7F5] py-4 px-5 border-b border-gray-100">
-          <CardTitle className="text-lg font-medium text-[#256C68]">
+    <div className="w-full mx-auto px-2" id="technical-aspects">
+      <div className="grid grid-cols-1 gap-4">
+        {/* Technical Aspects Column */}
+        <div>
+          <h2 className="text-3xl font-bold text-[#308883] mb-4">
             Technical Aspects
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 flex-grow">
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <RulerIcon className="h-5 w-5 text-[#00BFA5]" />
-                <h3 className="text-lg font-medium text-[#00BFA5]">R-Value</h3>
-              </div>
-              <p className="text-gray-700 mb-3">
-                A measure of resistance to the flow of heat through a given
-                thickness of material (as insulation) with higher numbers
-                indicating better insulating properties.
-              </p>
-              <div className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">
-                    Insulation Effectiveness
-                  </span>
-                  <span className="text-[#256C68] font-medium">R-49</span>
-                </div>
-                <Progress value={100} className="bg-[#44BFB83D] [&>div]:bg-[#44BFB8]" />
-              </div>
-            </div>
+          </h2>
 
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <CameraIcon className="h-5 w-5 text-[#00BFA5]" />
-                <h3 className="text-lg font-medium text-[#00BFA5]">
-                  Thermal Imaging
+          <div className="border border-gray-200 rounded-lg p-4 mb-2">
+            <div className="flex items-start">
+              <div className="mr-4 text-[#308883] mt-1">
+                <Ruler size={28} className="transform rotate-45" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-semibold text-[#308883] mb-2">
+                  R-Value
                 </h3>
-              </div>
-              <p className="text-gray-700">
-                When possible our Building Performance Technicians use infra-red
-                cameras to examine existing insulation performance.
-              </p>
-            </div>
-
-            <div className="bg-[#E6F7F5] rounded-md p-4">
-              <div className="flex items-start gap-3">
-                <BugIcon className="h-5 w-5 text-[#00BFA5] shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700">
-                  Did you know? Cellulose insulation treated with borate will
-                  naturally repel rodents, critters, and insects
+                <p className="text-xl text-gray-700">
+                  A measure of resistance to the flow of heat through a given
+                  thickness of material (as insulation) with higher numbers
+                  indicating better insulating properties.
                 </p>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="border border-gray-200 rounded-lg p-4 mb-2">
+            <div className="flex items-start">
+              <div className="mr-4 text-[#308883] mt-1">
+                <Camera size={28} />
+              </div>
+              <div>
+                <h3 className="text-2xl font-semibold text-[#308883] mb-2">
+                  Thermal Imaging
+                </h3>
+                <p className="text-xl text-gray-700">
+                  When possible our Building Performance Technicians use
+                  infrared cameras to examine existing insulation performance.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <div className="mr-4 text-[#308883] mt-1">
+                <Bug size={28} />
+              </div>
+              <div>
+                <h3 className="text-2xl font-medium text-[#308883] mb-2">
+                  {
+                    "Did you know? Cellulose insulation treated with borate will naturally repel rodents, critters, and insects"
+                  }
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default ReportInsulationSectionTechnicalAspects;
+}

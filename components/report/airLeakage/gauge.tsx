@@ -63,20 +63,14 @@ const ReportAirLeakageSectionGauge = ({
   const valuePosition = getValuePosition(achValue);
 
   return (
-    <div
-      className="w-full aspect-[4/3] relative"
-      style={{ minHeight: "300px" }}
-    >
+    <div className="relative" style={{ width: "500px", height: "300px" }}>
       <svg
         viewBox="0 0 500 300"
-        className="w-full h-full"
+        className="absolute top-0 left-0"
         style={{
+          width: "500px",
+          height: "300px",
           display: "block",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
         }}
         preserveAspectRatio="xMidYMid meet"
       >
@@ -244,12 +238,13 @@ const ReportAirLeakageSectionGauge = ({
         <text
           x="250"
           y="270"
-          fill="#333333"
           fontSize="16"
-          fontWeight="500"
+          fontWeight="700"
           textAnchor="middle"
         >
-          Air Changes per Hour (ACH)
+          <tspan fill="#031a82">Your Air Changes</tspan>
+          <tspan fill="#666666">{" per Hour (ACH) is "}</tspan>
+          <tspan fill="#031a82">{achValue.toFixed(2)}</tspan>
         </text>
       </svg>
     </div>

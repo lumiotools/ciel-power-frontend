@@ -56,7 +56,7 @@ export default function DocumentPortal() {
         <NeedHelpSection />
 
         {/* Disclaimer */}
-        <div className="text-sm text-gray-500 mt-8 p-4 border-t border-gray-200">
+        <div className="text-sm text-black mt-8 p-4 border-t border-gray-200">
           <p>
             All documents are managed securely through PandaDoc and stored in
             accordance with industry-standard encryption and privacy practices.

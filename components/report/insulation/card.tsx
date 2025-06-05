@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { InsulationData } from "@/app/admin/[bookingNumber]/report/page";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ReportInsulationSectionGauge from "./gauge";
@@ -10,6 +10,7 @@ import { ReportImagePicker } from "../common/imagePicker";
 import ReportEditableSelect from "../common/editableSelect";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 // Define the HouseImage interface based on the provided sample
 export interface HouseImage {
@@ -41,19 +42,29 @@ const ReportInsulationSectionCard = ({
 }: ReportInsulationSectionCardProps) => {
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
 
+  const [isUser, setIsUser] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname.includes("/dashboard/report")) {
+      setIsUser(true);
+    }
+  }, [pathname]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      className="bg-white max-h-fit p-4"
     >
-      <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="bg-[#E0F7F5] py-4 px-5 border-b border-gray-100">
-          <CardTitle className="text-lg font-medium text-[#256C68] flex justify-between">
-            <div className="flex-1 !text-lg">
+      {" "}
+      <Card className="shadow-sm overflow-hidden">
+        <CardHeader className="py-0 px-2">
+          <CardTitle className="text-2xl md:text-3xl font-bold text-[#308883] flex justify-between">
+            <div className="flex-1 mb-2">
               {isAdmin ? (
                 <ReportEditableInput
-                  className="max-w-[50%] !text-lg"
+                  className="max-w-[50%]"
                   value={insulation?.title}
                   onChange={(title) => {
                     onUpdateValue({
@@ -74,11 +85,11 @@ const ReportInsulationSectionCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-[#44BFB80F] p-4 rounded-md flex justify-center items-center">
+          <div className="py-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-xl flex justify-center items-center">
               <ReportImageViewer
                 allowSelection={isAdmin}
-                buttonClassName="bg-[#256C68] hover:bg-[#256C68]/90"
+                buttonClassName="bg-[#308883] hover:bg-[#308883]/90"
                 selectedImage={insulation?.images?.[0]}
                 onOpenPicker={() => setIsImagePickerOpen(true)}
                 onDescriptionChange={(description) => {
@@ -95,8 +106,8 @@ const ReportInsulationSectionCard = ({
                 }}
               />
             </div>
-            <div className="bg-[#44BFB80F] p-4 rounded-md">
-              <h3 className="text-lg font-semibold text-[#256C68]">
+            <div className="py-2 px-2 rounded-xl border-2 border-gray-200">
+              <h3 className="text-xl font-bold text-[#308883]">
                 Current Performance
               </h3>
 
@@ -104,8 +115,14 @@ const ReportInsulationSectionCard = ({
                 value={insulation.current_rValue ?? 0}
                 maxValue={insulation.recommended_rValue}
               />
-
-              <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">
+              <div className="text-xl text-center font-semibold text-gray-500">
+                <span className="text-[#308883]">{insulation.title} </span>
+                <span>R-value is </span>
+                <span className="text-[#308883]">
+                  R{insulation.current_rValue}
+                </span>
+              </div>
+              <div className="max-w-xl mx-auto flex justify-between gap-2 px-2 mt-2">
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-500">Current R-Value</p>
                   <p className="text-xl font-bold text-[#F44336]">
@@ -121,10 +138,10 @@ const ReportInsulationSectionCard = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-12 gap-y-2 p-4">
+            <div className="border-2 border-gray-200 rounded-xl grid grid-cols-2 gap-x-8 gap-y-2 p-2">
               <div>
                 <p className="text-gray-800">Material</p>
-                <div className="text-[#256C68] !font-bold">
+                <div className="text-[#308883] !font-bold">
                   {isAdmin ? (
                     <ReportEditableInput
                       value={insulation.material}
@@ -142,7 +159,7 @@ const ReportInsulationSectionCard = ({
               </div>
               <div>
                 <p className="text-gray-800">Condition</p>
-                <div className="text-[#256C68] !font-bold">
+                <div className="text-[#308883] !font-bold">
                   {isAdmin ? (
                     <ReportEditableSelect
                       value={insulation.condition}
@@ -166,7 +183,7 @@ const ReportInsulationSectionCard = ({
               </div>
               <div>
                 <p className="text-gray-800">Current R-Value</p>
-                <div className="text-[#256C68] !font-bold">
+                <div className="text-[#308883] !font-bold">
                   {isAdmin ? (
                     <ReportEditableInput
                       prefix="R"
@@ -186,7 +203,7 @@ const ReportInsulationSectionCard = ({
               </div>
               <div>
                 <p className="text-gray-800">Recommended</p>
-                <div className="text-[#256C68] !font-bold">
+                <div className="text-[#308883] !font-bold">
                   {isAdmin ? (
                     <ReportEditableInput
                       prefix="R"
@@ -205,8 +222,8 @@ const ReportInsulationSectionCard = ({
                 </div>
               </div>
             </div>
-            <div className="bg-[#44BFB80F] p-4 rounded-md space-y-4">
-              <h3 className="text-lg font-semibold text-[#256C68]">
+            <div className="rounded-xl p-2 border-2 border-gray-200 space-y-2">
+              <h3 className="text-lg font-semibold text-[#308883]">
                 BPI Recommendation
               </h3>
               <p className="text-gray-700">
@@ -229,7 +246,7 @@ const ReportInsulationSectionCard = ({
           {/* Image Picker Dialog */}
           {isAdmin && (
             <ReportImagePicker
-              buttonClassName="bg-[#256C68] hover:bg-[#256C68]/90"
+              buttonClassName="bg-[#308883] hover:bg-[#308883]/90"
               images={houseImages}
               selectedImage={insulation?.images?.[0]?.id}
               isOpen={isImagePickerOpen}

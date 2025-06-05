@@ -1,79 +1,80 @@
-import { Shield, Target, Thermometer } from "lucide-react";
-import React from "react";
-
-const ReportOverviewSectionGoals = () => {
+export default function GoalsSection() {
   return (
-    <div
-      className="bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden"
-      id="goals-of-the-audit"
-    >
-      <div className="p-5" style={{ backgroundColor: "#F0F8E699" }}>
-        <h2 className="font-medium" style={{ color: "#67B502" }}>
-          Goals of the Audit
-        </h2>
-      </div>
-      <div className="p-5">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Safety */}
-          <div
-            className="bg-orange-50 rounded-lg p-6 flex flex-col items-center border"
-            style={{ border: "0.5px solid #FF670099" }}
-          >
-            <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center mb-4">
-              <div className="text-orange-500">
-                <Shield className="h-6 w-6" />
-              </div>
+    <section className="bg-white max-h-fit p-8 w-full" id="intro-goals">
+      <div className="w-full mx-auto">
+        <h2 className="text-5xl font-bold text-[#818287] mb-10">Goals</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Safety Card */}
+          <div className="rounded-lg border border-gray-200 p-8 flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6">
+              <div
+                className="w-20 h-20"
+                style={{
+                  backgroundImage: "url('/image 19.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="Safety icon"
+              />
             </div>
-            <h3 className="text-orange-500 font-medium mb-2">Safety</h3>
-            <p className="text-gray-600 text-sm text-center">
+            <h3 className="text-[#ff6700] text-2xl font-bold mb-4">Safety</h3>
+            <p className="text-[#333333] text-lg">
               We tested the ambient air in your home, gas lines, heating
               systems, hot water systems and ventilation systems
             </p>
           </div>
 
-          {/* Comfort */}
-          <div
-            className="bg-cyan-50 rounded-lg p-6 flex flex-col items-center border"
-            style={{ border: "0.5px solid #43C0B9B2" }}
-          >
-            <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center mb-4">
-              <div className="text-cyan-500">
-                <Thermometer className="h-6 w-6" />
-              </div>
+          {/* Comfort Card */}
+          <div className="rounded-lg border border-gray-200 p-8 flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6">
+              <div
+                className="w-20 h-20"
+                style={{
+                  backgroundImage: "url('/image 20.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="Comfort icon"
+              />
             </div>
-            <h3 className="text-cyan-500 font-medium mb-2">Comfort</h3>
-            <p className="text-gray-600 text-sm text-center">
-              We examined your home's air flow rates and insulation levels. We
-              determined the sources of comfort and conditioning issues
+            <h3 className="text-[#43c0b9] text-2xl font-bold mb-4">Comfort</h3>
+            <p className="text-[#333333] text-lg">
+              We examined your home&apos;s air flow rates and insulation levels.
+              We determined the sources of comfort and conditioning issues
             </p>
           </div>
 
-          {/* Efficiency */}
-          <div
-            className="rounded-lg p-6 flex flex-col items-center border"
-            style={{
-              backgroundColor: "#F0F8E699",
-              border: "0.5px solid #67B502CC",
-            }}
-          >
-            <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center mb-4">
-              <div style={{ color: "#67B502" }}>
-                <Target className="h-6 w-6" />
-              </div>
+          {/* Efficiency Card */}
+          <div className="rounded-lg border border-gray-200 p-8 flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6">
+              <div
+                className="w-20 h-20"
+                style={{
+                  backgroundImage: "url('/image 21.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="Efficiency icon"
+              />
             </div>
-            <h3 className="font-medium mb-2" style={{ color: "#67B502" }}>
+            <h3 className="text-[#67b502] text-2xl font-bold mb-4">
               Efficiency
             </h3>
-            <p className="text-gray-600 text-sm text-center">
-              We determined the efficiency of your home's heating, cooling and
-              hot water systems. We analyzed the impact of your home's
+            <p className="text-[#333333] text-lg">
+              We determined the efficiency of your home&apos;s heating, cooling
+              and hot water systems. We analyzed the impact of your home&apos;s
               construction, insulation and air flow rates
             </p>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default ReportOverviewSectionGoals;
+}

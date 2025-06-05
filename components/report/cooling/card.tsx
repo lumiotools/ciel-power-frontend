@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
 import type { CoolingData } from "@/app/admin/[bookingNumber]/report/page";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ReportEditableInput from "../common/editableInput";
@@ -42,31 +42,34 @@ const ReportCoolingSectionCard = ({
 }: ReportCoolingSectionCardProps) => {
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
 
-  useEffect(() => {
-    onUpdateValue({
-      ...cooling,
-      description: {
-        title: "System Condition",
-        content: `Your ${cooling.title} has a ${cooling.parameter} of ${cooling.current_value}. Upgrading to a high-efficiency model with ${cooling.recommended_value} ${cooling.parameter} could result in significant energy savings.`,
-        footer: "Estimated based on Age & Type",
-      },
-    });
-  }, [
-    cooling?.title,
-    cooling?.parameter,
-    cooling?.current_value,
-    cooling?.recommended_value,
-  ]);
+  // Generate the default description content
+  const defaultDescription = useMemo(
+    () => ({
+      title: "System Condition",
+      content: `Your ${cooling.title} has a ${cooling.parameter} of ${cooling.current_value}. Upgrading to a high-efficiency model with ${cooling.recommended_value} ${cooling.parameter} could result in significant energy savings.`,
+      footer: "Estimated based on Age & Type",
+    }),
+    [
+      cooling.title,
+      cooling.parameter,
+      cooling.current_value,
+      cooling.recommended_value,
+    ]
+  );
+
+  // Use the existing description or fall back to default
+  const currentDescription = cooling.description || defaultDescription;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      className="bg-white max-h-fit p-4"
     >
       <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="bg-[#FFFCF3] py-4 px-5 border-b border-gray-100">
-          <CardTitle className="text-lg font-medium text-[#B18C2E] flex justify-between items-center">
+        <CardHeader className="bg-white py-2 px-3 border-b border-gray-100">
+          <CardTitle className="text-lg font-medium text-[#d47c02] flex justify-between items-center">
             <Sun className="size-5 mr-2" />
             <div className="flex-1 !text-lg !font-semibold">
               {isAdmin ? (
@@ -93,14 +96,19 @@ const ReportCoolingSectionCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-8">
-              <div className="bg-[#FFFCF3] p-4 rounded-md">
-                <h3 className="text-lg font-semibold text-[#B18C2E]">
+              <div className="bg-white p-4 rounded-md border border-gray-200">
+                <h3 className="text-lg font-semibold text-[#d47c02]">
                   Current Performance
                 </h3>
 
-                <ReportCoolingSectionGauge value={cooling.current_value ?? 0} maxValue={20} labelSuffix="" />
+                <ReportCoolingSectionGauge
+                  value={cooling.current_value ?? 0}
+                  maxValue={20}
+                  labelSuffix=""
+                  cooling={cooling}
+                />
 
                 <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">
                   <div className="flex items-center gap-2">
@@ -119,126 +127,129 @@ const ReportCoolingSectionCard = ({
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-2 p-4">
-                <div>
-                  <p className="text-gray-800">Type</p>
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableInput
-                        value={cooling.type}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...cooling,
-                            type: value as string,
-                          });
-                        }}
-                      />
-                    ) : (
-                      cooling.type
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-800">Condition</p>
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableSelect
-                        value={cooling.condition}
-                        options={[
-                          { label: "Poor", value: "Poor" },
-                          { label: "Fair", value: "Fair" },
-                          { label: "Good", value: "Good" },
-                          { label: "Excellent", value: "Excellent" },
-                        ]}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...cooling,
-                            condition: value as string,
-                          });
-                        }}
-                      />
-                    ) : (
-                      cooling.condition
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-800">Year</p>
-                  <div className="text-[#B18C2E] !font-bold">
-                    {isAdmin ? (
-                      <ReportEditableInput
-                        type="number"
-                        value={cooling.year ?? 0}
-                        onChange={(value) => {
-                          onUpdateValue({
-                            ...cooling,
-                            year: Number(value),
-                          });
-                        }}
-                      />
-                    ) : (
-                      cooling.year
-                    )}
-                  </div>
-                </div>
 
-                <div>
-                  {isAdmin ? (
-                    <ReportEditableInput
-                      className="text-gray-800 !h-6 !py-0"
-                      value={cooling.parameter ?? "SEER"}
-                      onChange={(value) => {
-                        onUpdateValue({
-                          ...cooling,
-                          parameter: value as string,
-                        });
-                      }}
-                    />
-                  ) : (
-                    <p className="text-gray-800 !h-6 !py-0">
-                      {cooling.parameter}
-                    </p>
-                  )}
-                  <div className="text-[#B18C2E] !font-bold">
+              {/* System Information Card */}
+              <div className="bg-white rounded-lg border border-gray-200 p-3">
+                <div className="grid grid-cols-2 gap-x-12 gap-y-2 p-4">
+                  <div>
+                    <p className="text-gray-800">Type</p>
+                    <div className="text-[#d47c02] !font-bold">
+                      {isAdmin ? (
+                        <ReportEditableInput
+                          value={cooling.type}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...cooling,
+                              type: value as string,
+                            });
+                          }}
+                        />
+                      ) : (
+                        cooling.type
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-800">Condition</p>
+                    <div className="text-[#d47c02] !font-bold">
+                      {isAdmin ? (
+                        <ReportEditableSelect
+                          value={cooling.condition}
+                          options={[
+                            { label: "Poor", value: "Poor" },
+                            { label: "Fair", value: "Fair" },
+                            { label: "Good", value: "Good" },
+                            { label: "Excellent", value: "Excellent" },
+                          ]}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...cooling,
+                              condition: value as string,
+                            });
+                          }}
+                        />
+                      ) : (
+                        cooling.condition
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-800">Year</p>
+                    <div className="text-[#d47c02] !font-bold">
+                      {isAdmin ? (
+                        <ReportEditableInput
+                          type="number"
+                          value={cooling.year ?? 0}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...cooling,
+                              year: Number(value),
+                            });
+                          }}
+                        />
+                      ) : (
+                        cooling.year
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
                     {isAdmin ? (
                       <ReportEditableInput
-                        value={cooling.current_value ?? "0%"}
+                        className="text-gray-800 !h-6 !py-0"
+                        value={cooling.parameter ?? "SEER"}
                         onChange={(value) => {
                           onUpdateValue({
                             ...cooling,
-                            current_value: Number(value),
+                            parameter: value as string,
                           });
                         }}
                       />
                     ) : (
-                      cooling.current_value
+                      <p className="text-gray-800 !h-6 !py-0">
+                        {cooling.parameter}
+                      </p>
                     )}
+                    <div className="text-[#d47c02] !font-bold">
+                      {isAdmin ? (
+                        <ReportEditableInput
+                          value={cooling.current_value ?? 0}
+                          onChange={(value) => {
+                            onUpdateValue({
+                              ...cooling,
+                              current_value: Number(value),
+                            });
+                          }}
+                        />
+                      ) : (
+                        cooling.current_value
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-8">
-              <div className="bg-[#FFFCF3] p-4 rounded-md space-y-4">
+            <div className="flex flex-col gap-4">
+              <div className="bg-white p-4 rounded-md border border-gray-200 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Info className="size-6 text-[#B18C2E]" />
-                  <div className="flex-1 !text-lg !font-semibold text-[#B18C2E]">
+                  <Info className="size-6 text-[#d47c02]" />
+                  <div className="flex-1 !text-lg !font-semibold text-[#d47c02]">
                     {isAdmin ? (
                       <ReportEditableInput
                         placeholder="Enter a title"
-                        value={cooling.description?.title ?? ""}
+                        value={currentDescription.title}
                         onChange={(value) => {
                           onUpdateValue({
                             ...cooling,
                             description: {
+                              ...currentDescription,
                               title: value as string,
-                              content: cooling.description?.content ?? "",
-                              footer: cooling.description?.footer ?? "",
                             },
                           });
                         }}
                       />
                     ) : (
-                      cooling.description?.title
+                      currentDescription.title
                     )}
                   </div>
                 </div>
@@ -247,44 +258,42 @@ const ReportCoolingSectionCard = ({
                   {isAdmin ? (
                     <ReportEditableTextArea
                       placeholder="Enter a description"
-                      value={cooling.description?.content ?? ""}
+                      value={currentDescription.content}
                       onChange={(value) => {
                         onUpdateValue({
                           ...cooling,
                           description: {
-                            title: cooling.description?.title ?? "",
+                            ...currentDescription,
                             content: value as string,
-                            footer: cooling.description?.footer ?? "",
                           },
                         });
                       }}
                     />
                   ) : (
-                    cooling.description?.content
+                    currentDescription.content
                   )}
                 </div>
 
-                {(isAdmin || cooling.description?.footer) && (
+                {(isAdmin || currentDescription.footer) && (
                   <div className="flex items-center gap-2">
-                    <Zap className="size-6 text-[#B18C2E]" />
-                    <div className="flex-1 !text-base text-[#B18C2E]">
+                    <Zap className="size-6 text-[#d47c02]" />
+                    <div className="flex-1 !text-base text-[#d47c02]">
                       {isAdmin ? (
                         <ReportEditableInput
                           placeholder="Enter a footer text (optional)"
-                          value={cooling.description?.footer ?? ""}
+                          value={currentDescription.footer ?? ""}
                           onChange={(value) => {
                             onUpdateValue({
                               ...cooling,
                               description: {
-                                title: cooling.description?.title ?? "",
-                                content: cooling.description?.content ?? "",
+                                ...currentDescription,
                                 footer: value as string,
                               },
                             });
                           }}
                         />
                       ) : (
-                        cooling.description?.footer
+                        currentDescription.footer
                       )}
                     </div>
                   </div>
@@ -294,7 +303,7 @@ const ReportCoolingSectionCard = ({
               <div className="rounded-md flex justify-center items-start">
                 <ReportImageViewer
                   allowSelection={isAdmin}
-                  buttonClassName="bg-[#B18C2E] hover:bg-[#B18C2E]/90"
+                  buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
                   selectedImage={cooling?.images?.[0]}
                   onOpenPicker={() => setIsImagePickerOpen(true)}
                   onDescriptionChange={(description) => {
@@ -317,7 +326,7 @@ const ReportCoolingSectionCard = ({
           {/* Image Picker Dialog */}
           {isAdmin && (
             <ReportImagePicker
-              buttonClassName="bg-[#B18C2E] hover:bg-[#B18C2E]/90"
+              buttonClassName="bg-[#d47c02] hover:bg-[#d47c02]/90"
               images={houseImages}
               selectedImage={cooling?.images?.[0]?.id}
               isOpen={isImagePickerOpen}

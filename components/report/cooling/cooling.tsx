@@ -1,8 +1,12 @@
-import { CoolingData } from "@/app/admin/[bookingNumber]/report/page";
-import React, { useEffect, useState } from "react";
-import { HouseImage } from "./card";
+"use client";
+
+import type { CoolingData } from "@/app/admin/[bookingNumber]/report/page";
+import { useState } from "react";
+import type { HouseImage } from "./card";
 import ReportCoolingSectioninformation from "./information";
 import ReportCoolingSectionCard from "./card";
+import AirConditioningAssessment from "./assessment";
+import { motion } from "framer-motion";
 
 interface ReportCoolingSectionProps {
   isAdmin?: boolean;
@@ -13,88 +17,107 @@ interface ReportCoolingSectionProps {
 
 const ReportCoolingSection = ({
   isAdmin,
-  coolingData,
+  coolingData = [],
   houseImages,
   onUpdateValue,
 }: ReportCoolingSectionProps) => {
-  const [coolingDataSection, setCoolingDataSection] = useState<CoolingData[]>(
-    coolingData ?? []
-  );
-
-  useEffect(() => {
-    if (onUpdateValue) {
-      onUpdateValue(coolingDataSection);
-    }
-  }, [coolingDataSection]);
+  const [coolingDataSection, setCoolingDataSection] =
+    useState<CoolingData[]>(coolingData);
 
   const addNewCooling = () => {
     if (!isAdmin) return;
-    setCoolingDataSection((prev) => [
-      ...prev,
-      {
-        title: "Your Home's Cooling " + (prev.length + 1),
-        type: "Unknown",
-        condition: "Unknown",
-        year: 0,
-        parameter: "SEER",
-        current_value: 0,
-        recommended_value: 100,
-      },
-    ]);
+    const newCooling: CoolingData = {
+      title: "Your Home's Cooling " + (coolingDataSection.length + 1),
+      type: "Unknown",
+      condition: "Unknown",
+      year: 0,
+      parameter: "SEER",
+      current_value: 0,
+      recommended_value: 100,
+    };
+
+    const updatedData = [...coolingDataSection, newCooling];
+    setCoolingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
   };
 
   const deleteCooling = (index: number) => {
     if (!isAdmin) return;
-    setCoolingDataSection((prev) => prev.filter((_, i) => i !== index));
+    const updatedData = coolingDataSection.filter((_, i) => i !== index);
+    setCoolingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
+
+  const updateCooling = (index: number, updatedCooling: CoolingData) => {
+    if (!isAdmin) return;
+    const updatedData = coolingDataSection.map((c, i) =>
+      i === index ? updatedCooling : c
+    );
+    setCoolingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
   };
 
   return (
-    <div className="space-y-8">
-      {/* {isAdmin && (
-        <div className="flex justify-end items-center mb-4">
-          <button
-            // onClick={handleSubmit}
-            className="px-4 py-2 rounded-md bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors"
-            style={{ backgroundColor: "#B18C2E" }}
-          >
-            Save
-          </button>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-[#eaeaea] py-12"
+    >
+      <div className="max-w-none mx-auto space-y-12">
+        <div
+          id="cooling-header"
+          className=" flex items-center justify-center w-full"
+        >
+          <ReportCoolingSectioninformation />
         </div>
-      )} */}
 
-      <div id="cooling-header">
-        <ReportCoolingSectioninformation />
+        {/* Air Conditioning Assessment Section */}
+        <div
+          id="air-conditioning-assessment"
+          className="min-h-screen flex items-center justify-center w-full"
+        >
+          <AirConditioningAssessment
+            isAdmin={isAdmin}
+            houseImages={houseImages}
+            selectedImages={[]} // You can add state management for this if needed
+            onUpdateImages={(images) => {
+              // Add state management logic here if needed
+              console.log("Assessment images updated:", images);
+            }}
+          />
+        </div>
+
+        {coolingDataSection?.map((cooling, index) => (
+          <div
+            key={`cooling-system-${index}`}
+            id={`cooling-system-${index}`}
+            className="flex items-center justify-center w-full"
+          >
+            <ReportCoolingSectionCard
+              isAdmin={isAdmin}
+              cooling={cooling}
+              houseImages={houseImages}
+              onUpdateValue={(updatedCooling) =>
+                updateCooling(index, updatedCooling)
+              }
+              onDelete={() => deleteCooling(index)}
+            />
+          </div>
+        ))}
+
+        {isAdmin && (
+          <div className="flex justify-center items-center fixed bottom-5 left-1/2 transform -translate-x-1/2 z-10">
+            <button
+              onClick={addNewCooling}
+              className="px-4 py-2 rounded-full bg-[#d47c02] text-white font-bold shadow-lg hover:bg-[#c06e00] transition-colors"
+            >
+              Add New Cooling Section
+            </button>
+          </div>
+        )}
       </div>
-
-      {coolingData?.map((cooling, index) => (
-        <div id={`cooling-system-${index}`}>
-          <ReportCoolingSectionCard
-          key={`${cooling.title}-${index}`}
-          isAdmin={isAdmin}
-          cooling={cooling}
-          houseImages={houseImages}
-          onUpdateValue={(updatedCooling) => {
-            if (!isAdmin) return;
-            setCoolingDataSection((prev) =>
-              prev.map((item, i) => (i === index ? updatedCooling : item))
-            );
-          }}
-          onDelete={() => deleteCooling(index)}
-        />
-        </div>
-      ))}
-
-      {isAdmin && (
-        <div className="flex justify-center items-center">
-          <button
-            onClick={addNewCooling}
-            className="px-4 py-2 rounded-full bg-[#B18C2E] text-white font-bold"
-          >
-            Add New Cooling Section
-          </button>
-        </div>
-      )}
-    </div>
+    </motion.div>
   );
 };
 

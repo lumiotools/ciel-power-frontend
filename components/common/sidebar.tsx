@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Leaf,
   LogOut,
+  MessageCircle,
   Percent,
   Zap,
 } from "lucide-react";
@@ -67,14 +68,19 @@ export function Sidebar() {
     },
     { name: "About Us", href: "/about-us", icon: <Home size={20} /> },
     {
-      name: "Affiliate Program",
-      href: "/affiliate-program",
-      icon: <Leaf size={20} />,
+      name: "Ciel Support",
+      href: "/ciel-support",
+      icon: <MessageCircle size={20} />,
     },
+    // {
+    //   name: "Affiliate Program",
+    //   href: "/affiliate-program",
+    //   icon: <Leaf size={20} />,
+    // },
   ];
 
   return (
-    <div className="w-64 bg-[#a6d66b] flex flex-col overflow-y-auto ">
+    <div className="w-64 bg-[#7ab236] flex flex-col overflow-y-auto ">
       <div className="p-6">
         <div className="flex items-center">
           <img

@@ -94,12 +94,12 @@ export default function AffiliateProgram() {
             </button>
           </Link>
 
-          <Link href="/affiliate-program">
+          {/* <Link href="/affiliate-program">
             <button className="w-full flex items-center gap-3 bg-[#8bc34a] text-white rounded-full p-3 pl-6 text-left">
               <Leaf size={20} />
               <span className="font-medium">Affiliate Program</span>
             </button>
-          </Link>
+          </Link> */}
         </div>
 
         <div className="p-6 mt-auto">

@@ -147,25 +147,32 @@ export default function UtilityBillsSection({ bookingNumber }: UtilityBillsSecti
     <>
       <PortalSection
         id="upload-utility-bills"
-        icon={<Upload className="text-[#8bc34a]" size={24} />}
+        icon={<Upload className="text-[#68BEB9]" size={24} />}
         title="Upload Utility Bills"
       >
         <p className="text-gray-700 mb-4">
-          Upload your utility bills here for our auditors to assess. Sharing your utility bills helps us analyze your
-          energy usage patterns and identify potential savings.
+          Upload your utility bills here for our auditors to assess. Sharing
+          your utility bills helps us analyze your energy usage patterns and
+          identify potential savings.
         </p>
 
-        <div className="bg-white rounded-lg p-5 mb-4 border border-[#e0f0d0]">
+        <div className="bg-white rounded-lg p-5 mb-4 border border-gray-200">
           <div className="flex flex-col space-y-4">
             <div className="flex justify-between items-center">
-              <p className="font-medium text-gray-700">Your Uploaded Bills</p>
+              <p className="font-medium text-gray-500">Your Uploaded Bills</p>
               <label
                 htmlFor="file-upload"
-                className="bg-[#8bc34a] text-white px-4 py-2 rounded-md hover:bg-[#7cb342] flex items-center cursor-pointer"
+                className="bg-[#68BEB9] text-white px-4 py-2 rounded-md hover:bg-[#7cb342] flex items-center cursor-pointer"
               >
                 <Upload size={18} className="mr-2" />
                 Upload Bills
-                <input id="file-upload" type="file" multiple className="hidden" onChange={handleFileUpload} />
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
               </label>
             </div>
 
@@ -177,14 +184,20 @@ export default function UtilityBillsSection({ bookingNumber }: UtilityBillsSecti
             )}
 
             {/* Error state */}
-            {error && <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>}
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                {error}
+              </div>
+            )}
 
             {/* Empty state */}
             {!isLoading && !error && bills.length === 0 && (
               <div className="mt-4 p-6 bg-gray-50 rounded-lg border border-gray-200 text-center">
                 <FileText size={32} className="text-gray-400 mx-auto mb-2" />
                 <p className="text-gray-600">No utility bills uploaded yet.</p>
-                <p className="text-sm text-gray-500 mt-1">Upload your first bill to get started.</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Upload your first bill to get started.
+                </p>
               </div>
             )}
 
@@ -197,11 +210,12 @@ export default function UtilityBillsSection({ bookingNumber }: UtilityBillsSecti
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
                   >
                     <div className="flex items-center">
-                      <FileText size={20} className="text-[#8bc34a] mr-3" />
+                      <FileText size={20} className="text-[#68BEB9] mr-3" />
                       <div>
-                        <p className="font-medium">{bill.name}</p>
-                        <p className="text-xs text-gray-500">
-                          Uploaded on {new Date(bill.createdTime).toLocaleDateString()}
+                        <p className="font-medium text-gray-500">{bill.name}</p>
+                        <p className="text-xs text-black">
+                          Uploaded on{" "}
+                          {new Date(bill.createdTime).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -255,7 +269,9 @@ export default function UtilityBillsSection({ bookingNumber }: UtilityBillsSecti
             )}
           </div>
         </div>
-        <p className="text-sm text-gray-600 mt-2">Accepted formats: PDF, JPG, PNG. Max size: 10MB</p>
+        <p className="text-sm text-black mt-2">
+          Accepted formats: PDF, JPG, PNG. Max size: 10MB
+        </p>
       </PortalSection>
 
       {/* Delete Confirmation Dialog */}
@@ -267,28 +283,41 @@ export default function UtilityBillsSection({ bookingNumber }: UtilityBillsSecti
               Confirm Deletion
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this file? This action cannot be undone.
+              Are you sure you want to delete this file? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
 
           {billToDelete && (
             <div className="p-4 bg-gray-50 rounded-md my-2">
               <div className="flex items-center">
-                <FileText size={20} className="text-[#8bc34a] mr-3 flex-shrink-0" />
+                <FileText
+                  size={20}
+                  className="text-[#8bc34a] mr-3 flex-shrink-0"
+                />
                 <div className="overflow-hidden">
                   <p className="font-medium truncate">{billToDelete.name}</p>
                   <p className="text-xs text-gray-500">
-                    Uploaded on {new Date(billToDelete.createdTime).toLocaleDateString()}
+                    Uploaded on{" "}
+                    {new Date(billToDelete.createdTime).toLocaleDateString()}
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {error && <div className="p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">{error}</div>}
+          {error && (
+            <div className="p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">
+              {error}
+            </div>
+          )}
 
           <DialogFooter className="flex justify-between sm:justify-between">
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
               Cancel
             </Button>
             <Button
@@ -313,5 +342,5 @@ export default function UtilityBillsSection({ bookingNumber }: UtilityBillsSecti
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

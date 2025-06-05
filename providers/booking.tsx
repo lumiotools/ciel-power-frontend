@@ -18,8 +18,12 @@ export interface BookingDetails {
     };
     auditor: {
       name: string;
+      imageUrl?: string | null;
+      description?: string;
     };
     rescheduleAvailable: boolean;
+    imageId?: string;
+    profilePictureUrl?: string | null;
   };
   utilityBillDetails: {
     count: number;

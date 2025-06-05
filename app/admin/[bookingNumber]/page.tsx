@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -7,9 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import BookingProgress from "@/components/component/booking-progress";
 import { STAGE_LABELS } from "@/constants/booking-stages";
-import { formatDate, getStepStatus } from "@/utils/booking-utils";
+import { formatDate } from "@/utils/booking-utils";
 import {
   ExternalLink,
   FolderOpen,
@@ -22,6 +23,7 @@ import {
   Eye,
   Trash2,
   Plus,
+  User,
 } from "lucide-react";
 import type { Booking, ContractDoc, Recipient } from "@/types/admin";
 import { toast } from "sonner";
@@ -47,9 +49,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ReportImagePicker } from "../../../components/report/common/imagePicker";
+import { ReportImageViewer } from "../../../components/report/common/imageViewer";
+
+// Define the HouseImage interface based on the provided sample
+export interface HouseImage {
+  mimeType: string;
+  thumbnailLink: string;
+  size: string;
+  id: string;
+  name: string;
+  description: string;
+  createdTime: string;
+  modifiedTime: string;
+  link: string;
+}
 
 interface BookingDetailsResponse {
   success: boolean;
@@ -69,6 +85,7 @@ interface BookingDetailsResponse {
       status: string;
       updated_at: string;
     } | null;
+    profileImage?: HouseImage | null;
   };
 }
 
@@ -109,20 +126,30 @@ export default function BookingDetailsPage({
   const [reportData, setReportData] = useState<Object | null>(null);
   const [reportStatus, setReportStatus] = useState("NONE");
   const [offeredContracts, setOfferedContracts] = useState<OfferedContract[]>(
-    [],
+    []
   );
   const [completedContractFileUrl, setCompletedContractFileUrl] = useState<
     string | null
   >(null);
   const [hasReportChanges, setHasReportChanges] = useState(false);
 
+  // Profile picture management states
+  const [isProfileImagePickerOpen, setIsProfileImagePickerOpen] =
+    useState(false);
+  const [selectedProfileImage, setSelectedProfileImage] =
+    useState<HouseImage | null>(null);
+  const [houseImages, setHouseImages] = useState<HouseImage[]>([]);
+  const [isLoadingHouseImages, setIsLoadingHouseImages] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isSavingProfileImage, setIsSavingProfileImage] = useState(false);
+
   // Separate loading states for different actions
   const [isSavingReport, setIsSavingReport] = useState(false);
   const [isTogglingContract, setIsTogglingContract] = useState<string | null>(
-    null,
+    null
   );
   const [isRemovingContract, setIsRemovingContract] = useState<string | null>(
-    null,
+    null
   );
   const [isAttachingContract, setIsAttachingContract] = useState(false);
 
@@ -135,7 +162,7 @@ export default function BookingDetailsPage({
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<ContractDoc[]>([]);
   const [selectedContract, setSelectedContract] = useState<ContractDoc | null>(
-    null,
+    null
   );
 
   const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -186,6 +213,34 @@ export default function BookingDetailsPage({
       if (data.success) {
         setBooking(data.data.booking);
         // Handle report data if available
+        sessionStorage.setItem(
+          "bookingData",
+          JSON.stringify(data.data.booking)
+        );
+
+        // Set default profile image from booking.imageId if present
+        if (data.data.booking.imageId && !data.data.profileImage) {
+          // Fetch house images to find the image with matching ID
+          try {
+            const imagesResponse = await fetch(
+              `/api/admin/bookings/${bookingNumber}/pictures`
+            );
+            if (imagesResponse.ok) {
+              const imagesData = await imagesResponse.json();
+              if (imagesData.success && imagesData.data.pictures) {
+                const defaultImage = imagesData.data.pictures.find(
+                  (img: HouseImage) => img.id === data.data.booking.imageId
+                );
+                if (defaultImage) {
+                  setSelectedProfileImage(defaultImage);
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching default profile image:", error);
+          }
+        }
+
         if (data.data.report) {
           setReportData(data.data.report.data || null);
           setReportUrl(data.data.report.url || "");
@@ -199,11 +254,22 @@ export default function BookingDetailsPage({
           setReportStatus("NONE");
         }
 
+        // Handle profile image if available (this will override the default if present)
+        if (data.data.profileImage) {
+          setSelectedProfileImage(data.data.profileImage);
+        }
+
         // Handle offered contracts
         if (data.data.offeredContracts) {
           setOfferedContracts(data.data.offeredContracts);
+          // Store in sessionStorage for quick access
+          sessionStorage.setItem(
+            "offeredContracts",
+            JSON.stringify(data.data.offeredContracts)
+          );
         } else {
           setOfferedContracts([]);
+          sessionStorage.removeItem("offeredContracts");
         }
         if (data.data.completedContractLink) {
           setCompletedContractFileUrl(data.data.completedContractLink);
@@ -239,7 +305,7 @@ export default function BookingDetailsPage({
 
     try {
       const response = await fetch(
-        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`,
+        `/api/admin/search/contracts?docName=${encodeURIComponent(searchQuery)}`
       );
 
       if (!response.ok) {
@@ -269,7 +335,7 @@ export default function BookingDetailsPage({
 
     try {
       const response = await fetch(
-        `/api/admin/search/contracts/${contractId}/recipients`,
+        `/api/admin/search/contracts/${contractId}/recipients`
       );
 
       if (!response.ok) {
@@ -336,7 +402,7 @@ export default function BookingDetailsPage({
             "Content-Type": "application/json",
           },
           body: JSON.stringify(contractData),
-        },
+        }
       );
 
       const data = await response.json();
@@ -365,7 +431,7 @@ export default function BookingDetailsPage({
 
   const handleToggleContractDisplay = async (
     contractId: string,
-    display: boolean,
+    display: boolean
   ) => {
     setIsTogglingContract(contractId);
     try {
@@ -376,7 +442,7 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       const data = await response.json();
@@ -388,8 +454,8 @@ export default function BookingDetailsPage({
           prevContracts.map((contract) =>
             contract.id === contractId
               ? { ...contract, displayContract: display }
-              : contract,
-          ),
+              : contract
+          )
         );
       } else {
         toast.error(data.message || "Failed to toggle contract display");
@@ -416,7 +482,7 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       const data = await response.json();
@@ -425,7 +491,7 @@ export default function BookingDetailsPage({
         toast.success("Contract removed successfully");
         // Remove the contract from the local state
         setOfferedContracts((prevContracts) =>
-          prevContracts.filter((contract) => contract.id !== contractId),
+          prevContracts.filter((contract) => contract.id !== contractId)
         );
       } else {
         toast.error(data.message || "Failed to remove contract");
@@ -471,7 +537,7 @@ export default function BookingDetailsPage({
               "Content-Type": "application/json",
             },
             body: JSON.stringify(updatedReportData),
-          },
+          }
         );
 
         const responseData = await reportResponse.json();
@@ -480,7 +546,7 @@ export default function BookingDetailsPage({
           reportUpdated = true;
         } else {
           toast.error(
-            responseData.message || "Failed to update report details",
+            responseData.message || "Failed to update report details"
           );
         }
       }
@@ -499,7 +565,7 @@ export default function BookingDetailsPage({
   };
 
   const handleAddPayment = async () => {
-    if (!paymentAmount || isNaN(parseFloat(paymentAmount))) {
+    if (!paymentAmount || isNaN(Number.parseFloat(paymentAmount))) {
       toast.error("Please enter a valid amount");
       return;
     }
@@ -513,7 +579,7 @@ export default function BookingDetailsPage({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ amount: parseFloat(paymentAmount) }),
+          body: JSON.stringify({ amount: Number.parseFloat(paymentAmount) }),
         }
       );
 
@@ -561,6 +627,96 @@ export default function BookingDetailsPage({
       toast.error("An error occurred while deleting payment details");
     } finally {
       setIsDeletingPayment(false);
+    }
+  };
+
+  const fetchHouseImages = async () => {
+    setIsLoadingHouseImages(true);
+    setImageError(null);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/pictures`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setImageError(errorData.message || "Failed to fetch house images");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setHouseImages(data.data.pictures || []); // Changed from images to pictures
+      } else {
+        setImageError(data.message || "Failed to fetch house images");
+      }
+    } catch (error) {
+      console.error("Error fetching house images:", error);
+      setImageError(
+        "An error occurred while fetching house images. Please try again later."
+      );
+    } finally {
+      setIsLoadingHouseImages(false);
+    }
+  };
+
+  const handleSelectProfileImage = (id: string) => {
+    const selectedImage = houseImages.find((img) => img.id === id);
+    if (selectedImage) {
+      setSelectedProfileImage(selectedImage);
+      // Save the selected profile image to the backend
+      saveProfileImage(selectedImage.id);
+    }
+    setIsProfileImagePickerOpen(false);
+  };
+
+  const handleOpenProfileImagePicker = () => {
+    setImageError(null);
+    // Always fetch fresh images when opening picker
+    fetchHouseImages();
+    setIsProfileImagePickerOpen(true);
+  };
+
+  const handleProfileImageDescriptionChange = (description: string) => {
+    if (selectedProfileImage) {
+      const updatedImage = {
+        ...selectedProfileImage,
+        description: description,
+      };
+      setSelectedProfileImage(updatedImage);
+      // Optionally save the description change to the backend
+      // saveProfileImageDescription(updatedImage.id, description);
+    }
+  };
+
+  // Function to save the profile image to the backend
+  const saveProfileImage = async (imageId: string) => {
+    setIsSavingProfileImage(true);
+    try {
+      const response = await fetch(
+        `/api/admin/bookings/${bookingNumber}/profile-image`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageId }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Profile picture saved successfully");
+      } else {
+        toast.error(data.message || "Failed to save profile picture");
+      }
+    } catch (error) {
+      console.error("Error saving profile picture:", error);
+      toast.error("An error occurred while saving the profile picture");
+    } finally {
+      setIsSavingProfileImage(false);
     }
   };
 
@@ -738,14 +894,6 @@ export default function BookingDetailsPage({
               </div>
             )}
 
-            {/* Booking Progress */}
-            {/* <div className="pt-6 border-t">
-              <h3 className="text-lg font-medium mb-6">Booking Progress</h3>
-              <div className="w-full overflow-x-auto pb-4">
-                <BookingProgress steps={getStepStatus(booking.currentStage)} />
-              </div>
-            </div> */}
-
             {/* Report Management */}
             <div className="pt-6 border-t max-w-screen-md">
               <h3 className="text-lg font-medium mb-2">Report Management</h3>
@@ -848,6 +996,65 @@ export default function BookingDetailsPage({
               </div>
             </div>
 
+            {/* Profile Picture Management - Unified Section */}
+            <div className="pt-6 border-t">
+              <div className="flex items-center gap-2 mb-4">
+                <User className="h-5 w-5 text-[#5cb85c]" />
+                <h3 className="text-lg font-medium">
+                  Profile Picture Management
+                </h3>
+              </div>
+              <p className="text-gray-600 mb-6 text-sm">
+                Select a profile picture that will be displayed on the customer
+                dashboard. Choose from uploaded images in the customer's Google
+                Drive folder.
+              </p>
+
+              <div className="max-w-md">
+                <ReportImageViewer
+                  allowSelection={true}
+                  buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
+                  selectedImage={selectedProfileImage ?? undefined}
+                  onOpenPicker={handleOpenProfileImagePicker}
+                  onDescriptionChange={handleProfileImageDescriptionChange}
+                />
+
+                {/* Save Status */}
+                {isSavingProfileImage && (
+                  <div className="mt-4 flex items-center gap-2 text-sm text-[#5cb85c]">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#5cb85c] border-t-transparent"></div>
+                    Saving profile picture...
+                  </div>
+                )}
+
+                {/* Error Display */}
+                {imageError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <X className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm">
+                        <p className="text-red-800 font-medium mb-1">
+                          Unable to load images
+                        </p>
+                        <p className="text-red-600">{imageError}</p>
+                        <Button
+                          onClick={() => {
+                            setImageError(null);
+                            fetchHouseImages();
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="mt-3 border-red-300 text-red-700 hover:bg-red-50"
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Contract Management */}
             <div className="pt-6 border-t">
               <div className="flex justify-between items-center mb-6">
@@ -900,7 +1107,7 @@ export default function BookingDetailsPage({
                                 onCheckedChange={(checked) =>
                                   handleToggleContractDisplay(
                                     contract.id,
-                                    checked,
+                                    checked
                                   )
                                 }
                                 className="data-[state=checked]:bg-[#5cb85c]"
@@ -987,6 +1194,7 @@ export default function BookingDetailsPage({
                 </div>
               )}
             </div>
+
             {/* Payment Details */}
             <div className="pt-6 border-t">
               {payment ? (
@@ -1083,6 +1291,16 @@ export default function BookingDetailsPage({
           </div>
         </div>
       </main>
+
+      {/* Profile Image Picker Dialog */}
+      <ReportImagePicker
+        buttonClassName="bg-[#5cb85c] hover:bg-[#5cb85c]/90"
+        images={houseImages}
+        selectedImage={selectedProfileImage?.id}
+        isOpen={isProfileImagePickerOpen}
+        onOpenChange={setIsProfileImagePickerOpen}
+        onSelectImage={handleSelectProfileImage}
+      />
 
       {/* Attach Contract Modal */}
       <Dialog open={isContractModalOpen} onOpenChange={setIsContractModalOpen}>

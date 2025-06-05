@@ -8,7 +8,9 @@ export type ReportSection =
   | "insulation"
   | "heating"
   | "cooling"
-  | "summary";
+  | "concerns"
+  | "solutions"
+  | "pearl-certification";
 
 // Report configuration interface
 export interface ReportConfig {
@@ -34,10 +36,10 @@ const PAGE_CONFIG: {
   orientation: "portrait",
   unit: "mm",
   margins: {
-    top: 8,
-    right: 8,
-    bottom: 12,
-    left: 8,
+    top: 2,
+    right: 2,
+    bottom: 2,
+    left: 2,
   },
 };
 
@@ -60,7 +62,11 @@ const switchToTab = async (tabName: string): Promise<void> => {
       await wait(800);
 
       // Add a small additional wait for more complex tabs that might need more time
-      if (tabName === "Insulation Reports" || tabName === "Report Summary") {
+      if (
+        tabName === "Insulation" ||
+        tabName === "Concerns" ||
+        tabName === "Solutions"
+      ) {
         await wait(200);
       }
 
@@ -92,6 +98,12 @@ const captureElement = async (
     element.scrollIntoView({ behavior: "auto", block: "start" });
     await wait(200);
 
+    // Hide air-leakage-svg div during PDF generation
+    const airLeakageSvg = document.getElementById("air-leakage-svg");
+    if (airLeakageSvg) {
+      airLeakageSvg.classList.add("hidden");
+    }
+
     // Dynamically adjust scale based on element size for better fit
     let scaleValue = 1.4; // Default scale
 
@@ -120,10 +132,22 @@ const captureElement = async (
       removeContainer: true, // Remove the temporary container to save memory
     });
 
+    // Show air-leakage-svg div again after capture
+    if (airLeakageSvg) {
+      airLeakageSvg.classList.remove("hidden");
+    }
+
     console.log(`Successfully captured ${elementId}`);
     return canvas;
   } catch (error) {
     console.error(`Error capturing element with ID "${elementId}":`, error);
+
+    // Ensure air-leakage-svg is visible again even if there's an error
+    const airLeakageSvg = document.getElementById("air-leakage-svg");
+    if (airLeakageSvg) {
+      airLeakageSvg.classList.remove("hidden");
+    }
+
     return null;
   }
 };
@@ -139,9 +163,13 @@ const getSectionColor = (section: string): string => {
       return "#256C68"; // teal-500
     case "heating":
     case "cooling":
-      return "#B18C2E"; // amber-500
-    case "summary":
-      return "#FF6700"; // orange-500
+      return "#d47c00"; // amber-500
+    case "concerns":
+      return "#FF6700";
+    case "solutions":
+      return "#67B502";
+    case "pearl-certification":
+      return "#67B502";
     default:
       return "#000000"; // black
   }
@@ -185,12 +213,13 @@ const addSectionHeading = (
   pdf.setTextColor(0, 0, 0);
 };
 
-// Helper function to add an image to the PDF
+// Helper function to add an image to the PDF with custom spacing
 const addImageToPDF = (
   pdf: jsPDF,
   canvas: HTMLCanvasElement,
   startY = 20,
-  section?: string
+  section?: string,
+  elementId?: string
 ): number => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -235,9 +264,11 @@ const addImageToPDF = (
     "FAST"
   );
 
-  // Return the new Y position with adjusted gap based on section
-  // Remove gap for insulation sections
-  if (section === "insulation") {
+  // Return the new Y position with adjusted gap based on section and element
+  // Add extra spacing after intro-header specifically
+  if (elementId === "intro-header") {
+    return startY + scaledHeight + 24; // Extra spacing after intro-header (increased from 8 to 12)
+  } else if (section === "insulation") {
     return startY + scaledHeight; // No additional gap for insulation
   } else {
     return startY + scaledHeight + 3; // Regular gap for other sections
@@ -320,7 +351,7 @@ const addBookmark = (
 const formatSectionName = (section: string): string => {
   switch (section) {
     case "overview":
-      return "Overview";
+      return "Introduction";
     case "airLeakage":
     case "air-leakage":
       return "Air Leakage";
@@ -330,8 +361,12 @@ const formatSectionName = (section: string): string => {
       return "Heating Systems";
     case "cooling":
       return "Cooling Systems";
-    case "summary":
-      return "Report Summary";
+    case "concerns":
+      return "Concerns";
+    case "solutions":
+      return "Solutions";
+    case "pearl-certification":
+      return "Pearl Certification";
     default:
       return section.charAt(0).toUpperCase() + section.slice(1);
   }
@@ -348,7 +383,9 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         "insulation",
         "heating",
         "cooling",
-        "summary",
+        "concerns",
+        "solutions",
+        "pearl-certification",
       ],
       customFileName:
         config?.customFileName ||
@@ -392,6 +429,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       unit: PAGE_CONFIG.unit,
       format: PAGE_CONFIG.format,
       compress: true, // Enable compression for smaller file size
+      putOnlyUsedFonts: true, // Optimize font embedding
       putOnlyUsedFonts: true, // Optimize font embedding
     });
 
@@ -477,39 +515,43 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
     // Define the report structure based on the specified requirements
     // Using the exact groupings as specified
     const allReportSections = [
-      // Overview - Regrouped elements as requested
+      // Overview - Keep elements together but add spacing between intro-header and intro-contents
       {
         section: "overview" as ReportSection,
-        tabName: "Overview",
+        tabName: "Introduction",
         pages: [
-          { ids: ["about-ciel-power", "goals-of-the-audit"] },
-          {
-            ids: [
-              "about-new-whole-home-energy-solutions-program",
-              "house-system",
-            ],
-          },
+          { ids: ["intro-notes", "intro-header", "intro-contents"] },
+          { ids: ["intro-goals", "intro-about", "intro-achievements"] },
+          { ids: ["intro-sustainability", "intro-energy"] },
+          { ids: ["intro-science"] },
         ],
       },
 
       // Air Leakage - Combined introduction with air-flow-rates
       {
         section: "airLeakage" as ReportSection,
-        tabName: "Air Leakage Reports",
+        tabName: "Air Leakage",
         pages: [
-          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] },
-          { ids: ["common-air-leak-points"] },
+          {
+            ids: [
+              "introduction",
+              "air-flow-rates",
+              "air-changes-per-hour",
+              "common-air-leak-points",
+            ],
+          },
+          // { ids: ["common-air-leak-points"] },
         ],
       },
 
       // Insulation - Regrouped elements as requested
       {
         section: "insulation" as ReportSection,
-        tabName: "Insulation Reports",
+        tabName: "Insulation",
         pages: [
           {
             ids: [
-              "insulation-overview",
+              "insulation-overview-intro",
               "technical-aspects",
               "insulation-benefits",
             ],
@@ -521,25 +563,49 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       // Heating - Include header with system-1 only
       {
         section: "heating" as ReportSection,
-        tabName: "Heating Reports",
-        pages: [{ ids: ["heating-header"] }],
+        tabName: "Heating",
+        pages: [{ ids: ["heating-header"] }, { ids: ["clients-equipment"] }],
       },
 
       // Cooling - Include header with first cooling system
       {
         section: "cooling" as ReportSection,
-        tabName: "Cooling Reports",
-        pages: [{ ids: ["cooling-header"] }],
+        tabName: "Cooling",
+        pages: [{ ids: ["cooling-header", "air-conditioning-assessment"] }],
       },
 
       // Report Summary - Combined more elements and put project-costs and tax-credits on the same page
       {
-        section: "summary" as ReportSection,
-        tabName: "Report Summary",
+        section: "concerns" as ReportSection,
+        tabName: "Concerns",
         pages: [
-          { ids: ["summary-of-concerns", "solutions-and-recommendations"] },
-          { ids: ["future-solutions", "environmental-impact"] },
-          { ids: ["project-costs", "tax-credits"] },
+          { ids: ["summary-of-concerns"] },
+          { ids: ["summary-of-concerns-1"] },
+          { ids: ["summary-of-concerns-2"] },
+        ],
+      },
+      {
+        section: "solutions" as ReportSection,
+        tabName: "Solutions",
+        pages: [
+          {
+            ids: [
+              "understanding-solutions",
+              "notes-section",
+              "solutions-and-recommendations",
+            ],
+          },
+          { ids: ["financial-summary", "federal-tax-credits"] },
+          { ids: ["environmental-impact"] },
+        ],
+      },
+      {
+        section: "pearl-certification" as ReportSection,
+        tabName: "Pearl Certification",
+        pages: [
+          { ids: ["pearl-discover", "pearl-what-is"] },
+          { ids: ["pearl-package"] },
+          { ids: ["pearl-why-matters", "pearl-peace-of-mind", "pearl-access"] },
         ],
       },
     ];
@@ -611,8 +677,14 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
 
           const canvas = await captureElement(id);
           if (canvas) {
-            // Pass the section name to addImageToPDF
-            currentY = addImageToPDF(pdf, canvas, currentY, section.section);
+            // Pass the section name and element ID to addImageToPDF for custom spacing
+            currentY = addImageToPDF(
+              pdf,
+              canvas,
+              currentY,
+              section.section,
+              id
+            );
           }
         }
 

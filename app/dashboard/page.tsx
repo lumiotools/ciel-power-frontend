@@ -6,6 +6,7 @@ import { useEffect, useState, useContext } from "react";
 import { AUTH_CONTEXT, type UserDetails } from "../../providers/auth";
 import { Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import GoogleReview from "./_comp/Google-review";
 import Recommendation from "./_comp/Recommendation";
 
@@ -112,10 +113,10 @@ const isOneAndHalfHourAhead = (startTime?: string): boolean => {
   if (!startTime) return false;
   const startDate = new Date(startTime);
   const currentDate = new Date();
-  if (currentDate < startDate) return false;
   const diffInHours =
     (startDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60);
-  return diffInHours >= 1.5;
+  console.log(diffInHours);
+  return diffInHours >= 1.5 || diffInHours < 0;
 };
 
 const formatDate = (dateStr?: string): string => {
@@ -159,10 +160,13 @@ const TimelineItem = ({
 }: TimelineItemProps) => {
   const isGreen = shouldBeGreen(state, bookingDetails, currentState);
   const greenBgClass = isGreen ? "bg-[#f0f8e6]" : "bg-white";
+  const borderColorClass = isGreen ? "border-[#7ab236]" : "border-gray-200";
 
   return (
     <div className="timeline-item mb-6 relative">
-      <div className={`${greenBgClass} rounded-lg p-6 border border-gray-200`}>
+      <div
+        className={`${greenBgClass} rounded-lg p-6 border-2 ${borderColorClass}`}
+      >
         {children}
       </div>
     </div>
@@ -386,12 +390,35 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-white">
       <div className="space-y-6">
         {/* Main Content Container */}
-        <div className="container mx-auto p-6">
+        <div className="relative w-full h-64 md:h-80">
+          <Image
+            src={
+              bookingDetails?.bookingDetails?.imageId
+                ? `https://drive.google.com/uc?export=view&id=${bookingDetails.bookingDetails.imageId}`
+                : "/house-isolated-field.webp"
+            }
+            alt={
+              bookingDetails?.bookingDetails?.imageId
+                ? "Your home profile image"
+                : "Modern house with white walls and wooden accents"
+            }
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#ffffff4D] to-transparent"></div>
+          <div className="absolute inset-0 flex flex-col justify-center">
+            <h1 className="text-4xl font-[800] text-gray-800 ml-8 md:ml-16">
+              Hi Fred!
+            </h1>
+            <p className="text-xl text-gray-700 ml-8 md:ml-16 mt-2 font-medium">
+              Welcome to your Dashboard
+            </p>
+          </div>
+        </div>
+        <div className="container mx-auto p-8">
           {/* main component */}
-
-          <div className="flex-1 overflow-auto p-8 bg-white">
-            <h1 className="text-2xl font-bold mb-6">Your Dashboard</h1>
-
+          <div className="flex-1 overflow-auto bg-white">
             {/* Container Card with Light Green Background */}
             <div className="bg-[#f9fcf6] rounded-xl border border-[#e0f0d0] p-6 shadow-sm relative mt-8">
               {/* Collapse/Expand button positioned half on/half off the container */}
@@ -410,6 +437,11 @@ export default function DashboardPage() {
               </button>
 
               <div className="timeline-container relative">
+                {/* Show only the latest state component when collapsed */}
+                <div className="font-extrabold text-2xl text-gray-800 flex items-center mb-4">
+                  <FileCheck size={24} className="text-[#8bc34a] mr-2" />
+                  Your Audit Journey
+                </div>
                 {/* Show only the latest state component when collapsed */}
                 {!isTimelineExpanded && renderLatestStateComponent()}
 
@@ -430,7 +462,6 @@ export default function DashboardPage() {
                         />
                       </TimelineItem>
                     )}
-
                     {/* Project Plans Ready */}
                     {bookingDetails?.proposalDetails && (
                       <TimelineItem
@@ -443,18 +474,16 @@ export default function DashboardPage() {
                         />
                       </TimelineItem>
                     )}
-
                     {/* Timeline Item - We're Lining Everything Up */}
                     {isOneAndHalfHourAhead(
-                      bookingDetails?.bookingDetails?.startTime
+                      bookingDetails?.consultationDetails?.startTime
                     ) && (
                       <div className="timeline-item mb-6 relative">
-                        <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="bg-white rounded-lg p-6 border-2 border-gray-200">
                           <WeAreLinning />
                         </div>
                       </div>
                     )}
-
                     {/* Timeline Item - Your Audit Results are in */}
                     {bookingDetails?.consultationDetails && (
                       <TimelineItem
@@ -473,7 +502,6 @@ export default function DashboardPage() {
                         />
                       </TimelineItem>
                     )}
-
                     {/* Timeline Item - Your Results Are In — Let's Talk */}
                     {bookingDetails?.reportConsultation && (
                       <TimelineItem
@@ -488,7 +516,6 @@ export default function DashboardPage() {
                         />
                       </TimelineItem>
                     )}
-
                     {/* Timeline Item - Upload Your Utility Bills */}
                     {bookingDetails?.utilityBillDetails && (
                       <TimelineItem
@@ -503,7 +530,6 @@ export default function DashboardPage() {
                         />
                       </TimelineItem>
                     )}
-
                     {/* Timeline Item - Professional Home Energy Audit */}
                     {bookingDetails?.bookingDetails && (
                       <TimelineItem
@@ -547,7 +573,7 @@ export default function DashboardPage() {
           )}
 
           {/* Google review */}
-          <GoogleReview />
+          <GoogleReview bookingNumber={userDetails?.bookingNumber} />
         </div>
       </div>
     </div>
@@ -580,7 +606,7 @@ const PaymentDetails = ({
           <path d="m2.3 2.3 7.286 7.286"></path>
           <circle cx="11" cy="11" r="2"></circle>
         </svg>
-        <div className="font-medium text-lg">One Last Thing!</div>
+        <div className="font-bold text-xl">One Last Thing!</div>
       </div>
       <p className="text-gray-600 mb-4">
         To finalize your project and secure your installation dates, please
@@ -651,15 +677,10 @@ const ProjectPlansReady = ({ ProposalDetails }: ProjectPlansReadyProps) => {
     <>
       <div className="flex items-center mb-4">
         <FileCheck size={24} className="text-[#8bc34a] mr-2" />
-        <div className="font-medium text-lg">Your Project Plans Are Ready</div>
+        <div className="font-bold text-xl">Your Project Plans Are Ready</div>
       </div>
 
-      <p className="text-gray-600 mb-4">
-        Review & sign the proposal which works for you! We&apos;ve prepared
-        detailed project plans based on your audit results. Choose the option
-        that best fits your needs and budget to move forward with your home
-        energy improvements.
-      </p>
+      <p className="text-gray-600 mb-4">Review & sign the proposal.</p>
 
       <div className="mb-4">
         {ProposalDetails?.count > 0 && (
@@ -692,13 +713,7 @@ const WeAreLinning = () => {
     <>
       <div className="flex items-center mb-2">
         <CheckCircle size={24} className="text-[#8bc34a] mr-2" />
-        <div className="font-medium text-lg">
-          We&apos;re Lining Everything Up
-        </div>
-      </div>
-
-      <div className="mb-3 text-[#8bc34a] font-medium">
-        Thanks for signing off!
+        <div className="font-bold text-xl">We&apos;re Lining Everything Up</div>
       </div>
 
       <p className="text-gray-600 mb-4">
@@ -730,7 +745,7 @@ const ConsultationDerails = ({
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <FileCheck size={24} className="text-[#8bc34a] mr-2" />
-          <div className="font-medium text-lg">Your Audit Results are in</div>
+          <div className="font-bold text-xl">Your Audit Results are in</div>
         </div>
         {!isOneAndHalfHourAhead(BookingDetails?.startTime) &&
         ConsultationDetails?.rescheduleLink ? (
@@ -749,7 +764,7 @@ const ConsultationDerails = ({
               isOneAndHalfHourAhead(BookingDetails?.startTime) &&
                 ConsultationDetails?.rescheduleLink
             )}
-            className="bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-[#95c25a] transition-colors"
+            className={`pointer-events-none opacity-35 bg-[#8bc34a] text-white px-4 py-2 rounded-md flex items-center gap-2 h-9`}
           >
             <Clock size={18} />
             Reschedule
@@ -811,7 +826,7 @@ const ReportConsaltation = ({
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <FileSpreadsheet size={24} className="text-[#8bc34a] mr-2" />
-          <div className="font-medium text-lg">
+          <div className="font-bold text-xl">
             Your Results Are In — Let&apos;s Talk
           </div>
         </div>
@@ -864,7 +879,7 @@ const UtilityBills = ({ UtilityBillDetails }: UtilityBillsProps) => {
     <>
       <div className="flex items-center mb-4">
         <FileText size={24} className="text-[#8bc34a] mr-2" />
-        <div className="font-medium text-lg">Upload Your Utility Bills</div>
+        <div className="font-bold text-xl">Upload Your Utility Bills</div>
       </div>
 
       <p className="text-gray-600 mb-4">
@@ -912,7 +927,7 @@ const EnergyAudit = ({ BookingDetails, onClick }: EnergyAuditProps) => {
         <div className="flex items-center">
           <ListChecks size={24} className="text-[#8bc34a] mr-2" />
           <div>
-            <div className="font-medium text-lg">
+            <div className="font-bold text-xl">
               Professional Home Energy Audit
             </div>
             <div className="text-sm text-gray-500">

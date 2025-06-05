@@ -63,10 +63,10 @@ const DisplayAllVideos: React.FC<DisplayAllVideosProps> = ({
             </div>
           </div>
           <div className="p-4">
-            <h3 className="text-[#8bc34a] font-medium text-lg mb-1">
+            <h3 className="text-[#8bc34a] font-medium text-lg mb-1 line-clamp-3">
               {item?.title}
             </h3>
-            <p className="text-sm text-gray-600">{item?.description}</p>
+            <p className="text-sm text-gray-600 line-clamp-4">{item?.description}</p>
           </div>
         </div>
       ))}

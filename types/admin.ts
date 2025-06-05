@@ -1,3 +1,10 @@
+export interface Auditor {
+  id: string;
+  name: string;
+  description?: string;
+  file_id?: string;
+}
+
 export interface Booking {
   bookingNumber: string;
   startTime: string;
@@ -8,6 +15,8 @@ export interface Booking {
   utilityBillsUploaded: boolean;
   currentStage: string;
   googleDriveFolder?: string;
+  profilePictureUrl?: string | null;
+  imageId?: string;
 }
 
 export interface ContractDetails {
@@ -45,7 +54,7 @@ export interface BookingResponse {
       total_pages: number;
       total_records: number;
       limit: number;
-    }
+    };
   };
 }
 

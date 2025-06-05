@@ -382,17 +382,14 @@ const KnowledgeBase = () => {
                           </div>
                           <div className="p-4">
                             <div className="flex justify-between items-center mb-2">
-                              <h3 className="text-[#8bc34a] font-medium">
+                              <h3 className="text-[#8bc34a] font-medium line-clamp-3">
                                 {video.title}
                               </h3>
-                              <ChevronRight className="text-[#8bc34a]" />
+                              <ChevronRight className="text-[#8bc34a] w-14 h-14" />
                             </div>
                             {video.description && (
-                              <p className="text-sm text-gray-600">
-                                {truncateDescription(
-                                  video.description,
-                                  MAX_DESCRIPTION_WORDS
-                                )}
+                              <p className="text-sm text-gray-600 line-clamp-4">
+                                {video.description}
                               </p>
                             )}
                           </div>
