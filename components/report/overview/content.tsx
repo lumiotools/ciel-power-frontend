@@ -88,7 +88,7 @@ export default function ContentsSection() {
   return (
     <section
       className="bg-white max-h-fit p-8 w-full border-b border-gray-200 -ml-10"
-      id="intro-header"
+      id="intro-contents"
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
         {/* Left side - House image */}

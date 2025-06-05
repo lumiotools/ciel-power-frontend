@@ -1,17 +1,16 @@
 import { Camera, Ruler, Bug } from "lucide-react";
-import Image from "next/image";
 
 export default function InsulationTechnical() {
   return (
-    <div className="w-full mx-auto px-4">
-      <div className="grid grid-cols-1 gap-8">
+    <div className="w-full mx-auto px-2" id="technical-aspects">
+      <div className="grid grid-cols-1 gap-4">
         {/* Technical Aspects Column */}
         <div>
-          <h2 className="text-3xl font-bold text-[#308883] mb-6">
+          <h2 className="text-3xl font-bold text-[#308883] mb-4">
             Technical Aspects
           </h2>
 
-          <div className="border border-gray-200 rounded-lg p-6 mb-4">
+          <div className="border border-gray-200 rounded-lg p-4 mb-2">
             <div className="flex items-start">
               <div className="mr-4 text-[#308883] mt-1">
                 <Ruler size={28} className="transform rotate-45" />
@@ -29,7 +28,7 @@ export default function InsulationTechnical() {
             </div>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-6 mb-4">
+          <div className="border border-gray-200 rounded-lg p-4 mb-2">
             <div className="flex items-start">
               <div className="mr-4 text-[#308883] mt-1">
                 <Camera size={28} />
@@ -46,15 +45,16 @@ export default function InsulationTechnical() {
             </div>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-6">
+          <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-start">
               <div className="mr-4 text-[#308883] mt-1">
                 <Bug size={28} />
               </div>
               <div>
                 <h3 className="text-2xl font-medium text-[#308883] mb-2">
-                  Did you know? Cellulose insulation treated with borate will
-                  naturally repel rodents, critters, and insects
+                  {
+                    "Did you know? Cellulose insulation treated with borate will naturally repel rodents, critters, and insects"
+                  }
                 </h3>
               </div>
             </div>

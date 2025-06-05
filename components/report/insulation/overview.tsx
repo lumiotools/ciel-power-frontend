@@ -1,14 +1,13 @@
-import Image from "next/image";
 import { Info } from "lucide-react";
 
 export default function InsulationInfo() {
   return (
-    <div className="bg-white max-h-fit p-8 w-full mx-auto">
-      <h1 className="text-3xl md:text-4xl font-bold text-[#308883] mb-6">
+    <div className="bg-white max-h-fit p-4 w-full mx-auto">
+      <h1 className="text-3xl md:text-4xl font-bold text-[#308883] mb-4">
         Understanding Insulation
       </h1>
 
-      <div className="border-2 border-gray-200 rounded-2xl p-6 mb-4">
+      <div className="border-2 border-gray-200 rounded-2xl p-4 mb-2">
         <h2 className="text-2xl font-semibold text-[#308883] mb-2">
           What is Insulation?
         </h2>
@@ -20,15 +19,12 @@ export default function InsulationInfo() {
 
       <div className="flex flex-row items-center justify-center gap-4">
         <div className="flex-col flex items-start justify-center ">
-          <div className="w-full h-[37vh] gap-2 border-2 border-gray-200 border-l-8 border-l-[#308883] bg-gray-50 p-6 rounded-2xl">
+          <div className="w-full h-[37vh] gap-2 border-2 border-gray-200 border-l-8 border-l-[#308883] bg-gray-50 p-4 rounded-2xl">
             <blockquote className="text-gray-700">
               <p className="">
-                "Insulation is one of the keys to a comfortable,
-                energy-efficient home. But simply having the right amount of
-                insulation is not enough. If insulation is not properly
-                installed, a home can have excessive heat gain during the summer
-                and heat loss in the winter—forcing the heating and cooling
-                systems to work overtime."
+                {
+                  "Insulation is one of the keys to a comfortable, energy-efficient home. But simply having the right amount of insulation is not enough. If insulation is not properly installed, a home can have excessive heat gain during the summer and heat loss in the winter—forcing the heating and cooling systems to work overtime."
+                }
               </p>
               <footer className="font-medium italic">
                 — United States EPA
@@ -46,12 +42,16 @@ export default function InsulationInfo() {
           </div>
         </div>
         <div className="border-2 border-gray-200 rounded-lg w-full h-full">
-          <Image
-            src="/image 82.png"
-            alt="Thermal imaging of a house showing heat loss"
-            width={500}
-            height={500}
-            className="rounded-lg w-full h-full"
+          <div
+            className="rounded-lg w-full h-full min-h-[300px]"
+            style={{
+              backgroundImage: "url('/image 82.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+            role="img"
+            aria-label="Thermal imaging of a house showing heat loss"
           />
         </div>
       </div>

@@ -65,10 +65,10 @@ const ReportCoolingSectionCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white max-h-fit p-8"
+      className="bg-white max-h-fit p-4"
     >
       <Card className="rounded-lg border border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="bg-white py-4 px-5 border-b border-gray-100">
+        <CardHeader className="bg-white py-2 px-3 border-b border-gray-100">
           <CardTitle className="text-lg font-medium text-[#d47c02] flex justify-between items-center">
             <Sun className="size-5 mr-2" />
             <div className="flex-1 !text-lg !font-semibold">
@@ -96,7 +96,7 @@ const ReportCoolingSectionCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-8">
               <div className="bg-white p-4 rounded-md border border-gray-200">
                 <h3 className="text-lg font-semibold text-[#d47c02]">
@@ -129,7 +129,7 @@ const ReportCoolingSectionCard = ({
               </div>
 
               {/* System Information Card */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-3">
                 <div className="grid grid-cols-2 gap-x-12 gap-y-2 p-4">
                   <div>
                     <p className="text-gray-800">Type</p>
@@ -229,8 +229,8 @@ const ReportCoolingSectionCard = ({
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-8">
-              <div className="bg-white p-4 rounded-md border border-gray-200 space-y-4">
+            <div className="flex flex-col gap-4">
+              <div className="bg-white p-4 rounded-md border border-gray-200 space-y-2">
                 <div className="flex items-center gap-2">
                   <Info className="size-6 text-[#d47c02]" />
                   <div className="flex-1 !text-lg !font-semibold text-[#d47c02]">

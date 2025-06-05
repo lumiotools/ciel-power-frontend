@@ -61,22 +61,31 @@ const ReportInsulationSection = ({
         </div>
       )} */}
 
-      <div
-        id="insulation-overview"
+      <section
+        id="insulation-overview-intro"
         className="min-h-screen flex items-center justify-center"
       >
         <ReportInsulationSectionOverview />
-      </div>
-      <motion.div
+      </section>
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 min-h-screen"
+        className="bg-white max-h-fit p-8"
         id="technical-aspects"
       >
-        <ReportInsulationSectionTechnicalAspects />
-        <ReportInsulationSectionSeasonalPerformance />
-      </motion.div>
+        <div className="flex flex-row gap-8">
+          {/* Technical Aspects Component - Left Side */}
+          <div className="w-1/2">
+            <ReportInsulationSectionTechnicalAspects />
+          </div>
+
+          {/* Seasonal Performance Component - Right Side */}
+          <div className="w-1/2">
+            <ReportInsulationSectionSeasonalPerformance />
+          </div>
+        </div>
+      </motion.section>
       <div
         id="insulation-benefits"
         className="min-h-screen flex items-center justify-center"
@@ -89,7 +98,7 @@ const ReportInsulationSection = ({
           <div
             key={`insulation-zone-${index}`}
             id={`insulation-zone-${index}`}
-            className="min-h-screen flex items-center justify-center"
+            className="flex items-center justify-center"
           >
             <ReportInsulationSectionCard
               key={`${insulation.title}-${index}`}

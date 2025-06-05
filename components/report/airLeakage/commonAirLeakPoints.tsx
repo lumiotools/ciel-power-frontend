@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 import { motion } from "framer-motion";
 
 const ReportAirLeakageSectionCommonAirLeakPoints = () => {
@@ -23,13 +23,13 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
     { id: 18, label: "Windows & Doors" },
     { id: 19, label: "Common Walls Between Attached Dwelling Units" },
   ];
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
   };
 
-  const cardStyle = "bg-white rounded-lg overflow-hidden";
   return (
     <motion.div
       {...fadeInUp}
@@ -43,31 +43,32 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
 
       {/* Content Container */}
       <div className="bg-[#ffffff] rounded-2xl border border-gray-200 p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-row gap-8">
           {/* House Diagram */}
-          <div className="md:w-[42.5%] border-r-[3px] border-gray-200 pr-4">
+          <div className="w-[42.5%] border-r-[3px] border-gray-200 pr-4">
             <img
               src="/images/air-sealing-diagram.png"
               alt="House air sealing trouble spots diagram"
               className="w-full h-auto rounded-lg"
             />
           </div>
+
           {/* Air Leak Points List */}
-          <div className="md:w-[57.5%]">
+          <div className="w-[57.5%]">
             <div className="flex gap-8">
               {/* First Column (1-10) */}
               <div className="flex-1">
                 {airLeakagePoints.slice(0, 10).map((point) => (
-                  <div key={point.id} className="flex items-center gap-4 mb-5">
+                  <div key={point.id} className="flex items-start gap-3 mb-4">
                     <div
-                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5"
                       style={{ backgroundColor: "#031A82" }}
                     >
-                      <span className="font-medium text-white text-md">
+                      <span className="font-medium text-white text-sm leading-none">
                         {point.id}
                       </span>
                     </div>
-                    <span className="text-gray-800 text-md font-semibold leading-tight">
+                    <span className="text-gray-800 text-sm font-semibold leading-relaxed flex-1">
                       {point.label}
                     </span>
                   </div>
@@ -77,16 +78,16 @@ const ReportAirLeakageSectionCommonAirLeakPoints = () => {
               {/* Second Column (11-19) */}
               <div className="flex-1">
                 {airLeakagePoints.slice(10).map((point) => (
-                  <div key={point.id} className="flex items-center gap-4 mb-5">
+                  <div key={point.id} className="flex items-start gap-3 mb-4">
                     <div
-                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5"
                       style={{ backgroundColor: "#031A82" }}
                     >
-                      <span className="font-medium text-white text-md">
+                      <span className="font-medium text-white text-sm leading-none">
                         {point.id}
                       </span>
                     </div>
-                    <span className="text-gray-800 text-md font-semibold leading-tight">
+                    <span className="text-gray-800 text-sm font-semibold leading-relaxed flex-1">
                       {point.label}
                     </span>
                   </div>

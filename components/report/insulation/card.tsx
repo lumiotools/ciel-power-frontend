@@ -55,13 +55,13 @@ const ReportInsulationSectionCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white max-h-fit p-8"
+      className="bg-white max-h-fit p-4"
     >
       {" "}
       <Card className="shadow-sm overflow-hidden">
-        <CardHeader className="py-4 px-5">
+        <CardHeader className="py-0 px-2">
           <CardTitle className="text-2xl md:text-3xl font-bold text-[#308883] flex justify-between">
-            <div className="flex-1">
+            <div className="flex-1 mb-2">
               {isAdmin ? (
                 <ReportEditableInput
                   className="max-w-[50%]"
@@ -85,7 +85,7 @@ const ReportInsulationSectionCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="py-1 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="rounded-xl flex justify-center items-center">
               <ReportImageViewer
                 allowSelection={isAdmin}
@@ -106,7 +106,7 @@ const ReportInsulationSectionCard = ({
                 }}
               />
             </div>
-            <div className="py-2 px-4 rounded-xl border-2 border-gray-200">
+            <div className="py-2 px-2 rounded-xl border-2 border-gray-200">
               <h3 className="text-xl font-bold text-[#308883]">
                 Current Performance
               </h3>
@@ -122,7 +122,7 @@ const ReportInsulationSectionCard = ({
                   R{insulation.current_rValue}
                 </span>
               </div>
-              <div className="max-w-xl mx-auto flex justify-between gap-4 px-4 mt-3">
+              <div className="max-w-xl mx-auto flex justify-between gap-2 px-2 mt-2">
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-500">Current R-Value</p>
                   <p className="text-xl font-bold text-[#F44336]">
@@ -138,7 +138,7 @@ const ReportInsulationSectionCard = ({
               </div>
             </div>
 
-            <div className="border-2 border-gray-200 rounded-xl grid grid-cols-2 gap-x-12 gap-y-2 p-4">
+            <div className="border-2 border-gray-200 rounded-xl grid grid-cols-2 gap-x-8 gap-y-2 p-2">
               <div>
                 <p className="text-gray-800">Material</p>
                 <div className="text-[#308883] !font-bold">
@@ -222,7 +222,7 @@ const ReportInsulationSectionCard = ({
                 </div>
               </div>
             </div>
-            <div className="rounded-xl p-4 border-2 border-gray-200 space-y-4">
+            <div className="rounded-xl p-2 border-2 border-gray-200 space-y-2">
               <h3 className="text-lg font-semibold text-[#308883]">
                 BPI Recommendation
               </h3>

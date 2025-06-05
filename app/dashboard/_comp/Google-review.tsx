@@ -1,79 +1,102 @@
-import { ChevronDown } from "lucide-react";
-import React, { useRef } from "react";
+"use client"
 
-const GoogleReview = () => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+import { ChevronDown } from "lucide-react"
+import type React from "react"
+import { useRef, useState, useEffect } from "react"
 
-  // Array of review data
-  const reviews = [
-    {
-      id: 1,
-      author: "Hostos Monegro",
-      initials: "HM",
-      date: "15/04/2025",
-      rating: 5,
-      color: "bg-[#EE702E]",
-      review:
-        "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed.",
-    },
-    {
-      id: 2,
-      author: "James Van Ness",
-      initials: "JV",
-      date: "10/04/2025",
-      rating: 5,
-      color: "bg-[#EE702E]",
-      review:
-        "I've done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it's pretty common for me to have quality issues with other contractors work. However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project.",
-    },
-    {
-      id: 3,
-      author: "Matthew Gould",
-      initials: "MG",
-      date: "05/04/2025",
-      rating: 5,
-      color: "bg-[#EE702E]",
-      review:
-        "Michael was amazing. He took the time to explain the process, how it works, what he looks for and walked me through next steps. Would highly recommend him to anyone looking to get a better understanding of their energy consumption and potential opportunities to improve the energy efficiency of their home.",
-    },
-    {
-      id: 4,
-      author: "JOHN PERRY",
-      initials: "JP",
-      date: "01/04/2025",
-      rating: 5,
-      color: "bg-[#EE702E]",
-      review:
-        "A little while back we had a Ciel Power Energy audit by Jesse Lubkiewicz and was completely satisfied. Jesse was punctual and very professional as he did a complete examination of the interior and exterior of our home and he actually explained in terms we could comprehend of what he was doing. he did audit with no disruption to our home and left no mess, Jesse seemed to really like his work and talking with people.",
-    },
-    {
-      id: 5,
-      author: "Melodie Hodge",
-      initials: "MH",
-      date: "25/03/2025",
-      rating: 5,
-      color: "bg-[#EE702E]",
-      review:
-        "My initial appointment with Marvin went really well. He arrived on time and was very pleasant. He sat down and explained the process, made time for questions, and kept me updated with what he was doing along the way. Very great customer service overall, and super personable!",
-    },
-  ];
+interface Review {
+  id: number
+  author: string
+  initials: string
+  date: string
+  rating: number
+  color: string
+  review: string
+}
+
+interface GoogleReviewProps {
+  bookingNumber?: string
+  apiEndpoint?: string
+}
+
+const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", apiEndpoint = "/api/bookings" }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+
+  // Fetch reviews from API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(`${apiEndpoint}/${bookingNumber}/google-reviews`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your auth method
+            "Content-Type": "application/json",
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.success) {
+          setReviews(data.data.reviews)
+          setLastUpdated(data.data.last_updated)
+        } else {
+          throw new Error(data.error || "Failed to fetch reviews")
+        }
+      } catch (err) {
+        console.error("Error fetching reviews:", err)
+        setError(err instanceof Error ? err.message : "Failed to fetch reviews")
+
+        // Fallback to static data if API fails
+        setReviews([
+          {
+            id: 1,
+            author: "Hostos Monegro",
+            initials: "HM",
+            date: "15/04/2025",
+            rating: 5,
+            color: "bg-[#EE702E]",
+            review:
+              "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed.",
+          },
+          {
+            id: 2,
+            author: "James Van Ness",
+            initials: "JV",
+            date: "10/04/2025",
+            rating: 5,
+            color: "bg-blue-500",
+            review:
+              "I've done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it's pretty common for me to have quality issues with other contractors work. However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project.",
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchReviews()
+  }, [bookingNumber, apiEndpoint])
 
   // Function to render star ratings
   const renderStars = (rating: number) => {
-    const stars = [];
+    const stars = []
     for (let i = 0; i < rating; i++) {
       stars.push(
-        <svg
-          key={i}
-          className="w-5 h-5 text-[#EE702E] fill-current"
-          viewBox="0 0 24 24"
-        >
+        <svg key={i} className="w-5 h-5 text-[#EE702E] fill-current" viewBox="0 0 24 24">
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-        </svg>
-      );
+        </svg>,
+      )
     }
-    return stars;
-  };
+    return stars
+  }
 
   // Function to scroll left
   const scrollLeft = () => {
@@ -81,9 +104,9 @@ const GoogleReview = () => {
       scrollContainerRef.current.scrollBy({
         left: -370, // Width of card (350px) + gap (20px)
         behavior: "smooth",
-      });
+      })
     }
-  };
+  }
 
   // Function to scroll right
   const scrollRight = () => {
@@ -91,20 +114,56 @@ const GoogleReview = () => {
       scrollContainerRef.current.scrollBy({
         left: 370, // Width of card (350px) + gap (20px)
         behavior: "smooth",
-      });
+      })
     }
-  };
+  }
+
+  if (loading) {
+    return (
+      <div className="mt-12 mb-8 rounded-xl p-6">
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+        </div>
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EE702E]"></div>
+          <span className="ml-2 text-gray-600">Loading reviews...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error && reviews.length === 0) {
+    return (
+      <div className="mt-12 mb-8 rounded-xl p-6">
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+        </div>
+        <div className="flex justify-center items-center h-32">
+          <div className="text-red-500">
+            <p>Failed to load reviews: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 bg-[#EE702E] text-white rounded hover:bg-orange-600"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-12 mb-8 rounded-xl p-6">
       <div className="mb-6">
         <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+        {lastUpdated && (
+          <p className="text-sm text-gray-500 mt-1">Last updated: {new Date(lastUpdated).toLocaleDateString()}</p>
+        )}
+        {error && <p className="text-sm text-yellow-600 mt-1">Using cached data due to: {error}</p>}
       </div>
       <div className="relative">
-        <div
-          ref={scrollContainerRef}
-          className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth"
-        >
+        <div ref={scrollContainerRef} className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth">
           {reviews.map((review) => (
             <div
               key={review.id}
@@ -146,18 +205,22 @@ const GoogleReview = () => {
             </div>
           ))}
         </div>
-        <button
-          onClick={scrollLeft}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E] hover:bg-orange-50 transition-colors"
-        >
-          <ChevronDown className="rotate-90 text-[#EE702E]" size={24} />
-        </button>
-        <button
-          onClick={scrollRight}
-          className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E] hover:bg-orange-50 transition-colors"
-        >
-          <ChevronDown className="-rotate-90 text-[#EE702E]" size={24} />
-        </button>
+        {reviews.length > 1 && (
+          <>
+            <button
+              onClick={scrollLeft}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E] hover:bg-orange-50 transition-colors"
+            >
+              <ChevronDown className="rotate-90 text-[#EE702E]" size={24} />
+            </button>
+            <button
+              onClick={scrollRight}
+              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#EE702E] hover:bg-orange-50 transition-colors"
+            >
+              <ChevronDown className="-rotate-90 text-[#EE702E]" size={24} />
+            </button>
+          </>
+        )}
       </div>
 
       <style jsx>{`
@@ -170,7 +233,7 @@ const GoogleReview = () => {
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default GoogleReview;
+export default GoogleReview

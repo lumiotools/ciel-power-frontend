@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export default function SustainabilitySection() {
   const energyPrograms = [
     {
@@ -50,12 +48,17 @@ export default function SustainabilitySection() {
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 items-center">
             {energyPrograms.map((program, index) => (
-              <div key={index} className="h-32 relative">
-                <Image
-                  src={program.logo || "/placeholder.svg"}
-                  alt={program.name}
-                  fill
-                  style={{ objectFit: "contain" }}
+              <div key={index} className="h-32">
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `url('${program.logo || "/placeholder.svg?height=128&width=128"}')`,
+                    backgroundSize: "contain",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                  role="img"
+                  aria-label={program.name}
                 />
               </div>
             ))}
@@ -66,12 +69,17 @@ export default function SustainabilitySection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* NJ Sustainable Business Registry Card */}
           <div className="rounded-lg border border-gray-200 p-3 flex flex-col items-center text-center">
-            <div className="h-40 w-96 relative mb-6">
-              <Image
-                src="/image 35.png"
-                alt="NJ Sustainable Business Registry"
-                fill
-                style={{ objectFit: "contain" }}
+            <div className="h-40 w-96 mb-6">
+              <div
+                className="w-full h-full"
+                style={{
+                  backgroundImage: "url('/image 35.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="NJ Sustainable Business Registry"
               />
             </div>
             <p className="text-3xl text-[#333333]">
@@ -83,12 +91,17 @@ export default function SustainabilitySection() {
 
           {/* TreeEra Card */}
           <div className="rounded-lg border border-gray-200 p-3 flex flex-col items-center text-center">
-            <div className="h-40 w-96 relative mb-6">
-              <Image
-                src="/image 36.png"
-                alt="TreeEra"
-                fill
-                style={{ objectFit: "contain" }}
+            <div className="h-40 w-96 mb-6">
+              <div
+                className="w-full h-full"
+                style={{
+                  backgroundImage: "url('/image 36.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="TreeEra"
               />
             </div>
             <p className="text-3xl text-[#333333]">

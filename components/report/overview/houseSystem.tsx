@@ -40,15 +40,15 @@ export default function BuildingScienceSection() {
           {/* House as a System Card */}
           <div className="rounded-lg border border-gray-200 p-8">
             <h3 className="text-2xl md:text-3xl font-semibold text-[#824ea0] mb-6">
-              A "House of a System" Approach
+              A &quot;House of a System&quot; Approach
             </h3>
 
             <blockquote className="text-gray-700 italic mb-8 leading-relaxed">
-              "You understand that your car is made up of interacting components
-              and systems – when one component fails, it affects the performance
-              of the entire vehicle. Do you know that the same goes for your
-              house? If one system has a problem, it impacts the other systems'
-              ability to function properly."
+              &quot;You understand that your car is made up of interacting
+              components and systems – when one component fails, it affects the
+              performance of the entire vehicle. Do you know that the same goes
+              for your house? If one system has a problem, it impacts the other
+              systems&apos; ability to function properly.&quot;
               <footer className="text-gray-600 mt-2 italic text-right font-semibold">
                 —Building Performance Institute
               </footer>

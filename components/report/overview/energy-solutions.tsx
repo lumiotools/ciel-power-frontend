@@ -1,51 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-
 export default function EnergySolutionsSection() {
-  const [activeTab, setActiveTab] = useState("nj");
-
   const includedServices = [
     {
       name: "Insulation Upgrades",
-      icon: <img src="/image 69.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 69.png",
     },
     {
       name: "Heating Systems",
-      icon: <img src="/image 68.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 68.png",
     },
     {
       name: "Oil-to-Gas Conversions",
-      icon: <img src="/image 67.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 67.png",
     },
     {
       name: "Air Conditioning Systems",
-      icon: <img src="/image 66.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 66.png",
     },
     {
       name: "Air Sealing",
-      icon: <img src="/image 65.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 65.png",
     },
     {
       name: "Hot water Systems",
-      icon: <img src="/image 64.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 64.png",
     },
     {
       name: "Crawlspace Encapsulation",
-      icon: <img src="/image 63.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 63.png",
     },
     {
       name: "Health & safety Concerns",
-      icon: <img src="/image 62.png" alt="" className="w-16 h-16" />,
+      iconSrc: "/image 62.png",
     },
   ];
 
   return (
-    <section
-      className="bg-white max-h-fit p-8 w-full"
-      id="intro-energy"
-    >
+    <section className="bg-white max-h-fit p-8 w-full" id="intro-energy">
       <div className="w-full mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-[#2fabe2] mb-10">
           Whole Home Energy Solutions
@@ -79,12 +71,17 @@ export default function EnergySolutionsSection() {
               <p className="text-gray-500 mb-4">Monthly Cost Sample</p>
             </div>
 
-            <div className="h-64 relative">
-              <Image
-                src="/image 59.png"
-                alt="Monthly utility cost comparison"
-                fill
-                style={{ objectFit: "contain" }}
+            <div className="h-64">
+              <div
+                className="w-full h-full"
+                style={{
+                  backgroundImage: "url('/image 59.png')",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                role="img"
+                aria-label="Monthly utility cost comparison"
               />
             </div>
           </div>
@@ -92,12 +89,17 @@ export default function EnergySolutionsSection() {
           {/* Incentives Card */}
           <div className="rounded-lg border border-gray-200 p-6 md:p-8">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-36 h-36 relative flex-shrink-0">
-                <Image
-                  src="/image 55.png"
-                  alt="New Jersey"
-                  fill
-                  style={{ objectFit: "contain" }}
+              <div className="w-36 h-36 flex-shrink-0">
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: "url('/image 55.png')",
+                    backgroundSize: "contain",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                  role="img"
+                  aria-label="New Jersey"
                 />
               </div>
               <div>
@@ -105,9 +107,9 @@ export default function EnergySolutionsSection() {
                   New Jersey Incentives
                 </h3>
                 <p className="text-[#333333] text-xl">
-                  New Jersey's regional utility companies are offering cash-back
-                  and financing incentives to New Jersey homeowners to install
-                  upgrades!
+                  New Jersey&apos;s regional utility companies are offering
+                  cash-back and financing incentives to New Jersey homeowners to
+                  install upgrades!
                 </p>
               </div>
             </div>
@@ -115,12 +117,17 @@ export default function EnergySolutionsSection() {
             <div className="space-y-8">
               {/* Cash-Back Incentives */}
               <div className="flex gap-4">
-                <div className="w-36 h-36 relative flex-shrink-0">
-                  <Image
-                    src="/image 56.png"
-                    alt="image 56"
-                    fill
-                    style={{ objectFit: "contain" }}
+                <div className="w-36 h-36 flex-shrink-0">
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: "url('/image 56.png')",
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    role="img"
+                    aria-label="Cash-back incentives icon"
                   />
                 </div>
                 <div>
@@ -132,19 +139,25 @@ export default function EnergySolutionsSection() {
                     each additional percentage point up to 25% or $6,000
                   </p>
                   <p className="text-md text-gray-600 italic">
-                    Cash-back rebate can not exceed 50% of the project's cost
+                    Cash-back rebate can not exceed 50% of the project&apos;s
+                    cost
                   </p>
                 </div>
               </div>
 
               {/* Financing Incentives */}
               <div className="flex gap-4">
-                <div className="w-36 h-36 relative flex-shrink-0">
-                  <Image
-                    src="/image 57.png"
-                    alt="Financing Incentives"
-                    fill
-                    style={{ objectFit: "contain" }}
+                <div className="w-36 h-36 flex-shrink-0">
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: "url('/image 57.png')",
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    role="img"
+                    aria-label="Financing Incentives"
                   />
                 </div>
                 <div>
@@ -172,7 +185,7 @@ export default function EnergySolutionsSection() {
         {/* What's Included Section */}
         <div className="rounded-lg border border-gray-200 p-6 md:p-8 mb-8">
           <h3 className="text-3xl font-semibold text-[#2fabe2] text-center mb-8">
-            What's Included?
+            What&apos;s Included?
           </h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-20">
@@ -181,7 +194,19 @@ export default function EnergySolutionsSection() {
                 key={index}
                 className="border-2 border-gray-200 rounded-lg py-10 px-8 flex flex-col items-center text-center"
               >
-                <div className="mb-4">{service.icon}</div>
+                <div className="mb-4 w-16 h-16">
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: `url('${service.iconSrc}')`,
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    role="img"
+                    aria-label={service.name}
+                  />
+                </div>
                 <h4 className="text-2xl font-medium text-[#333333]">
                   {service.name}
                 </h4>

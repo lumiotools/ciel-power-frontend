@@ -8,7 +8,8 @@ export type ReportSection =
   | "heating"
   | "cooling"
   | "concerns"
-  | "solutions";
+  | "solutions"
+  | "pearl-certification";
 
 // Define the props interface
 interface DownloadModalProps {
@@ -74,6 +75,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
     { id: "cooling", name: "Cooling" },
     { id: "concerns", name: "Concerns" },
     { id: "solutions", name: "Solutions" },
+    { id: "pearl-certification", name: "Pearl Certification" },
   ];
 
   // All available section IDs

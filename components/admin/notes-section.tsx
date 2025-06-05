@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronUp, Wind } from "lucide-react";
+import Image from "next/image";
 
 export default function NotesSection() {
   const [notes, setNotes] = useState("");
@@ -44,14 +45,17 @@ export default function NotesSection() {
   return (
     <div
       className="w-full border-b border-gray-200 p-4 bg-white max-h-fit"
-      id="intro-header"
+      id="intro-notes"
     >
       <div className="w-full mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img
+            <Image
               src="/notes-icon.svg"
-              className="text-[#67b502] w-8 h-8 mr-2"
+              alt="Notes Icon"
+              width={32}
+              height={32}
+              className="text-[#67b502] mr-2"
             />
             <h2 className="text-[#67b502] text-3xl font-bold">Notes</h2>
           </div>
