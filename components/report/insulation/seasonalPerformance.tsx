@@ -1,6 +1,3 @@
-import React from "react";
-import Image from "next/image";
-
 const ReportInsulationSectionSeasonalPerformance = () => {
   return (
     <div>
@@ -8,12 +5,16 @@ const ReportInsulationSectionSeasonalPerformance = () => {
         Seasonal Performance
       </h2>
       <div className="border border-gray-200 rounded-lg p-4">
-        <Image
-          src="/image 83.png"
-          alt="Diagram showing how insulation performs in summer and winter seasons"
-          width={600}
-          height={500}
-          className="w-full h-auto"
+        <div
+          className="rounded-lg w-full h-full min-h-[400px]"
+          style={{
+            backgroundImage: "url('/image 83.png')",
+            backgroundSize: "100% 100%",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+          role="img"
+          aria-label="Diagram showing how insulation performs in summer and winter seasons"
         />
       </div>
     </div>

@@ -1,25 +1,31 @@
-"use client"
+"use client";
 
-import type { CoolingData } from "@/app/admin/[bookingNumber]/report/page"
-import { useState } from "react"
-import type { HouseImage } from "./card"
-import ReportCoolingSectioninformation from "./information"
-import ReportCoolingSectionCard from "./card"
-import AirConditioningAssessment from "./assessment"
-import { motion } from "framer-motion"
+import type { CoolingData } from "@/app/admin/[bookingNumber]/report/page";
+import { useState } from "react";
+import type { HouseImage } from "./card";
+import ReportCoolingSectioninformation from "./information";
+import ReportCoolingSectionCard from "./card";
+import AirConditioningAssessment from "./assessment";
+import { motion } from "framer-motion";
 
 interface ReportCoolingSectionProps {
-  isAdmin?: boolean
-  coolingData?: CoolingData[]
-  onUpdateValue?: (cooling: CoolingData[]) => void
-  houseImages?: HouseImage[]
+  isAdmin?: boolean;
+  coolingData?: CoolingData[];
+  onUpdateValue?: (cooling: CoolingData[]) => void;
+  houseImages?: HouseImage[];
 }
 
-const ReportCoolingSection = ({ isAdmin, coolingData = [], houseImages, onUpdateValue }: ReportCoolingSectionProps) => {
-  const [coolingDataSection, setCoolingDataSection] = useState<CoolingData[]>(coolingData)
+const ReportCoolingSection = ({
+  isAdmin,
+  coolingData = [],
+  houseImages,
+  onUpdateValue,
+}: ReportCoolingSectionProps) => {
+  const [coolingDataSection, setCoolingDataSection] =
+    useState<CoolingData[]>(coolingData);
 
   const addNewCooling = () => {
-    if (!isAdmin) return
+    if (!isAdmin) return;
     const newCooling: CoolingData = {
       title: "Your Home's Cooling " + (coolingDataSection.length + 1),
       type: "Unknown",
@@ -28,26 +34,28 @@ const ReportCoolingSection = ({ isAdmin, coolingData = [], houseImages, onUpdate
       parameter: "SEER",
       current_value: 0,
       recommended_value: 100,
-    }
+    };
 
-    const updatedData = [...coolingDataSection, newCooling]
-    setCoolingDataSection(updatedData)
-    onUpdateValue?.(updatedData)
-  }
+    const updatedData = [...coolingDataSection, newCooling];
+    setCoolingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
 
   const deleteCooling = (index: number) => {
-    if (!isAdmin) return
-    const updatedData = coolingDataSection.filter((_, i) => i !== index)
-    setCoolingDataSection(updatedData)
-    onUpdateValue?.(updatedData)
-  }
+    if (!isAdmin) return;
+    const updatedData = coolingDataSection.filter((_, i) => i !== index);
+    setCoolingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
 
   const updateCooling = (index: number, updatedCooling: CoolingData) => {
-    if (!isAdmin) return
-    const updatedData = coolingDataSection.map((c, i) => (i === index ? updatedCooling : c))
-    setCoolingDataSection(updatedData)
-    onUpdateValue?.(updatedData)
-  }
+    if (!isAdmin) return;
+    const updatedData = coolingDataSection.map((c, i) =>
+      i === index ? updatedCooling : c
+    );
+    setCoolingDataSection(updatedData);
+    onUpdateValue?.(updatedData);
+  };
 
   return (
     <motion.div
@@ -56,20 +64,26 @@ const ReportCoolingSection = ({ isAdmin, coolingData = [], houseImages, onUpdate
       transition={{ duration: 0.5 }}
       className="bg-[#eaeaea] py-12"
     >
-      <div className="max-w-none mx-auto space-y-24">
-        <div id="cooling-header" className="min-h-screen flex items-center justify-center w-full">
+      <div className="max-w-none mx-auto space-y-12">
+        <div
+          id="cooling-header"
+          className=" flex items-center justify-center w-full"
+        >
           <ReportCoolingSectioninformation />
         </div>
 
         {/* Air Conditioning Assessment Section */}
-        <div id="air-conditioning-assessment" className="min-h-screen flex items-center justify-center w-full">
+        <div
+          id="air-conditioning-assessment"
+          className="min-h-screen flex items-center justify-center w-full"
+        >
           <AirConditioningAssessment
             isAdmin={isAdmin}
             houseImages={houseImages}
             selectedImages={[]} // You can add state management for this if needed
             onUpdateImages={(images) => {
               // Add state management logic here if needed
-              console.log("Assessment images updated:", images)
+              console.log("Assessment images updated:", images);
             }}
           />
         </div>
@@ -78,13 +92,15 @@ const ReportCoolingSection = ({ isAdmin, coolingData = [], houseImages, onUpdate
           <div
             key={`cooling-system-${index}`}
             id={`cooling-system-${index}`}
-            className="min-h-screen flex items-center justify-center w-full"
+            className="flex items-center justify-center w-full"
           >
             <ReportCoolingSectionCard
               isAdmin={isAdmin}
               cooling={cooling}
               houseImages={houseImages}
-              onUpdateValue={(updatedCooling) => updateCooling(index, updatedCooling)}
+              onUpdateValue={(updatedCooling) =>
+                updateCooling(index, updatedCooling)
+              }
               onDelete={() => deleteCooling(index)}
             />
           </div>
@@ -102,7 +118,7 @@ const ReportCoolingSection = ({ isAdmin, coolingData = [], houseImages, onUpdate
         )}
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ReportCoolingSection
+export default ReportCoolingSection;

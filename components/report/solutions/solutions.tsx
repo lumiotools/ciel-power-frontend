@@ -1,9 +1,9 @@
-import {
+"use client";
+
+import type {
   ReportData,
   SolutionsAndRecommendationsData,
 } from "@/app/admin/[bookingNumber]/report/page";
-import React from "react";
-import ReportSummarySectionSummaryOfConcerns from "../concerns/summaryOfConcerns";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
 // import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
@@ -12,7 +12,7 @@ import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
 import UnderstandingSolutions from "./understandingSolutions";
 import { motion } from "framer-motion";
 import NotesSection from "./LoremIpsumHeading";
-import { HouseImage } from "../concerns/concerns";
+import type { HouseImage } from "../concerns/concerns";
 
 interface ReportSummarySolutionSectionProps {
   isAdmin?: boolean;
@@ -73,75 +73,107 @@ const ReportSummarySolutionSection = ({
           }
         }}
       /> */}
-      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
-        <UnderstandingSolutions />
+      <div className="pt-24">
+        <section
+          id="understanding-solutions"
+          className="bg-[#eaeaea] flex items-center justify-center"
+        >
+          <UnderstandingSolutions />
+        </section>
       </div>
-      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
-        <NotesSection
-          isAdmin={isAdmin}
-          houseImages={houseImages}
-          solutionsAndRecommendations={solutionsAndRecommendations}
-        />
+      <div className="pt-24">
+        <section
+          id="notes-section"
+          className="bg-[#eaeaea] flex items-center justify-center"
+        >
+          <NotesSection
+            isAdmin={isAdmin}
+            houseImages={houseImages}
+            solutionsAndRecommendations={solutionsAndRecommendations}
+          />
+        </section>
       </div>
-      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
-        <ReportSummarySectionSolutionsAndRecommendations
-          isAdmin={isAdmin}
-          solutionsAndRecommendations={reportData?.solutionsAndRecommendations}
-          onUpdateValue={(solutionsAndRecommendations) => {
-            if (onUpdateValue) {
-              onUpdateValue({
-                ...reportData,
-                solutionsAndRecommendations: solutionsAndRecommendations,
-              });
+      <div className="pt-24">
+        <section
+          id="solutions-and-recommendations"
+          className="bg-[#eaeaea] flex items-center justify-center"
+        >
+          <ReportSummarySectionSolutionsAndRecommendations
+            isAdmin={isAdmin}
+            solutionsAndRecommendations={
+              reportData?.solutionsAndRecommendations
             }
-          }}
-        />
+            onUpdateValue={(solutionsAndRecommendations) => {
+              if (onUpdateValue) {
+                onUpdateValue({
+                  ...reportData,
+                  solutionsAndRecommendations: solutionsAndRecommendations,
+                });
+              }
+            }}
+          />
+        </section>
       </div>
 
       {/* <ReportSummarySectionFutureUpgrades /> */}
-      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
-        <ReportSummarySectionFinancialSummary
-          isAdmin={isAdmin}
-          financialSummary={reportData?.financialSummary}
-          onUpdateValue={(financialSummary) => {
-            if (onUpdateValue) {
-              onUpdateValue({
-                ...reportData,
-                financialSummary: financialSummary,
-              });
-            }
-          }}
-        />
+      <div className="pt-24">
+        <section
+          id="financial-summary"
+          className="bg-[#eaeaea] flex items-center justify-center"
+        >
+          <ReportSummarySectionFinancialSummary
+            isAdmin={isAdmin}
+            financialSummary={reportData?.financialSummary}
+            onUpdateValue={(financialSummary) => {
+              if (onUpdateValue) {
+                onUpdateValue({
+                  ...reportData,
+                  financialSummary: financialSummary,
+                });
+              }
+            }}
+          />
+        </section>
       </div>
-      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
-        <ReportSummarySectionFederalTaxCredits
-          isAdmin={isAdmin}
-          federalTaxCredits={reportData?.federalTaxCredits}
-          onUpdateValue={(federalTaxCredits) => {
-            if (onUpdateValue) {
-              onUpdateValue({
-                ...reportData,
-                federalTaxCredits: federalTaxCredits,
-              });
-            }
-          }}
-        />
+      <div className="pt-24">
+        <section
+          id="federal-tax-credits"
+          className="bg-[#eaeaea] flex items-center justify-center"
+        >
+          <ReportSummarySectionFederalTaxCredits
+            isAdmin={isAdmin}
+            federalTaxCredits={reportData?.federalTaxCredits}
+            onUpdateValue={(federalTaxCredits) => {
+              if (onUpdateValue) {
+                onUpdateValue({
+                  ...reportData,
+                  federalTaxCredits: federalTaxCredits,
+                });
+              }
+            }}
+          />
+        </section>
       </div>
 
       {/* Environmental Impact Section - Without styled wrapper */}
-      <div className="min-h-screen bg-[#eaeaea] flex items-center justify-center">
-        <ReportSummarySectionEnvironmentalImpact
-          isAdmin={isAdmin}
-          environmentalImpact={reportData?.environmentalImpact}
-          onUpdateValue={(environmentalImpact) => {
-            if (onUpdateValue) {
-              onUpdateValue({
-                ...reportData,
-                environmentalImpact: environmentalImpact,
-              });
-            }
-          }}
-        />
+      <div className="pt-24">
+        <section
+          id="environmental-impact"
+          className="bg-[#eaeaea] flex items-center justify-center"
+        >
+          <ReportSummarySectionEnvironmentalImpact
+            isAdmin={isAdmin}
+            environmentalImpact={reportData?.environmentalImpact}
+            onUpdateValue={(environmentalImpact) => {
+              if (onUpdateValue) {
+                onUpdateValue({
+                  ...reportData,
+                  environmentalImpact: environmentalImpact,
+                });
+              }
+            }}
+          />
+        </section>
       </div>
 
       {/* Project Costs Section - Without styled wrapper */}

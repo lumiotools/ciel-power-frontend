@@ -98,6 +98,12 @@ const captureElement = async (
     element.scrollIntoView({ behavior: "auto", block: "start" });
     await wait(200);
 
+    // Hide air-leakage-svg div during PDF generation
+    const airLeakageSvg = document.getElementById("air-leakage-svg");
+    if (airLeakageSvg) {
+      airLeakageSvg.classList.add("hidden");
+    }
+
     // Dynamically adjust scale based on element size for better fit
     let scaleValue = 1.4; // Default scale
 
@@ -126,10 +132,22 @@ const captureElement = async (
       removeContainer: true, // Remove the temporary container to save memory
     });
 
+    // Show air-leakage-svg div again after capture
+    if (airLeakageSvg) {
+      airLeakageSvg.classList.remove("hidden");
+    }
+
     console.log(`Successfully captured ${elementId}`);
     return canvas;
   } catch (error) {
     console.error(`Error capturing element with ID "${elementId}":`, error);
+
+    // Ensure air-leakage-svg is visible again even if there's an error
+    const airLeakageSvg = document.getElementById("air-leakage-svg");
+    if (airLeakageSvg) {
+      airLeakageSvg.classList.remove("hidden");
+    }
+
     return null;
   }
 };
@@ -412,6 +430,7 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       format: PAGE_CONFIG.format,
       compress: true, // Enable compression for smaller file size
       putOnlyUsedFonts: true, // Optimize font embedding
+      putOnlyUsedFonts: true, // Optimize font embedding
     });
 
     // Add this function right after the PDF initialization
@@ -513,8 +532,15 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         section: "airLeakage" as ReportSection,
         tabName: "Air Leakage",
         pages: [
-          { ids: ["introduction", "air-flow-rates", "air-changes-per-hour"] },
-          { ids: ["common-air-leak-points"] },
+          {
+            ids: [
+              "introduction",
+              "air-flow-rates",
+              "air-changes-per-hour",
+              "common-air-leak-points",
+            ],
+          },
+          // { ids: ["common-air-leak-points"] },
         ],
       },
 
@@ -538,14 +564,14 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
       {
         section: "heating" as ReportSection,
         tabName: "Heating",
-        pages: [{ ids: ["heating-header"] }],
+        pages: [{ ids: ["heating-header"] }, { ids: ["clients-equipment"] }],
       },
 
       // Cooling - Include header with first cooling system
       {
         section: "cooling" as ReportSection,
         tabName: "Cooling",
-        pages: [{ ids: ["cooling-header"] }],
+        pages: [{ ids: ["cooling-header", "air-conditioning-assessment"] }],
       },
 
       // Report Summary - Combined more elements and put project-costs and tax-credits on the same page
@@ -562,9 +588,15 @@ const handleDownloadReport = async (config?: ReportConfig): Promise<void> => {
         section: "solutions" as ReportSection,
         tabName: "Solutions",
         pages: [
-          { ids: ["summary-of-solutions"] },
-          { ids: ["future-solutions", "environmental-impact"] },
-          { ids: ["project-costs", "tax-credits"] },
+          {
+            ids: [
+              "understanding-solutions",
+              "notes-section",
+              "solutions-and-recommendations",
+            ],
+          },
+          { ids: ["financial-summary", "federal-tax-credits"] },
+          { ids: ["environmental-impact"] },
         ],
       },
       {

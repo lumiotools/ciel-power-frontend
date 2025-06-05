@@ -64,7 +64,7 @@ const ReportHeatingSection = ({
     <div className="space-y-8 container bg-[#eaeaea]">
       <div
         id="heating-header"
-        className="min-h-screen flex items-center justify-center"
+        className="pt-12 flex items-center justify-center"
       >
         <ReportHeatingSectioninformation />
       </div>
@@ -73,7 +73,7 @@ const ReportHeatingSection = ({
         <div
           key={`heating-system-${index}`}
           id={`heating-system-${index}`}
-          className="min-h-screen flex items-center justify-center"
+          className=" flex items-center justify-center"
         >
           <ReportHeatingSectionCard
             isAdmin={isAdmin}
@@ -99,7 +99,10 @@ const ReportHeatingSection = ({
       )}
 
       {/* Client's Equipment Section */}
-      <div id="clients-equipment" className="min-h-screen flex items-center justify-center">
+      <div
+        id="clients-equipment"
+        className="min-h-screen flex items-center justify-center"
+      >
         <ClientsEquipment
           isAdmin={isAdmin}
           houseImages={houseImages}
