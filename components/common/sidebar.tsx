@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Leaf,
   LogOut,
+  MessageCircle,
   Percent,
   Zap,
 } from "lucide-react";
@@ -66,6 +67,11 @@ export function Sidebar() {
       icon: <Zap size={20} />,
     },
     { name: "About Us", href: "/about-us", icon: <Home size={20} /> },
+    {
+      name: "Ciel Support",
+      href: "/ciel-support",
+      icon: <MessageCircle size={20} />,
+    },
     // {
     //   name: "Affiliate Program",
     //   href: "/affiliate-program",
