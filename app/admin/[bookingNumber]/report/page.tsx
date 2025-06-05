@@ -1,39 +1,19 @@
 "use client";
 
 import { Overview } from "@/components/report-/Overview";
-import { AirLeakageContent } from "@/components/report-/AirLeakageContent";
-import { CoolingContent } from "@/components/report-/CoolingContent";
-import { HeatingContent } from "@/components/report-/HeatingContent";
-import { InsulationContent } from "@/components/report-/InsulationContent";
-import { ReportSummary } from "@/components/report-/ReportSummary";
-import { FutureUpgradesAndCertificates } from "@/components/report-/FutureUpgradesAndCertificates";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { motion } from "framer-motion";
-import React, { useRef, useState, useEffect, use, useContext } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Info,
-  HelpCircle,
-  CheckCircle2,
-  Home,
-  DollarSign,
-  Leaf,
-  Percent,
-  ArrowLeft,
-} from "lucide-react";
+import { useRef, useState, useEffect, use, useContext } from "react";
+import { ArrowLeft } from "lucide-react";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { set } from "date-fns";
-import { DefaultReportData } from "./utils";
 import { useDebouncedCallback } from "use-debounce";
 import { AUTH_CONTEXT } from "@/providers/auth";
 import ReportOverviewSection from "@/components/report/overview/overview";
 import ReportAirLeakageSection from "@/components/report/airLeakage/airLeakage";
 import ReportInsulationSection from "@/components/report/insulation/insulation";
 import ReportHeatingSection from "@/components/report/heating/heating";
-import ReportSummarySection from "@/components/report/concerns/concerns";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummaryConcernSection from "@/components/report/concerns/concerns";
 import ReportSummarySolutionSection from "@/components/report/solutions/solutions";
@@ -156,6 +136,18 @@ export interface EnvironmentalImpactData {
   totalReduction: EnvironmentalImpactItem;
 }
 
+export interface HouseImage {
+  mimeType: string;
+  thumbnailLink: string;
+  size: string;
+  id: string;
+  name: string;
+  description: string;
+  createdTime: string;
+  modifiedTime: string;
+  link: string;
+}
+
 // Define the type for reportData
 export interface ReportData {
   airLeakage?: AirLeakageData;
@@ -167,6 +159,18 @@ export interface ReportData {
   financialSummary?: FinancialSummaryData;
   federalTaxCredits?: FederalTaxCreditData[];
   environmentalImpact?: EnvironmentalImpactData;
+  concernsImages?: HouseImage[];
+  assessmentData?: {
+    title: string;
+    subtitle: string;
+    notes: string;
+  };
+  solutionImages?: HouseImage[];
+  solutionNotesData?: {
+    title: string;
+    subtitle: string;
+    notes: string;
+  };
 }
 
 const ReportPage = ({
@@ -231,11 +235,6 @@ const ReportPage = ({
     }
   };
 
-  useEffect(() => {
-    setIsChangesSaved(false);
-    updateReportDataField(reportData);
-  }, [reportData]);
-
   // Debounced save function to avoid too many API calls
   const debouncedSaveReportData = useDebouncedCallback(
     async (data: ReportData) => {
@@ -281,6 +280,16 @@ const ReportPage = ({
     },
     2000
   ); // 2 second debounce
+
+  // NEW: Add a separate useEffect to trigger auto-save when reportData changes
+  useEffect(() => {
+    // Skip auto-save on initial load or when changes are already saved
+    if (Object.keys(reportData).length === 0 || isChangesSaved) return;
+
+    if (isAdmin) {
+      debouncedSaveReportData(reportData);
+    }
+  }, [reportData, isAdmin, isChangesSaved, debouncedSaveReportData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -345,15 +354,12 @@ const ReportPage = ({
     }
   }, [bookingNumber]);
 
-  // Common function to update report data and trigger autosave
+  // UPDATED: Common function to update report data and trigger autosave
   const updateReportDataField = (updatedData: ReportData) => {
     if (!isAdmin) return;
 
-    // setReportData(updatedData);
+    setReportData(updatedData); // Actually update the state
     setIsChangesSaved(false);
-
-    // Trigger debounced save
-    debouncedSaveReportData(updatedData);
   };
 
   // Manual save function for the save button
@@ -420,7 +426,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             airLeakage={reportData?.airLeakage}
             onUpdateValue={(airLeakage) =>
-              setReportData({ ...reportData, airLeakage })
+              updateReportDataField({ ...reportData, airLeakage })
             }
           />
         );
@@ -430,7 +436,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             insulationData={reportData?.insulation}
             onUpdateValue={(insulation) =>
-              setReportData({ ...reportData, insulation })
+              updateReportDataField({ ...reportData, insulation })
             }
             houseImages={houseImages}
           />
@@ -441,7 +447,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             heatingData={reportData?.heating}
             onUpdateValue={(heating) =>
-              setReportData({ ...reportData, heating })
+              updateReportDataField({ ...reportData, heating })
             }
             houseImages={houseImages}
           />
@@ -452,7 +458,7 @@ const ReportPage = ({
             isAdmin={isAdmin}
             coolingData={reportData?.cooling}
             onUpdateValue={(cooling) =>
-              setReportData({ ...reportData, cooling })
+              updateReportDataField({ ...reportData, cooling })
             }
             houseImages={houseImages}
           />
@@ -462,9 +468,10 @@ const ReportPage = ({
           <ReportSummaryConcernSection
             isAdmin={isAdmin}
             reportData={reportData}
-            onUpdateValue={(reportData: ReportData) =>
-              setReportData(reportData)
+            onUpdateValue={(updatedReportData: ReportData) =>
+              updateReportDataField(updatedReportData)
             }
+            houseImages={houseImages}
           />
         );
       case "solutions":
@@ -472,8 +479,8 @@ const ReportPage = ({
           <ReportSummarySolutionSection
             isAdmin={isAdmin}
             reportData={reportData}
-            onUpdateValue={(reportData: ReportData) =>
-              setReportData(reportData)
+            onUpdateValue={(updatedReportData: ReportData) =>
+              updateReportDataField(updatedReportData)
             }
             houseImages={houseImages}
           />

@@ -5,7 +5,6 @@ import type {
   SolutionsAndRecommendationsData,
 } from "@/app/admin/[bookingNumber]/report/page";
 import ReportSummarySectionSolutionsAndRecommendations from "./solutionsAndRecommendations";
-// import ReportSummarySectionFutureUpgrades from "./futureUpgrades";
 import ReportSummarySectionEnvironmentalImpact from "./environmentalImpact";
 import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
@@ -22,6 +21,7 @@ interface ReportSummarySolutionSectionProps {
   onUpdateImages?: (images: HouseImage[]) => void;
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
 }
+
 const ReportSummarySolutionSection = ({
   isAdmin,
   reportData,
@@ -37,42 +37,6 @@ const ReportSummarySolutionSection = ({
       id="summary-of-solutions"
       className="container bg-[#eaeaea] space-y-8"
     >
-      {/* {isAdmin && (
-        <div className="flex justify-end items-center mb-4">
-          <button
-            // onClick={handleSubmit}
-            className="px-4 py-2 rounded-md bg-green-500 text-white font-bold hover:bg-green-600 transition-colors"
-          >
-            Save
-          </button>
-        </div>
-      )} */}
-
-      {/* <ReportSummarySectionSummaryOfConcerns
-        isAdmin={isAdmin}
-        summaryOfConcerns={reportData?.summaryOfConcerns}
-        onUpdateValue={(updatedSummaryOfConcerns) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              summaryOfConcerns: updatedSummaryOfConcerns,
-            });
-          }
-        }}
-      /> */}
-
-      {/* <NotesSection
-        isAdmin={isAdmin}
-        notes={reportData?.notes}
-        onUpdateValue={(notes) => {
-          if (onUpdateValue) {
-            onUpdateValue({
-              ...reportData,
-              notes: notes,
-            });
-          }
-        }}
-      /> */}
       <div className="pt-24">
         <section
           id="understanding-solutions"
@@ -89,6 +53,24 @@ const ReportSummarySolutionSection = ({
           <NotesSection
             isAdmin={isAdmin}
             houseImages={houseImages}
+            selectedImages={reportData?.solutionImages || []}
+            onUpdateImages={(images) => {
+              if (onUpdateValue) {
+                onUpdateValue({
+                  ...reportData,
+                  solutionImages: images,
+                });
+              }
+            }}
+            notesData={reportData?.solutionNotesData}
+            onUpdateNotes={(notes) => {
+              if (onUpdateValue) {
+                onUpdateValue({
+                  ...reportData,
+                  solutionNotesData: notes,
+                });
+              }
+            }}
             solutionsAndRecommendations={solutionsAndRecommendations}
           />
         </section>
@@ -115,7 +97,6 @@ const ReportSummarySolutionSection = ({
         </section>
       </div>
 
-      {/* <ReportSummarySectionFutureUpgrades /> */}
       <div className="pt-24">
         <section
           id="financial-summary"
@@ -155,7 +136,6 @@ const ReportSummarySolutionSection = ({
         </section>
       </div>
 
-      {/* Environmental Impact Section - Without styled wrapper */}
       <div className="pt-24">
         <section
           id="environmental-impact"
@@ -175,39 +155,6 @@ const ReportSummarySolutionSection = ({
           />
         </section>
       </div>
-
-      {/* Project Costs Section - Without styled wrapper */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        id="project-costs"
-      >
-        <ProjectCosts
-          data={{
-            financialSummary: data?.financialSummary,
-          }}
-          isAdmin={isAdmin}
-          bookingNumber={bookingNumber || ""}
-          onUpdateFinancials={updateFinancials}
-        />
-      </motion.div> */}
-
-      {/* Federal Tax Credits Section - Without styled wrapper */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
-        id="tax-credits"
-      >
-        <FederalTaxCredits
-          data={data?.federalTaxCredits}
-          isAdmin={isAdmin}
-          bookingNumber={bookingNumber}
-          reportData={data}
-          onUpdate={updateTaxCredits}
-        />
-      </motion.div> */}
     </motion.div>
   );
 };
