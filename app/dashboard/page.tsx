@@ -392,8 +392,16 @@ export default function DashboardPage() {
         {/* Main Content Container */}
         <div className="relative w-full h-64 md:h-80">
           <Image
-            src="/house-isolated-field.webp"
-            alt="Modern house with white walls and wooden accents"
+            src={
+              bookingDetails?.bookingDetails?.imageId
+                ? `https://drive.google.com/uc?export=view&id=${bookingDetails.bookingDetails.imageId}`
+                : "/house-isolated-field.webp"
+            }
+            alt={
+              bookingDetails?.bookingDetails?.imageId
+                ? "Your home profile image"
+                : "Modern house with white walls and wooden accents"
+            }
             fill
             className="object-cover"
             priority

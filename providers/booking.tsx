@@ -22,6 +22,7 @@ export interface BookingDetails {
       description?: string;
     };
     rescheduleAvailable: boolean;
+    imageId?: string;
     profilePictureUrl?: string | null;
   };
   utilityBillDetails: {
