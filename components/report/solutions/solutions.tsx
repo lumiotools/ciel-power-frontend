@@ -53,12 +53,17 @@ const ReportSummarySolutionSection = ({
           <NotesSection
             isAdmin={isAdmin}
             houseImages={houseImages}
-            selectedImages={reportData?.solutionImages || []}
+            selectedImages={reportData?.solutionNotesData?.images || []}
             onUpdateImages={(images) => {
               if (onUpdateValue) {
                 onUpdateValue({
                   ...reportData,
-                  solutionImages: images,
+                  solutionNotesData: {
+                    title: reportData?.solutionNotesData?.title ?? "",
+                    subtitle: reportData?.solutionNotesData?.subtitle ?? "",
+                    notes: reportData?.solutionNotesData?.notes ?? "",
+                    images,
+                  },
                 });
               }
             }}

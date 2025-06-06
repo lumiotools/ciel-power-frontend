@@ -153,23 +153,24 @@ export interface ReportData {
   airLeakage?: AirLeakageData;
   insulation?: InsulationData[];
   heating?: HeatingData[];
+  heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
   financialSummary?: FinancialSummaryData;
   federalTaxCredits?: FederalTaxCreditData[];
   environmentalImpact?: EnvironmentalImpactData;
-  concernsImages?: HouseImage[];
   assessmentData?: {
     title: string;
     subtitle: string;
     notes: string;
+    images?: HouseImage[];
   };
-  solutionImages?: HouseImage[];
   solutionNotesData?: {
     title: string;
     subtitle: string;
     notes: string;
+    images?: HouseImage[];
   };
 }
 
@@ -450,6 +451,13 @@ const ReportPage = ({
               updateReportDataField({ ...reportData, heating })
             }
             houseImages={houseImages}
+            clientEquipmentImages={reportData?.heatingClientEquipmentImages}
+            onUpdateClientEquipment={(images) =>
+              updateReportDataField({
+                ...reportData,
+                heatingClientEquipmentImages: images,
+              })
+            }
           />
         );
       case "cooling":

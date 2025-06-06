@@ -27,6 +27,7 @@ import ReportSummaryConcernSection from "@/components/report/concerns/concerns";
 // } from "@/app/admin/[bookingNumber]/report/page";
 import ReportSummarySolutionSection from "@/components/report/solutions/solutions";
 import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
+import { HouseImage } from "@/app/admin/[bookingNumber]/report/page";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -134,6 +135,7 @@ export interface ReportData {
   airLeakage?: AirLeakageData;
   insulation?: InsulationData[];
   heating?: HeatingData[];
+  heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
@@ -281,7 +283,12 @@ const ReportPage = ({
             <ReportInsulationSection insulationData={reportData?.insulation} />
           );
         case "heating":
-          return <ReportHeatingSection heatingData={reportData?.heating} />;
+          return (
+            <ReportHeatingSection
+              heatingData={reportData?.heating}
+              clientEquipmentImages={reportData?.heatingClientEquipmentImages}
+            />
+          );
         case "cooling":
           return <ReportCoolingSection coolingData={reportData?.cooling} />;
         case "concerns":

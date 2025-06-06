@@ -78,17 +78,17 @@ export function ReportImageViewer({
             </button>
           )}
         </div>
-        {allowSelection ? (
+        {/* {allowSelection ? (
           <ReportEditableInput
             className="w-full"
-            value={selectedImage?.description ?? "Image Description"}
+            value={""}
             onChange={(description) => {
               onDescriptionChange(description as string);
             }}
           />
         ) : (
           selectedImage?.description
-        )}
+        )} */}
       </div>
     </div>
   );
