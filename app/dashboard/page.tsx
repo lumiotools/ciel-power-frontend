@@ -573,7 +573,7 @@ export default function DashboardPage() {
           )}
 
           {/* Google review */}
-          <GoogleReview />
+          <GoogleReview bookingNumber={userDetails?.bookingNumber} />
         </div>
       </div>
     </div>

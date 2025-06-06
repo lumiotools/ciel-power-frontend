@@ -1,102 +1,197 @@
-"use client"
+"use client";
 
-import { ChevronDown } from "lucide-react"
-import type React from "react"
-import { useRef, useState, useEffect } from "react"
+import { ChevronDown } from "lucide-react";
+import type React from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface Review {
-  id: number
-  author: string
-  initials: string
-  date: string
-  rating: number
-  color: string
-  review: string
+  id: number;
+  author: string;
+  initials: string;
+  date: string;
+  rating: number;
+  color: string;
+  review: string;
 }
 
 interface GoogleReviewProps {
-  bookingNumber?: string
-  apiEndpoint?: string
+  bookingNumber?: string;
+  apiEndpoint?: string;
 }
 
-const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", apiEndpoint = "/api/bookings" }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+const GoogleReview: React.FC<GoogleReviewProps> = ({
+  bookingNumber,
+  apiEndpoint = "/api/bookings",
+}) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   // Fetch reviews from API
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        setLoading(true)
-        const response = await fetch(`${apiEndpoint}/${bookingNumber}/google-reviews`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your auth method
-            "Content-Type": "application/json",
-          },
-        })
+        setLoading(true);
+        const response = await fetch(
+          `/api/user/bookings/${bookingNumber}/google-reviews`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your auth method
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json()
+        const data = await response.json();
 
         if (data.success) {
-          setReviews(data.data.reviews)
-          setLastUpdated(data.data.last_updated)
+          // setReviews(data.data.reviews);
+          setReviews([
+            {
+              id: 1,
+              author: "Yosef Sharbat",
+              initials: "YS",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-[#EE702E]",
+              review:
+                "Wow! Jesse was so nice, respectful and very knowledgeable! He was patient with me and answered all my questions with a smile on his face. I would definitely recommend Cielpower to audit your home.",
+            },
+            {
+              id: 2,
+              author: "Hostos Monegro",
+              initials: "HM",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-blue-500",
+              review:
+                "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed. Would definitely recommend Ciel Power to anyone looking for energy efficiency services!",
+            },
+            {
+              id: 3,
+              author: "JOHN PERRY",
+              initials: "JP",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-green-500",
+              review:
+                "A little while back we had a Ciel Power Energy audit by Jesse Lubkiewicz and was completely satisfied. Jesse was punctual and very professional as he did a complete examination of the interior and exterior of our home and he actually explained in terms we could comprehend of what he was doing. he did audit with no disruption to our home and left no mess, Jesse seemed to really like his work and talking with people. Anyone requiring a Ciel Audit should ask for Jesse!",
+            },
+            {
+              id: 4,
+              author: "James Van Ness",
+              initials: "JVN",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-purple-500",
+              review:
+                "I’ve done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it’s pretty common for me to have quality issues with other contractors work.  However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project. I just recommended them to my son, so that’s so that says something!",
+            },
+            {
+              id: 5,
+              author: "Fred Twum-Acheampong",
+              initials: "FTA",
+              date: "", // You can add a real date if available
+              rating: 5,
+              color: "bg-red-500",
+              review:
+                "Mason, Krystal, and the rest of the team were great! They performed a comprehensive audit of my home, installed a bunch of insulation to improve the efficiency of the house, and were friendly and accommodating the entire time. Highly recommend if you are looking for energy-improvement projects!",
+            },
+          ]);
+
+          setLastUpdated(data.data.last_updated);
         } else {
-          throw new Error(data.error || "Failed to fetch reviews")
+          throw new Error(data.error || "Failed to fetch reviews");
         }
       } catch (err) {
-        console.error("Error fetching reviews:", err)
-        setError(err instanceof Error ? err.message : "Failed to fetch reviews")
+        console.error("Error fetching reviews:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch reviews"
+        );
 
         // Fallback to static data if API fails
         setReviews([
           {
             id: 1,
-            author: "Hostos Monegro",
-            initials: "HM",
-            date: "15/04/2025",
+            author: "Yosef Sharbat",
+            initials: "YS",
+            date: "", // You can add a real date if available
             rating: 5,
             color: "bg-[#EE702E]",
             review:
-              "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed.",
+              "Wow! Jesse was so nice, respectful and very knowledgeable! He was patient with me and answered all my questions with a smile on his face. I would definitely recommend Cielpower to audit your home.",
           },
           {
             id: 2,
-            author: "James Van Ness",
-            initials: "JV",
-            date: "10/04/2025",
+            author: "Hostos Monegro",
+            initials: "HM",
+            date: "", // You can add a real date if available
             rating: 5,
             color: "bg-blue-500",
             review:
-              "I've done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it's pretty common for me to have quality issues with other contractors work. However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project.",
+              "I had a great experience working with Natalie M. and her team at Ciel Power. She was professional, knowledgeable, and made the entire process smooth from start to finish. I appreciated how clearly she explained everything and how responsive she was to all of my questions. The service felt personalized, efficient, and well-managed. Would definitely recommend Ciel Power to anyone looking for energy efficiency services!",
           },
-        ])
+          {
+            id: 3,
+            author: "JOHN PERRY",
+            initials: "JP",
+            date: "", // You can add a real date if available
+            rating: 5,
+            color: "bg-green-500",
+            review:
+              "A little while back we had a Ciel Power Energy audit by Jesse Lubkiewicz and was completely satisfied. Jesse was punctual and very professional as he did a complete examination of the interior and exterior of our home and he actually explained in terms we could comprehend of what he was doing. he did audit with no disruption to our home and left no mess, Jesse seemed to really like his work and talking with people. Anyone requiring a Ciel Audit should ask for Jesse!",
+          },
+          {
+            id: 4,
+            author: "James Van Ness",
+            initials: "JVN",
+            date: "", // You can add a real date if available
+            rating: 5,
+            color: "bg-purple-500",
+            review:
+              "I’ve done construction mostly on my own properties for over 50 years. I rarely hire the same contractor twice because it’s pretty common for me to have quality issues with other contractors work.  However, I was very pleased with not only the work but the execution process's used by Ciel POWER. Their field crew was top-notch and very accommodating to my specific needs on this project. I just recommended them to my son, so that’s so that says something!",
+          },
+          {
+            id: 5,
+            author: "Fred Twum-Acheampong",
+            initials: "FTA",
+            date: "", // You can add a real date if available
+            rating: 5,
+            color: "bg-red-500",
+            review:
+              "Mason, Krystal, and the rest of the team were great! They performed a comprehensive audit of my home, installed a bunch of insulation to improve the efficiency of the house, and were friendly and accommodating the entire time. Highly recommend if you are looking for energy-improvement projects!",
+          },
+        ]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchReviews()
-  }, [bookingNumber, apiEndpoint])
+    fetchReviews();
+  }, [bookingNumber, apiEndpoint]);
 
   // Function to render star ratings
   const renderStars = (rating: number) => {
-    const stars = []
+    const stars = [];
     for (let i = 0; i < rating; i++) {
       stars.push(
-        <svg key={i} className="w-5 h-5 text-[#EE702E] fill-current" viewBox="0 0 24 24">
+        <svg
+          key={i}
+          className="w-5 h-5 text-[#EE702E] fill-current"
+          viewBox="0 0 24 24"
+        >
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-        </svg>,
-      )
+        </svg>
+      );
     }
-    return stars
-  }
+    return stars;
+  };
 
   // Function to scroll left
   const scrollLeft = () => {
@@ -104,9 +199,9 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
       scrollContainerRef.current.scrollBy({
         left: -370, // Width of card (350px) + gap (20px)
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   // Function to scroll right
   const scrollRight = () => {
@@ -114,29 +209,33 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
       scrollContainerRef.current.scrollBy({
         left: 370, // Width of card (350px) + gap (20px)
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="mt-12 mb-8 rounded-xl p-6">
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+          <h3 className="text-2xl font-bold text-gray-700">
+            Our Google Reviews
+          </h3>
         </div>
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EE702E]"></div>
           <span className="ml-2 text-gray-600">Loading reviews...</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (error && reviews.length === 0) {
     return (
       <div className="mt-12 mb-8 rounded-xl p-6">
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
+          <h3 className="text-2xl font-bold text-gray-700">
+            Our Google Reviews
+          </h3>
         </div>
         <div className="flex justify-center items-center h-32">
           <div className="text-red-500">
@@ -150,7 +249,7 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -158,12 +257,21 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
       <div className="mb-6">
         <h3 className="text-2xl font-bold text-gray-700">Our Google Reviews</h3>
         {lastUpdated && (
-          <p className="text-sm text-gray-500 mt-1">Last updated: {new Date(lastUpdated).toLocaleDateString()}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Last updated: {new Date(lastUpdated).toLocaleDateString()}
+          </p>
         )}
-        {error && <p className="text-sm text-yellow-600 mt-1">Using cached data due to: {error}</p>}
+        {error && (
+          <p className="text-sm text-yellow-600 mt-1">
+            Using cached data due to: {error}
+          </p>
+        )}
       </div>
       <div className="relative">
-        <div ref={scrollContainerRef} className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth">
+        <div
+          ref={scrollContainerRef}
+          className="flex space-x-6 overflow-x-auto pb-4 hide-scrollbar scroll-smooth"
+        >
           {reviews.map((review) => (
             <div
               key={review.id}
@@ -233,7 +341,7 @@ const GoogleReview: React.FC<GoogleReviewProps> = ({ bookingNumber = "default", 
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default GoogleReview
+export default GoogleReview;
