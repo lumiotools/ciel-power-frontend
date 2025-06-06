@@ -99,7 +99,7 @@ const ReportHeatingSection = ({
       )}
 
       {/* Client's Equipment Section */}
-      {/* <div
+      <div
         id="clients-equipment"
         className="min-h-screen flex items-center justify-center"
       >
@@ -109,7 +109,7 @@ const ReportHeatingSection = ({
           selectedImages={clientEquipmentImages}
           onUpdateImages={onUpdateClientEquipment}
         />
-      </div> */}
+      </div>
     </div>
   );
 };
