@@ -12,7 +12,7 @@ import type {
   NutshellLead,
 } from "@/types/admin";
 import { toast } from "sonner";
-import { Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Settings, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { AuditorsTable } from "@/components/admin/AuditorsTable";
@@ -52,6 +52,9 @@ export default function AdminPage() {
   );
   const [hasPopulatedAuditors, setHasPopulatedAuditors] = useState(false);
 
+  // New state to control the "Add Auditor" row
+  const [isAddingAuditor, setIsAddingAuditor] = useState(false);
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalBookings, setTotalBookings] = useState(0);
@@ -67,7 +70,9 @@ export default function AdminPage() {
     setBookings([]);
     try {
       const response = await fetch(
-        `/api/admin/bookings?page=${currentPage}&limit=${bookingsPerPage}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`
+        `/api/admin/bookings?page=${currentPage}&limit=${bookingsPerPage}${
+          searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""
+        }`
       );
 
       if (!response.ok) {
@@ -253,7 +258,9 @@ export default function AdminPage() {
     try {
       // Call the lead search API
       const response = await fetch(
-        `/api/admin/search/leads?leadName=${encodeURIComponent(nutshellLeadName.trim())}`
+        `/api/admin/search/leads?leadName=${encodeURIComponent(
+          nutshellLeadName.trim()
+        )}`
       );
 
       // Set search flag to true after search completes
@@ -375,15 +382,6 @@ export default function AdminPage() {
             </h2>
 
             <div className="flex gap-3">
-              {/* <Button
-                onClick={fetchBookings}
-                variant="outline"
-                className="text-[#5cb85c] border-[#5cb85c] hover:bg-[#5cb85c]/10"
-                disabled={loading}
-                size="icon"
-              >
-                <RotateCw className={loading ? "animate-spin" : ""} />
-              </Button> */}
               <div className="flex items-center gap-3">
                 <Input
                   placeholder="Search..."
@@ -466,7 +464,14 @@ export default function AdminPage() {
             <h2 className="text-2xl font-bold text-gray-800">
               Manage your Auditors
             </h2>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
+              <Button
+                className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
+                onClick={() => setIsAddingAuditor(true)}
+              >
+                <Plus />
+                Add Auditor
+              </Button>
               <div className="flex items-center gap-3">
                 <Input
                   placeholder="Search auditors..."
@@ -498,6 +503,9 @@ export default function AdminPage() {
             auditors={auditors}
             isLoading={auditorsLoading}
             onOpenImageModal={openImageModal}
+            isAdding={isAddingAuditor}
+            setIsAdding={setIsAddingAuditor}
+            onAuditorAdded={fetchAuditors} // Pass a callback to refresh the list
           />
 
           {/* Pagination Controls */}
