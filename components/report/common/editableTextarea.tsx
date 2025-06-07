@@ -31,7 +31,7 @@ const ReportEditableTextArea = ({
     <div className="relative flex items-top">
       {isEditing ? (
         <Textarea
-          className={cn(className, "!h-auto")}
+          className={cn(className, "!h-auto w-screen")}
           value={currentValue}
           onChange={(e) => setCurrentValue(e.target.value)}
           autoFocus
@@ -64,14 +64,14 @@ const ReportEditableTextArea = ({
       ) : (
         <>
           <Check
-            className="size-5 ml-5 text-green-400 cursor-pointer"
+            className="size-10 ml-5 text-green-400 cursor-pointer"
             onClick={() => {
               onChange(currentValue);
               setIsEditing(false);
             }}
           />
           <X
-            className="size-5 ml-5 text-red-400 cursor-pointer"
+            className="size-10 ml-5 text-red-400 cursor-pointer"
             onClick={() => {
               setCurrentValue(value);
               setIsEditing(false);
