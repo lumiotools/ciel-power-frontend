@@ -21,16 +21,22 @@ interface AuditorsTableProps {
     currentFileId?: string,
     onUploadComplete?: (fileId: string) => void
   ) => void;
+  isAdding: boolean;
+  setIsAdding: (isAdding: boolean) => void;
+  onAuditorAdded: () => void; // Callback to refresh data
 }
 
 export function AuditorsTable({
   auditors,
   isLoading,
   onOpenImageModal,
+  isAdding,
+  setIsAdding,
+  onAuditorAdded,
 }: AuditorsTableProps) {
   // Local state copy of auditors to update UI immediately on delete
   const [localAuditors, setLocalAuditors] = useState<Auditor[]>([]);
-  const [isAdding, setIsAdding] = useState(false);
+  // const [isAdding, setIsAdding] = useState(false); // This state is now managed by the parent
   const [newAuditor, setNewAuditor] = useState({
     name: "",
     description: "",
@@ -135,7 +141,7 @@ export function AuditorsTable({
     );
   }
 
-  if (localAuditors.length === 0) {
+  if (localAuditors.length === 0 && !isAdding) {
     return (
       <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-600">
         No auditors found.
@@ -145,12 +151,7 @@ export function AuditorsTable({
 
   return (
     <>
-      <Button
-        className="relative left-[82.5vw] m-2 bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
-        onClick={() => setIsAdding(true)}
-      >
-        + Add Auditor
-      </Button>
+      {/* BUTTON HAS BEEN REMOVED FROM HERE */}
       <div className="rounded-lg overflow-hidden border border-gray-200">
         <Table>
           <TableHeader className="bg-gray-50">
@@ -296,8 +297,8 @@ export function AuditorsTable({
                         }
 
                         toast.success("Auditor added");
-                        setLocalAuditors((prev) => [...prev, data.data]);
-                        setIsAdding(false);
+                        onAuditorAdded(); // Refresh the auditor list in the parent
+                        setIsAdding(false); // Close the add row
                         setNewAuditor({
                           name: "",
                           description: "",

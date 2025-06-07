@@ -34,7 +34,7 @@ const ReportSummaryConcernSection = ({
         isAdmin={isAdmin}
         summaryOfConcerns={reportData?.summaryOfConcerns}
         houseImages={houseImages}
-        selectedImages={reportData?.concernsImages || []}
+        selectedImages={reportData?.assessmentData?.images || []}
         assessmentData={reportData?.assessmentData}
         onUpdateValue={(updatedSummaryOfConcerns) => {
           if (onUpdateValue) {
@@ -45,10 +45,13 @@ const ReportSummaryConcernSection = ({
           }
         }}
         onUpdateImages={(images) => {
-          if (onUpdateValue) {
+          if (onUpdateValue && reportData.assessmentData) {
             onUpdateValue({
               ...reportData,
-              concernsImages: images,
+              assessmentData: {
+                ...reportData.assessmentData,
+                images: images, // <-- UPDATE THE NESTED images ARRAY
+              },
             });
           }
         }}

@@ -10,7 +10,7 @@ import ReportSummarySectionFinancialSummary from "./financialSummary";
 import ReportSummarySectionFederalTaxCredits from "./federalTaxCredits";
 import UnderstandingSolutions from "./understandingSolutions";
 import { motion } from "framer-motion";
-// import NotesSection from "./LoremIpsumHeading";
+import NotesSection from "./LoremIpsumHeading";
 import type { HouseImage } from "../concerns/concerns";
 
 interface ReportSummarySolutionSectionProps {
@@ -45,7 +45,7 @@ const ReportSummarySolutionSection = ({
           <UnderstandingSolutions />
         </section>
       </div>
-      {/* <div className="pt-24">
+      <div className="pt-24">
         <section
           id="notes-section"
           className="bg-[#eaeaea] flex items-center justify-center"
@@ -53,12 +53,17 @@ const ReportSummarySolutionSection = ({
           <NotesSection
             isAdmin={isAdmin}
             houseImages={houseImages}
-            selectedImages={reportData?.solutionImages || []}
+            selectedImages={reportData?.solutionNotesData?.images || []}
             onUpdateImages={(images) => {
               if (onUpdateValue) {
                 onUpdateValue({
                   ...reportData,
-                  solutionImages: images,
+                  solutionNotesData: {
+                    title: reportData?.solutionNotesData?.title ?? "",
+                    subtitle: reportData?.solutionNotesData?.subtitle ?? "",
+                    notes: reportData?.solutionNotesData?.notes ?? "",
+                    images,
+                  },
                 });
               }
             }}
@@ -74,7 +79,7 @@ const ReportSummarySolutionSection = ({
             solutionsAndRecommendations={solutionsAndRecommendations}
           />
         </section>
-      </div> */}
+      </div>
       <div className="pt-24">
         <section
           id="solutions-and-recommendations"

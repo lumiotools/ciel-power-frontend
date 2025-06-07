@@ -21,12 +21,13 @@ import ReportHeatingSection from "@/components/report/heating/heating";
 import ReportCoolingSection from "@/components/report/cooling/cooling";
 import ReportSummarySection from "@/components/report/concerns/concerns";
 import ReportSummaryConcernSection from "@/components/report/concerns/concerns";
-import {
-  DescriptionData,
-  ImageData,
-} from "@/app/admin/[bookingNumber]/report/page";
+// import {
+//   DescriptionData,
+//   ImageData,
+// } from "@/app/admin/[bookingNumber]/report/page";
 import ReportSummarySolutionSection from "@/components/report/solutions/solutions";
 import PearlCertificationSection from "@/components/report/pearlCertification/pearl-certification";
+import { HouseImage } from "@/app/admin/[bookingNumber]/report/page";
 
 // Define interfaces for specific data types
 export interface ImageData {
@@ -134,6 +135,7 @@ export interface ReportData {
   airLeakage?: AirLeakageData;
   insulation?: InsulationData[];
   heating?: HeatingData[];
+  heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
@@ -281,7 +283,12 @@ const ReportPage = ({
             <ReportInsulationSection insulationData={reportData?.insulation} />
           );
         case "heating":
-          return <ReportHeatingSection heatingData={reportData?.heating} />;
+          return (
+            <ReportHeatingSection
+              heatingData={reportData?.heating}
+              clientEquipmentImages={reportData?.heatingClientEquipmentImages}
+            />
+          );
         case "cooling":
           return <ReportCoolingSection coolingData={reportData?.cooling} />;
         case "concerns":
@@ -317,7 +324,7 @@ const ReportPage = ({
 
   return (
     <div className="container mx-auto bg-white" ref={scrollRef}>
-      <div className="mb-6">
+      <div className="mb-6 p-6">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-2xl font-bold text-gray-800">View Report</h1>
           <div className="flex gap-2">

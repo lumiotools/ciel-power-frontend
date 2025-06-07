@@ -30,7 +30,7 @@ interface SolutionNotesData {
   notes: string;
 }
 
-interface noteSectionLoremIpsumHeadingProps {
+interface NotesSectionProps {
   isAdmin?: boolean;
   houseImages?: HouseImage[];
   selectedImages?: HouseImage[];
@@ -48,7 +48,7 @@ const NotesSection = ({
   solutionsAndRecommendations,
   notesData,
   onUpdateNotes,
-}: noteSectionLoremIpsumHeadingProps) => {
+}: NotesSectionProps) => {
   // Use notes data from props or fallback to defaults
   const currentNotes = notesData || {
     title: "Solution Details",
