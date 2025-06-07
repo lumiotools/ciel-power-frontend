@@ -137,6 +137,7 @@ export interface ReportData {
   heating?: HeatingData[];
   heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
+  coolingAssessmentImages?: HouseImage[];
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
   financialSummary?: FinancialSummaryData;
@@ -290,7 +291,12 @@ const ReportPage = ({
             />
           );
         case "cooling":
-          return <ReportCoolingSection coolingData={reportData?.cooling} />;
+          return (
+            <ReportCoolingSection
+              coolingData={reportData?.cooling}
+              assessmentImages={reportData?.coolingAssessmentImages}
+            />
+          );
         case "concerns":
           return <ReportSummaryConcernSection reportData={reportData} />;
         case "solutions":

@@ -13,6 +13,8 @@ interface ReportCoolingSectionProps {
   coolingData?: CoolingData[];
   onUpdateValue?: (cooling: CoolingData[]) => void;
   houseImages?: HouseImage[];
+  assessmentImages?: HouseImage[];
+  onUpdateAssessmentImages?: (images: HouseImage[]) => void;
 }
 
 const ReportCoolingSection = ({
@@ -20,6 +22,8 @@ const ReportCoolingSection = ({
   coolingData = [],
   houseImages,
   onUpdateValue,
+  assessmentImages,
+  onUpdateAssessmentImages,
 }: ReportCoolingSectionProps) => {
   const [coolingDataSection, setCoolingDataSection] =
     useState<CoolingData[]>(coolingData);
@@ -80,11 +84,8 @@ const ReportCoolingSection = ({
           <AirConditioningAssessment
             isAdmin={isAdmin}
             houseImages={houseImages}
-            selectedImages={[]} // You can add state management for this if needed
-            onUpdateImages={(images) => {
-              // Add state management logic here if needed
-              console.log("Assessment images updated:", images);
-            }}
+            selectedImages={assessmentImages}
+            onUpdateImages={onUpdateAssessmentImages}
           />
         </div>
 

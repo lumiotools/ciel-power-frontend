@@ -155,6 +155,7 @@ export interface ReportData {
   heating?: HeatingData[];
   heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
+  coolingAssessmentImages?: HouseImage[];
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
   financialSummary?: FinancialSummaryData;
@@ -469,6 +470,13 @@ const ReportPage = ({
               updateReportDataField({ ...reportData, cooling })
             }
             houseImages={houseImages}
+            assessmentImages={reportData?.coolingAssessmentImages}
+            onUpdateAssessmentImages={(images) =>
+              updateReportDataField({
+                ...reportData,
+                coolingAssessmentImages: images,
+              })
+            }
           />
         );
       case "concerns":
