@@ -254,7 +254,7 @@ const ReportCoolingSectionCard = ({
                   </div>
                 </div>
 
-                <div className="!text-gray-700 !text-base !min-h-24 !py-0">
+                <div className="text-gray-700 text-base">
                   {isAdmin ? (
                     <ReportEditableTextArea
                       placeholder="Enter a description"

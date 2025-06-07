@@ -155,6 +155,8 @@ export interface ReportData {
   heating?: HeatingData[];
   heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
+  coolingAssessmentImages?: HouseImage[];
+  overviewImage?: ImageData;
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
   financialSummary?: FinancialSummaryData;
@@ -420,7 +422,14 @@ const ReportPage = ({
   const renderContent = () => {
     switch (activeSubMenu) {
       case "overview":
-        return <ReportOverviewSection />;
+        return (
+          <ReportOverviewSection
+            isAdmin={isAdmin}
+            reportData={reportData}
+            houseImages={houseImages}
+            onUpdateValue={(updatedData) => updateReportDataField(updatedData)}
+          />
+        );
       case "air-leakage":
         return (
           <ReportAirLeakageSection
@@ -469,6 +478,13 @@ const ReportPage = ({
               updateReportDataField({ ...reportData, cooling })
             }
             houseImages={houseImages}
+            assessmentImages={reportData?.coolingAssessmentImages}
+            onUpdateAssessmentImages={(images) =>
+              updateReportDataField({
+                ...reportData,
+                coolingAssessmentImages: images,
+              })
+            }
           />
         );
       case "concerns":

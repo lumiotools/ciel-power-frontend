@@ -9,8 +9,21 @@ import SustainabilitySection from "./sustainability";
 import EnergySolutionsSection from "./energy-solutions";
 import BuildingScienceSection from "./houseSystem";
 import { motion } from "framer-motion";
+import { ReportData, HouseImage, ImageData } from "@/app/admin/[bookingNumber]/report/page";
 
-const ReportOverviewSection = () => {
+interface ReportOverviewSectionProps {
+  isAdmin?: boolean;
+  reportData?: ReportData;
+  houseImages?: HouseImage[];
+  onUpdateValue?: (data: ReportData) => void;
+}
+
+const ReportOverviewSection = ({
+  isAdmin,
+  reportData,
+  houseImages,
+  onUpdateValue,
+}: ReportOverviewSectionProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -21,7 +34,16 @@ const ReportOverviewSection = () => {
     >
       <div className="min-h-screen flex flex-col items-center justify-center">
         <NotesSection />
-        <IntroSection />
+        <IntroSection
+          isAdmin={isAdmin}
+          reportData={reportData}
+          houseImages={houseImages}
+          onUpdateImage={(image) => {
+            if (onUpdateValue && reportData) {
+              onUpdateValue({ ...reportData, overviewImage: image });
+            }
+          }}
+        />
       </div>
       <div className="min-h-screen flex items-center justify-center">
         <ContentsSection />

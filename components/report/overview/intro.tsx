@@ -1,6 +1,13 @@
 "use client";
 
+import {
+  ReportData,
+  HouseImage,
+  ImageData,
+} from "@/app/admin/[bookingNumber]/report/page";
 import { useEffect, useState } from "react";
+import { ReportImageViewer } from "./imageViewer";
+import { ReportImagePicker } from "./imagePicker";
 
 interface ParsedAddress {
   street: string;
@@ -9,7 +16,20 @@ interface ParsedAddress {
   zip: string;
 }
 
-export default function IntroSection() {
+interface IntroSectionProps {
+  isAdmin?: boolean;
+  reportData?: ReportData;
+  houseImages?: HouseImage[];
+  onUpdateImage: (image: ImageData) => void;
+}
+
+export default function IntroSection({
+  isAdmin,
+  reportData,
+  houseImages = [],
+  onUpdateImage,
+}: IntroSectionProps) {
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [address, setAddress] = useState<ParsedAddress>({
     street: "123 Main Street",
     city: "ANYTOWN",
@@ -19,6 +39,15 @@ export default function IntroSection() {
   const [auditor, setAuditor] = useState("Ciel Energy Auditor");
   const [auditDate, setAuditDate] = useState("August 1st, 2023");
   const [customerName, setCustomerName] = useState("");
+  const selectedOverviewImage = reportData?.overviewImage;
+
+  const handleSelectImage = (id: string) => {
+    const image = houseImages.find((img) => img.id === id);
+    if (image) {
+      // Create the simple ImageData object to save
+      onUpdateImage({ id: image.id, description: image.description });
+    }
+  };
 
   useEffect(() => {
     try {
@@ -116,17 +145,27 @@ export default function IntroSection() {
         {/* Right side - Home image */}
         <div className="relative w-full h-[300px] md:h-full">
           {/* Using a div with background image for better print/capture compatibility */}
-          <div
-            className="w-full h-full min-h-[300px]"
-            style={{
-              backgroundImage: "url('/house-report.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
+          <ReportImageViewer
+            allowSelection={isAdmin}
+            buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+            selectedImage={selectedOverviewImage}
+            onOpenPicker={() => setIsImagePickerOpen(true)}
+            onDescriptionChange={(description) => {
+              if (selectedOverviewImage) {
+                onUpdateImage({ ...selectedOverviewImage, description });
+              }
             }}
-            role="img"
-            aria-label="Home exterior"
           />
+          {isAdmin && (
+            <ReportImagePicker
+              buttonClassName="bg-[#67b502] hover:bg-[#67b502]/90"
+              images={houseImages}
+              selectedImage={selectedOverviewImage?.id}
+              isOpen={isImagePickerOpen}
+              onOpenChange={setIsImagePickerOpen}
+              onSelectImage={handleSelectImage}
+            />
+          )}
         </div>
       </div>
     </section>

@@ -137,6 +137,8 @@ export interface ReportData {
   heating?: HeatingData[];
   heatingClientEquipmentImages?: HouseImage[];
   cooling?: CoolingData[];
+  coolingAssessmentImages?: HouseImage[];
+  overviewImage?: ImageData;
   summaryOfConcerns?: SummaryOfConcernsData[];
   solutionsAndRecommendations?: SolutionsAndRecommendationsData[];
   financialSummary?: FinancialSummaryData;
@@ -273,7 +275,7 @@ const ReportPage = ({
       // Render the existing structure for automated reports
       switch (activeSubMenu) {
         case "overview":
-          return <ReportOverviewSection />;
+          return <ReportOverviewSection reportData={reportData} />;
         case "airLeakage":
           return (
             <ReportAirLeakageSection airLeakage={reportData?.airLeakage} />
@@ -290,7 +292,12 @@ const ReportPage = ({
             />
           );
         case "cooling":
-          return <ReportCoolingSection coolingData={reportData?.cooling} />;
+          return (
+            <ReportCoolingSection
+              coolingData={reportData?.cooling}
+              assessmentImages={reportData?.coolingAssessmentImages}
+            />
+          );
         case "concerns":
           return <ReportSummaryConcernSection reportData={reportData} />;
         case "solutions":
@@ -323,108 +330,109 @@ const ReportPage = ({
   }
 
   return (
-    <div className="container mx-auto bg-white" ref={scrollRef}>
-      <div className="mb-6 p-6">
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-2xl font-bold text-gray-800">View Report</h1>
-          <div className="flex gap-2">
-            {reportStatus === "NONE" ? (
-              <button
-                className="bg-gray-300 text-gray-500 py-2 px-4 rounded flex items-center gap-2 cursor-not-allowed"
-                disabled
-              >
-                <Download className="h-5 w-5" />
-                <span>Download Report</span>
-              </button>
-            ) : reportStatus === "STATIC" ? (
-              <a
-                href={reportUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
-              >
-                <Download className="h-5 w-5" />
-                <span>Download Report</span>
-              </a>
-            ) : (
-              <button
-                className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
-                onClick={() => setShowDownloadModal(true)}
-              >
-                <Download className="h-5 w-5" />
-                <span>Download Report</span>
-              </button>
-            )}
-            <button
-              className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 p-2 rounded shadow-sm"
-              onClick={handleShareReport}
-            >
-              <Share2 className="h-5 w-5" />
-            </button>
+    <div className="bg-white" ref={scrollRef}>
+      <div className="container mx-auto">
+        <div className="mb-6 p-6">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-bold text-gray-800">View Report</h1>
+            <div className="flex gap-2">
+              {reportStatus === "NONE" ? (
+                <button
+                  className="bg-gray-300 text-gray-500 py-2 px-4 rounded flex items-center gap-2 cursor-not-allowed"
+                  disabled
+                >
+                  <Download className="h-5 w-5" />
+                  <span>Download Report</span>
+                </button>
+              ) : reportStatus === "STATIC" ? (
+                <a
+                  href={reportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
+                >
+                  <Download className="h-5 w-5" />
+                  <span>Download Report</span>
+                </a>
+              ) : (
+                <button
+                  className="bg-lime-500 hover:bg-lime-600 text-white py-2 px-4 rounded flex items-center gap-2 transition-colors"
+                  onClick={() => setShowDownloadModal(true)}
+                >
+                  <Download className="h-5 w-5" />
+                  <span>Download Report</span>
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <span>Dashboard</span>
+            <span className="mx-1 text-lime-500">›</span>
+            <span>View Report</span>
+            <span className="mx-1 text-lime-500">›</span>
+            <span>{getCurrentBreadcrumb()}</span>
           </div>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
-          <span>Dashboard</span>
-          <span className="mx-1 text-lime-500">›</span>
-          <span>View Report</span>
-          <span className="mx-1 text-lime-500">›</span>
-          <span>{getCurrentBreadcrumb()}</span>
-        </div>
+        <DownloadModal
+          showDownloadModal={showDownloadModal}
+          setShowDownloadModal={setShowDownloadModal}
+          selectedSections={selectedSections}
+          setSelectedSections={setSelectedSections}
+          handleDownloadReport={handleDownloadReport}
+        />
       </div>
-      <DownloadModal
-        showDownloadModal={showDownloadModal}
-        setShowDownloadModal={setShowDownloadModal}
-        selectedSections={selectedSections}
-        setSelectedSections={setSelectedSections}
-        handleDownloadReport={handleDownloadReport}
-      />
-      <div>
-        {reportStatus === "AUTOMATED" && (
-          <div className="flex overflow-x-auto border-b border-gray-100">
-            {[
-              "overview",
-              "airLeakage",
-              "insulation",
-              "heating",
-              "cooling",
-              "concerns",
-              "solutions",
-              "pearl-certification",
-            ].map((tab) => (
-              <button
-                key={tab}
-                className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
-                  activeSubMenu === tab
-                    ? tab === "overview"
-                      ? "text-[#67B502]"
-                      : tab === "airLeakage"
-                        ? "text-[#031A82]"
-                        : tab === "insulation"
-                          ? "text-[#308883]"
-                          : tab === "heating" || tab === "cooling"
-                            ? "text-[#d47c00]"
-                            : tab === "concerns"
-                              ? "text-[#FF6700]"
-                              : tab === "solutions"
-                                ? "text-[#67B502]"
-                                : tab === "pearl-certification"
-                                  ? "text-[#85C435]"
-                                  : "text-gray-800"
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-                onClick={() => setActiveSubMenu(tab)}
-              >
-                {formatTabName(tab)}
-                {activeSubMenu === tab && (
-                  <div
-                    className={`absolute bottom-0 left-0 right-0 h-1 ${tabColors[tab]}`}
-                  ></div>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
 
+      {reportStatus === "AUTOMATED" && (
+        <div className="-mt-10 sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto">
+            <div className="flex overflow-x-auto">
+              {[
+                "overview",
+                "airLeakage",
+                "insulation",
+                "heating",
+                "cooling",
+                "concerns",
+                "solutions",
+                "pearl-certification",
+              ].map((tab) => (
+                <button
+                  key={tab}
+                  className={`relative py-4 px-6 text-center font-medium transition-colors duration-200 whitespace-nowrap ${
+                    activeSubMenu === tab
+                      ? tab === "overview"
+                        ? "text-[#67B502]"
+                        : tab === "airLeakage"
+                          ? "text-[#031A82]"
+                          : tab === "insulation"
+                            ? "text-[#308883]"
+                            : tab === "heating" || tab === "cooling"
+                              ? "text-[#d47c00]"
+                              : tab === "concerns"
+                                ? "text-[#FF6700]"
+                                : tab === "solutions"
+                                  ? "text-[#67B502]"
+                                  : tab === "pearl-certification"
+                                    ? "text-[#85C435]"
+                                    : "text-gray-800"
+                      : "text-gray-600 hover:text-gray-800"
+                  }`}
+                  onClick={() => setActiveSubMenu(tab)}
+                >
+                  {formatTabName(tab)}
+                  {activeSubMenu === tab && (
+                    <div
+                      className={`absolute bottom-0 left-0 right-0 h-1 ${tabColors[tab]}`}
+                    ></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto">
         <div>{renderContent()}</div>
       </div>
     </div>

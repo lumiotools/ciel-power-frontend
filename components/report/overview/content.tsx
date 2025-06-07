@@ -87,10 +87,10 @@ export default function ContentsSection() {
 
   return (
     <section
-      className="bg-white max-h-fit p-8 w-full border-b border-gray-200 -ml-10"
+      className="bg-white max-h-fit p-8 w-full border-b border-gray-200"
       id="intro-contents"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-20 -ml-16">
         {/* Left side - House image */}
         <div
           className={`${isUser ? "relative top-0 left-0 w-full h-[700px] overflow-hidden" : "relative w-full h-[400px] md:h-auto overflow-hidden"}`}
