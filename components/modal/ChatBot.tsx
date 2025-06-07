@@ -84,15 +84,16 @@ export function ChatBot() {
     setIsTyping(true);
 
     try {
-      const response = await fetch("/api/user/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ user_message: inputValue, chat_history: messages }),
+      const response = await fetch("/api/user/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          user_message: inputValue,
+          chat_history: messages,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -103,19 +104,24 @@ export function ChatBot() {
 
       const aiMessage: Message = {
         role: "assistant",
-        content: responseJson.data.response || "Sorry, I couldn't process that request.",
+        content:
+          responseJson.data.response ||
+          "Sorry, I couldn't process that request.",
         timestamp: new Date().toLocaleTimeString([], { timeStyle: "short" }),
       };
 
       setMessages((prevMessages) => [...prevMessages, aiMessage]);
-        } catch (error: any) {
+    } catch (error: any) {
       console.error("Error in API call:", error);
       let content = "Sorry, there was an error processing your request.";
       if (
-        (error instanceof Response && (error.status === 401 || error.status === 403)) ||
-        (error?.message?.includes("401") || error?.message?.includes("403"))
+        (error instanceof Response &&
+          (error.status === 401 || error.status === 403)) ||
+        error?.message?.includes("401") ||
+        error?.message?.includes("403")
       ) {
-        content = "Session has expired, please login again";
+        content =
+          "Your session has timed out, please refresh the page to continue.";
       }
       const errorMessage: Message = {
         role: "assistant",
@@ -225,7 +231,7 @@ export function ChatBot() {
                       <ReactMarkdown
                         className={cn(
                           "prose-sm",
-                          message.role === "user" ? "prose-invert" : "prose",
+                          message.role === "user" ? "prose-invert" : "prose"
                         )}
                       >
                         {message.content}

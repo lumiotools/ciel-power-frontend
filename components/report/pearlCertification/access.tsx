@@ -18,7 +18,7 @@ export default function Access() {
           <div className="flex items-center gap-3">
             <img src="/image 97.png" alt="checklist" />
             <h1 className="text-3xl font-bold text-[#67b502]">
-              Accessing Your Pearl Certification
+              Accessing Your Pearl Certification via Your Portal - Coming Soon
             </h1>
           </div>
           <button
