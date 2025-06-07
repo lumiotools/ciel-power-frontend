@@ -105,12 +105,21 @@ export default function AIChatbot() {
       ]);
     } catch (error) {
       console.error("Error fetching from API:", error);
+      let content = "Sorry, I encountered an error while processing your request. Please try again.";
+      // Try to detect session expiration
+      if (
+        (error instanceof Response && (error.status === 401 || error.status === 403)) ||
+        // @ts-ignore
+        (typeof error === "object" && error && "message" in error && typeof (error as any).message === "string" &&
+          ((error as any).message.includes("401") || (error as any).message.includes("403")))
+      ) {
+        content = "Your session has timed out, please refresh the page to continue.";
+      }
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "Sorry, I encountered an error while processing your request. Please try again.",
+          content,
         },
       ]);
     } finally {
