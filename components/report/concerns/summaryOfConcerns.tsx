@@ -373,7 +373,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
             >
               <div className="flex items-center mb-2">
                 <ConcernIcon className="h-8 w-8 mr-2 text-[#ff6700]" />
-                <div className="font-semibold text-xl text-[#FF6700] flex-1">
+                <div className="w-fit font-semibold text-xl text-[#FF6700] flex-1">
                   {isAdmin ? (
                     <ReportEditableInput
                       value={concern.name}
@@ -400,7 +400,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
                 )}
               </div>
 
-              <div className="text-gray-700 text-sm mb-3">
+              <div className="text-gray-700 text-sm mb-3 w-[85rem]">
                 {isAdmin ? (
                   <ReportEditableTextArea
                     value={concern.concern}
@@ -410,6 +410,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
                       })
                     }
                     placeholder="Describe the concern..."
+                    className="w-full"
                   />
                 ) : (
                   concern.concern || "No description provided"
