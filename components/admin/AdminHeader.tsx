@@ -40,11 +40,6 @@ export function AdminHeader() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-          </Button>
-
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
               <AvatarImage src="/placeholder-user.jpg" alt="Admin" />

@@ -363,12 +363,6 @@ const ReportPage = ({
                   <span>Download Report</span>
                 </button>
               )}
-              <button
-                className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 p-2 rounded shadow-sm"
-                onClick={handleShareReport}
-              >
-                <Share2 className="h-5 w-5" />
-              </button>
             </div>
           </div>
           <div className="flex items-center text-sm text-gray-600">

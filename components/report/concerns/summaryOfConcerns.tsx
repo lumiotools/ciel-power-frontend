@@ -195,19 +195,14 @@ const ReportSummarySectionSummaryOfConcerns = ({
   }, [pathname]);
 
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isExpanded1, setIsExpanded1] = useState(true);
-  const [isExpanded2, setIsExpanded2] = useState(true);
-
-  const toggleExpanded1 = () => {
-    setIsExpanded1(!isExpanded1);
-  };
-
-  const toggleExpanded2 = () => {
-    setIsExpanded2(!isExpanded2);
-  };
+  const [isExpandedConcerns, setIsExpandedConcerns] = useState(true);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const toggleExpandedConcerns = () => {
+    setIsExpandedConcerns(!isExpandedConcerns);
   };
 
   // Image handling - exactly like AirConditioningAssessment
@@ -312,15 +307,8 @@ const ReportSummarySectionSummaryOfConcerns = ({
     ({ flag }) => isAdmin || flag
   );
 
-  // Split concerns into two groups of 10 each
-  const concernsGroup1 = visibleConcerns.slice(0, 10);
-  const concernsGroup2 = visibleConcerns.slice(10, 20);
-
-  const renderConcernGroup = (
-    concerns: typeof visibleConcerns,
-    groupNumber: number
-  ) => {
-    if (concerns.length === 0) {
+  const renderAllConcerns = () => {
+    if (visibleConcerns.length === 0) {
       return (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -332,17 +320,15 @@ const ReportSummarySectionSummaryOfConcerns = ({
             <Shield className="text-green-600 flex-shrink-0" size={24} />
             <div className="flex-1">
               <h3 className="font-medium text-green-800 text-lg">
-                {groupNumber === 1
-                  ? "No Primary Concerns Detected"
-                  : "No Additional Concerns Detected"}
+                No Concerns Detected
               </h3>
               <p className="text-gray-700 text-sm mt-1">
-                {groupNumber === 1
-                  ? "No significant health, safety, or combustion issues were found during the assessment. Your home appears to be in good condition."
-                  : "No additional concerns were identified in this category."}
+                No significant health, safety, or combustion issues were found
+                during the assessment. Your home appears to be in good
+                condition.
               </p>
 
-              {isAdmin && groupNumber === 1 && (
+              {isAdmin && (
                 <Button
                   onClick={addConcern}
                   variant="outline"
@@ -360,8 +346,8 @@ const ReportSummarySectionSummaryOfConcerns = ({
 
     return (
       <div>
-        {/* Add New Concern button when there are already concerns and it's group 1 */}
-        {isAdmin && groupNumber === 1 && (
+        {/* Add New Concern button when there are already concerns */}
+        {isAdmin && (
           <div className="flex justify-start pb-4">
             <Button
               onClick={addConcern}
@@ -373,7 +359,7 @@ const ReportSummarySectionSummaryOfConcerns = ({
           </div>
         )}
 
-        {concerns.map((concern, index) => {
+        {visibleConcerns.map((concern, index) => {
           const ConcernIcon = getIconForConcern(concern.name);
           const actualIndex = summaryOfConcerns.findIndex((c) => c === concern);
 
@@ -665,24 +651,26 @@ const ReportSummarySectionSummaryOfConcerns = ({
         </Card>
       </section>
 
-      {/* Summary of Concerns Section 1 (First 10 concerns) */}
-      <section id="summary-of-concerns-1">
+      {/* Single Summary of Concerns Section (All concerns) */}
+      <section id="summary-of-concerns-main">
         <Card className="bg-white max-h-fit p-8 rounded-xl shadow-sm mb-6 overflow-hidden">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-3xl font-bold flex items-center gap-2 text-[#FF6700]">
                 <AlertTriangle className="h-8 w-8" />
-                Summary of Concerns - Primary Issues
+                Summary of Concerns
               </CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={toggleExpanded1}
+                onClick={toggleExpandedConcerns}
                 className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
-                aria-label={isExpanded1 ? "Hide section" : "Show section"}
+                aria-label={
+                  isExpandedConcerns ? "Hide section" : "Show section"
+                }
               >
                 <ChevronUp
-                  className={`w-6 h-6 transition-transform duration-300 ${isExpanded1 ? "" : "transform rotate-180"}`}
+                  className={`w-6 h-6 transition-transform duration-300 ${isExpandedConcerns ? "" : "transform rotate-180"}`}
                 />
               </Button>
             </div>
@@ -691,57 +679,16 @@ const ReportSummarySectionSummaryOfConcerns = ({
           <CardContent>
             <div
               className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                isExpanded1 ? "max-h-[8000px] opacity-100" : "max-h-0 opacity-0"
+                isExpandedConcerns
+                  ? "max-h-[8000px] opacity-100"
+                  : "max-h-0 opacity-0"
               }`}
             >
-              <div className="grid gap-4">
-                {renderConcernGroup(concernsGroup1, 1)}
-              </div>
+              <div className="grid gap-4">{renderAllConcerns()}</div>
             </div>
           </CardContent>
         </Card>
       </section>
-
-      {/* Summary of Concerns Section 2 (Next 10 concerns) */}
-      {concernsGroup2.length > 0 && (
-        <section id="summary-of-concerns-2">
-          <Card className="bg-white max-h-fit p-8 rounded-xl shadow-sm mb-6 overflow-hidden">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-3xl font-bold flex items-center gap-2 text-[#FF6700]">
-                  <AlertTriangle className="h-8 w-8" />
-                  Summary of Concerns - Additional Issues
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleExpanded2}
-                  className="text-[#ff6700] border-2 border-[#ff6700] rounded-full p-2"
-                  aria-label={isExpanded2 ? "Hide section" : "Show section"}
-                >
-                  <ChevronUp
-                    className={`w-6 h-6 transition-transform duration-300 ${isExpanded2 ? "" : "transform rotate-180"}`}
-                  />
-                </Button>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  isExpanded2
-                    ? "max-h-[8000px] opacity-100"
-                    : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="grid gap-4">
-                  {renderConcernGroup(concernsGroup2, 2)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
 
       {/* Image Picker Dialog - only show if images are loaded and no error */}
       {isAdmin && !isLoadingImages && !imageError && (
