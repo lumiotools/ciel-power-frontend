@@ -260,7 +260,12 @@ export default function AdminPage() {
   };
 
   const saveImageForAuditor = async (fileId: string) => {
-    if (!selectedAuditorId) return;
+    if (!selectedAuditorId || selectedAuditorId.startsWith("pending-")) {
+      console.error(
+        "Attempted to save image for a pending auditor. This should be handled by the modal's onSave logic."
+      );
+      return;
+    }
 
     try {
       const response = await fetch(`/api/admin/auditors/${selectedAuditorId}`, {
@@ -645,7 +650,23 @@ export default function AdminPage() {
           currentFileId={selectedFileId}
           isOpen={isImageModalOpen}
           onOpenChange={setIsImageModalOpen}
-          onSave={saveImageForAuditor}
+          onSave={(fileId) => {
+            if (selectedAuditorId && selectedAuditorId.startsWith("pending-")) {
+              const index = parseInt(selectedAuditorId.split("-")[1], 10);
+              setPendingAuditors((current) =>
+                current.map((auditor, i) =>
+                  i === index ? { ...auditor, file_id: fileId } : auditor
+                )
+              );
+              toast.success(
+                "Image selected. Click 'Save' to add the new auditor."
+              );
+              closeImageModal();
+            } else {
+              // This is an EXISTING auditor. Call the PATCH API.
+              saveImageForAuditor(fileId);
+            }
+          }}
         />
       )}
 

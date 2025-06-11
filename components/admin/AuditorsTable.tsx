@@ -16,11 +16,7 @@ import { toast } from "sonner";
 interface AuditorsTableProps {
   auditors: Auditor[];
   isLoading: boolean;
-  onOpenImageModal: (
-    auditorId: string,
-    currentFileId?: string,
-    onUploadComplete?: (fileId: string) => void
-  ) => void;
+  onOpenImageModal: (auditorId: string, currentFileId?: string) => void;
   isAdding: boolean;
   setIsAdding: (isAdding: boolean) => void;
   onAuditorAdded: () => void;
@@ -206,13 +202,7 @@ export function AuditorsTable({
                   <Button
                     className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
                     onClick={() =>
-                      onOpenImageModal(
-                        `pending-${index}`,
-                        pending.file_id,
-                        (fileId) => {
-                          handlePendingChange(index, "file_id", fileId);
-                        }
-                      )
+                      onOpenImageModal(`pending-${index}`, pending.file_id)
                     }
                   >
                     {pending.file_id ? "Change Image" : "Add Image"}
@@ -330,18 +320,7 @@ export function AuditorsTable({
                 <TableCell>
                   <Button
                     className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
-                    onClick={() =>
-                      onOpenImageModal(
-                        "new",
-                        undefined,
-                        (uploadedFileId: string) => {
-                          setNewAuditor((prev) => ({
-                            ...prev,
-                            file_id: uploadedFileId,
-                          }));
-                        }
-                      )
-                    }
+                    onClick={() => onOpenImageModal("new")}
                   >
                     Add image
                   </Button>
