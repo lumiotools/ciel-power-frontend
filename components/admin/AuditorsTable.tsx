@@ -23,7 +23,15 @@ interface AuditorsTableProps {
   ) => void;
   isAdding: boolean;
   setIsAdding: (isAdding: boolean) => void;
-  onAuditorAdded: () => void; // Callback to refresh data
+  onAuditorAdded: () => void;
+  pendingAuditors: Partial<Auditor>[];
+  onRemovePendingAuditor: (index: number) => void;
+  onSavePendingAuditor: (index: number) => Promise<boolean>;
+  setPendingAuditors: (
+    auditors:
+      | Partial<Auditor>[]
+      | ((prev: Partial<Auditor>[]) => Partial<Auditor>[])
+  ) => void;
 }
 
 export function AuditorsTable({
@@ -33,6 +41,10 @@ export function AuditorsTable({
   isAdding,
   setIsAdding,
   onAuditorAdded,
+  pendingAuditors,
+  onRemovePendingAuditor,
+  onSavePendingAuditor,
+  setPendingAuditors,
 }: AuditorsTableProps) {
   // Local state copy of auditors to update UI immediately on delete
   const [localAuditors, setLocalAuditors] = useState<Auditor[]>([]);
@@ -43,6 +55,9 @@ export function AuditorsTable({
     file_id: "",
   });
   const [adding, setAdding] = useState(false);
+  const [savingPendingIndex, setSavingPendingIndex] = useState<number | null>(
+    null
+  );
 
   // Sync localAuditors when auditors prop changes
   useEffect(() => {
@@ -59,6 +74,18 @@ export function AuditorsTable({
     });
     setDescriptions(initialDescriptions);
   }, [localAuditors]);
+
+  const handlePendingChange = (
+    index: number,
+    field: keyof Auditor,
+    value: string
+  ) => {
+    setPendingAuditors((current) =>
+      current.map((auditor, i) =>
+        i === index ? { ...auditor, [field]: value } : auditor
+      )
+    );
+  };
 
   const saveDescription = async (auditorId: string) => {
     const newDescription = descriptions[auditorId];
@@ -141,7 +168,7 @@ export function AuditorsTable({
     );
   }
 
-  if (localAuditors.length === 0 && !isAdding) {
+  if (localAuditors.length === 0 && !isAdding && pendingAuditors.length === 0) {
     return (
       <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-600">
         No auditors found.
@@ -151,7 +178,6 @@ export function AuditorsTable({
 
   return (
     <>
-      {/* BUTTON HAS BEEN REMOVED FROM HERE */}
       <div className="rounded-lg overflow-hidden border border-gray-200">
         <Table>
           <TableHeader className="bg-gray-50">
@@ -162,6 +188,69 @@ export function AuditorsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
+            {pendingAuditors.map((pending, index) => (
+              <TableRow key={`pending-${index}`} className="bg-green-50">
+                <TableCell>
+                  <input
+                    type="text"
+                    className="border rounded px-2 py-1 w-full"
+                    value={pending.name || ""}
+                    onChange={(e) =>
+                      handlePendingChange(index, "name", e.target.value)
+                    }
+                    placeholder="Enter name"
+                  />
+                </TableCell>
+                <TableCell>
+                  {/* Image handling for pending auditors */}
+                  <Button
+                    className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
+                    onClick={() =>
+                      onOpenImageModal(
+                        `pending-${index}`,
+                        pending.file_id,
+                        (fileId) => {
+                          handlePendingChange(index, "file_id", fileId);
+                        }
+                      )
+                    }
+                  >
+                    {pending.file_id ? "Change Image" : "Add Image"}
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <input
+                    type="text"
+                    className="border rounded px-2 py-1 w-full"
+                    value={pending.description || ""}
+                    onChange={(e) =>
+                      handlePendingChange(index, "description", e.target.value)
+                    }
+                    placeholder="Enter description"
+                  />
+                </TableCell>
+                <TableCell className="text-right flex gap-2 justify-end">
+                  <Button
+                    disabled={savingPendingIndex === index}
+                    onClick={async () => {
+                      setSavingPendingIndex(index);
+                      await onSavePendingAuditor(index);
+                      setSavingPendingIndex(null);
+                    }}
+                    className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
+                  >
+                    {savingPendingIndex === index ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => onRemovePendingAuditor(index)}
+                    className="hover:bg-red-100 hover:text-red-700"
+                  >
+                    Cancel
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
             {localAuditors.map((auditor) => (
               <TableRow key={auditor.id} className="hover:bg-gray-50">
                 <TableCell className="font-medium">{auditor.name}</TableCell>

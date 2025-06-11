@@ -12,7 +12,13 @@ import type {
   NutshellLead,
 } from "@/types/admin";
 import { toast } from "sonner";
-import { Settings, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import {
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { AuditorsTable } from "@/components/admin/AuditorsTable";
@@ -51,9 +57,11 @@ export default function AdminPage() {
     undefined
   );
   const [hasPopulatedAuditors, setHasPopulatedAuditors] = useState(false);
-
-  // New state to control the "Add Auditor" row
   const [isAddingAuditor, setIsAddingAuditor] = useState(false);
+  const [pendingAuditors, setPendingAuditors] = useState<Partial<Auditor>[]>(
+    []
+  );
+  const [isFetchingNew, setIsFetchingNew] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +103,50 @@ export default function AdminPage() {
       toast.error("An error occurred while fetching bookings");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFetchNewAuditors = async () => {
+    setIsFetchingNew(true);
+    try {
+      const response = await fetch("/api/admin/auditors/new");
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch new auditors");
+      }
+
+      const newNames: string[] = data.data.new_auditors;
+
+      if (newNames.length === 0) {
+        toast.info("No new auditors found.");
+        return;
+      }
+
+      const newAuditorsToAdd = newNames.map((name) => ({
+        name,
+        description: "",
+        file_id: "",
+      }));
+
+      setPendingAuditors((current) => {
+        const existingPendingNames = new Set(current.map((a) => a.name));
+        const trulyNew = newAuditorsToAdd.filter(
+          (a) => !existingPendingNames.has(a.name)
+        );
+        return [...current, ...trulyNew];
+      });
+
+      toast.success(
+        `Found ${newNames.length} new auditors. Please review and save them.`
+      );
+    } catch (error) {
+      console.error("Error discovering new auditors:", error);
+      toast.error(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    } finally {
+      setIsFetchingNew(false);
     }
   };
 
@@ -154,6 +206,44 @@ export default function AdminPage() {
       setBookingError("An error occurred while searching for the booking");
     } finally {
       setIsSearchingBooking(false);
+    }
+  };
+
+  const handleRemovePendingAuditor = (indexToRemove: number) => {
+    setPendingAuditors((current) =>
+      current.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
+  const handleSavePendingAuditor = async (indexToSave: number) => {
+    const auditorToSave = pendingAuditors[indexToSave];
+    if (!auditorToSave || !auditorToSave.name?.trim()) {
+      toast.error("Auditor name cannot be empty.");
+      return false; // Indicate failure
+    }
+
+    try {
+      const response = await fetch("/api/admin/auditors/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(auditorToSave),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to save auditor.");
+      }
+
+      toast.success(`Auditor "${auditorToSave.name}" saved successfully.`);
+      handleRemovePendingAuditor(indexToSave); // Remove from pending list
+      fetchAuditors(); // Refresh the main auditor list
+      return true; // Indicate success
+    } catch (error) {
+      console.error("Error saving pending auditor:", error);
+      toast.error(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      return false; // Indicate failure
     }
   };
 
@@ -467,6 +557,14 @@ export default function AdminPage() {
             <div className="flex items-center gap-3">
               <Button
                 className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
+                onClick={handleFetchNewAuditors}
+                disabled={isFetchingNew}
+              >
+                <Search className="mr-2 h-4 w-4" />
+                {isFetchingNew ? "Fetching..." : "Fetch all auditors"}
+              </Button>
+              <Button
+                className="bg-[#5cb85c] hover:bg-[#4a9d4a] text-white"
                 onClick={() => setIsAddingAuditor(true)}
               >
                 <Plus />
@@ -505,7 +603,11 @@ export default function AdminPage() {
             onOpenImageModal={openImageModal}
             isAdding={isAddingAuditor}
             setIsAdding={setIsAddingAuditor}
-            onAuditorAdded={fetchAuditors} // Pass a callback to refresh the list
+            onAuditorAdded={fetchAuditors}
+            pendingAuditors={pendingAuditors}
+            onRemovePendingAuditor={handleRemovePendingAuditor}
+            onSavePendingAuditor={handleSavePendingAuditor}
+            setPendingAuditors={setPendingAuditors}
           />
 
           {/* Pagination Controls */}
